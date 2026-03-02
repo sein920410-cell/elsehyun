@@ -6,7 +6,7 @@ const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
   
-  // drawer.html에서 보낸 mimeType을 여기서 정확히 받아야 함
+  // drawer.html에서 보낸 filePath와 mimeType을 정확히 받습니다.
   const { filePath, mimeType } = req.body;
 
   try {
@@ -14,11 +14,12 @@ export default async function handler(req, res) {
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // 한도 초과를 대비해 여러 모델을 순차적으로 시도함
-    const modelStack = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
-    let lastError = "";
+    // 한도 초과(429) 에러 발생 시 순차적으로 시도할 모델 리스트
+    // 2.0-flash-lite가 한도가 가장 넉넉해서 백업으로 넣었습니다.
+    const models = ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash"];
+    let lastErrorMessage = "";
 
-    for (const model of modelStack) {
+    for (const model of models) {
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
       
       const gResp = await fetch(endpoint, {
@@ -27,30 +28,32 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           contents: [{ parts: [
             { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
-            { text: "물류 분석가로서 이미지 속 물건의 '브랜드명 상세이름'을 한국어로 찾으세요. 결과는 오직 이름들만 콤마(,)로 구분해 출력하세요." }
+            { text: "물류 분석가로서 이미지 속 물건의 '브랜드명 상세제품명'을 한국어 콤마로만 구분해서 출력해. 다른 설명은 절대 하지 마." }
           ]}]
         })
       });
 
       const gData = await gResp.json();
 
-      // 한도 초과(429) 에러가 나면 다음 모델로 넘어감
+      // 한도 초과 에러(429)가 나면 다음 모델로 넘어감
       if (gData.error) {
-        lastError = gData.error.message;
+        lastErrorMessage = gData.error.message;
         if (gData.error.code === 429) continue;
-        throw new Error(lastError);
+        throw new Error(lastErrorMessage);
       }
 
-      // 성공 시 데이터 반환
+      // 성공 시 데이터 정제 후 반환
       const botText = gData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      const items = botText.replace(/```/g, "").split(",").map(s => s.trim()).filter(it => it.length > 1);
+      const items = botText.replace(/```[a-z]*|```/gi, "").split(",").map(s => s.trim()).filter(it => it.length > 1);
+      
       return res.status(200).json({ items });
     }
 
-    // 모든 모델이 실패한 경우
-    throw new Error(`모든 AI 모델의 한도가 초과되었습니다: ${lastError}`);
+    // 모든 모델이 실패했을 때
+    return res.status(429).json({ error: "모든 모델의 사용 한도가 초과되었습니다. 1분 뒤에 다시 시도해 주세요!" });
 
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    console.error("분석 에러:", err.message);
+    return res.status(500).json({ error: "분석 중 오류 발생", details: err.message });
   }
 }
