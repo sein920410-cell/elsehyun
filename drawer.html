@@ -107,7 +107,7 @@
             if(!localStorage.getItem('mediaPath_' + tag)) return;
             if(confirm('사진/영상을 삭제하시겠습니까?')) {
                 localStorage.removeItem('mediaPath_' + tag); localStorage.removeItem('rot_' + tag);
-                document.getElementById('media-wrap').innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">등록된 사진/영상이 없습니다.</div>';
+                document.getElementById('media-wrap').innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>';
             }
         }
 
@@ -166,51 +166,49 @@
 
         function rotateMedia(deg) { currentRotation = (currentRotation + deg + 360) % 360; document.getElementById('edit-preview').className = `rotate${currentRotation}`; }
         
-       // drawer.html 내 confirmUpload 함수를 아래 내용으로 교체하세요.
-async function confirmUpload() {
-    if(!selectedFile) return; 
-    const file = selectedFile; 
-    const fileMimeType = file.type; // 파일의 실제 타입 추출
+        async function confirmUpload() {
+            if(!selectedFile) return; 
+            const file = selectedFile; 
+            const fileMimeType = file.type;
 
-    document.getElementById('rotate-window').style.display = 'none';
-    const mediaWrap = document.getElementById('media-wrap');
-    mediaWrap.innerHTML = '<div class="empty-text" style="color:var(--primary); font-weight:bold;">이미지 분석 중...</div>';
-    
-    try {
-        const path = `${tag}/${Date.now()}_${file.name}`;
-        const { error: uploadError } = await _supa.storage.from('user_uploads').upload(path, file);
-        if (uploadError) throw uploadError;
-
-        localStorage.setItem('mediaPath_' + tag, path); 
-        localStorage.setItem('rot_' + tag, currentRotation);
-        
-        const { data: sData } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600); 
-        showMedia(sData.signedUrl, currentRotation);
-
-        if (fileMimeType.startsWith('image/')) {
-            const res = await fetch('/api/analyze', { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ filePath: path, mimeType: fileMimeType }) 
-            });
+            document.getElementById('rotate-window').style.display = 'none';
+            const mediaWrap = document.getElementById('media-wrap');
+            mediaWrap.innerHTML = '<div class="empty-text" style="color:var(--primary); font-weight:bold;">분석 중...</div>';
             
-            const resData = await res.json();
-            if (resData.items && resData.items.length > 0) {
-                resData.items.forEach(n => items.push({ n, q: 1 }));
-                saveData(); 
-                renderItems();
-            } else {
-                alert("인식된 물품이 없습니다. 직접 추가해 주세요.");
-                mediaWrap.innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">인식 실패 (직접 등록 가능)</div>';
-                // 실패 시에도 이미지는 보여줘야 하므로 다시 출력
+            try {
+                const path = `${tag}/${Date.now()}_${file.name}`;
+                const { error: uploadError } = await _supa.storage.from('user_uploads').upload(path, file);
+                if (uploadError) throw uploadError;
+
+                localStorage.setItem('mediaPath_' + tag, path); 
+                localStorage.setItem('rot_' + tag, currentRotation);
+                
+                const { data: sData } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600); 
                 showMedia(sData.signedUrl, currentRotation);
+
+                if (fileMimeType.startsWith('image/')) {
+                    const res = await fetch('/api/analyze', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ filePath: path, mimeType: fileMimeType }) 
+                    });
+                    
+                    const resData = await res.json();
+                    if (resData.items && resData.items.length > 0) {
+                        resData.items.forEach(n => items.push({ n, q: 1 }));
+                        saveData(); 
+                        renderItems();
+                    } else if (resData.error) {
+                        alert("분석 실패: " + resData.error);
+                    } else {
+                        alert("인식된 물품이 없습니다. 직접 이름을 입력해 주세요.");
+                    }
+                }
+            } catch (err) {
+                alert("업로드 또는 분석 중 오류가 발생했습니다.");
             }
         }
-    } catch (err) {
-        console.error(err);
-        alert("업로드 또는 분석 중 오류가 발생했습니다.");
-    }
-}
+
         async function sendMsg() {
             const input = document.getElementById('chat-input'); const text = input.value.trim(); if(!text) return;
             const box = document.getElementById('chat-messages'); box.innerHTML += `<div class="msg user">${text}</div>`; input.value = '';
