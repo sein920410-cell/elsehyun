@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Vercel Node 18+ 환경에서는 내장 fetch를 사용하는 것이 가장 안정적입니다.
+// Vercel 환경 변수 로드
 const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 export default async function handler(req, res) {
@@ -9,25 +9,18 @@ export default async function handler(req, res) {
   const { filePath, mimeType } = req.body;
 
   try {
-    // 1. Supabase 서명된 URL 생성
+    // 1. 보안 정책(RLS)을 우회하기 위해 Signed URL 생성
     const { data: signedData, error: sError } = await supa.storage.from('user_uploads').createSignedUrl(filePath, 60);
-    if (sError) {
-      console.error("Supabase Error:", sError.message);
-      throw new Error("이미지 접근 권한이 없습니다.");
-    }
+    if (sError) throw new Error(`스토리지 접근 실패: ${sError.message}`);
 
-    // 2. 이미지 데이터 가져오기
+    // 2. 이미지 데이터 다운로드 및 Base64 변환
     const imgResp = await fetch(signedData.signedUrl);
     const buffer = await imgResp.arrayBuffer();
     const b64 = Buffer.from(buffer).toString("base64");
 
-    // 3. Gemini API 호출 (2.0 Flash Lite는 v1beta 필수)
+    // 3. Gemini 2.0 Flash Lite용 v1beta 엔드포인트 호출
     const model = process.env.GEMINI_MODEL || "gemini-2.0-flash-lite";
-    const apiKey = process.env.GEMINI_API_KEY;
-    
-    if (!apiKey) throw new Error("GEMINI_API_KEY 환경변수가 설정되지 않았습니다.");
-
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
     const gResp = await fetch(endpoint, {
       method: "POST",
@@ -35,21 +28,16 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         contents: [{ parts: [
           { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
-          { text: "물류 전문가로서 이미지 속 물건들을 분석하세요. 결과는 오직 한국어 물품 이름들만 콤마(,)로 구분해서 출력하고, 마크다운이나 다른 설명은 절대 하지 마세요. 예: '진라면 매운맛, 삼다수 2L'" }
+          { text: "물류 분석 전문가로서 이미지 속 물건의 '브랜드명 상세이름'을 한국어로 찾으세요. 결과는 오직 이름들만 콤마(,)로 구분해 출력하고 마크다운이나 설명은 절대 하지 마세요." }
         ]}]
       })
     });
 
     const gData = await gResp.json();
-    
-    // API 에러 응답 처리 (로그 기록)
-    if (gData.error) {
-      console.error("Gemini API Error Detail:", gData.error);
-      throw new Error(`AI 분석 오류: ${gData.error.message}`);
-    }
+    if (gData.error) throw new Error(`AI 분석 실패: ${gData.error.message}`);
 
     let botText = gData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    // 불필요한 찌꺼기 제거
+    // 불필요한 기호 및 공백 정제
     botText = botText.replace(/```[a-z]*|```|[#*]/gi, "").trim();
     
     const items = botText ? botText.split(",").map(s => s.trim()).filter(it => it.length > 0) : [];
@@ -57,8 +45,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ items });
 
   } catch (err) {
-    // Vercel 대시보드 로그에서 이 에러 메시지를 확인할 수 있습니다.
-    console.error("서버 내부 에러:", err.message);
+    console.error("[분석 에러]", err.message);
     return res.status(500).json({ error: err.message });
   }
 }
