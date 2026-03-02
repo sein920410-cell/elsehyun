@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     const model = process.env.GEMINI_MODEL || "gemini-2.0-flash-lite";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
-    const prompt = `당신은 비서 '봄'입니다. 장소: ${tag}. 물품: ${inventory}. 질문: ${message}. 짧고 친절하게 답하세요.`;
+    const prompt = `당신은 비서 '봄'입니다. 장소: ${tag}. 현재 물품: ${inventory}. 질문: ${message}. 짧고 친절하게 답하세요.`;
     
     const response = await fetch(endpoint, {
       method: "POST",
@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "잠시 후 다시 말씀해 주세요.";
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "잠시 후 다시 시도해 주세요.";
     return res.status(200).json({ reply });
   } catch (err) {
     return res.status(500).json({ error: err.message });
