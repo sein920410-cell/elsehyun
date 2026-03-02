@@ -6,181 +6,217 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #007bff; --bg: #f8fafc; --dark: #1e293b; --danger: #ef4444; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* 상단 디자인 */
-        .header { background: #fff; padding: 15px 20px; display: flex; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        :root { --primary: #007bff; --bg: #f8fafc; --dark: #1e293b; --light-grey: #F2F4F7; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--dark); }
+        .header { background: #fff; padding: 15px 20px; display: flex; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; }
+        .header .spacer { width: 40px; }
         .drawer-name { font-size: 18px; font-weight: 800; flex: 1; text-align: center; }
-        
-        /* 미디어 슬라이드 삭제 */
-        .media-section { position: relative; padding: 15px; background: #fff; border-radius: 0 0 25px 25px; overflow: hidden; }
-        .swipe-underlay { position: absolute; right: 15px; top: 15px; bottom: 15px; width: 100px; background: var(--danger); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; }
-        .media-box { position: relative; width: 100%; height: 220px; background: #f1f5f9; border-radius: 20px; z-index: 2; transition: transform 0.3s; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; }
-        .media-box img, .media-box video { max-width: 100%; max-height: 100%; border-radius: 20px; }
-
-        /* 서랍 내 검색 및 일괄 조절 */
-        .tool-bar { padding: 10px 15px; display: flex; flex-direction: column; gap: 10px; }
-        .search-wrap { position: relative; flex: 1; }
-        .search-input { width: 100%; padding: 10px 40px; border-radius: 12px; border: 1px solid #e2e8f0; outline: none; box-sizing: border-box; }
-        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.3; font-size: 18px; }
-        .bulk-qty { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #64748b; }
-
-        /* 목록 디자인 */
-        .list-container { flex: 1; overflow-y: auto; padding: 0 15px 80px; }
-        .cat-group { margin-top: 15px; }
-        .cat-title { font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 8px; margin-left: 5px; }
-        .item-card { background: #fff; border-radius: 18px; margin-bottom: 10px; border: 1px solid #f1f5f9; }
+        .icon-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--dark); width: 40px; text-align: right; }
+        .main-card { background: #fff; padding: 15px; border-radius: 0 0 25px 25px; flex-shrink: 0; position: relative; }
+        .media-box { width: 100%; height: 250px; background: #f1f5f9; border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; overflow: hidden; cursor: pointer; -webkit-user-select: none; user-select: none; }
+        .media-box img, .media-box video { max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; }
+        .list-header { display: flex; justify-content: flex-end; align-items: center; padding: 10px 15px 5px 15px; }
+        .toggle-btn { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #94a3b8; font-weight: bold; }
+        .round-arrow { width: 26px; height: 26px; background: var(--light-grey); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; }
+        .chevron { width: 6px; height: 6px; border-right: 2px solid #64748b; border-bottom: 2px solid #64748b; transform: translateY(-1px) rotate(45deg); }
+        .is-open .round-arrow { transform: rotate(180deg); }
+        .list-container { flex: 1; overflow-y: auto; padding: 0 15px 15px 15px; display: flex; flex-direction: column; }
+        .add-list-btn { align-self: flex-start; background: none; border: none; color: var(--primary); font-weight: bold; cursor: pointer; font-size: 15px; padding: 0; margin-bottom: 15px; }
+        .item-card { background: #fff; border-radius: 18px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; overflow: hidden; }
         .item-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .qty-ctrl { display: flex; align-items: center; gap: 10px; }
-        .qty-btn { width: 30px; height: 30px; border: 1px solid #ddd; background: #fff; border-radius: 8px; }
-        .item-detail { display: none; padding: 15px; border-top: 1px solid #f8fafc; }
-        .item-card.open .item-detail { display: block; }
-
-        /* 위치 도면 창 */
-        .map-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
-        .map-box { background: #fff; width: 85%; padding: 20px; border-radius: 25px; text-align: center; }
-        .grid-map { width: 100%; height: 250px; background: #f1f5f9; border: 2px solid var(--dark); position: relative; }
-        .dot { position: absolute; width: 15px; height: 15px; background: var(--primary); border-radius: 50%; transform: translate(-50%, -50%); border: 2px solid #fff; }
-
-        .btn-plus { width: 50px; height: 50px; background: var(--dark); color: #fff; border-radius: 50%; font-size: 24px; position: fixed; bottom: 20px; right: 20px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .item-name { font-weight: 700; font-size: 16px; }
+        .qty-controls { display: flex; align-items: center; gap: 8px; }
+        .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .qty-num { font-weight: 700; color: var(--primary); min-width: 30px; text-align: center; }
+        .item-content { display: none; padding: 15px; border-top: 1px solid #f8fafc; background: #fff; }
+        .item-card.open .item-content { display: block; }
+        .action-btn { background: none; border: none; color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer; margin-right: 15px; }
+        .bottom-actions { padding: 15px 0; display: flex; flex-direction: column; gap: 10px; }
+        .chat-entry { background: var(--dark); color: #fff; padding: 15px; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; z-index: 50; }
+        .reset-btn { align-self: center; background: none; border: none; color: #94a3b8; font-size: 12px; text-decoration: underline; cursor: pointer; padding: 5px; }
+        .overlay-window { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 10000; flex-direction: column; }
+        .chat-window { z-index: 10001; }
+        .overlay-header.dark { background: var(--dark); color: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 18px; font-size: 14px; }
+        .msg.user { align-self: flex-end; background: var(--primary); color: #fff; }
+        .msg.bot { align-self: flex-start; background: #f1f5f9; }
+        #fullscreen-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000; align-items: center; justify-content: center; }
+        #fullscreen-view img, #fullscreen-view video { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .rotate90 { transform: rotate(90deg); } .rotate180 { transform: rotate(180deg); } .rotate270 { transform: rotate(270deg); }
+        #preview-wrap { flex:1; display:flex; align-items:center; justify-content:center; background:#000; overflow:hidden; }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div style="font-size:24px;" onclick="toggleOverlay('map-overlay')">🗺️</div>
-        <div class="drawer-name" id="drawer-title" onclick="renameDrawer()">서랍 1</div>
-        <div style="width:24px;"></div>
-    </header>
-
-    <div class="media-section">
-        <div class="swipe-underlay" onclick="deleteMedia()">삭제</div>
-        <div class="media-box" id="media-box">
-            <div id="media-content" style="color:#94a3b8; font-size:13px;">옆으로 밀어서 삭제</div>
+    <header class="header"><div class="spacer"></div><div class="drawer-name" id="drawer-title" onclick="renameDrawer()">서랍 1</div><button class="icon-btn" onclick="analyzeMedia()">＋</button></header>
+    <div class="main-card"><div class="media-box" id="media-wrap"><div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div></div></div>
+    <div class="list-header"><div class="toggle-btn" id="toggle-all-btn" onclick="toggleAll()"><div class="round-arrow"><div class="chevron"></div></div><span id="toggle-text">전체펼치기</span></div></div>
+    <div class="list-container">
+        <button class="add-list-btn" onclick="addItemDirectly()">＋ 목록추가</button>
+        <div id="list-items"></div>
+        <div class="bottom-actions">
+            <div class="chat-entry" onclick="toggleOverlay('chat-window')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+                <strong>비서 '봄'에게 물어보기</strong>
+            </div>
+            <button class="reset-btn" onclick="clearAllItems()">목록 전체 초기화</button>
         </div>
     </div>
-
-    <div class="tool-bar">
-        <div class="search-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" class="search-input" placeholder="이 서랍 안에서 찾기..." oninput="renderItems(this.value)">
-        </div>
-        <div class="bulk-qty">
-            <span>일괄 수량 변경:</span>
-            <div><input type="number" id="bulk-input" style="width:40px; text-align:center;" value="1"><button onclick="applyBulk()" style="border:none; color:var(--primary); font-weight:bold; background:none; margin-left:10px;">적용</button></div>
-        </div>
+    <div id="chat-window" class="overlay-window chat-window">
+        <div class="overlay-header dark"><strong>비서 '봄'</strong><button class="icon-btn" style="color:#fff;" onclick="toggleOverlay('chat-window')">✕</button></div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div style="padding:15px; display:flex; gap:10px; border-top:1px solid #eee;"><input type="text" id="chat-input" style="flex:1; padding:12px; border:1px solid #ddd; border-radius:12px;" placeholder="봄에게 물어보세요..."><button onclick="sendMsg()" style="background:var(--dark); color:#fff; border:none; padding:0 20px; border-radius:12px;">전송</button></div>
     </div>
-
-    <div class="list-container" id="list-items"></div>
-
-    <button class="btn-plus" onclick="takePhotoOrVideo()">＋</button>
-
-    <div id="map-overlay" class="map-overlay" onclick="toggleOverlay('map-overlay')">
-        <div class="map-box" onclick="event.stopPropagation()">
-            <h3>📍 물건 위치 표시</h3>
-            <div class="grid-map" id="grid-map" onclick="placeDot(event)"></div>
-            <button onclick="toggleOverlay('map-overlay')" style="margin-top:15px; padding:10px 20px; border:none; background:var(--dark); color:#fff; border-radius:12px;">닫기</button>
-        </div>
+    <div id="fullscreen-view" onclick="closeFullscreen()"><div id="fs-content" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></div></div>
+    <div id="rotate-window" class="overlay-window">
+        <div id="preview-wrap"></div>
+        <div style="padding:20px; display:flex; gap:10px; background:#fff;"><button onclick="rotateMedia(90)" style="flex:1; padding:15px; border-radius:12px; border:1px solid #ddd;">회전</button><button onclick="confirmUpload()" style="flex:2; padding:15px; border-radius:12px; background:var(--dark); color:#fff; border:none; font-weight:bold;">등록</button><button onclick="cancelUpload()" style="flex:1; padding:15px; border-radius:12px; background:#f1f5f9; border:none;">취소</button></div>
     </div>
-
     <script>
         const _supa = supabase.createClient('https://tqhtggusphhcsygiitrv.supabase.co', 'sb_publishable_lJeKpO0aRv9mTBE1qnbkow_JqTmhnHQ');
-        const tag = new URLSearchParams(window.location.search).get('tag') || 'D001';
+        const params = new URLSearchParams(window.location.search);
+        const tag = (params.get('tag') || 'DRAWER001').toUpperCase();
         let items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
-        let startX = 0;
+        let isAllOpen = false, currentRotation = 0, selectedFile = null, pressTimer, isLongPress = false;
 
-        window.onload = () => {
+        window.onload = async () => {
             document.getElementById('drawer-title').innerText = localStorage.getItem('name_' + tag) || '서랍 1';
-            loadMedia(); renderItems(); initSwipe();
+            const mediaPath = localStorage.getItem('mediaPath_' + tag);
+            if (mediaPath) { 
+                const { data } = await _supa.storage.from('user_uploads').createSignedUrl(mediaPath, 3600);
+                if (data) showMedia(data.signedUrl, localStorage.getItem('rot_' + tag) || 0);
+            }
+            renderItems(); initMediaEvents();
         };
 
-        function initSwipe() {
-            const box = document.getElementById('media-box');
-            box.ontouchstart = (e) => startX = e.touches[0].clientX;
-            box.ontouchmove = (e) => {
-                let move = e.touches[0].clientX - startX;
-                if(move < 0 && move > -100) box.style.transform = `translateX(${move}px)`;
-            };
-            box.ontouchend = (e) => {
-                let move = e.changedTouches[0].clientX - startX;
-                box.style.transform = move < -50 ? `translateX(-100px)` : `translateX(0)`;
-            };
+        function initMediaEvents() {
+            const wrap = document.getElementById('media-wrap');
+            const start = () => { isLongPress = false; pressTimer = setTimeout(() => { isLongPress = true; deleteMedia(); }, 2000); };
+            const end = (e) => { clearTimeout(pressTimer); if (!isLongPress && e.type !== 'mouseleave') openFullscreen(); };
+            wrap.onmousedown = start; wrap.ontouchstart = (e) => { start(); };
+            wrap.onmouseup = end; wrap.ontouchend = (e) => { e.preventDefault(); end(e); };
         }
+
+        function showMedia(url, rot) {
+            const wrap = document.getElementById('media-wrap');
+            const isVideo = url.match(/\.(mp4|mov|webm|ogg)/i) || url.includes('video');
+            wrap.innerHTML = isVideo ? `<video src="${url}" class="rotate${rot}" id="main-media-el" playsinline muted loop autoplay></video>` : `<img src="${url}" class="rotate${rot}" id="main-media-el">`;
+        }
+
+        function deleteMedia() {
+            if(!localStorage.getItem('mediaPath_' + tag)) return;
+            if(confirm('사진/영상을 삭제하시겠습니까?')) {
+                localStorage.removeItem('mediaPath_' + tag); localStorage.removeItem('rot_' + tag);
+                document.getElementById('media-wrap').innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>';
+            }
+        }
+
+        function openFullscreen() {
+            const el = document.getElementById('main-media-el'); if(!el) return;
+            const fsContent = document.getElementById('fs-content');
+            fsContent.innerHTML = el.tagName === 'VIDEO' ? `<video src="${el.src}" class="${el.className}" controls autoplay></video>` : `<img src="${el.src}" class="${el.className}">`;
+            document.getElementById('fullscreen-view').style.display = 'flex';
+        }
+
+        function closeFullscreen() { document.getElementById('fullscreen-view').style.display = 'none'; }
 
         function renderItems(filter = '') {
             const container = document.getElementById('list-items');
             const filtered = items.filter(it => it.n.toLowerCase().includes(filter.toLowerCase()));
-            const grouped = filtered.reduce((acc, it) => {
-                (acc[it.cat || '기타'] = acc[it.cat || '기타'] || []).push(it);
-                return acc;
-            }, {});
-
-            container.innerHTML = Object.keys(grouped).map(cat => `
-                <div class="cat-group">
-                    <div class="cat-title">${cat}</div>
-                    ${grouped[cat].map(it => {
-                        const idx = items.indexOf(it);
-                        return `
-                        <div class="item-card" onclick="this.classList.toggle('open')">
-                            <div class="item-header">
-                                <strong>${it.n}</strong>
-                                <div class="qty-ctrl" onclick="event.stopPropagation()">
-                                    <button class="qty-btn" onclick="updateQty(${idx},-1)">-</button>
-                                    <span style="font-weight:bold; color:var(--primary);">${it.q}</span>
-                                    <button class="qty-btn" onclick="updateQty(${idx},1)">+</button>
-                                </div>
-                            </div>
-                            <div class="item-detail">
-                                <button onclick="editItem(${idx})" style="border:none; color:#64748b; font-weight:bold; background:none; margin-right:20px;">편집</button>
-                                <button onclick="deleteItem(${idx})" style="border:none; color:var(--danger); font-weight:bold; background:none;">삭제</button>
-                            </div>
-                        </div>`;
-                    }).join('')}
+            container.innerHTML = filtered.map((it, idx) => `
+                <div class="item-card ${isAllOpen ? 'open' : ''}">
+                    <div class="item-header"><span class="item-name">${it.n}</span><div class="qty-controls"><button class="qty-btn" onclick="changeQty(${idx}, -1)">-</button><span class="qty-num">${it.q || 1}개</span><button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button></div></div>
+                    <div class="item-content"><button class="action-btn" onclick="editItem(${idx})">이름 수정</button><button class="action-btn" style="color:#ef4444" onclick="deleteItem(${idx})">삭제</button></div>
                 </div>
             `).join('');
         }
 
-        // 실시간 촬영 설정 (화질 최적화)
-        function takePhotoOrVideo() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'video/*,image/*';
-            input.capture = 'environment'; // 카메라 바로 연결
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if(file.size > 50 * 1024 * 1024) return alert("용량이 너무 큽니다. 짧게 찍어주세요.");
-                // 업로드 및 분석 로직 (기존 유지)
+        function toggleAll() {
+            isAllOpen = !isAllOpen;
+            document.getElementById('toggle-text').innerText = isAllOpen ? '전체접기' : '전체펼치기';
+            document.getElementById('toggle-all-btn').classList.toggle('is-open', isAllOpen);
+            document.querySelectorAll('.item-card').forEach(card => card.classList.toggle('open', isAllOpen));
+        }
+
+        function toggleOverlay(id) { const el = document.getElementById(id); const cur = window.getComputedStyle(el).display; el.style.display = (cur === 'none') ? 'flex' : 'none'; }
+        function changeQty(idx, val) { items[idx].q = Math.max(1, (items[idx].q || 1) + val); saveData(); renderItems(); }
+        function deleteItem(idx) { if(confirm('삭제할까요?')) { items.splice(idx, 1); saveData(); renderItems(); } }
+        function editItem(idx) { const n = prompt('새 이름:', items[idx].n); if(n) { items[idx].n = n; saveData(); renderItems(); } }
+        function addItemDirectly() { const name = prompt('물건 이름:'); if(name) { items.push({ n: name, q: 1 }); saveData(); renderItems(); } }
+        function clearAllItems() { if(confirm('전체 초기화할까요?')) { items = []; saveData(); renderItems(); } }
+        function saveData() { localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); }
+
+        async function analyzeMedia() {
+            const oldInput = document.getElementById('temp-media-input'); if(oldInput) oldInput.remove();
+            const input = document.createElement('input'); 
+            input.id = 'temp-media-input'; input.type = 'file'; input.accept = 'video/*,image/*'; input.style.display = 'none';
+            document.body.appendChild(input);
+            input.onchange = (e) => {
+                const file = e.target.files[0]; if (!file) return; selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = (re) => {
+                    const previewWrap = document.getElementById('preview-wrap');
+                    previewWrap.innerHTML = file.type.startsWith('video/') ? `<video id="edit-preview" src="${re.target.result}" style="max-width:100%; max-height:100%;" muted autoplay loop></video>` : `<img id="edit-preview" src="${re.target.result}" style="max-width:100%; max-height:100%;">`;
+                    currentRotation = 0; document.getElementById('rotate-window').style.display = 'flex';
+                };
+                reader.readAsDataURL(file);
             };
             input.click();
         }
 
-        function placeDot(e) {
-            const map = document.getElementById('grid-map');
-            const rect = map.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            map.innerHTML = `<div class="dot" style="left:${x}%; top:${y}%;"></div>`;
-            localStorage.setItem('loc_' + tag, JSON.stringify({x, y}));
+        function rotateMedia(deg) { currentRotation = (currentRotation + deg + 360) % 360; document.getElementById('edit-preview').className = `rotate${currentRotation}`; }
+        
+        async function confirmUpload() {
+            if(!selectedFile) return; 
+            const file = selectedFile; 
+            const fileMimeType = file.type;
+
+            document.getElementById('rotate-window').style.display = 'none';
+            const mediaWrap = document.getElementById('media-wrap');
+            mediaWrap.innerHTML = '<div class="empty-text" style="color:var(--primary); font-weight:bold;">분석 중...</div>';
+            
+            try {
+                const path = `${tag}/${Date.now()}_${file.name}`;
+                const { error: uploadError } = await _supa.storage.from('user_uploads').upload(path, file);
+                if (uploadError) throw uploadError;
+
+                localStorage.setItem('mediaPath_' + tag, path); 
+                localStorage.setItem('rot_' + tag, currentRotation);
+                
+                const { data: sData } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600); 
+                showMedia(sData.signedUrl, currentRotation);
+
+                if (fileMimeType.startsWith('image/')) {
+                    const res = await fetch('/api/analyze', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ filePath: path, mimeType: fileMimeType }) 
+                    });
+                    
+                    const resData = await res.json();
+                    if (resData.items && resData.items.length > 0) {
+                        resData.items.forEach(n => items.push({ n, q: 1 }));
+                        saveData(); 
+                        renderItems();
+                    } else if (resData.error) {
+                        alert("분석 실패: " + resData.error);
+                    } else {
+                        alert("인식된 물품이 없습니다. 직접 이름을 입력해 주세요.");
+                    }
+                }
+            } catch (err) {
+                alert("업로드 또는 분석 중 오류가 발생했습니다.");
+            }
         }
 
-        function applyBulk() {
-            const val = parseInt(document.getElementById('bulk-input').value) || 1;
-            items.forEach(it => it.q = val);
-            saveData(); renderItems();
+        async function sendMsg() {
+            const input = document.getElementById('chat-input'); const text = input.value.trim(); if(!text) return;
+            const box = document.getElementById('chat-messages'); box.innerHTML += `<div class="msg user">${text}</div>`; input.value = '';
+            const res = await fetch('/api/chat', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ message: text, tag, inventory: JSON.stringify(items.map(i => i.n)) }) });
+            const data = await res.json(); box.innerHTML += `<div class="msg bot">${data.reply}</div>`; box.scrollTop = box.scrollHeight;
         }
-
-        function editItem(idx) {
-            const name = prompt('편집:', items[idx].n);
-            if(name) { items[idx].n = name; saveData(); renderItems(); }
-        }
-
-        function toggleOverlay(id) { const el = document.getElementById(id); el.style.display = el.style.display === 'flex' ? 'none' : 'flex'; }
-        function updateQty(idx, v) { items[idx].q = Math.max(1, items[idx].q + v); saveData(); renderItems(); }
-        function deleteItem(idx) { if(confirm('삭제?')) { items.splice(idx,1); saveData(); renderItems(); } }
-        function saveData() { localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); }
-        function loadMedia() { /* Supabase 불러오기 로직 */ }
-        function deleteMedia() { if(confirm('미디어 삭제?')) { localStorage.removeItem('mediaPath_'+tag); location.reload(); } }
-        function renameDrawer() { const n = prompt('이름:', document.getElementById('drawer-title').innerText); if(n) { localStorage.setItem('name_'+tag, n); location.reload(); } }
+        function cancelUpload() { document.getElementById('rotate-window').style.display = 'none'; selectedFile = null; }
+        function renameDrawer() { const n = prompt('서랍 이름:', document.getElementById('drawer-title').innerText); if(n) { document.getElementById('drawer-title').innerText = n; localStorage.setItem('name_' + tag, n); } }
     </script>
 </body>
 </html>
