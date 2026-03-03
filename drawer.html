@@ -14,28 +14,30 @@
         .icon-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--dark); width: 40px; text-align: right; }
         .main-card { background: #fff; padding: 15px; border-radius: 0 0 25px 25px; flex-shrink: 0; position: relative; overflow: hidden; }
         
-        /* [지시사항 반영] 1. 사진/영상이 테두리에 꽉 차게 수정 (object-fit: cover) */
+        /* [버그 수정] 슬라이드 삭제 시 레이아웃 깨짐 방지 */
         .media-box { 
             width: 100%; height: 250px; background: #f1f5f9; border-radius: 20px; 
             position: relative; border: 1px solid #e2e8f0; overflow: hidden; 
         }
         #swipe-container {
-            display: flex; width: calc(100% + 80px); height: 100%;
-            transition: transform 0.3s ease;
+            display: flex; 
+            width: calc(100% + 80px); /* 사진(100%) + 삭제버튼(80px) */
+            height: 100%;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
         }
         .media-inner-content { 
-            width: calc(100% - 80px); width: 100%; height: 100%; flex-shrink: 0; 
+            width: calc(100% - 80px); /* 실제 박스 너비만큼만 차지 */
+            height: 100%; flex-shrink: 0; 
             display: flex; align-items: center; justify-content: center; 
         }
         .media-box img, .media-box video { 
             width: 100%; height: 100%; object-fit: cover; pointer-events: none; 
         }
-        
-        /* [지시사항 반영] 2. 슬라이드 삭제 버튼 UX */
         .swipe-delete-btn {
             width: 80px; height: 100%; background: #ef4444; color: white;
             display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 14px; flex-shrink: 0;
+            font-weight: bold; font-size: 14px; flex-shrink: 0; cursor: pointer;
         }
 
         .list-header { display: flex; justify-content: flex-end; align-items: center; padding: 10px 15px 5px 15px; }
@@ -126,16 +128,16 @@
             renderItems(); initMediaEvents();
         };
 
-        // [2번 반영] 롱프레스 제거 -> 좌측 슬라이드 삭제 UX
+        // [슬라이드 버그 수정] 터치 이벤트 및 레이아웃 최적화
         function initMediaEvents() {
             const wrap = document.getElementById('media-wrap');
             const container = document.getElementById('swipe-container');
-            wrap.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+            wrap.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive: true});
             wrap.addEventListener('touchend', e => {
                 const diff = touchStartX - e.changedTouches[0].clientX;
-                if (diff > 50) container.style.transform = 'translateX(-80px)';
-                else if (diff < -50) container.style.transform = 'translateX(0)';
-                else if (Math.abs(diff) < 10) openFullscreen();
+                if (diff > 50) container.style.transform = 'translateX(-80px)'; // 왼쪽 슬라이드
+                else if (diff < -50) container.style.transform = 'translateX(0)'; // 복구
+                else if (Math.abs(diff) < 10) openFullscreen(); // 단순 클릭
             });
         }
 
@@ -145,11 +147,12 @@
             target.innerHTML = isVideo ? `<video src="${url}" class="rotate${rot}" id="main-media-el" playsinline muted loop autoplay></video>` : `<img src="${url}" class="rotate${rot}" id="main-media-el">`;
         }
 
+        // [버그 수정] 단일 삭제 시 위치 복구
         function deleteMedia() {
             if(!localStorage.getItem('mediaPath_' + tag)) return;
             if(confirm('사진/영상을 삭제하시겠습니까?')) {
                 localStorage.removeItem('mediaPath_' + tag); localStorage.removeItem('rot_' + tag);
-                document.getElementById('media-content-target').innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>';
+                document.getElementById('media-content-target').innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">사진이나 영상을 등록해 주세요.</div>';
                 document.getElementById('swipe-container').style.transform = 'translateX(0)';
             }
         }
@@ -163,7 +166,6 @@
 
         function closeFullscreen() { document.getElementById('fullscreen-view').style.display = 'none'; }
 
-        // [1번 반영] "이름 수정" -> "편집"
         function renderItems(filter = '') {
             const container = document.getElementById('list-items');
             const filtered = items.filter(it => it.n.toLowerCase().includes(filter.toLowerCase()));
@@ -182,15 +184,25 @@
             document.querySelectorAll('.item-card').forEach(card => card.classList.toggle('open', isAllOpen));
         }
 
-        // [신규 로직 반영] 갤러리 영상 차단 (accept="image/*")
+        // [버그 수정] 전체 초기화 시 사진까지 삭제
+        function clearAllItems() {
+            if(confirm('전체 초기화할까요? 목록과 사진이 모두 삭제됩니다.')) {
+                items = [];
+                localStorage.removeItem('gyeol_' + tag);
+                localStorage.removeItem('mediaPath_' + tag);
+                localStorage.removeItem('rot_' + tag);
+                document.getElementById('media-content-target').innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">사진이나 영상을 등록해 주세요.</div>';
+                document.getElementById('swipe-container').style.transform = 'translateX(0)';
+                saveData(); 
+                renderItems();
+            }
+        }
+
         async function analyzeMedia() {
             const oldInput = document.getElementById('temp-media-input'); if(oldInput) oldInput.remove();
             const input = document.createElement('input'); 
-            input.id = 'temp-media-input'; input.type = 'file'; 
-            input.accept = 'image/*'; // 지시사항: 갤러리에서 영상 아예 안 보이게 사진만 허용
-            input.style.display = 'none';
+            input.id = 'temp-media-input'; input.type = 'file'; input.accept = 'image/*'; input.style.display = 'none';
             document.body.appendChild(input);
-
             input.onchange = (e) => {
                 const file = e.target.files[0]; if (!file) return; selectedFile = file;
                 const reader = new FileReader();
@@ -204,27 +216,13 @@
             input.click();
         }
 
-        // [신규 로직 반영] 사진 변경 시 데이터 초기화 알림창
         async function confirmUpload() {
             if(!selectedFile) return; 
-
             const isConfirmed = confirm("기존 데이터를 변경하시겠습니까?");
-            if (isConfirmed) {
-                // '네' 클릭: 목록 전체 초기화 및 분석 시작
-                items = [];
-                saveData();
-                renderItems();
-            } else {
-                // '아니오' 클릭: 중단
-                alert("기존 데이터로 인해 변경 불가능합니다.");
-                document.getElementById('rotate-window').style.display = 'none';
-                return;
-            }
+            if (isConfirmed) { items = []; saveData(); renderItems(); }
+            else { alert("변경이 취소되었습니다."); document.getElementById('rotate-window').style.display = 'none'; return; }
 
-            const file = selectedFile; 
-            const fileMimeType = file.type;
-
-            document.getElementById('rotate-window').style.display = 'none';
+            const file = selectedFile; document.getElementById('rotate-window').style.display = 'none';
             const target = document.getElementById('media-content-target');
             target.innerHTML = '<div class="empty-text" style="color:var(--primary); font-weight:bold;">분석 중...</div>';
             
@@ -232,25 +230,12 @@
                 const path = `${tag}/${Date.now()}_${file.name}`;
                 const { error: uploadError } = await _supa.storage.from('user_uploads').upload(path, file);
                 if (uploadError) throw uploadError;
-
-                localStorage.setItem('mediaPath_' + tag, path); 
-                localStorage.setItem('rot_' + tag, currentRotation);
-                
+                localStorage.setItem('mediaPath_' + tag, path); localStorage.setItem('rot_' + tag, currentRotation);
                 const { data: sData } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600); 
                 showMedia(sData.signedUrl, currentRotation);
-
-                const res = await fetch('/api/analyze', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ filePath: path, mimeType: fileMimeType }) 
-                });
-                
+                const res = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filePath: path, mimeType: file.type }) });
                 const resData = await res.json();
-                if (resData.items) {
-                    resData.items.forEach(n => items.push({ n, q: 1 }));
-                    saveData(); 
-                    renderItems();
-                }
+                if (resData.items) { resData.items.forEach(n => items.push({ n, q: 1 })); saveData(); renderItems(); }
             } catch (err) { alert("업로드 실패"); }
         }
 
@@ -259,7 +244,6 @@
         function deleteItem(idx) { if(confirm('삭제할까요?')) { items.splice(idx, 1); saveData(); renderItems(); } }
         function editItem(idx) { const n = prompt('새 이름:', items[idx].n); if(n) { items[idx].n = n; saveData(); renderItems(); } }
         function addItemDirectly() { const name = prompt('물건 이름:'); if(name) { items.push({ n: name, q: 1 }); saveData(); renderItems(); } }
-        function clearAllItems() { if(confirm('전체 초기화할까요?')) { items = []; saveData(); renderItems(); } }
         function saveData() { localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); }
         async function sendMsg() {
             const input = document.getElementById('chat-input'); const text = input.value.trim(); if(!text) return;
