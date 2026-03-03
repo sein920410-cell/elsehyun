@@ -13,8 +13,16 @@
         .drawer-name { font-size: 18px; font-weight: 800; flex: 1; text-align: center; }
         .icon-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--dark); width: 40px; text-align: right; }
         .main-card { background: #fff; padding: 15px; border-radius: 0 0 25px 25px; flex-shrink: 0; position: relative; }
+        
+        /* [수정] 이미지가 카드 테두리에 꽉 차도록 수정 */
         .media-box { width: 100%; height: 250px; background: #f1f5f9; border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; overflow: hidden; cursor: pointer; -webkit-user-select: none; user-select: none; }
-        .media-box img, .media-box video { max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; }
+        .media-box img, .media-box video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        
+        /* [추가] 스와이프 삭제 UI */
+        .media-content-wrapper { width: 100%; height: 100%; transition: transform 0.3s ease; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; background: #f1f5f9; }
+        .swipe-delete-overlay { position: absolute; right: 0; top: 0; width: 80px; height: 100%; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; z-index: 1; border-radius: 0 20px 20px 0; }
+        .media-box.swiped .media-content-wrapper { transform: translateX(-80px); }
+
         .list-header { display: flex; justify-content: flex-end; align-items: center; padding: 10px 15px 5px 15px; }
         .toggle-btn { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #94a3b8; font-weight: bold; }
         .round-arrow { width: 26px; height: 26px; background: var(--light-grey); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; }
@@ -49,7 +57,13 @@
 </head>
 <body>
     <header class="header"><div class="spacer"></div><div class="drawer-name" id="drawer-title" onclick="renameDrawer()">서랍 1</div><button class="icon-btn" onclick="analyzeMedia()">＋</button></header>
-    <div class="main-card"><div class="media-box" id="media-wrap"><div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div></div></div>
+    <div class="main-card">
+        <div class="media-box" id="media-wrap">
+            <div class="media-content-wrapper" id="media-content-inner">
+                <div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>
+            </div>
+        </div>
+    </div>
     <div class="list-header"><div class="toggle-btn" id="toggle-all-btn" onclick="toggleAll()"><div class="round-arrow"><div class="chevron"></div></div><span id="toggle-text">전체펼치기</span></div></div>
     <div class="list-container">
         <button class="add-list-btn" onclick="addItemDirectly()">＋ 목록추가</button>
@@ -72,12 +86,14 @@
         <div id="preview-wrap"></div>
         <div style="padding:20px; display:flex; gap:10px; background:#fff;"><button onclick="rotateMedia(90)" style="flex:1; padding:15px; border-radius:12px; border:1px solid #ddd;">회전</button><button onclick="confirmUpload()" style="flex:2; padding:15px; border-radius:12px; background:var(--dark); color:#fff; border:none; font-weight:bold;">등록</button><button onclick="cancelUpload()" style="flex:1; padding:15px; border-radius:12px; background:#f1f5f9; border:none;">취소</button></div>
     </div>
+
     <script>
         const _supa = supabase.createClient('https://tqhtggusphhcsygiitrv.supabase.co', 'sb_publishable_lJeKpO0aRv9mTBE1qnbkow_JqTmhnHQ');
         const params = new URLSearchParams(window.location.search);
         const tag = (params.get('tag') || 'DRAWER001').toUpperCase();
         let items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
-        let isAllOpen = false, currentRotation = 0, selectedFile = null, pressTimer, isLongPress = false;
+        let isAllOpen = false, currentRotation = 0, selectedFile = null;
+        let startX = 0, isSwiped = false, shouldClearOnUpload = false;
 
         window.onload = async () => {
             document.getElementById('drawer-title').innerText = localStorage.getItem('name_' + tag) || '서랍 1';
@@ -89,25 +105,38 @@
             renderItems(); initMediaEvents();
         };
 
+        /* [수정] 2초 길게 누르기 제거 및 좌측 슬라이드 삭제 적용 */
         function initMediaEvents() {
             const wrap = document.getElementById('media-wrap');
-            const start = () => { isLongPress = false; pressTimer = setTimeout(() => { isLongPress = true; deleteMedia(); }, 2000); };
-            const end = (e) => { clearTimeout(pressTimer); if (!isLongPress && e.type !== 'mouseleave') openFullscreen(); };
-            wrap.onmousedown = start; wrap.ontouchstart = (e) => { start(); };
-            wrap.onmouseup = end; wrap.ontouchend = (e) => { e.preventDefault(); end(e); };
+            wrap.ontouchstart = (e) => { startX = e.touches[0].clientX; };
+            wrap.ontouchmove = (e) => {
+                const moveX = e.touches[0].clientX;
+                const diff = startX - moveX;
+                if (diff > 50) { wrap.classList.add('swiped'); isSwiped = true; }
+                else if (diff < -50) { wrap.classList.remove('swiped'); isSwiped = false; }
+            };
+            wrap.onclick = () => { if(!isSwiped) openFullscreen(); };
         }
 
+        /* [수정] 스와이프 삭제 UI 대응 및 object-fit 적용 */
         function showMedia(url, rot) {
             const wrap = document.getElementById('media-wrap');
             const isVideo = url.match(/\.(mp4|mov|webm|ogg)/i) || url.includes('video');
-            wrap.innerHTML = isVideo ? `<video src="${url}" class="rotate${rot}" id="main-media-el" playsinline muted loop autoplay></video>` : `<img src="${url}" class="rotate${rot}" id="main-media-el">`;
+            wrap.classList.remove('swiped'); isSwiped = false;
+            wrap.innerHTML = `
+                <div class="swipe-delete-overlay" onclick="deleteMedia(); event.stopPropagation();">삭제</div>
+                <div class="media-content-wrapper" id="media-content-inner">
+                    ${isVideo ? `<video src="${url}" class="rotate${rot}" id="main-media-el" playsinline muted loop autoplay></video>` : `<img src="${url}" class="rotate${rot}" id="main-media-el">`}
+                </div>
+            `;
         }
 
         function deleteMedia() {
             if(!localStorage.getItem('mediaPath_' + tag)) return;
             if(confirm('사진/영상을 삭제하시겠습니까?')) {
                 localStorage.removeItem('mediaPath_' + tag); localStorage.removeItem('rot_' + tag);
-                document.getElementById('media-wrap').innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>';
+                document.getElementById('media-wrap').innerHTML = '<div class="media-content-wrapper" id="media-content-inner"><div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div></div>';
+                document.getElementById('media-wrap').classList.remove('swiped'); isSwiped = false;
             }
         }
 
@@ -120,13 +149,14 @@
 
         function closeFullscreen() { document.getElementById('fullscreen-view').style.display = 'none'; }
 
+        /* [수정] 이름수정 -> 편집 으로 텍스트 변경 */
         function renderItems(filter = '') {
             const container = document.getElementById('list-items');
             const filtered = items.filter(it => it.n.toLowerCase().includes(filter.toLowerCase()));
             container.innerHTML = filtered.map((it, idx) => `
                 <div class="item-card ${isAllOpen ? 'open' : ''}">
                     <div class="item-header"><span class="item-name">${it.n}</span><div class="qty-controls"><button class="qty-btn" onclick="changeQty(${idx}, -1)">-</button><span class="qty-num">${it.q || 1}개</span><button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button></div></div>
-                    <div class="item-content"><button class="action-btn" onclick="editItem(${idx})">이름 수정</button><button class="action-btn" style="color:#ef4444" onclick="deleteItem(${idx})">삭제</button></div>
+                    <div class="item-content"><button class="action-btn" onclick="editItem(${idx})">편집</button><button class="action-btn" style="color:#ef4444" onclick="deleteItem(${idx})">삭제</button></div>
                 </div>
             `).join('');
         }
@@ -146,34 +176,64 @@
         function clearAllItems() { if(confirm('전체 초기화할까요?')) { items = []; saveData(); renderItems(); } }
         function saveData() { localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); }
 
+        /* [수정] 업로드 정책 반영 (사진: 갤러리/카메라, 영상: 카메라 전용 및 설정 고정) */
         async function analyzeMedia() {
+            shouldClearOnUpload = confirm("기존 목록 데이터를 삭제하고 새로 분석하시겠습니까?");
+            
+            const type = confirm("사진을 등록하시려면 '확인', 영상을 촬영하시려면 '취소'를 누르세요.") ? 'image' : 'video';
             const oldInput = document.getElementById('temp-media-input'); if(oldInput) oldInput.remove();
             const input = document.createElement('input'); 
-            input.id = 'temp-media-input'; input.type = 'file'; input.accept = 'video/*,image/*'; input.style.display = 'none';
-            document.body.appendChild(input);
+            input.id = 'temp-media-input'; input.type = 'file'; input.style.display = 'none';
+
+            if (type === 'image') {
+                input.accept = 'image/*'; // 사진 업로드 및 촬영 허용
+            } else {
+                input.accept = 'video/*';
+                input.capture = 'environment'; // 앱 내부 카메라 촬영만 허용 (갤러리 영상 선택 불가)
+            }
+
             input.onchange = (e) => {
-                const file = e.target.files[0]; if (!file) return; selectedFile = file;
-                const reader = new FileReader();
-                reader.onload = (re) => {
-                    const previewWrap = document.getElementById('preview-wrap');
-                    previewWrap.innerHTML = file.type.startsWith('video/') ? `<video id="edit-preview" src="${re.target.result}" style="max-width:100%; max-height:100%;" muted autoplay loop></video>` : `<img id="edit-preview" src="${re.target.result}" style="max-width:100%; max-height:100%;">`;
-                    currentRotation = 0; document.getElementById('rotate-window').style.display = 'flex';
-                };
-                reader.readAsDataURL(file);
+                const file = e.target.files[0]; if (!file) return; 
+                if (type === 'video') {
+                    // 영상 60초 제한 체크 (브라우저 지원 범위 내)
+                    const video = document.createElement('video');
+                    video.preload = 'metadata';
+                    video.onloadedmetadata = () => {
+                        window.URL.revokeObjectURL(video.src);
+                        if (video.duration > 61) { alert("영상은 최대 60초까지만 촬영 가능합니다."); return; }
+                        processSelectedFile(file);
+                    };
+                    video.src = URL.createObjectURL(file);
+                } else {
+                    processSelectedFile(file);
+                }
             };
             input.click();
+        }
+
+        function processSelectedFile(file) {
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (re) => {
+                const previewWrap = document.getElementById('preview-wrap');
+                previewWrap.innerHTML = file.type.startsWith('video/') ? `<video id="edit-preview" src="${re.target.result}" style="max-width:100%; max-height:100%;" muted autoplay loop></video>` : `<img id="edit-preview" src="${re.target.result}" style="max-width:100%; max-height:100%;">`;
+                currentRotation = 0; document.getElementById('rotate-window').style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
         }
 
         function rotateMedia(deg) { currentRotation = (currentRotation + deg + 360) % 360; document.getElementById('edit-preview').className = `rotate${currentRotation}`; }
         
         async function confirmUpload() {
             if(!selectedFile) return; 
+            if(shouldClearOnUpload) { items = []; saveData(); renderItems(); } // 등록 전 데이터 초기화 정책 적용
+
             const file = selectedFile; 
             const fileMimeType = file.type;
 
             document.getElementById('rotate-window').style.display = 'none';
             const mediaWrap = document.getElementById('media-wrap');
-            mediaWrap.innerHTML = '<div class="empty-text" style="color:var(--primary); font-weight:bold;">분석 중...</div>';
+            mediaWrap.innerHTML = '<div class="media-content-wrapper" id="media-content-inner"><div class="empty-text" style="color:var(--primary); font-weight:bold;">분석 중...</div></div>';
             
             try {
                 const path = `${tag}/${Date.now()}_${file.name}`;
