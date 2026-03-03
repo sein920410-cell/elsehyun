@@ -5,8 +5,6 @@ const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
-  
-  // 기존 drawer.html이 보내는 형식을 그대로 받습니다.
   const { filePath, mimeType } = req.body;
 
   try {
@@ -17,7 +15,7 @@ export default async function handler(req, res) {
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // 2. 제미나이 2.0 모델 호출
+    // 2. 구글 제미나이 2.0 모델 호출 (Vercel의 GEMINI_API_KEY 사용)
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
     const response = await fetch(endpoint, {
@@ -33,14 +31,12 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // 429 에러(한도 초과) 등이 나면 그대로 화면에 뿌려줍니다. [cite: 2026-01-22]
+    // 에러 발생 시(한도 초과 등) 화면에 정확히 표시 [cite: 2026-01-22]
     if (data.error) {
       return res.status(200).json({ error: `제미나이 에러: ${data.error.message}` });
     }
 
     const botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    
-    // 3. 기존 UI가 기대하는 배열 형식으로 반환
     const items = botText.split(",").map(s => s.trim()).filter(it => it.length > 0);
 
     return res.status(200).json({ items });
