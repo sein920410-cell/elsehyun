@@ -18,22 +18,19 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         contents: [{ parts: [
           { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
-          { text: `너는 공간:결 시스템의 물품 인식 전문가야. 엉뚱한 물건을 절대 지어내지 말고 아래 규칙을 무조건 지켜.
-
-1. 없는 물건 창조 금지: 억지로 추측해서 지어내지 마.
-2. 보이는 글자 그대로 읽기: 겉면에 적힌 한국어와 숫자를 그대로 읽어. (예: '맘스 크린장갑', '가성비 칫솔', '면봉 1000')
-3. 추측 금지: 이름표나 글자가 안 보여서 뭔지 확실히 모르는 비닐이나 상자는 '기타:내용물을 알 수 없는 비닐', '기타:상자' 정도로만 적어.
-4. 응답 형식: 오직 '카테고리:물품명' 형식으로만 결과만 쉼표로 나열해. (예: 생활:맘스 크린장갑, 생활:가성비 칫솔, 생활:면봉)` }
-        ]}]
+          { text: "사진 속 물건을 추출해. 1.글자가 써진 물건은 반드시 그 글자를 읽어서 이름으로 정해(예: 맘스 크린장갑). 2.비슷한 물건은 하나로 합쳐서 중복 없이 리스트를 만들어. 3.글자가 없는 잡동사니는 '기타:상자', '기타:비닐' 식으로 딱 한 번씩만 포함하고 100개씩 만들지 마. 4.응답은 반드시 '카테고리:물품명' 형식으로 쉼표로만 구분해. 예: 생활:맘스 크린장갑, 생활:가성비 칫솔, 기타:비닐" }
         ]}]
       })
     });
 
     const data = await response.json();
     const botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    // 대괄호를 제거하고 형식에 맞는 데이터만 리스트로 반환 [cite: 2026-03-04]
-    const items = botText.split(",").map(s => s.trim().replace(/\[|\]/g, "")).filter(it => it.includes(":"));
-    return res.status(200).json({ items });
+    
+    // 중복 제거 로직 추가
+    const rawItems = botText.split(",").map(s => s.replace(/\[|\]|\n|`|\*/g, "").trim());
+    const uniqueItems = [...new Set(rawItems)].filter(it => it.includes(":") && it.length > 3);
+    
+    return res.status(200).json({ items: uniqueItems });
   } catch (err) {
     return res.status(500).json({ error: "분석 오류" });
   }
