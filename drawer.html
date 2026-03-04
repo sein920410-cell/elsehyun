@@ -14,10 +14,10 @@
         .icon-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--dark); width: 40px; text-align: right; }
         .main-card { background: #fff; padding: 15px; border-radius: 0 0 25px 25px; flex-shrink: 0; position: relative; }
         
-        /* [수정] 이미지가 테두리에 꽉 차도록 object-fit: cover 적용 [cite: 2026-03-02] */
+        /* [수정] 이미지가 테두리에 가득 차도록 object-fit: cover 적용 [cite: 2026-03-02] */
         .media-box { width: 100%; height: 250px; background: #f1f5f9; border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; overflow: hidden; cursor: pointer; -webkit-user-select: none; user-select: none; }
         .media-box img, .media-box video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; position: relative; z-index: 2; transition: transform 0.3s ease; }
-        .media-delete-btn { position: absolute; right: 0; top: 0; width: 80px; height: 100%; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 1; border-radius: 0 20px 20px 0; }
+        .media-delete-btn { position: absolute; right: 0; top: 0; width: 80px; height: 100%; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 3; border-radius: 0 20px 20px 0; }
         
         .list-header { display: flex; justify-content: flex-end; align-items: center; padding: 10px 15px 5px 15px; }
         .toggle-btn { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #94a3b8; font-weight: bold; }
@@ -96,7 +96,7 @@
             renderItems(); initMediaEvents();
         };
 
-        // 슬라이드 삭제 로직 유지 [cite: 2026-03-02]
+        // [수정] 슬라이드 삭제 시 사진 튀어나오지 않도록 이벤트 차단 및 UX 개선 [cite: 2026-03-02]
         function initMediaEvents() {
             const wrap = document.getElementById('media-wrap');
             let startX = 0, isMoving = false;
@@ -122,7 +122,8 @@
                         btn.id = 'media-del-btn';
                         btn.className = 'media-delete-btn';
                         btn.innerText = '삭제';
-                        btn.onclick = (ev) => { ev.stopPropagation(); deleteMedia(); };
+                        // stopPropagation으로 전체화면 방지 [cite: 2026-03-02]
+                        btn.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); deleteMedia(); };
                         wrap.appendChild(btn);
                     }
                 }
@@ -132,16 +133,15 @@
                 const el = document.getElementById('main-media-el');
                 if(!el) return;
                 el.style.transition = 'transform 0.3s ease';
-                const diffX = e.changedTouches[0].clientX - startX;
                 
-                if(diffX < -50) { el.style.transform = 'translateX(-80px)'; } 
-                else { 
-                    el.style.transform = 'translateX(0)';
-                    setTimeout(() => { const b = document.getElementById('media-del-btn'); if(b) b.remove(); }, 300);
+                if(isMoving) {
+                    const diffX = e.changedTouches[0].clientX - startX;
+                    if(diffX < -50) { el.style.transform = 'translateX(-80px)'; } 
+                    else { el.style.transform = 'translateX(0)'; setTimeout(() => { const b = document.getElementById('media-del-btn'); if(b) b.remove(); }, 300); }
                 }
-                if(!isMoving) openFullscreen(); 
             });
-            wrap.onclick = () => { if(!isMoving) openFullscreen(); };
+            // 클릭 시 슬라이드 중이 아닐 때만 전체화면 실행 [cite: 2026-03-02]
+            wrap.onclick = (ev) => { if(!isMoving) openFullscreen(); };
         }
 
         function showMedia(url, rot) {
