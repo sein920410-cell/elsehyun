@@ -18,20 +18,15 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         contents: [{ parts: [
           { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
-          { text: `너는 사업용 수납 관리 시스템 '공간:결'의 전문가야. 절대 장난질하지 마.
-
-1. 이름 지어내지 마: 확실히 안 보이면 브랜드 쓰지 마. 모르면 '펌프 용기', '스프레이 병'처럼 생김새로 이름 지어. [cite: 2026-03-04]
-2. 누락 방지: 콘센트(멀티탭), 마우스패드, 구석의 파일 뭉치까지 꼼꼼하게 다 찾아내. [cite: 2026-03-04]
-3. 분류: 애매하면 무조건 '기타' 카테고리로 넣어. [cite: 2026-03-04]
-4. 응답 형식: '카테고리:이름' 형식으로 결과만 쉼표로 나열해. "내용이 없다" 같은 말 절대 하지 마.` }
+          { text: "너는 물품 인식 전문가야. 사진 속 모든 물건을 아주 꼼꼼하게 분석해서 [카테고리: 브랜드명 상품명 상세모델] 형식으로만 답해. 예: [식품: 농심 신라면], [식품: CJ 스팸 클래식], [전자제품: 로지텍 MX Master 3S 마우스]. 브랜드명이 보이면 무조건 쓰고, 마우스 같은 기기는 상세 모델명까지 식별해. 설명 없이 결과만 쉼표(,)로 구분해서 나열해." }
         ]}]
       })
     });
 
     const data = await response.json();
     const botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    // 대괄호를 제거하고 형식에 맞는 데이터만 리스트로 반환 [cite: 2026-03-04]
     const items = botText.split(",").map(s => s.trim().replace(/\[|\]/g, "")).filter(it => it.includes(":"));
-
     return res.status(200).json({ items });
   } catch (err) {
     return res.status(500).json({ error: "분석 오류" });
