@@ -4,12 +4,14 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
   const { message, inventory, tag } = req.body;
 
+// ... (상단 코드 유지)
   try {
-    // 2.0 라인 중 대화에 최적화된 모델 2개를 순차적으로 찌릅니다. [cite: 2026-03-02]
-    const chatModels = ["gemini-2.0-flash-lite", "gemini-2.0-flash"];
+    // [수정] Lite가 막혔으므로 Experimental 모델로 긴급 우회
+    const chatModels = ["gemini-2.0-flash-exp", "gemini-2.0-flash"];
     let finalReply = "";
 
     for (const model of chatModels) {
+// ... (하단 코드 유지)
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
       const prompt = `당신은 비서 '봄'입니다. 장소: ${tag}. 현재 물품: ${inventory}. 질문: ${message}. 짧고 친절하게 한국어로 답하세요.`;
 
