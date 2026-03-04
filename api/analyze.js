@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
     // 한도가 19회 남은 2.5 모델로 정확히 연결합니다.
-    const model = "gemini-2.5-flash";
+    const model = "gemini-2.5-flash-lite";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
     const response = await fetch(endpoint, {
