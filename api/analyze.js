@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // 한도가 19회 남은 2.5 모델로 정확히 연결합니다.
+    // RPM 10으로 더 빠른 Lite 모델로 변경합니다.
     const model = "gemini-2.5-flash-lite";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
@@ -24,7 +24,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         contents: [{ parts: [
           { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
-          { text: "이미지 속 물건 이름을 한국어로 분석해. 콤마로만 구분해. 예: 라면, 망치. 설명 금지." }
+          // 인식 수준을 높이기 위해 지시어를 전문가급으로 수정했습니다. [cite: 2026-03-04]
+          { text: "이미지 속 물건들을 브랜드명과 함께 아주 상세하게 분석해. [카테고리: 브랜드 상품명] 형식으로 작성하고, 여러 개면 쉼표로 구분해. 설명은 절대 하지 마. 예: [식품: 농심 신라면], [생활: 유한양행 락스]" }
         ]}]
       })
     });
