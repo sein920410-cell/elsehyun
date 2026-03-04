@@ -14,8 +14,8 @@ export default async function handler(req, res) {
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // [최종 수정] 'not found' 에러를 피하기 위해 리스트에 있는 정식 명칭만 사용
-    const model = "gemini-2.0-flash";
+    // 한도가 19회 남은 2.5 모델로 정확히 연결합니다.
+    const model = "gemini-2.5-flash";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
     const response = await fetch(endpoint, {
