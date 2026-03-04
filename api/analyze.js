@@ -1,4 +1,3 @@
-// api/analyze.js를 이 내용으로 덮어씌우세요
 import { createClient } from "@supabase/supabase-js";
 import fetch from "node-fetch";
 
@@ -15,32 +14,43 @@ export default async function handler(req, res) {
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // [수정] 돌려막기 중단! 한도가 따로 노는 '2.0-flash-exp' 하나에만 올인합니다. [cite: 2026-03-02]
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${process.env.GEMINI_API_KEY}`;
-    
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [
-          { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
-          { text: "이미지 속 물건 이름을 한국어로 분석해. 콤마로만 구분해. 예: 라면, 망치. 설명 금지." }
-        ]}]
-      })
-    });
+    // [수정] 'is not found' 에러 방지를 위해 가장 확실한 정식 모델명으로 교체
+    // 2.0-flash를 먼저 쓰고, 한도 초과 시 2.0-flash-lite로 딱 한 번만 더 시도합니다.
+    const reliableModels = ["gemini-2.0-flash", "gemini-2.0-flash-lite"];
+    let finalItems = [];
+    let lastError = "";
 
-    const data = await response.json();
+    for (const model of reliableModels) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
+      
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [
+            { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
+            { text: "이미지 속 물건 이름을 한국어로 분석해. 콤마로만 구분해서 나열해. 예: 라면, 망치. 설명 금지." }
+          ]}]
+        })
+      });
 
-    if (data.error) {
-      return res.status(200).json({ error: `구글 한도 초과: ${data.error.message}` });
+      const data = await response.json();
+
+      if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        const botText = data.candidates[0].content.parts[0].text;
+        finalItems = botText.split(",").map(s => s.trim()).filter(it => it.length > 0);
+        break; 
+      }
+      lastError = data.error ? data.error.message : "알 수 없는 오류";
     }
 
-    const botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    const items = botText.split(",").map(s => s.trim()).filter(it => it.length > 0);
-
-    return res.status(200).json({ items });
+    if (finalItems.length > 0) {
+      return res.status(200).json({ items: finalItems });
+    } else {
+      return res.status(200).json({ error: `구글 한도 소진 또는 오류: ${lastError}` });
+    }
 
   } catch (err) {
-    return res.status(500).json({ error: "서버 오류" });
+    return res.status(500).json({ error: "서버 내부 오류" });
   }
 }
