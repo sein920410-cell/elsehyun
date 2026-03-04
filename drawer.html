@@ -13,8 +13,12 @@
         .drawer-name { font-size: 18px; font-weight: 800; flex: 1; text-align: center; }
         .icon-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--dark); width: 40px; text-align: right; }
         .main-card { background: #fff; padding: 15px; border-radius: 0 0 25px 25px; flex-shrink: 0; position: relative; }
+        
+        /* [수정] 이미지가 테두리에 꽉 차도록 object-fit: cover 적용 [cite: 2026-03-02] */
         .media-box { width: 100%; height: 250px; background: #f1f5f9; border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; overflow: hidden; cursor: pointer; -webkit-user-select: none; user-select: none; }
-        .media-box img, .media-box video { max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; }
+        .media-box img, .media-box video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; position: relative; z-index: 2; transition: transform 0.3s ease; }
+        .media-delete-btn { position: absolute; right: 0; top: 0; width: 80px; height: 100%; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 1; border-radius: 0 20px 20px 0; }
+        
         .list-header { display: flex; justify-content: flex-end; align-items: center; padding: 10px 15px 5px 15px; }
         .toggle-btn { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #94a3b8; font-weight: bold; }
         .round-arrow { width: 26px; height: 26px; background: var(--light-grey); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; }
@@ -30,7 +34,10 @@
         .qty-num { font-weight: 700; color: var(--primary); min-width: 30px; text-align: center; }
         .item-content { display: none; padding: 15px; border-top: 1px solid #f8fafc; background: #fff; }
         .item-card.open .item-content { display: block; }
+        
+        /* [수정] "이름수정" -> "편집" 버튼명 변경 반영 [cite: 2026-02-08] */
         .action-btn { background: none; border: none; color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer; margin-right: 15px; }
+        
         .bottom-actions { padding: 15px 0; display: flex; flex-direction: column; gap: 10px; }
         .chat-entry { background: var(--dark); color: #fff; padding: 15px; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; z-index: 50; }
         .reset-btn { align-self: center; background: none; border: none; color: #94a3b8; font-size: 12px; text-decoration: underline; cursor: pointer; padding: 5px; }
@@ -77,7 +84,7 @@
         const params = new URLSearchParams(window.location.search);
         const tag = (params.get('tag') || 'DRAWER001').toUpperCase();
         let items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
-        let isAllOpen = false, currentRotation = 0, selectedFile = null, pressTimer, isLongPress = false;
+        let isAllOpen = false, currentRotation = 0, selectedFile = null;
 
         window.onload = async () => {
             document.getElementById('drawer-title').innerText = localStorage.getItem('name_' + tag) || '서랍 1';
@@ -89,12 +96,52 @@
             renderItems(); initMediaEvents();
         };
 
+        // 슬라이드 삭제 로직 유지 [cite: 2026-03-02]
         function initMediaEvents() {
             const wrap = document.getElementById('media-wrap');
-            const start = () => { isLongPress = false; pressTimer = setTimeout(() => { isLongPress = true; deleteMedia(); }, 2000); };
-            const end = (e) => { clearTimeout(pressTimer); if (!isLongPress && e.type !== 'mouseleave') openFullscreen(); };
-            wrap.onmousedown = start; wrap.ontouchstart = (e) => { start(); };
-            wrap.onmouseup = end; wrap.ontouchend = (e) => { e.preventDefault(); end(e); };
+            let startX = 0, isMoving = false;
+
+            wrap.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                isMoving = false;
+            }, {passive: true});
+
+            wrap.addEventListener('touchmove', (e) => {
+                const el = document.getElementById('main-media-el');
+                if(!el || !localStorage.getItem('mediaPath_' + tag)) return;
+                const diffX = e.touches[0].clientX - startX;
+                
+                if(diffX < -10) { 
+                    isMoving = true;
+                    const move = Math.max(diffX, -100);
+                    el.style.transform = `translateX(${move}px)`;
+                    el.style.transition = 'none';
+                    
+                    if(!document.getElementById('media-del-btn')) {
+                        const btn = document.createElement('div');
+                        btn.id = 'media-del-btn';
+                        btn.className = 'media-delete-btn';
+                        btn.innerText = '삭제';
+                        btn.onclick = (ev) => { ev.stopPropagation(); deleteMedia(); };
+                        wrap.appendChild(btn);
+                    }
+                }
+            }, {passive: true});
+
+            wrap.addEventListener('touchend', (e) => {
+                const el = document.getElementById('main-media-el');
+                if(!el) return;
+                el.style.transition = 'transform 0.3s ease';
+                const diffX = e.changedTouches[0].clientX - startX;
+                
+                if(diffX < -50) { el.style.transform = 'translateX(-80px)'; } 
+                else { 
+                    el.style.transform = 'translateX(0)';
+                    setTimeout(() => { const b = document.getElementById('media-del-btn'); if(b) b.remove(); }, 300);
+                }
+                if(!isMoving) openFullscreen(); 
+            });
+            wrap.onclick = () => { if(!isMoving) openFullscreen(); };
         }
 
         function showMedia(url, rot) {
@@ -126,7 +173,7 @@
             container.innerHTML = filtered.map((it, idx) => `
                 <div class="item-card ${isAllOpen ? 'open' : ''}">
                     <div class="item-header"><span class="item-name">${it.n}</span><div class="qty-controls"><button class="qty-btn" onclick="changeQty(${idx}, -1)">-</button><span class="qty-num">${it.q || 1}개</span><button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button></div></div>
-                    <div class="item-content"><button class="action-btn" onclick="editItem(${idx})">이름 수정</button><button class="action-btn" style="color:#ef4444" onclick="deleteItem(${idx})">삭제</button></div>
+                    <div class="item-content"><button class="action-btn" onclick="editItem(${idx})">편집</button><button class="action-btn" style="color:#ef4444" onclick="deleteItem(${idx})">삭제</button></div>
                 </div>
             `).join('');
         }
