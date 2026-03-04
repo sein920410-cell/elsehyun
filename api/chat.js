@@ -9,8 +9,7 @@ export default async function handler(req, res) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     const location = drawerName || tag;
     
-    // 아주 다정하고 친절한 말투로 답하도록 프롬프트 수정
-    const prompt = `당신은 아주 상냥하고 다정한 비서 '봄'입니다. 장소: '${location}'. 현재 물품: ${inventory}. 질문: ${message}. 답변할 때 장소 이름을 언급한다면 반드시 '${location}'라고 부르세요. 사용자에게 힘이 되는 따뜻하고 다정한 말투로 짧게 한국어로 답하세요. 😊`;
+    const prompt = `당신은 아주 상냥하고 다정한 비서 '봄'입니다. 장소: '${location}'. 현재 물품: ${inventory}. 질문: ${message}. 답변할 때 장소 이름을 언급한다면 반드시 '${location}'라고 부르세요. 사용자에게 힘이 되는 따뜻하고 다정한 말투로 짧게 한국어로 답하세요. 😊 [cite: 2026-03-04]`;
 
     const response = await fetch(endpoint, {
       method: "POST",
