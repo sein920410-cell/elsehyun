@@ -108,72 +108,45 @@
             renderItems(); initMediaEvents();
         };
 
-        // 미디어 클릭 처리 (없으면 업로드, 있으면 확대)
         function handleMediaClick() {
             if (!localStorage.getItem('mediaPath_' + tag)) {
                 analyzeMedia();
             }
         }
 
-       function initMediaEvents() {
-    const wrap = document.getElementById('media-wrap');
-    let startX = 0, isMoving = false;
-    
-    wrap.addEventListener('touchstart', (e) => { 
-        startX = e.touches[0].clientX; 
-        isMoving = false; 
-    }, {passive: true});
-
-    wrap.addEventListener('touchmove', (e) => {
-        const el = document.getElementById('main-media-el');
-        if(!el || !localStorage.getItem('mediaPath_' + tag)) return;
-        const diffX = e.touches[0].clientX - startX;
-        if(diffX < -10) { 
-            isMoving = true;
-            el.style.transform = `translateX(${Math.max(diffX, -100)}px)`; 
-            el.style.transition = 'none';
-            if(!document.getElementById('media-del-btn')) {
-                const btn = document.createElement('div'); 
-                btn.id = 'media-del-btn'; 
-                btn.className = 'media-delete-btn'; 
-                btn.innerText = '삭제';
-                // 클릭 이벤트가 사진박스로 퍼지지 않게 확실히 차단
-                btn.ontouchend = (ev) => { 
-                    ev.preventDefault();
-                    ev.stopPropagation(); 
-                    deleteMedia(); 
-                };
-                btn.onclick = (ev) => { 
-                    ev.stopPropagation(); 
-                    deleteMedia(); 
-                };
-                wrap.appendChild(btn);
-            }
+        // 사진 삭제 버튼과 전체화면 클릭 충돌 해결 로직
+        function initMediaEvents() {
+            const wrap = document.getElementById('media-wrap');
+            let startX = 0, isMoving = false;
+            wrap.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; isMoving = false; }, {passive: true});
+            wrap.addEventListener('touchmove', (e) => {
+                const el = document.getElementById('main-media-el');
+                if(!el || !localStorage.getItem('mediaPath_' + tag)) return;
+                const diffX = e.touches[0].clientX - startX;
+                if(diffX < -10) { 
+                    isMoving = true;
+                    el.style.transform = `translateX(${Math.max(diffX, -100)}px)`; el.style.transition = 'none';
+                    if(!document.getElementById('media-del-btn')) {
+                        const btn = document.createElement('div'); btn.id = 'media-del-btn'; btn.className = 'media-delete-btn'; btn.innerText = '삭제';
+                        btn.ontouchend = (ev) => { ev.preventDefault(); ev.stopPropagation(); deleteMedia(); };
+                        btn.onclick = (ev) => { ev.stopPropagation(); deleteMedia(); };
+                        wrap.appendChild(btn);
+                    }
+                }
+            }, {passive: true});
+            wrap.addEventListener('touchend', (e) => {
+                const el = document.getElementById('main-media-el'); if(!el) return;
+                el.style.transition = 'transform 0.3s ease';
+                if (e.target.id === 'media-del-btn') return;
+                if(isMoving) {
+                    const diffX = e.changedTouches[0].clientX - startX;
+                    if(diffX < -50) { el.style.transform = 'translateX(-80px)'; } 
+                    else { el.style.transform = 'translateX(0)'; setTimeout(() => { const b = document.getElementById('media-del-btn'); if(b) b.remove(); }, 300); }
+                } else if (localStorage.getItem('mediaPath_' + tag)) {
+                    openFullscreen();
+                }
+            });
         }
-    }, {passive: true});
-
-    wrap.addEventListener('touchend', (e) => {
-        const el = document.getElementById('main-media-el'); 
-        if(!el) return;
-        el.style.transition = 'transform 0.3s ease';
-        
-        // 삭제 버튼을 누른 것이라면 무시
-        if (e.target.id === 'media-del-btn') return;
-
-        if(isMoving) {
-            const diffX = e.changedTouches[0].clientX - startX;
-            if(diffX < -50) { 
-                el.style.transform = 'translateX(-80px)'; 
-            } else { 
-                el.style.transform = 'translateX(0)'; 
-                setTimeout(() => { const b = document.getElementById('media-del-btn'); if(b) b.remove(); }, 300); 
-            }
-        } else if (localStorage.getItem('mediaPath_' + tag)) {
-            // 이미지가 있을 때만 전체화면 실행
-            openFullscreen();
-        }
-    });
-}
 
         function showMedia(url, rot) {
             const wrap = document.getElementById('media-wrap');
@@ -188,7 +161,6 @@
             }
         }
 
-        // 전체 초기화 (사진까지 삭제 로직 포함) [cite: 2026-03-04]
         function clearAllItems() {
             if(confirm('목록과 등록된 사진/영상을 모두 초기화할까요?')) {
                 items = []; localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
@@ -198,7 +170,6 @@
             }
         }
 
-        // 업로드 핵심 함수 (이게 안 눌렸던 겁니다)
         function analyzeMedia() {
             const old = document.getElementById('temp-input'); if(old) old.remove();
             const input = document.createElement('input');
@@ -214,10 +185,9 @@
                 };
                 reader.readAsDataURL(file);
             };
-            input.click(); // 여기서 파일 선택창이 떠야 합니다.
+            input.click();
         }
 
-        // 기존 렌더링, 수량, 편집 함수 유지 [cite: 2026-03-04]
         function renderItems(filter = '') {
             const container = document.getElementById('list-items');
             const filtered = items.filter(it => it.n.toLowerCase().includes(filter.toLowerCase()));
@@ -249,7 +219,6 @@
             `).join('');
         }
 
-        // 나머지 업로드 확인, 회전, 채팅 함수들 (생략 없이 원본 유지)
         async function confirmUpload() {
             if(!selectedFile) return; const file = selectedFile;
             document.getElementById('rotate-window').style.display = 'none';
@@ -277,7 +246,30 @@
         function editItem(idx) { const n = prompt('이름:', items[idx].n); if(n) { items[idx].n = n; localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); } }
         function addItemDirectly() { const n = prompt('물품 입력:'); if(n) { items.push({ n, q: 1 }); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); } }
         function renameDrawer() { const n = prompt('서랍 이름:', document.getElementById('drawer-title').innerText); if(n) { document.getElementById('drawer-title').innerText = n; localStorage.setItem('name_' + tag, n); } }
-        async function sendMsg() { const i = document.getElementById('chat-input'); const t = i.value.trim(); if(!t) return; const b = document.getElementById('chat-messages'); b.innerHTML += `<div class="msg user">${t}</div>`; i.value = ''; const res = await fetch('/api/chat', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ message: t, tag, inventory: JSON.stringify(items.map(it => it.n)) }) }); const d = await res.json(); b.innerHTML += `<div class="msg bot">${d.reply}</div>`; b.scrollTop = b.scrollHeight; }
+
+        // 비서 '봄'에게 현재 서랍 이름을 전달하도록 수정한 채팅 함수
+        async function sendMsg() { 
+            const i = document.getElementById('chat-input'); 
+            const t = i.value.trim(); 
+            if(!t) return; 
+            const b = document.getElementById('chat-messages'); 
+            b.innerHTML += `<div class="msg user">${t}</div>`; 
+            i.value = ''; 
+            const currentDrawerName = document.getElementById('drawer-title').innerText; 
+            const res = await fetch('/api/chat', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ 
+                    message: t, 
+                    tag, 
+                    drawerName: currentDrawerName, 
+                    inventory: JSON.stringify(items.map(it => it.n)) 
+                }) 
+            }); 
+            const d = await res.json(); 
+            b.innerHTML += `<div class="msg bot">${d.reply}</div>`; 
+            b.scrollTop = b.scrollHeight; 
+        }
     </script>
 </body>
 </html>
