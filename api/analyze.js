@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    const model = "gemini-2.5-flash-lite"; // 세인 님이 설정한 최신 모델 유지
+    const model = "gemini-2.5-flash-lite"; 
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
     const response = await fetch(endpoint, {
@@ -31,8 +31,10 @@ export default async function handler(req, res) {
     const data = await response.json();
     const botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
     
-    // 쉼표로 구분된 목록을 배열로 변환 (대괄호 포함된 결과 처리)
-    const items = botText.split(",").map(s => s.trim()).filter(it => it.includes(":"));
+    // 쉼표로 나누고, 대괄호([ ])를 제거한 뒤 카테고리 형식이 맞는 것만 추출
+    const items = botText.split(",")
+      .map(s => s.trim().replace(/\[|\]/g, "")) 
+      .filter(it => it.includes(":"));
 
     return res.status(200).json({ items });
   } catch (err) {
