@@ -14,8 +14,7 @@ export default async function handler(req, res) {
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // RPM 10으로 더 빠른 Lite 모델로 변경합니다.
-    const model = "gemini-2.5-flash-lite";
+    const model = "gemini-2.5-flash-lite"; // RPM 10 적용
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
     const response = await fetch(endpoint, {
@@ -24,24 +23,18 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         contents: [{ parts: [
           { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
-          // 인식 수준을 높이기 위해 지시어를 전문가급으로 수정했습니다. [cite: 2026-03-04]
-          { text: "이미지 속 물건들을 브랜드명과 함께 아주 상세하게 분석해. [카테고리: 브랜드 상품명] 형식으로 작성하고, 여러 개면 쉼표로 구분해. 설명은 절대 하지 마. 예: [식품: 농심 신라면], [생활: 유한양행 락스]" }
+          { text: "이미지 속 모든 물건을 아주 꼼꼼하게 분석해. 브랜드와 정확한 상품명을 식별하고, '카테고리:브랜드 상품명' 형식으로만 나열해. 예: 위생:베베앙 물티슈, 생활:비에르 화장솜. 잇지도 않은 물건은 절대 지어내지 마." }
         ]}]
       })
     });
 
     const data = await response.json();
-
-    if (data.error) {
-      return res.status(200).json({ error: `구글 에러: ${data.error.message}` });
-    }
-
     const botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    const items = botText.split(",").map(s => s.trim()).filter(it => it.length > 0);
+    // 쉼표로 구분된 목록을 배열로 변환
+    const items = botText.split(",").map(s => s.trim()).filter(it => it.includes(":"));
 
     return res.status(200).json({ items });
-
   } catch (err) {
-    return res.status(500).json({ error: "서버 연결 오류" });
+    return res.status(500).json({ error: "분석 오류" });
   }
 }
