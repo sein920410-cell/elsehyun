@@ -3,155 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>공간 : 결 - 서랍 관리</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>공간 : 결</title>
     <style>
-        /* 사진 2번 스타일: 카테고리 그룹 디자인 */
-        .category-group { border-bottom: 1px solid #eee; }
+        /* 사진 2번 스타일: 카테고리 그룹 디자인만 반영 */
+        .category-container { border-bottom: 1px solid #e0e0e0; }
         .category-header { 
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px; background: #f9f9f9; cursor: pointer; font-weight: bold;
+            padding: 12px 15px; background: #f8f9fa; cursor: pointer; font-weight: bold;
         }
         .item-row { 
             display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 15px; border-top: 1px solid #f0f0f0;
+            padding: 10px 15px; border-top: 1px solid #f0f0f0;
         }
-        .arrow { transition: transform 0.3s; }
-        .arrow.open { transform: rotate(180deg); }
-        
+        .arrow { font-size: 0.8rem; transition: transform 0.2s; }
+        .open .arrow { transform: rotate(180deg); }
+
         /* 기존 UI 유지 */
-        .btn-action { font-size: 0.8rem; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; }
-        #media-preview-container { width: 100%; height: 250px; background: #eee; overflow: hidden; display: none; position: relative; }
-        #media-preview-container img, #media-preview-container video { width: 100%; height: 100%; object-fit: cover; }
+        #media-view { width: 100%; min-height: 200px; background: #000; display: none; }
+        #media-view img, #media-view video { width: 100%; height: auto; display: block; }
+        .btn-group button { padding: 4px 8px; font-size: 12px; border: 1px solid #ccc; background: #fff; }
     </style>
 </head>
-<body class="bg-white">
+<body>
 
-    <div id="media-preview-container">
-        </div>
+    <div id="media-view"></div>
 
-    <div class="p-4 flex justify-between items-center border-b">
-        <button onclick="toggleAllGroups()" class="text-sm text-gray-600">전체 펼치기/접기</button>
-        <button onclick="handleFullReset()" class="text-sm text-red-500 font-bold">전체 초기화</button>
+    <div style="padding: 10px; display: flex; justify-content: space-between; border-bottom: 1px solid #eee;">
+        <button onclick="toggleAll()">전체 펼치기/접기</button>
+        <button onclick="fullReset()" style="color: red; font-weight: bold;">전체 초기화</button>
     </div>
 
-    <div id="inventory-list">
-        </div>
+    <div id="list-area"></div>
 
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
-        let expandedCategories = new Set(); // 펼쳐진 카테고리 저장
+        let opened = new Set(); 
 
-        // 1. 전체 초기화 (사진/영상까지 싹 삭제)
-        function handleFullReset() {
-            if (confirm("목록과 업로드된 사진/영상을 모두 지우시겠습니까?")) {
+        // 1. 전체 초기화 (사진+목록 완전 삭제)
+        function fullReset() {
+            if (confirm("모든 데이터와 사진을 삭제하시겠습니까?")) {
                 inventory = [];
                 localStorage.removeItem('inventory');
+                localStorage.removeItem('lastUploadedMedia'); // 저장된 사진 경로 삭제
                 
-                // 사진/영상 영역 비우기
-                const mediaContainer = document.getElementById('media-preview-container');
-                mediaContainer.innerHTML = '';
-                mediaContainer.style.display = 'none';
-                localStorage.removeItem('lastUploadedMedia'); // 저장된 경로 삭제
+                const mediaView = document.getElementById('media-view');
+                mediaView.innerHTML = '';
+                mediaView.style.display = 'none';
                 
-                renderList();
+                render();
             }
         }
 
-        // 2. 카테고리별 그룹화 및 렌더링
-        function renderList() {
-            const listContainer = document.getElementById('inventory-list');
-            listContainer.innerHTML = '';
+        // 2. 리스트 렌더링 (사진 2번 카테고리 방식)
+        function render() {
+            const area = document.getElementById('list-area');
+            area.innerHTML = '';
 
             if (inventory.length === 0) {
-                listContainer.innerHTML = '<p class="text-center py-10 text-gray-400">등록된 물품이 없습니다.</p>';
+                area.innerHTML = '<p style="text-align:center; padding:20px; color:#999;">내용이 없습니다.</p>';
                 return;
             }
 
-            // 카테고리별로 묶기
-            const grouped = inventory.reduce((acc, item) => {
+            // 카테고리 그룹화
+            const groups = inventory.reduce((acc, item) => {
                 const cat = item.category || "미분류";
                 if (!acc[cat]) acc[cat] = [];
                 acc[cat].push(item);
                 return acc;
             }, {});
 
-            Object.keys(grouped).forEach(category => {
-                const isOpen = expandedCategories.has(category);
-                
+            for (const cat in groups) {
+                const isOpen = opened.has(cat);
                 const groupDiv = document.createElement('div');
-                groupDiv.className = 'category-group';
+                groupDiv.className = `category-container ${isOpen ? 'open' : ''}`;
                 
                 groupDiv.innerHTML = `
-                    <div class="category-header" onclick="toggleCategory('${category}')">
-                        <span>${category} (${grouped[category].length})</span>
-                        <span class="arrow ${isOpen ? 'open' : ''}">▼</span>
+                    <div class="category-header" onclick="toggleCat('${cat}')">
+                        <span>${cat} (${groups[cat].length})</span>
+                        <span class="arrow">▼</span>
                     </div>
-                    <div class="category-content" style="display: ${isOpen ? 'block' : 'none'}">
-                        ${grouped[category].map((item, idx) => `
+                    <div style="display: ${isOpen ? 'block' : 'none'}">
+                        ${groups[cat].map(item => `
                             <div class="item-row">
                                 <div>
-                                    <div class="font-medium">${item.name}</div>
-                                    <div class="flex gap-2 mt-1">
-                                        <button class="btn-action" onclick="editItem('${item.id}')">편집</button>
-                                        <button class="btn-action text-red-500" onclick="deleteItem('${item.id}')">삭제</button>
+                                    <div style="font-size: 16px;">${item.name}</div>
+                                    <div class="btn-group" style="margin-top: 5px;">
+                                        <button onclick="editItem('${item.id}')">편집</button>
+                                        <button onclick="removeItem('${item.id}')" style="color:red;">삭제</button>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <button onclick="changeQty('${item.id}', -1)" class="w-8 h-8 border rounded">-</button>
-                                    <span class="w-5 text-center">${item.quantity}</span>
-                                    <button onclick="changeQty('${item.id}', 1)" class="w-8 h-8 border rounded">+</button>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <button onclick="qty('${item.id}', -1)" style="width:30px; height:30px;">-</button>
+                                    <span style="min-width:20px; text-align:center;">${item.quantity}</span>
+                                    <button onclick="qty('${item.id}', 1)" style="width:30px; height:30px;">+</button>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                 `;
-                listContainer.appendChild(groupDiv);
-            });
-        }
-
-        // 카테고리 개별 토글
-        function toggleCategory(category) {
-            if (expandedCategories.has(category)) {
-                expandedCategories.delete(category);
-            } else {
-                expandedCategories.add(category);
+                area.appendChild(groupDiv);
             }
-            renderList();
         }
 
-        // 전체 토글
-        function toggleAllGroups() {
-            const allCategories = [...new Set(inventory.map(i => i.category || "미분류"))];
-            if (expandedCategories.size > 0) {
-                expandedCategories.clear();
-            } else {
-                allCategories.forEach(c => expandedCategories.add(c));
-            }
-            renderList();
+        function toggleCat(cat) {
+            if (opened.has(cat)) opened.delete(cat);
+            else opened.add(cat);
+            render();
         }
 
-        // 수량 및 삭제 함수는 기존 로직 그대로 유지 (생략)
-        function changeQty(id, change) {
+        function toggleAll() {
+            const cats = [...new Set(inventory.map(i => i.category || "미분류"))];
+            if (opened.size > 0) opened.clear();
+            else cats.forEach(c => opened.add(c));
+            render();
+        }
+
+        // 기존 수량/삭제 로직 유지
+        function qty(id, n) {
             const item = inventory.find(i => i.id === id);
             if (item) {
-                item.quantity = Math.max(1, item.quantity + change);
-                saveAndRender();
+                item.quantity = Math.max(1, item.quantity + n);
+                save();
             }
         }
-
-        function deleteItem(id) {
+        function removeItem(id) {
             inventory = inventory.filter(i => i.id !== id);
-            saveAndRender();
+            save();
         }
-
-        function saveAndRender() {
+        function save() {
             localStorage.setItem('inventory', JSON.stringify(inventory));
-            renderList();
+            render();
         }
 
-        // 초기 실행
-        renderList();
+        render();
     </script>
 </body>
 </html>
