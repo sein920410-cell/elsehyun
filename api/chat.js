@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   const { message, inventory, tag } = req.body;
 
   try {
-    // 2.5 모델로 비서 '봄'의 목소리를 다시 살려냅니다.
+    // 대화 모델도 RPM 10인 Lite 모델로 변경했습니다.
     const model = "gemini-2.5-flash-lite";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     const prompt = `당신은 비서 '봄'입니다. 장소: ${tag}. 현재 물품: ${inventory}. 질문: ${message}. 짧고 친절하게 한국어로 답하세요.`;
