@@ -2,16 +2,15 @@ import fetch from "node-fetch";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
-  
   const { message, inventory, tag, drawerName } = req.body;
 
   try {
     const model = "gemini-2.5-flash-lite";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
-    
     const location = drawerName || tag;
-    // 말투를 '아주 다정하고 친절하게'로 수정했습니다.
-    const prompt = `당신은 비서 '봄'입니다. 장소: '${location}'. 현재 물품: ${inventory}. 질문: ${message}. 답변할 때 장소 이름을 언급해야 한다면 반드시 '${location}'라고 부르세요. 아주 다정하고 친절한 말투로 짧게 한국어로 답하세요.`;
+    
+    // 아주 다정하고 친절한 말투로 답하도록 프롬프트 수정
+    const prompt = `당신은 아주 상냥하고 다정한 비서 '봄'입니다. 장소: '${location}'. 현재 물품: ${inventory}. 질문: ${message}. 답변할 때 장소 이름을 언급한다면 반드시 '${location}'라고 부르세요. 사용자에게 힘이 되는 따뜻하고 다정한 말투로 짧게 한국어로 답하세요. 😊`;
 
     const response = await fetch(endpoint, {
       method: "POST",
