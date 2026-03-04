@@ -197,21 +197,18 @@
             `).join('');
         }
 
-        // 사진/영상 등록 시 기존 목록 초기화 여부 확인 로직 추가
         async function confirmUpload() {
             if(!selectedFile) return;
 
-            // 기존 목록이 섞이지 않도록 초기화 여부 질문
+            // [cite: 2026-03-04] 기존 목록 초기화 확인 로직
             if (items.length > 0) {
                 if (confirm('기존 목록을 초기화할까요?')) {
-                    // '네' 클릭 시 초기화 진행
                     items = [];
                     localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
                     localStorage.removeItem('mediaPath_' + tag);
                     localStorage.removeItem('rot_' + tag);
                     renderItems();
                 } else {
-                    // '아니요' 클릭 시 업로드 및 목록 생성 중단
                     document.getElementById('rotate-window').style.display = 'none';
                     selectedFile = null;
                     return;
@@ -229,7 +226,16 @@
                 if (file.type.startsWith('image/')) {
                     const res = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filePath: path, mimeType: file.type }) });
                     const resData = await res.json();
-                    if (resData.items) { resData.items.forEach(n => items.push({ n, q: 1 })); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); }
+                    
+                    // [cite: 2026-03-04] 인식 실패 대응 및 알림
+                    if (resData.items && resData.items.length > 0) { 
+                        resData.items.forEach(n => items.push({ n, q: 1 })); 
+                        localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); 
+                        renderItems(); 
+                    } else {
+                        alert("사진에서 물품을 인식하지 못했어요. 다시 시도해 주세요.");
+                        showMedia(data.signedUrl, currentRotation);
+                    }
                 }
             } catch (err) { alert("업로드 실패"); }
         }
