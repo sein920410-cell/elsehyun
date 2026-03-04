@@ -15,14 +15,15 @@ export default async function handler(req, res) {
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // 2. [2.0 라인 고정] 3.0은 쳐다보지도 않고 2.0 시리즈로만 뚫습니다. [cite: 2026-03-02]
-    // 2.0-flash가 먼저 일하고, 혹시라도 막히면 2.0-flash-lite가 즉시 투입됩니다.
-    const modelStack = ["gemini-2.0-flash", "gemini-2.0-flash-lite"];
+// ... (상단 코드 유지)
+    // [수정] 한도가 따로 노는 Experimental(실험용) 모델을 최우선으로 배치
+    const modelStack = ["gemini-2.0-flash-exp", "gemini-2.0-flash"];
     let finalItems = [];
     let lastError = "";
 
     for (const modelName of modelStack) {
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`;
+// ... (하단 코드 유지)
       
       const response = await fetch(endpoint, {
         method: "POST",
