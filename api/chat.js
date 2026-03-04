@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "잠시 후 다시 시도해 주세요.";
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "죄송해요 제가 이해하지 못했어요.";
     return res.status(200).json({ reply });
   } catch (err) {
     return res.status(500).json({ error: "비서 응답 오류" });
