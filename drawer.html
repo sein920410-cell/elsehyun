@@ -15,11 +15,10 @@
         
         .main-card { background: #fff; padding: 15px; border-radius: 0 0 25px 25px; flex-shrink: 0; position: relative; }
         .media-box { width: 100%; height: 250px; background: #f1f5f9; border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; overflow: hidden; cursor: pointer; }
-        .media-box img, .media-box video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; transition: transform 0.3s ease; }
+        .media-box img, .media-box video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         
         .list-header { display: flex; justify-content: flex-end; align-items: center; padding: 10px 15px 5px 15px; }
         .toggle-btn { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #94a3b8; font-weight: bold; }
-        /* 둥근 화살표 스타일 [cite: 2026-03-04] */
         .round-arrow { width: 26px; height: 26px; background: var(--light-grey); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; }
         .chevron { width: 6px; height: 6px; border-right: 2px solid #64748b; border-bottom: 2px solid #64748b; transform: translateY(-1px) rotate(45deg); }
         .is-open .round-arrow { transform: rotate(180deg); }
@@ -28,22 +27,22 @@
         .add-list-btn { align-self: flex-start; background: none; border: none; color: var(--primary); font-weight: bold; cursor: pointer; font-size: 15px; padding: 0; margin-bottom: 15px; }
         
         .category-section { margin-bottom: 20px; }
-        .category-header { background: #fff; padding: 12px 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #f1f5f9; margin-bottom: 8px; }
-        .item-card { background: #fff; border-radius: 18px; margin-bottom: 12px; border: 1px solid #f1f5f9; overflow: hidden; }
-        .item-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .category-header { background: #fff; padding: 12px 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #f1f5f9; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        
+        /* 슬라이드 삭제를 위한 스타일 [cite: 2026-03-02] */
+        .item-wrapper { position: relative; margin-bottom: 12px; overflow: hidden; border-radius: 18px; }
+        .item-card { background: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; transition: transform 0.3s ease; border: 1px solid #f1f5f9; }
+        .slide-delete-btn { position: absolute; right: 0; top: 0; width: 80px; height: 100%; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 1; font-size: 14px; }
+        
         .item-name { font-weight: 700; font-size: 16px; }
         .qty-controls { display: flex; align-items: center; gap: 8px; }
         .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .qty-num { font-weight: 700; color: var(--primary); min-width: 30px; text-align: center; }
         
-        .action-btn { background: none; border: none; color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer; margin-right: 15px; }
         .bottom-actions { padding: 15px 0; display: flex; flex-direction: column; gap: 10px; }
-        .chat-entry { background: var(--dark); color: #fff; padding: 15px; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
         .reset-btn { align-self: center; background: none; border: none; color: #94a3b8; font-size: 12px; text-decoration: underline; cursor: pointer; padding: 5px; }
-
-        .overlay-window { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 10000; flex-direction: column; }
         #rotate-window { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 10001; flex-direction: column; }
-        #preview-wrap { flex:1; display:flex; align-items:center; justify-content:center; background:#000; overflow:hidden; }
+        #preview-wrap { flex:1; display:flex; align-items:center; justify-content:center; background:#000; }
         .rotate90 { transform: rotate(90deg); } .rotate180 { transform: rotate(180deg); } .rotate270 { transform: rotate(270deg); }
     </style>
 </head>
@@ -57,7 +56,6 @@
         <button class="add-list-btn" onclick="addItemDirectly()">＋ 목록추가</button>
         <div id="list-items"></div>
         <div class="bottom-actions">
-            <div class="chat-entry" onclick="toggleOverlay('chat-window')"><strong>비서 '봄'에게 물어보기</strong></div>
             <button class="reset-btn" onclick="clearAllItems()">목록 전체 초기화</button>
         </div>
     </div>
@@ -111,14 +109,12 @@
                 await _supa.storage.from('user_uploads').upload(path, file);
                 localStorage.setItem('mediaPath_' + tag, path); localStorage.setItem('rot_' + tag, currentRotation);
                 const { data } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600); showMedia(data.signedUrl, currentRotation);
-                
                 if (file.type.startsWith('image/')) {
                     const res = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filePath: path, mimeType: file.type }) });
                     const resData = await res.json();
                     if (resData.items) {
                         resData.items.forEach(n => items.push({ n, q: 1 }));
-                        localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
-                        renderItems();
+                        saveData(); renderItems();
                     }
                 }
             } catch (err) { alert("업로드 실패"); }
@@ -132,8 +128,8 @@
 
         function renderItems() {
             const container = document.getElementById('list-items');
-            container.innerHTML = ''; // "내용이 없습니다" 문구 삭제함 [cite: 2026-03-04]
-            if (items.length === 0) return; 
+            container.innerHTML = '';
+            if (items.length === 0) return;
 
             const groups = {};
             items.forEach((it, idx) => {
@@ -141,39 +137,80 @@
                 if (!groups[cat]) groups[cat] = [];
                 groups[cat].push({ ...it, originalIdx: idx, displayName: (name || cat).trim() });
             });
-            container.innerHTML = Object.keys(groups).map(cat => `
-                <div class="category-section">
-                    <div class="category-header ${isAllOpen ? 'is-open' : ''}" onclick="this.nextElementSibling.style.display = (this.nextElementSibling.style.display === 'none' ? 'block' : 'none'); this.classList.toggle('is-open')">
+
+            Object.keys(groups).forEach(cat => {
+                const section = document.createElement('div');
+                section.className = 'category-section';
+                section.innerHTML = `
+                    <div class="category-header ${isAllOpen ? 'is-open' : ''}" onclick="toggleSection(this)">
                         <strong>${cat} (${groups[cat].length})</strong>
-                        <div class="round-arrow" style="width: 22px; height: 22px;"><div class="chevron"></div></div>
+                        <div class="round-arrow"><div class="chevron"></div></div>
                     </div>
                     <div class="category-content" style="display: ${isAllOpen ? 'block' : 'block'};">
                         ${groups[cat].map(it => `
-                            <div class="item-card"><div class="item-header"><span class="item-name">${it.displayName}</span>
-                            <div class="qty-controls"><button class="qty-btn" onclick="changeQty(${it.originalIdx}, -1)">-</button><span class="qty-num">${it.q || 1}개</span><button class="qty-btn" onclick="changeQty(${it.originalIdx}, 1)">+</button></div></div>
-                            <div style="padding:0 15px 15px;"><button class="action-btn" onclick="editItem(${it.originalIdx})">편집</button><button class="action-btn" style="color:red" onclick="deleteItem(${it.originalIdx})">삭제</button></div></div>
+                            <div class="item-wrapper" ontouchstart="handleTouchStart(event)" ontouchmove="handleTouchMove(event)" ontouchend="handleTouchEnd(event)">
+                                <div class="item-card">
+                                    <div onclick="editItem(${it.originalIdx})">
+                                        <span class="item-name">${it.displayName}</span>
+                                    </div>
+                                    <div class="qty-controls">
+                                        <button class="qty-btn" onclick="changeQty(${it.originalIdx}, -1)">-</button>
+                                        <span class="qty-num">${it.q || 1}개</span>
+                                        <button class="qty-btn" onclick="changeQty(${it.originalIdx}, 1)">+</button>
+                                    </div>
+                                </div>
+                                <div class="slide-delete-btn" onclick="deleteItem(${it.originalIdx})">삭제</div>
+                            </div>
                         `).join('')}
                     </div>
-                </div>
-            `).join('');
+                `;
+                container.appendChild(section);
+            });
+        }
+
+        // [복구] 슬라이드 삭제 터치 이벤트 [cite: 2026-03-02]
+        let startX = 0;
+        function handleTouchStart(e) { startX = e.touches[0].clientX; }
+        function handleTouchMove(e) {
+            const card = e.currentTarget.querySelector('.item-card');
+            const diff = e.touches[0].clientX - startX;
+            if (diff < 0) card.style.transform = `translateX(${Math.max(diff, -80)}px)`;
+        }
+        function handleTouchEnd(e) {
+            const card = e.currentTarget.querySelector('.item-card');
+            const diff = e.changedTouches[0].clientX - startX;
+            card.style.transform = diff < -40 ? 'translateX(-80px)' : 'translateX(0)';
+        }
+
+        function toggleSection(el) {
+            const content = el.nextElementSibling;
+            const isOpen = content.style.display !== 'none';
+            content.style.display = isOpen ? 'none' : 'block';
+            el.classList.toggle('is-open', !isOpen);
+        }
+
+        function toggleAll() {
+            isAllOpen = !isAllOpen;
+            document.getElementById('toggle-text').innerText = isAllOpen ? '전체접기' : '전체펼치기';
+            document.getElementById('toggle-all-btn').classList.toggle('is-open', isAllOpen);
+            renderItems();
         }
 
         function clearAllItems() {
             if(confirm('전체 초기화하시겠습니까?')) {
-                items = []; localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
+                items = []; saveData();
                 localStorage.removeItem('mediaPath_' + tag); localStorage.removeItem('rot_' + tag);
-                document.getElementById('media-wrap').innerHTML = ''; // 안내 문구 삭제됨 [cite: 2026-03-04]
+                document.getElementById('media-wrap').innerHTML = '';
                 renderItems();
             }
         }
-
-        function toggleAll() { isAllOpen = !isAllOpen; document.getElementById('toggle-text').innerText = isAllOpen ? '전체접기' : '전체펼치기'; document.getElementById('toggle-all-btn').classList.toggle('is-open', isAllOpen); document.querySelectorAll('.category-content').forEach(c => c.style.display = isAllOpen ? 'block' : 'none'); document.querySelectorAll('.category-header').forEach(h => h.classList.toggle('is-open', isAllOpen)); }
+        function changeQty(idx, val) { items[idx].q = Math.max(1, (items[idx].q || 1) + val); saveData(); renderItems(); }
+        function deleteItem(idx) { items.splice(idx, 1); saveData(); renderItems(); }
+        function editItem(idx) { const n = prompt('이름:', items[idx].n); if(n) { items[idx].n = n; saveData(); renderItems(); } }
+        function addItemDirectly() { const n = prompt('물품명:'); if(n) { items.push({ n, q: 1 }); saveData(); renderItems(); } }
+        function saveData() { localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); }
         function rotateMedia(deg) { currentRotation = (currentRotation + deg + 360) % 360; document.getElementById('edit-preview').className = `rotate${currentRotation}`; }
         function cancelUpload() { document.getElementById('rotate-window').style.display = 'none'; selectedFile = null; }
-        function changeQty(idx, val) { items[idx].q = Math.max(1, (items[idx].q || 1) + val); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); }
-        function deleteItem(idx) { items.splice(idx, 1); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); }
-        function editItem(idx) { const n = prompt('이름:', items[idx].n); if(n) { items[idx].n = n; localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); } }
-        function addItemDirectly() { const n = prompt('물품명:'); if(n) { items.push({ n, q: 1 }); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); } }
         function renameDrawer() { const n = prompt('이름:', document.getElementById('drawer-title').innerText); if(n) { document.getElementById('drawer-title').innerText = n; localStorage.setItem('name_' + tag, n); } }
     </script>
 </body>
