@@ -115,36 +115,65 @@
             }
         }
 
-        function initMediaEvents() {
-            const wrap = document.getElementById('media-wrap');
-            let startX = 0, isMoving = false;
-            wrap.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; isMoving = false; }, {passive: true});
-            wrap.addEventListener('touchmove', (e) => {
-                const el = document.getElementById('main-media-el');
-                if(!el || !localStorage.getItem('mediaPath_' + tag)) return;
-                const diffX = e.touches[0].clientX - startX;
-                if(diffX < -10) { 
-                    isMoving = true;
-                    el.style.transform = `translateX(${Math.max(diffX, -100)}px)`; el.style.transition = 'none';
-                    if(!document.getElementById('media-del-btn')) {
-                        const btn = document.createElement('div'); btn.id = 'media-del-btn'; btn.className = 'media-delete-btn'; btn.innerText = '삭제';
-                        btn.onclick = (ev) => { ev.stopPropagation(); deleteMedia(); };
-                        wrap.appendChild(btn);
-                    }
-                }
-            }, {passive: true});
-            wrap.addEventListener('touchend', (e) => {
-                const el = document.getElementById('main-media-el'); if(!el) return;
-                el.style.transition = 'transform 0.3s ease';
-                if(isMoving) {
-                    const diffX = e.changedTouches[0].clientX - startX;
-                    if(diffX < -50) { el.style.transform = 'translateX(-80px)'; } 
-                    else { el.style.transform = 'translateX(0)'; setTimeout(() => { const b = document.getElementById('media-del-btn'); if(b) b.remove(); }, 300); }
-                } else {
-                    openFullscreen();
-                }
-            });
+       function initMediaEvents() {
+    const wrap = document.getElementById('media-wrap');
+    let startX = 0, isMoving = false;
+    
+    wrap.addEventListener('touchstart', (e) => { 
+        startX = e.touches[0].clientX; 
+        isMoving = false; 
+    }, {passive: true});
+
+    wrap.addEventListener('touchmove', (e) => {
+        const el = document.getElementById('main-media-el');
+        if(!el || !localStorage.getItem('mediaPath_' + tag)) return;
+        const diffX = e.touches[0].clientX - startX;
+        if(diffX < -10) { 
+            isMoving = true;
+            el.style.transform = `translateX(${Math.max(diffX, -100)}px)`; 
+            el.style.transition = 'none';
+            if(!document.getElementById('media-del-btn')) {
+                const btn = document.createElement('div'); 
+                btn.id = 'media-del-btn'; 
+                btn.className = 'media-delete-btn'; 
+                btn.innerText = '삭제';
+                // 클릭 이벤트가 사진박스로 퍼지지 않게 확실히 차단
+                btn.ontouchend = (ev) => { 
+                    ev.preventDefault();
+                    ev.stopPropagation(); 
+                    deleteMedia(); 
+                };
+                btn.onclick = (ev) => { 
+                    ev.stopPropagation(); 
+                    deleteMedia(); 
+                };
+                wrap.appendChild(btn);
+            }
         }
+    }, {passive: true});
+
+    wrap.addEventListener('touchend', (e) => {
+        const el = document.getElementById('main-media-el'); 
+        if(!el) return;
+        el.style.transition = 'transform 0.3s ease';
+        
+        // 삭제 버튼을 누른 것이라면 무시
+        if (e.target.id === 'media-del-btn') return;
+
+        if(isMoving) {
+            const diffX = e.changedTouches[0].clientX - startX;
+            if(diffX < -50) { 
+                el.style.transform = 'translateX(-80px)'; 
+            } else { 
+                el.style.transform = 'translateX(0)'; 
+                setTimeout(() => { const b = document.getElementById('media-del-btn'); if(b) b.remove(); }, 300); 
+            }
+        } else if (localStorage.getItem('mediaPath_' + tag)) {
+            // 이미지가 있을 때만 전체화면 실행
+            openFullscreen();
+        }
+    });
+}
 
         function showMedia(url, rot) {
             const wrap = document.getElementById('media-wrap');
