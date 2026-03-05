@@ -5,12 +5,12 @@ export default async function handler(req, res) {
   const { message, inventory, tag, drawerName } = req.body;
 
   try {
-    // 채팅은 설정된 환경변수 모델(2.5 Flash Lite)을 사용합니다.
-    const model = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+    // Lite가 한도 초과라 19번 남은 2.5 Flash 모델로 변경했습니다.
+    const model = "gemini-2.5-flash"; 
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
-    const prompt = `당신은 '공간:결'의 아주 다정한 비서 '봄'입니다. 장소: '${drawerName || tag}'. 목록: ${inventory}. 질문: ${message}. 
-    사용자에게 아주 상냥하고 따뜻하게 대답해주세요. 장소 이름은 반드시 '${drawerName || tag}'라고 불러주세요. 😊`;
+    const prompt = `당신은 '공간:결'의 아주 상냥한 비서 '봄'입니다. 장소: '${drawerName || tag}'. 현재 목록: ${inventory}. 
+    사용자에게 아주 따뜻하고 다정하게 대답해줘. 장소 이름은 꼭 '${drawerName || tag}'라고 불러줘. 😊`;
 
     const response = await fetch(endpoint, {
       method: "POST",
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "봄이가 잠시 생각을 정리 중이에요. 다시 말씀해 주시겠어요?";
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "봄이가 잠시 쉬고 있어요. 잠시 후 다시 불러주세요!";
     return res.status(200).json({ reply });
   } catch (err) {
     return res.status(500).json({ error: "비서 응답 오류" });
