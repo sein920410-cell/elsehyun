@@ -1,4 +1,3 @@
-// api/analyze.js 수정본
 import { createClient } from "@supabase/supabase-js";
 import fetch from "node-fetch";
 
@@ -13,13 +12,10 @@ export default async function handler(req, res) {
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // [중요] Vercel 설정(gemini-3-flash)을 가져오거나, 없으면 직접 지정합니다.
+    // [중요] Vercel 환경변수(gemini-3-flash)를 사용합니다.
     const modelName = process.env.GEMINI_MODEL || "gemini-3-flash";
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    console.log(`사용 모델: ${modelName}`); // Vercel 로그에서 확인용
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+    
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -35,25 +31,15 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-
-    // API 응답에 에러가 있는지 로그로 남깁니다.
-    if (data.error) {
-      console.error("Gemini API 에러:", data.error.message);
-      return res.status(500).json({ error: data.error.message });
-    }
-
     const botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    console.log("Gemini가 인식한 글자:", botText);
-
+    
+    // 인식된 텍스트를 정리하여 중복 제거 후 전달합니다.
     const rawItems = botText.split(",")
       .map(s => s.replace(/[\[\]\n`*]/g, "").trim())
-      .filter(it => it.includes(":") && it.length > 2); // 필터링 조건을 살짝 완화했습니다.
+      .filter(it => it.includes(":") && it.length > 2);
     
-    const uniqueItems = [...new Set(rawItems)];
-    
-    return res.status(200).json({ items: uniqueItems });
+    return res.status(200).json({ items: [...new Set(rawItems)] });
   } catch (err) {
-    console.error("서버 내부 오류:", err);
-    return res.status(500).json({ error: "분석 중 오류 발생" });
+    return res.status(500).json({ error: "분석 오류 발생" });
   }
 }
