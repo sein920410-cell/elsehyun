@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   const { message, inventory, tag, drawerName } = req.body;
 
   try {
-    // Lite가 한도 초과라 19번 남은 2.5 Flash 모델로 변경했습니다.
+    // 텍스트 대화에는 효율적인 Gemini 2.5 Flash 모델을 사용합니다.
     const model = "gemini-2.5-flash"; 
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
