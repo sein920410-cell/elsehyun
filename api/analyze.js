@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // [중요] Vercel 환경변수(gemini-3-flash)를 사용합니다.
+    // Vercel 설정(gemini-3-flash)을 정확히 사용합니다.
     const modelName = process.env.GEMINI_MODEL || "gemini-3-flash";
     
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
@@ -21,11 +21,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         contents: [{ parts: [
           { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
-          { text: `너는 '공간:결'의 최고 수준 물품 인식 전문가야. 사진을 정밀 스캔해서 목록을 작성해.
-지침:
-1. 브랜드명/글자 읽기 최우선: 모든 글자를 읽어서 '카테고리:브랜드명 제품명' 형식으로 적어.
-2. 꼼꼼한 전수 조사: 아주 작은 소모품(가위, 건전지, 머리끈 등)도 절대 놓치지 마.
-3. 응답 형식: 오직 '카테고리:제품명'들만 쉼표로 나열해. 인사말은 절대 금지.` }
+          { text: "너는 '공간:결'의 물품 인식 전문가야. 사진 속 물건을 하나하나 찾아서 '카테고리:물건명' 형식으로 쉼표로 나열해줘. 예) 위생:치약, 생활:가위" }
         ]}]
       })
     });
@@ -33,13 +29,14 @@ export default async function handler(req, res) {
     const data = await response.json();
     const botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
     
-    // 인식된 텍스트를 정리하여 중복 제거 후 전달합니다.
-    const rawItems = botText.split(",")
-      .map(s => s.replace(/[\[\]\n`*]/g, "").trim())
-      .filter(it => it.includes(":") && it.length > 2);
+    // AI가 뭐라고 답하든 목록만 쏙 뽑아내는 강력한 필터입니다.
+    const items = botText.split(/,|\n/)
+      .map(s => s.trim())
+      .filter(s => s.includes(":"))
+      .map(s => s.replace(/^[-\s*]+/, ""));
     
-    return res.status(200).json({ items: [...new Set(rawItems)] });
+    return res.status(200).json({ items: [...new Set(items)] });
   } catch (err) {
-    return res.status(500).json({ error: "분석 오류 발생" });
+    return res.status(500).json({ error: "분석 실패" });
   }
 }
