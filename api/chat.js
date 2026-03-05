@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   const { message, inventory, tag, drawerName } = req.body;
 
   try {
-    const model = "gemini-2.5-flash-lite";
+    const model = "gemini-2.5-Pro";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     const location = drawerName || tag;
     
