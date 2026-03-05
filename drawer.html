@@ -200,7 +200,6 @@
         async function confirmUpload() {
             if(!selectedFile) return;
 
-            // [cite: 2026-03-04] 기존 목록 초기화 확인 로직
             if (items.length > 0) {
                 if (confirm('기존 목록을 초기화할까요?')) {
                     items = [];
@@ -223,25 +222,24 @@
                 await _supa.storage.from('user_uploads').upload(path, file);
                 localStorage.setItem('mediaPath_' + tag, path); localStorage.setItem('rot_' + tag, currentRotation);
                 const { data } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600); showMedia(data.signedUrl, currentRotation);
-                // drawer.html 내 confirmUpload 함수의 fetch 부분만 이 내용으로 교체하세요.
-if (file.type.startsWith('image/')) {
-    const res = await fetch('/api/analyze', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ filePath: path, mimeType: file.type }) 
-    });
-    const resData = await res.json();
 
-    if (resData.items && resData.items.length > 0) { 
-        resData.items.forEach(n => items.push({ n, q: 1 })); 
-        localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); 
-        renderItems(); 
-    } else {
-        // 인식 결과가 비어있을 때 알림을 띄우고 화면을 원래대로 돌립니다.
-        alert("사진 속 물건의 브랜드명을 읽지 못했어요. 글자가 잘 보이게 다시 찍어주시겠어요?");
-        showMedia(data.signedUrl, currentRotation);
-    }
-}
+                if (file.type.startsWith('image/')) {
+                    const res = await fetch('/api/analyze', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ filePath: path, mimeType: file.type }) 
+                    });
+                    const resData = await res.json();
+
+                    if (resData.items && resData.items.length > 0) { 
+                        resData.items.forEach(n => items.push({ n, q: 1 })); 
+                        localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); 
+                        renderItems(); 
+                    } else {
+                        alert("사진 속 물건의 브랜드명을 읽지 못했어요. 글자가 잘 보이게 다시 찍어주시겠어요?");
+                        showMedia(data.signedUrl, currentRotation);
+                    }
+                }
             } catch (err) { alert("업로드 실패"); }
         }
 
