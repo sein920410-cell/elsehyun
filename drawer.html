@@ -84,7 +84,7 @@ const tag = (params.get('tag') || 'DRAWER001').toUpperCase();
 let items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
 let isAllOpen = false, currentRotation = 0, selectedFile = null;
 
-// [수정] window 변수 충돌 해결
+// [고정] window 충돌 오류 해결 및 초기 렌더링
 window.onload = async () => {
     document.getElementById('drawer-title').innerText = localStorage.getItem('name_' + tag) || '서랍 1';
     const mediaPath = localStorage.getItem('mediaPath_' + tag);
@@ -92,7 +92,7 @@ window.onload = async () => {
         const { data } = await _supa.storage.from('user_uploads').createSignedUrl(mediaPath, 3600);
         if (data) showMedia(data.signedUrl, localStorage.getItem('rot_' + tag) || 0);
     }
-    initMediaEvents();
+    initMediaEvents(); // [수정] window 대입문 삭제
     renderItems();
 };
 
@@ -140,32 +140,6 @@ function deleteMedia() {
     }
 }
 
-function clearAllItems() {
-    if(confirm('목록과 등록된 사진/영상을 모두 초기화할까요?')) {
-        items = []; localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
-        localStorage.removeItem('mediaPath_' + tag); localStorage.removeItem('rot_' + tag);
-        document.getElementById('media-wrap').innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>';
-        renderItems();
-    }
-}
-
-function analyzeMedia() {
-    const old = document.getElementById('temp-input'); if(old) old.remove();
-    const input = document.createElement('input'); input.id = 'temp-input'; input.type = 'file'; input.accept = 'image/*,video/*'; input.style.display = 'none';
-    document.body.appendChild(input);
-    input.onchange = (e) => {
-        const file = e.target.files[0]; if(!file) return; selectedFile = file;
-        const reader = new FileReader();
-        reader.onload = (re) => {
-            const p = document.getElementById('preview-wrap');
-            p.innerHTML = file.type.startsWith('video/') ? `<video id="edit-preview" src="${re.target.result}" style="max-width:100%; max-height:100%;" muted autoplay loop></video>` : `<img id="edit-preview" src="${re.target.result}" style="max-width:100%; max-height:100%;">`;
-            currentRotation = 0; document.getElementById('rotate-window').style.display = 'flex';
-        };
-        reader.readAsDataURL(file);
-    };
-    input.click();
-}
-
 function renderItems(filter = '') {
     const container = document.getElementById('list-items');
     const groups = {};
@@ -209,17 +183,16 @@ function renderItems(filter = '') {
     `).join('');
 }
 
+// [핵심 수정] 초기화 로직 및 이름 다듬기 기능
 async function confirmUpload() {
     if(!selectedFile) return;
 
-    // [수정] '예' 클릭 시 목록과 화면을 확실하게 초기화
     if (items.length > 0) {
         if (confirm('기존 목록을 초기화할까요?')) {
-            items = []; // 데이터 초기화
-            localStorage.removeItem('gyeol_' + tag); // 저장소 삭제
-            renderItems(); // 화면에서 목록 삭제 (이게 빠져있었습니다)
+            items = []; // 데이터 비우기
+            localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); // 저장소 비우기
+            renderItems(); // 화면 비우기
         } else {
-            // '아니오' 클릭 시 업로드 취소 후 종료
             cancelUpload();
             return;
         }
@@ -246,14 +219,22 @@ async function confirmUpload() {
             });
             const resData = await res.json();
             
-            // 데이터가 있을 때만 목록에 추가
-            if (resData.items && resData.items.length > 0) {
-                resData.items.forEach(it => {
-                    items.push({ n: `${it.category}:${it.name}`, q: it.qty || 1 });
+            // [추가] 긴 이름이나 불필요한 수식어를 제거하는 함수
+            const cleanName = (n) => {
+                return n.replace(/(스트렝스|아르기닌|스킨 베리어|젠틀|증상|루트젠|더블)/g, '').replace(/\s+/g, ' ').trim();
+            };
+
+            const rawItems = resData.items || [];
+            if (rawItems.length > 0) {
+                rawItems.forEach(it => {
+                    const shortName = cleanName(it.name || "알수없음");
+                    items.push({ n: `${it.category || '기타'}:${shortName}`, q: it.qty || 1 });
                 });
                 localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
                 renderItems();
-                alert(`${resData.items.length}개 물품이 인식됐어요!`);
+                alert(`${rawItems.length}개 물품이 인식됐어요!`);
+            } else {
+                alert("인식된 물품이 없습니다.");
             }
         }
     } catch (err) {
@@ -261,17 +242,44 @@ async function confirmUpload() {
         alert("분석 중 오류가 발생했습니다.");
     }
 }
+
+function clearAllItems() {
+    if(confirm('목록과 등록된 사진/영상을 모두 초기화할까요?')) {
+        items = []; localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
+        localStorage.removeItem('mediaPath_' + tag); localStorage.removeItem('rot_' + tag);
+        document.getElementById('media-wrap').innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>';
+        renderItems();
+    }
+}
+
+function analyzeMedia() {
+    const old = document.getElementById('temp-input'); if(old) old.remove();
+    const input = document.createElement('input'); input.id = 'temp-input'; input.type = 'file'; input.accept = 'image/*,video/*'; input.style.display = 'none';
+    document.body.appendChild(input);
+    input.onchange = (e) => {
+        const file = e.target.files[0]; if(!file) return; selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = (re) => {
+            const p = document.getElementById('preview-wrap');
+            p.innerHTML = file.type.startsWith('video/') ? `<video id="edit-preview" src="${re.target.result}" style="max-width:100%; max-height:100%;" muted autoplay loop></video>` : `<img id="edit-preview" src="${re.target.result}" style="max-width:100%; max-height:100%;">`;
+            currentRotation = 0; document.getElementById('rotate-window').style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    };
+    input.click();
+}
+
 function rotateMedia(deg) { currentRotation = (currentRotation + deg + 360) % 360; document.getElementById('edit-preview').className = `rotate${currentRotation}`; }
 function cancelUpload() { document.getElementById('rotate-window').style.display = 'none'; selectedFile = null; }
 function toggleAll() { isAllOpen = !isAllOpen; document.querySelectorAll('.category-content').forEach(c => c.style.display = isAllOpen ? 'block' : 'none'); }
-function openFullscreen() { const el = document.getElementById('main-media-el'); if(!el) return; const fs = document.getElementById('fs-content'); fs.innerHTML = el.tagName === 'VIDEO' ? `<video src="${el.src}" class="${el.className}" controls autoplay></video>` : `<img src="${el.src}" class="${el.className}">`; document.getElementById('fullscreen-view').style.display = 'flex'; }
-function closeFullscreen() { document.getElementById('fullscreen-view').style.display = 'none'; }
-function toggleOverlay(id) { const el = document.getElementById(id); el.style.display = (window.getComputedStyle(el).display === 'none') ? 'flex' : 'none'; }
 function changeQty(idx, val) { items[idx].q = Math.max(1, (items[idx].q || 1) + val); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); }
 function deleteItem(idx) { if(confirm('삭제할까요?')) { items.splice(idx, 1); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); } }
 function editItem(idx) { const n = prompt('이름:', items[idx].n); if(n) { items[idx].n = n; localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); } }
 function addItemDirectly() { const n = prompt('물품 입력:'); if(n) { items.push({ n, q: 1 }); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); } }
 function renameDrawer() { const n = prompt('서랍 이름:', document.getElementById('drawer-title').innerText); if(n) { document.getElementById('drawer-title').innerText = n; localStorage.setItem('name_' + tag, n); } }
+function toggleOverlay(id) { const el = document.getElementById(id); el.style.display = (window.getComputedStyle(el).display === 'none') ? 'flex' : 'none'; }
+function openFullscreen() { const el = document.getElementById('main-media-el'); if(!el) return; const fs = document.getElementById('fs-content'); fs.innerHTML = el.tagName === 'VIDEO' ? `<video src="${el.src}" class="${el.className}" controls autoplay></video>` : `<img src="${el.src}" class="${el.className}">`; document.getElementById('fullscreen-view').style.display = 'flex'; }
+function closeFullscreen() { document.getElementById('fullscreen-view').style.display = 'none'; }
 
 async function sendMsg() {
     const i = document.getElementById('chat-input'); const t = i.value.trim(); if(!t) return;
