@@ -167,34 +167,55 @@ input.click();
 }
 
 function renderItems(filter = '') {
-const container = document.getElementById('list-items');
-const filtered = items.filter(it => it.n.toLowerCase().includes(filter.toLowerCase()));
-const groups = {};
-filtered.forEach((it, idx) => {
-const [cat, name] = it.n.includes(':') ? it.n.split(':') : ['기타', it.n];
-if (!groups[cat]) groups[cat] = [];
-groups[cat].push({ ...it, originalIdx: idx, displayName: (name || cat).trim() });
-});
-container.innerHTML = Object.keys(groups).map(cat => `
-<div class="category-section">
-<div class="category-header" onclick="this.nextElementSibling.style.display = (this.nextElementSibling.style.display === 'none' ? 'block' : 'none')">
-<strong>${cat} (${groups[cat].length})</strong>
-<div class="round-arrow"><div class="chevron"></div></div>
-</div>
-<div class="category-content" style="display: block;">
-${groups[cat].map(it => `
-<div class="item-card">
-<div class="item-header"><span class="item-name">${it.displayName}</span>
-<div class="qty-controls"><button class="qty-btn" onclick="changeQty(${it.originalIdx}, -1)">-</button>
-<span class="qty-num">${it.q || 1}개</span><button class="qty-btn" onclick="changeQty(${it.originalIdx}, 1)">+</button>
-</div>
-</div>
-<div class="item-content"><button class="action-btn" onclick="editItem(${it.originalIdx})">편집</button><button class="action-btn" style="color:#ef4444" onclick="deleteItem(${it.originalIdx})">삭제</button></div>
-</div>
-`).join('')}
-</div>
-</div>
-`).join('');
+    const container = document.getElementById('list-items');
+    const groups = {};
+
+    items.forEach((it, idx) => {
+        if(filter && !it.n.toLowerCase().includes(filter.toLowerCase())) return;
+
+        let cat = '기타';
+        let name = it.n;
+
+        if(it.n.includes(':')){
+            const parts = it.n.split(':');
+            cat = parts[0].trim() || '기타';
+            name = parts[1].trim() || parts[0].trim();
+        }
+
+        if(!groups[cat]) groups[cat] = [];
+        groups[cat].push({
+            name,
+            qty: it.q || 1,
+            originalIdx: idx
+        });
+    });
+
+    container.innerHTML = Object.keys(groups).map(cat => `
+        <div class="category-section">
+            <div class="category-header" onclick="this.nextElementSibling.style.display = (this.nextElementSibling.style.display === 'none' ? 'block' : 'none')">
+                <strong>${cat} (${groups[cat].length})</strong>
+                <div class="round-arrow"><div class="chevron"></div></div>
+            </div>
+            <div class="category-content" style="display:block;">
+                ${groups[cat].map(it => `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <span class="item-name">${it.name}</span>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="changeQty(${it.originalIdx}, -1)">-</button>
+                                <span class="qty-num">${it.qty}개</span>
+                                <button class="qty-btn" onclick="changeQty(${it.originalIdx}, 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="item-content">
+                            <button class="action-btn" onclick="editItem(${it.originalIdx})">편집</button>
+                            <button class="action-btn" style="color:#ef4444" onclick="deleteItem(${it.originalIdx})">삭제</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
 }
 
 async function confirmUpload() {
