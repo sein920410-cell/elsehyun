@@ -8,26 +8,31 @@ export default async function handler(req, res) {
   const { filePath, mimeType } = req.body;
 
   try {
-    // 1. Supabase 이미지 다운로드
+    // 1. 이미지 가져오기
     const { data: signedData } = await supa.storage.from('user_uploads').createSignedUrl(filePath, 60);
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // 2. 개선된 프롬프트
-    const geminiPrompt = `사진 속 모든 물건 카운트해서 목록 만들어.
+    // 2. 인식률을 최대치로 높인 지시문
+    const geminiPrompt = `사진 속 모든 물건을 아주 꼼꼼하게 하나도 빠짐없이 찾아내세요.
+상단 선반의 작은 병들, 구석에 있는 물건들까지 전부 목록으로 만듭니다.
 
-✅ 정확 규칙:
-1. 브랜드: "베베앙","페브리즈","일리윤" 앞에 무조건
-2. 수량: "물티슈 3개" → 물티슈x3 (x1은 생략)
-3. 카테고리: 위생/청소/케어/생활/기타
-4. 형식: "카테고리:브랜드상품x수량"
+✅ 반드시 지킬 규칙:
+1. 브랜드가 보이면 상품명 앞에 꼭 붙이세요 (예: 일리윤, 베베앙, 페브리즈 등).
+2. 수량은 보이는 대로 숫자로만 추출하세요. (예: 물티슈 2개면 qty는 2)
+3. 카테고리는 [위생, 청소, 케어, 생활, 기타] 중 하나로 분류하세요.
+4. 형식은 반드시 아래 JSON 배열 형식을 지키세요.
 
-📋 예시 (딱 이렇게):
-["위생:베베앙 물티슈x3","청소:페브리즈 분무기","생활:크린장갑x4"]
+응답 예시:
+[
+  {"category": "위생", "name": "베베앙 물티슈", "qty": 2},
+  {"category": "케어", "name": "일리윤 여성청결제", "qty": 1},
+  {"category": "케어", "name": "닥터지 선크림", "qty": 1}
+]
 
-설명 없이 배열로만 출력!`;
+설명은 절대 하지 말고 오직 JSON 데이터만 출력하세요.`;
 
-    // 3. Gemini 2.5 Flash + JSON 강제
+    // 3. AI에게 요청 (결과를 무조건 JSON으로 고정)
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
@@ -43,7 +48,7 @@ export default async function handler(req, res) {
           generationConfig: {
             response_mime_type: "application/json",
             temperature: 0.1,
-            maxOutputTokens: 1024
+            maxOutputTokens: 2048 // 더 많은 물건을 쓸 수 있게 늘렸습니다.
           }
         })
       }
@@ -52,23 +57,22 @@ export default async function handler(req, res) {
     const data = await response.json();
     let botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
 
-    // 4. JSON 파싱 + 기존 형식 완벽 호환
+    // 4. 데이터 정리 및 전송
     let items = [];
     try {
       items = JSON.parse(botText);
-    } catch {
-      // Fallback: 텍스트 파싱
-      const rawItems = botText.split(",").map(s => s.trim()).filter(s => s.includes(":"));
-      items = rawItems.map(s => {
-        const [category, name] = s.split(":");
-        return { category: category || "기타", name: name || "알수없음" };
-      });
+    } catch (e) {
+      console.error("파싱 에러:", e);
+      items = [];
     }
 
-    // 5. 기존 프론트엔드 완벽 호환 응답
+    // 프론트엔드에서 바로 쓸 수 있게 이름 뒤에 x수량을 붙인 문자열도 같이 보냅니다.
     const result = {
-      items: items,                           // 새 JSON 형식
-      items_string: items.map(item => `${item.category}:${item.name}`).join(',')  // 기존 문자열 형식
+      items: items.map(it => ({
+        category: it.category || "기타",
+        name: it.qty > 1 ? `${it.name}x${it.qty}` : it.name,
+        qty: it.qty || 1
+      }))
     };
 
     return res.status(200).json(result);
