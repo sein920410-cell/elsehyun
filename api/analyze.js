@@ -14,16 +14,18 @@ export default async function handler(req, res) {
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
     // 2. 개선된 프롬프트
-    const geminiPrompt = `사진 속 물건 분석.
+    const geminiPrompt = `사진 속 모든 물건 카운트해서 목록 만들어.
 
-필수 규칙:
-1. 브랜드명 정확히 읽기 (베베앙, 일리윤, 페브리즈)
-2. 수량 파악해 xN 표기 (물티슈 3개 → 물티슈x3)
-3. 카테고리: 위생(물티슈), 케어(여성청결제), 청소(분무기), 생활(장갑)
-4. 중복 제거, 잡동사니는 기타:상자 1개만
+✅ 정확 규칙:
+1. 브랜드: "베베앙","페브리즈","일리윤" 앞에 무조건
+2. 수량: "물티슈 3개" → 물티슈x3 (x1은 생략)
+3. 카테고리: 위생/청소/케어/생활/기타
+4. 형식: "카테고리:브랜드상품x수량"
 
-오직 JSON 배열:
-[{"category":"위생","name":"베베앙 물티슈x3"}, {"category":"청소","name":"페브리즈 분무기"}]`;
+📋 예시 (딱 이렇게):
+["위생:베베앙 물티슈x3","청소:페브리즈 분무기","생활:크린장갑x4"]
+
+설명 없이 배열로만 출력!`;
 
     // 3. Gemini 2.5 Flash + JSON 강제
     const response = await fetch(
