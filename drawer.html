@@ -84,7 +84,6 @@ const tag = (params.get('tag') || 'DRAWER001').toUpperCase();
 let items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
 let isAllOpen = false, currentRotation = 0, selectedFile = null;
 
-// [수정] window 변수 충돌 해결
 window.onload = async () => {
     document.getElementById('drawer-title').innerText = localStorage.getItem('name_' + tag) || '서랍 1';
     const mediaPath = localStorage.getItem('mediaPath_' + tag);
@@ -111,7 +110,8 @@ function initMediaEvents() {
             el.style.transform = `translateX(${Math.max(diffX, -100)}px)`; el.style.transition = 'none';
             if(!document.getElementById('media-del-btn')) {
                 const btn = document.createElement('div'); btn.id = 'media-del-btn'; btn.className = 'media-delete-btn'; btn.innerText = '삭제';
-                btn.onclick = (ev) => { ev.stopPropagation(); if(confirm('사진/영상을 삭제하시겠습니까?')) deleteMedia(); };
+                // ⭐ 핵심 수정: 중복 confirm 제거 및 전파 방지
+                btn.onclick = (ev) => { ev.stopPropagation(); deleteMedia(); };
                 wrap.appendChild(btn);
             }
         }
@@ -119,6 +119,10 @@ function initMediaEvents() {
     wrap.addEventListener('touchend', (e) => {
         const el = document.getElementById('main-media-el'); if(!el) return;
         el.style.transition = 'transform 0.3s ease';
+        
+        // ⭐ 핵심 수정: 삭제 버튼 클릭 시 사진 뜨는 현상(openFullscreen) 방지
+        if (e.target.id === 'media-del-btn') return;
+
         if(isMoving) {
             const diffX = e.changedTouches[0].clientX - startX;
             if(diffX < -50) el.style.transform = 'translateX(-80px)';
@@ -215,13 +219,7 @@ function renderItems(filter = '') {
 }
 
 async function confirmUpload() {
-    console.log("🎬 분석 시작!");
-    
-    if(!selectedFile) {
-        console.log("❌ 파일 없음");
-        return;
-    }
-
+    if(!selectedFile) return;
     if (items.length > 0) {
         if (!confirm('기존 목록을 초기화할까요?')) {
             cancelUpload();
@@ -229,67 +227,44 @@ async function confirmUpload() {
         }
         items = [];
     }
-
     const file = selectedFile;
     document.getElementById('rotate-window').style.display = 'none';
     document.getElementById('media-wrap').innerHTML = '<div style="font-weight:bold; color:#007bff;">분석 중...</div>';
-    
     try {
-        console.log("📤 업로드 중...");
         const path = `${tag}/${Date.now()}_${file.name}`;
         await _supa.storage.from('user_uploads').upload(path, file);
         localStorage.setItem('mediaPath_' + tag, path); 
         localStorage.setItem('rot_' + tag, currentRotation);
-        
-        const { data, error } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600); 
-if (!data?.signedUrl || error) {
-    console.error('❌ Signed URL 실패:', error);
-    document.getElementById('media-wrap').innerHTML = '<div style="color:#ef4444;">이미지 로드 실패</div>';
-    return;
-}
-showMedia(data.signedUrl, currentRotation);
-
+        const { data } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600); 
+        showMedia(data.signedUrl, currentRotation);
         if (file.type.startsWith('image/')) {
-            console.log("🤖 AI 분석 요청...");
             const res = await fetch('/api/analyze', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ filePath: path, mimeType: file.type }) 
             });
             const resData = await res.json();
-            
-            console.log('✅ 서버 응답:', resData);
-            console.log('📦 아이템 수:', resData.items?.length || 0);
-            
             const rawItems = resData.items || [];
-            
             if (rawItems.length > 0) {
-                console.log('🎉 인식 성공:', rawItems);
-                rawItems.forEach((item, i) => {
-                    console.log(`  ${i+1}. ${item.category}: ${item.name}`);
+                rawItems.forEach((item) => {
                     let finalCat = item.category || "기타";
                     let finalName = item.name;
                     let finalQty = item.qty || 1;
-                    
                     const qtyMatch = finalName.match(/x(\d+)$/);
                     if(qtyMatch) {
                         finalQty = parseInt(qtyMatch[1]);
                         finalName = finalName.replace(/x\d+$/, '').trim();
                     }
-                    
                     items.push({ n: `${finalCat}:${finalName}`, q: finalQty });
                 });
-                
                 localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
                 renderItems();
                 alert(`${items.length}개 물품이 인식됐어요!`);
             } else {
-                console.log('😞 인식 실패 - 빈 배열');
-                alert("사진에서 물품을 찾지 못했어요. 더 밝은 곳에서 찍어보시겠어요?");
+                alert("사진에서 물품을 찾지 못했어요.");
             }
         }
     } catch (err) {
-        console.error('💥 오류:', err);
         alert("분석 중 오류가 발생했습니다.");
     }
 }
