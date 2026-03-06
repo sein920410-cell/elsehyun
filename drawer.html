@@ -135,7 +135,12 @@ function showMedia(url, rot) {
 
 function deleteMedia() {
     if(confirm('사진/영상을 삭제하시겠습니까?')) {
-        localStorage.removeItem('mediaPath_' + tag); localStorage.removeItem('rot_' + tag);
+        const mediaPath = localStorage.getItem('mediaPath_' + tag);
+        if(mediaPath) {
+            _supa.storage.from('user_uploads').remove([mediaPath]);
+        }
+        localStorage.removeItem('mediaPath_' + tag); 
+        localStorage.removeItem('rot_' + tag);
         document.getElementById('media-wrap').innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>';
     }
 }
