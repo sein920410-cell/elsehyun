@@ -223,20 +223,40 @@
                 await _supa.storage.from('user_uploads').upload(path, file);
                 localStorage.setItem('mediaPath_' + tag, path); localStorage.setItem('rot_' + tag, currentRotation);
                 const { data } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600); showMedia(data.signedUrl, currentRotation);
-                if (file.type.startsWith('image/')) {
-                    const res = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filePath: path, mimeType: file.type }) });
-                    const resData = await res.json();
-                    
-                    // [cite: 2026-03-04] 인식 실패 대응 및 알림
-                    if (resData.items && resData.items.length > 0) { 
-                        resData.items.forEach(n => items.push({ n, q: 1 })); 
-                        localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); 
-                        renderItems(); 
-                    } else {
-                        alert("사진에서 물품을 인식하지 못했어요. 다시 시도해 주세요.");
-                        showMedia(data.signedUrl, currentRotation);
-                    }
+               // ✅ 수정 (Gemini 2.5 Flash + 호환성 완벽)
+if (file.type.startsWith('image/')) {
+    try {
+        const res = await fetch('/api/analyze', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ filePath: path, mimeType: file.type }) 
+        });
+        const resData = await res.json();
+        console.log('분석 결과:', resData); // 디버깅용
+        
+        // 새 형식 + 기존 형식 둘 다 지원
+        const newItems = resData.items || (resData.items_string ? resData.items_string.split(',').map(s => ({n: s.trim()})) : []);
+        
+        if (newItems.length > 0) {
+            newItems.forEach(item => {
+                if (typeof item === 'object' && item.name) {
+                    items.push({ n: `${item.category}:${item.name}`, q: 1 });
+                } else {
+                    items.push({ n: item.n || item, q: 1 });
                 }
+            });
+            localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
+            renderItems();
+            alert(`${newItems.length}개 물품이 인식됐어요!`);
+        } else {
+            alert("사진에서 물품을 인식하지 못했어요. 다시 시도해 주세요.");
+        }
+    } catch (err) {
+        console.error('분석 오류:', err);
+        alert("분석 중 오류가 발생했어요.");
+    }
+}
+
             } catch (err) { alert("업로드 실패"); }
         }
 
