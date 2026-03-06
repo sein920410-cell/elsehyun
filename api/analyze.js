@@ -14,23 +14,10 @@ export default async function handler(req, res) {
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
     // 2. 인식률을 최대치로 높인 지시문
-    const geminiPrompt = `사진 속 모든 물건을 아주 꼼꼼하게 하나도 빠짐없이 찾아내세요.
-상단 선반의 작은 병들, 구석에 있는 물건들까지 전부 목록으로 만듭니다.
-
-✅ 반드시 지킬 규칙:
-1. 브랜드가 보이면 상품명 앞에 꼭 붙이세요 (예: 일리윤, 베베앙, 페브리즈 등).
-2. 수량은 보이는 대로 숫자로만 추출하세요. (예: 물티슈 2개면 qty는 2)
-3. 카테고리는 [위생, 청소, 케어, 생활, 기타] 중 하나로 분류하세요.
-4. 형식은 반드시 아래 JSON 배열 형식을 지키세요.
-
-응답 예시:
-[
-  {"category": "위생", "name": "베베앙 물티슈", "qty": 2},
-  {"category": "케어", "name": "일리윤 여성청결제", "qty": 1},
-  {"category": "케어", "name": "닥터지 선크림", "qty": 1}
-]
-
-설명은 절대 하지 말고 오직 JSON 데이터만 출력하세요.`;
+const geminiPrompt = `사진 속 모든 물건을 찾아내되, 이름은 브랜드명과 핵심 상품명만 딱 쓰세요.
+- 예: 려 트리트먼트, 일리윤 청결제
+- 절대 금지: '아르기닌', '스트렝스', '스킨 베리어' 같은 홍보 문구 다 빼세요.
+- 형식: [{"category": "분류", "name": "이름", "qty": 개수}]`;
 
     // 3. AI에게 요청 (결과를 무조건 JSON으로 고정)
     const response = await fetch(
