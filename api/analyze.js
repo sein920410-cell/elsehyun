@@ -8,18 +8,27 @@ export default async function handler(req, res) {
   const { filePath, mimeType } = req.body;
 
   try {
-    // 1. 이미지 가져오기
+    // 1. Supabase 이미지 다운로드 및 Base64 변환
     const { data: signedData } = await supa.storage.from('user_uploads').createSignedUrl(filePath, 60);
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // 2. 인식률을 최대치로 높인 지시문
-const geminiPrompt = `사진 속 모든 물건을 찾아내되, 이름은 브랜드명과 핵심 상품명만 딱 쓰세요.
-- 예: 려 트리트먼트, 일리윤 청결제
-- 절대 금지: '아르기닌', '스트렝스', '스킨 베리어' 같은 홍보 문구 다 빼세요.
-- 형식: [{"category": "분류", "name": "이름", "qty": 개수}]`;
+    // 2. [핵심] 이름 짧게 짓기 지시문 강화 [cite: 2026-02-08, 2026-01-22]
+    const geminiPrompt = `사진 속 모든 물건을 꼼꼼하게 찾으세요. 
+단, 상품 이름은 반드시 아래 규칙을 지키세요.
 
-    // 3. AI에게 요청 (결과를 무조건 JSON으로 고정)
+✅ 이름 규칙 (어기면 안 됨):
+1. 무조건 [브랜드명 + 핵심이름] (예: 려 트리트먼트, 일리윤 청결제)
+2. '루트젠', '더블', '스트렝스', '아르기닌', '젠틀', '클리너' 등 수식어는 전부 삭제! [cite: 2026-02-08]
+3. 없는 이름을 지어내지 말고 용기에 크게 써진 핵심 브랜드와 이름만 쓰세요. [cite: 2026-01-22]
+
+✅ 형식: JSON 배열만 출력 (설명 금지)
+[
+  {"category": "케어", "name": "려 트리트먼트", "qty": 1},
+  {"category": "케어", "name": "일리윤 청결제", "qty": 1}
+]`;
+
+    // 3. Gemini API 호출 (2.5 Flash 사용)
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
@@ -33,9 +42,9 @@ const geminiPrompt = `사진 속 모든 물건을 찾아내되, 이름은 브랜
             ]
           }],
           generationConfig: {
-            response_mime_type: "application/json",
-            temperature: 0.1,
-            maxOutputTokens: 2048 // 더 많은 물건을 쓸 수 있게 늘렸습니다.
+            response_mime_type: "application/json", // JSON으로 강제 고정
+            temperature: 0.1, // 창의성 배제, 일관성 유지
+            maxOutputTokens: 2048
           }
         })
       }
@@ -44,27 +53,19 @@ const geminiPrompt = `사진 속 모든 물건을 찾아내되, 이름은 브랜
     const data = await response.json();
     let botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
 
-    // 4. 데이터 정리 및 전송
+    // 4. 데이터 파싱 및 응답
     let items = [];
     try {
-      items = JSON.parse(botText);
+        items = JSON.parse(botText);
     } catch (e) {
-      console.error("파싱 에러:", e);
-      items = [];
+        console.error("JSON 파싱 에러:", e);
+        items = [];
     }
 
-    // 프론트엔드에서 바로 쓸 수 있게 이름 뒤에 x수량을 붙인 문자열도 같이 보냅니다.
-    const result = {
-      items: items.map(it => ({
-        category: it.category || "기타",
-        name: it.qty > 1 ? `${it.name}x${it.qty}` : it.name,
-        qty: it.qty || 1
-      }))
-    };
-
-    return res.status(200).json(result);
+    // 최종 결과 반환
+    return res.status(200).json({ items });
   } catch (err) {
-    console.error("분석 오류:", err);
+    console.error("서버 분석 오류:", err);
     return res.status(500).json({ error: "분석 오류", details: err.message });
   }
 }
