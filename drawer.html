@@ -144,17 +144,17 @@ function renderItems(filter = '') {
     const container = document.getElementById('list-items');
     const groups = {};
     items.forEach((it, idx) => {
-        if(filter && !it.n.toLowerCase().includes(filter.toLowerCase())) return;
-        let cat = '기타', name = String(it.n).replace(/[\[\]"']/g, '').trim();
-        if(name.includes(':')){
-            const parts = name.split(':');
-            cat = parts[0].trim() || '기타';
-            name = parts[1].trim() || parts[0].trim();
+        // [수정] 따옴표, 대괄호 등 찌꺼기 싹 제거
+        let rawN = String(it.n).replace(/[\[\]"']/g, '').trim(); 
+        let cat = '기타', name = rawN;
+        if(rawN.includes(':')){
+            const parts = rawN.split(':');
+            cat = parts[0].trim();
+            name = parts[1].trim();
         }
         if(!groups[cat]) groups[cat] = [];
         groups[cat].push({ name, qty: it.q || 1, originalIdx: idx });
     });
-
     container.innerHTML = Object.keys(groups).map(cat => `
         <div class="category-section">
             <div class="category-header" onclick="this.nextElementSibling.style.display = (this.nextElementSibling.style.display === 'none' ? 'block' : 'none')">
