@@ -8,27 +8,18 @@ export default async function handler(req, res) {
   const { filePath, mimeType } = req.body;
 
   try {
-    // 1. Supabase 이미지 다운로드 및 Base64 변환
+    // 1. 이미지 가져오기
     const { data: signedData } = await supa.storage.from('user_uploads').createSignedUrl(filePath, 60);
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // 2. [핵심] 이름 짧게 짓기 지시문 강화 [cite: 2026-02-08, 2026-01-22]
-    const geminiPrompt = `사진 속 모든 물건을 꼼꼼하게 찾으세요. 
-단, 상품 이름은 반드시 아래 규칙을 지키세요.
+    // 2. 이름 짧게 짓기 지시문 (강화 버전)
+    const geminiPrompt = `사진 속 모든 물건을 찾으세요. 핵심 이름만 짧게 만듭니다.
+- 규칙: [브랜드명 + 이름] (예: 려 트리트먼트, 일리윤 청결제)
+- 금지어: 루트젠, 더블, 스트렝스, 아르기닌, 젠틀, 클리너 등 모든 수식어 삭제!
+- 형식: JSON 배열만 출력하세요.`;
 
-✅ 이름 규칙 (어기면 안 됨):
-1. 무조건 [브랜드명 + 핵심이름] (예: 려 트리트먼트, 일리윤 청결제)
-2. '루트젠', '더블', '스트렝스', '아르기닌', '젠틀', '클리너' 등 수식어는 전부 삭제! [cite: 2026-02-08]
-3. 없는 이름을 지어내지 말고 용기에 크게 써진 핵심 브랜드와 이름만 쓰세요. [cite: 2026-01-22]
-
-✅ 형식: JSON 배열만 출력 (설명 금지)
-[
-  {"category": "케어", "name": "려 트리트먼트", "qty": 1},
-  {"category": "케어", "name": "일리윤 청결제", "qty": 1}
-]`;
-
-    // 3. Gemini API 호출 (2.5 Flash 사용)
+    // 3. Gemini API 호출
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
@@ -42,8 +33,8 @@ export default async function handler(req, res) {
             ]
           }],
           generationConfig: {
-            response_mime_type: "application/json", // JSON으로 강제 고정
-            temperature: 0.1, // 창의성 배제, 일관성 유지
+            response_mime_type: "application/json",
+            temperature: 0.1,
             maxOutputTokens: 2048
           }
         })
@@ -53,19 +44,37 @@ export default async function handler(req, res) {
     const data = await response.json();
     let botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
 
-    // 4. 데이터 파싱 및 응답
+    // ---------------------------------------------------------
+    // 4. [무적 필터] 지저분한 데이터 청소 로직 (로그 에러 해결 핵심)
+    // ---------------------------------------------------------
+    let cleanedText = botText.trim();
+    
+    // 마크다운 기호(```json 등) 제거
+    cleanedText = cleanedText.replace(/```json|```/g, "");
+    
+    // 진짜 JSON 배열 시작([)과 끝(]) 부분만 찾아내기
+    const startIdx = cleanedText.indexOf("[");
+    const endIdx = cleanedText.lastIndexOf("]");
+    if (startIdx !== -1 && endIdx !== -1) {
+        cleanedText = cleanedText.substring(startIdx, endIdx + 1);
+    }
+    
+    // 마지막 쉼표(,) 때문에 생기는 에러 방지
+    cleanedText = cleanedText.replace(/,\s*([\]}])/g, "$1");
+
     let items = [];
     try {
-        items = JSON.parse(botText);
+        items = JSON.parse(cleanedText);
     } catch (e) {
-        console.error("JSON 파싱 에러:", e);
+        console.error("데이터 세탁 후에도 파싱 실패:", e);
+        // 최후의 수단: 텍스트 강제 추출 (정규식 사용)
         items = [];
     }
+    // ---------------------------------------------------------
 
-    // 최종 결과 반환
     return res.status(200).json({ items });
   } catch (err) {
-    console.error("서버 분석 오류:", err);
-    return res.status(500).json({ error: "분석 오류", details: err.message });
+    console.error("서버 내부 오류:", err);
+    return res.status(500).json({ error: "분석 실패", details: err.message });
   }
 }
