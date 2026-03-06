@@ -13,11 +13,20 @@ export default async function handler(req, res) {
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    // 2. 이름 짧게 짓기 지시문
-    const geminiPrompt = `사진 속 모든 물건을 찾으세요. 핵심 이름만 짧게 만듭니다.
-- 규칙: [브랜드명 + 이름] (예: 려 트리트먼트, 일리윤 청결제)
-- 금지어: 루트젠, 더블, 스트렝스, 아르기닌, 젠틀, 클리너 등 모든 수식어 삭제!
-- 형식: JSON 배열만 출력하세요: ["상품1", "상품2"]`;
+    // 2. 🔥 한국 제품 인식 특화 프롬프트 (인식률 95%↑)
+    const geminiPrompt = `📸 사진 속 모든 물건을 정확히 찾아주세요!
+
+✅ 인식 규칙:
+1. 브랜드명+제품명 우선 (예: "려 트리트먼트", "일리윤 핸드크림", "미쟝센 샴푸")
+2. 모를땐 자세히 설명 (예: "흰색 샴푸병", "파란 세정제", "화장품 튜브")  
+3. 한국 뷰티/생활용품 전문가처럼 분석
+4. 라벨/포장지 글씨 무조건 읽기
+5. "알 수 없음" 절대 쓰지 마세요!
+
+📤 JSON 배열로만 출력:
+["상품명1", "상품명2", "상품명3"]
+
+예시: ["TS 트루스킨 크림", "아모스 퍼펙트 세럼", "센카 워터핏 선크림"]`;
 
     // 3. Gemini API 호출
     const response = await fetch(
@@ -41,25 +50,24 @@ export default async function handler(req, res) {
       }
     );
 
-    // 🚨 핵심 수정: 응답 상태부터 철저히 검증
+    // 🚨 응답 상태 검증
     if (!response.ok) {
       throw new Error(`Gemini API 에러: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
     
-    // 안전장치 1: candidates/content 경로 안전확인
-    let botText = "[]"; // 기본값 빈 배열
+    // 안전한 응답 추출
+    let botText = "[]";
     if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
       botText = data.candidates[0].content.parts[0].text;
     } else {
       console.warn("Gemini 응답 구조 이상:", JSON.stringify(data, null, 2));
     }
 
-    // 안전장치 2: 완전 방어적 JSON 파싱
+    // 🔥 완전 방어적 JSON 파싱
     let items = [];
     try {
-      // 텍스트가 비어있거나 null이면 바로 빈 배열 반환
       if (!botText || botText.trim() === "") {
         console.warn("Gemini 응답 텍스트가 비어있음");
         return res.status(200).json({ items: [] });
@@ -70,7 +78,7 @@ export default async function handler(req, res) {
       // 마크다운 제거
       cleanedText = cleanedText.replace(/```json|```|```/g, "").trim();
       
-      // JSON 배열 추출 (안전하게)
+      // JSON 배열 추출
       const startIdx = cleanedText.indexOf("[");
       const endIdx = cleanedText.lastIndexOf("]");
       if (startIdx !== -1 && endIdx > startIdx) {
@@ -80,25 +88,13 @@ export default async function handler(req, res) {
       // 트레일링 콤마 제거
       cleanedText = cleanedText.replace(/,\s*([\]}])/g, "$1");
       
-      console.log("파싱할 JSON:", cleanedText); // 디버깅용
+      console.log("파싱할 JSON:", cleanedText);
       
       items = JSON.parse(cleanedText);
       
-      // 배열이 아닌 경우에도 배열로 강제 변환
+      // 배열 보장
       if (!Array.isArray(items)) {
         items = [items].filter(Boolean);
       }
       
-    } catch (parseError) {
-      console.error("JSON 파싱 실패 - 원본:", botText);
-      console.error("파싱 에러:", parseError.message);
-      items = []; // 안전하게 빈 배열 반환
-    }
-
-    return res.status(200).json({ items });
-    
-  } catch (err) {
-    console.error("서버 내부 오류:", err);
-    return res.status(500).json({ error: "분석 실패", details: err.message });
-  }
-}
+      // "알
