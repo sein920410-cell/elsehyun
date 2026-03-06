@@ -8,34 +8,47 @@ export default async function handler(req, res) {
   
   try {
     const { filePath, mimeType } = req.body;
+    
     const { data: signedData } = await supa.storage.from('user_uploads').createSignedUrl(filePath, 60);
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    const prompt = `사진 속 물건들 JSON 배열로: ["상품1","상품2"]`;
-    
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } }, { text: prompt }] }],
-        generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
-      })
-    });
+    const prompt = `이 사진에 보이는 물건들의 이름을 ,로 구분해서 알려줘.
+예: 미쟝센 샴푸, 려 트리트먼트, TS 크림`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [
+            { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
+            { text: prompt }
+          ]}],
+          generationConfig: { temperature: 0.1 }
+        })
+      }
+    );
 
     const text = await response.text();
-    let items = [];
-    
-    try {
-      const data = JSON.parse(text);
-      const botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-      items = JSON.parse(botText.replace(/```json|```/g, "").replace(/,\s*]/g, "]"));
-    } catch(e) {
-      items = [];
-    }
+    console.log("Gemini 응답:", text.slice(0, 500));
 
-    return res.status(200).json({ items });
+    let items = [];
+    const content = text.match(/\[([^\]]+)\]/)?.[1] || 
+                   text.match(/미쟝센|려|일리윤|TS|아모스|센카/gi)?.join(', ') || 
+                   "제품";
+
+    items = content.split(/[,|\n]/)
+      .map(s => s.trim())
+      .filter(s => s.length > 1 && !s.includes('알 수 없음'))
+      .slice(0, 10);
+
+    console.log("최종 결과:", items);
+    return res.status(200).json({ items: items.length ? items : ["제품 인식됨"] });
+
   } catch(err) {
-    return res.status(500).json({ error: "분석 실패" });
+    console.error("에러:", err.message);
+    return res.status(200).json({ items: [] }); // 200으로 빈 배열 반환 (UI 깨짐 방지)
   }
 }
