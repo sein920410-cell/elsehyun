@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     const imgResp = await fetch(signedData.signedUrl);
     const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
 
-    const prompt = `이 사진에 보이는 물건들의 이름을 ,로 구분해서 알려줘.
+    const prompt = `이 사진에 보이는 물건들의 정확한 이름을 ,로 구분해서 알려줘.
 예: 미쟝센 샴푸, 려 트리트먼트, TS 크림`;
 
     const response = await fetch(
