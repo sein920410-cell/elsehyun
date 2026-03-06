@@ -1,19 +1,60 @@
+// api/analyze.js
 import { createClient } from "@supabase/supabase-js";
 import fetch from "node-fetch"; 
 
 const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
+// 순수 JSON 배열 부분만 뽑아서 파싱하는 헬퍼
+function safeParseItems(raw) {
+  if (!raw || typeof raw !== "string") return [];
+
+  // ```json ... ``` 같은 코드블럭 제거
+  let text = raw.trim();
+  text = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+
+  // 첫 '['와 마지막 ']' 사이만 잘라오기
+  const start = text.indexOf("[");
+  const end = text.lastIndexOf("]");
+  if (start === -1 || end === -1 || end <= start) return [];
+
+  const jsonSlice = text.slice(start, end + 1);
+
+  try {
+    const parsed = JSON.parse(jsonSlice);
+    // 배열만 허용
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.error("JSON 파싱 에러:", e, "원본:", raw);
+    return [];
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
-  const { filePath, mimeType } = req.body;
+
+  const { filePath, mimeType } = req.body || {};
+
+  if (!filePath) {
+    return res.status(400).json({ error: "filePath 누락" });
+  }
 
   try {
     // 1. 이미지 가져오기
-    const { data: signedData } = await supa.storage.from('user_uploads').createSignedUrl(filePath, 60);
-    const imgResp = await fetch(signedData.signedUrl);
-    const b64 = Buffer.from(await imgResp.arrayBuffer()).toString("base64");
+    const { data: signedData, error: signedErr } = await supa
+      .storage
+      .from("user_uploads")
+      .createSignedUrl(filePath, 60);
 
-    // 2. 인식률을 최대치로 높인 지시문
+    if (signedErr || !signedData?.signedUrl) {
+      console.error("Signed URL 오류:", signedErr);
+      return res.status(500).json({ error: "이미지 URL 생성 오류" });
+    }
+
+    const imgResp = await fetch(signedData.signedUrl);
+    const arrayBuf = await imgResp.arrayBuffer();
+    const b64 = Buffer.from(arrayBuf).toString("base64");
+
+    // 2. 프롬프트 (그대로 유지)
     const geminiPrompt = `사진 속 모든 물건을 아주 정확하고 꼼꼼하게 하나도 빠짐없이 찾아내세요.
 상단 선반의 작은 병들, 구석에 있는 물건들까지 전부 목록으로 만듭니다.
 
@@ -37,50 +78,57 @@ export default async function handler(req, res) {
 
 설명은 절대 하지 말고 오직 JSON 데이터만 출력하세요.`;
 
-    // 3. AI에게 요청 (결과를 무조건 JSON으로 고정)
+    // 3. Gemini 호출
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{
-            parts: [
-              { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
-              { text: geminiPrompt }
-            ]
-          }],
+          contents: [
+            {
+              parts: [
+                { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
+                { text: geminiPrompt }
+              ]
+            }
+          ],
           generationConfig: {
             response_mime_type: "application/json",
             temperature: 0.1,
-            maxOutputTokens: 2048 // 더 많은 물건을 쓸 수 있게 늘렸습니다.
+            maxOutputTokens: 2048
           }
         })
       }
     );
 
     const data = await response.json();
-    let botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
 
-    // 4. 데이터 정리 및 전송
-    let items = [];
-    try {
-      items = JSON.parse(botText);
-    } catch (e) {
-      console.error("파싱 에러:", e);
-      items = [];
+    // Gemini 응답이 이미 JSON 객체일 수도 있음
+    let botText = "";
+
+    if (Array.isArray(data)) {
+      // 이미 배열인 경우
+      botText = JSON.stringify(data);
+    } else if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      botText = data.candidates[0].content.parts[0].text;
+    } else if (typeof data === "object") {
+      // 혹시 모델이 바로 JSON 배열을 content로 준 경우 대비
+      botText = JSON.stringify(data);
+    } else {
+      botText = "[]";
     }
 
-    // 프론트엔드에서 바로 쓸 수 있게 이름 뒤에 x수량을 붙인 문자열도 같이 보냅니다.
-    const result = {
-      items: items.map(it => ({
-        category: it.category || "기타",
-        name: it.qty > 1 ? `${it.name}x${it.qty}` : it.name,
-        qty: it.qty || 1
-      }))
-    };
+    const rawItems = safeParseItems(botText);
 
-    return res.status(200).json(result);
+    // 4. 데이터 정리 및 전송 (기존 로직 유지)
+    const items = rawItems.map((it) => ({
+      category: it.category || "기타",
+      name: it.qty > 1 ? `${it.name}x${it.qty}` : it.name,
+      qty: it.qty || 1
+    }));
+
+    return res.status(200).json({ items });
   } catch (err) {
     console.error("분석 오류:", err);
     return res.status(500).json({ error: "분석 오류", details: err.message });
