@@ -214,17 +214,11 @@ async function confirmUpload() {
     if(!selectedFile) return;
 
     if (items.length > 0) {
-        if (confirm('기존 목록을 초기화할까요?')) {
-            items = [];
-            localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
-            localStorage.removeItem('mediaPath_' + tag);
-            localStorage.removeItem('rot_' + tag);
-            renderItems();
-        } else {
-            document.getElementById('rotate-window').style.display = 'none';
-            selectedFile = null;
+        if (!confirm('기존 목록을 초기화할까요?')) {
+            cancelUpload();
             return;
         }
+        items = [];
     }
 
     const file = selectedFile;
@@ -248,21 +242,48 @@ async function confirmUpload() {
             });
             const resData = await res.json();
             
-            const analysisItems = resData.items || (resData.items_string ? resData.items_string.split(',').map(s => ({n: s.trim()})) : []);
+            // 데이터 클리닝 함수: 따옴표, 대괄호 제거
+            const cleanText = (txt) => String(txt).replace(/[\[\]"']/g, '').trim();
+
+            const rawItems = resData.items || (resData.items_string ? resData.items_string.split(',') : []);
             
-            if (analysisItems.length > 0) {
-                analysisItems.forEach(item => {
-                    if (typeof item === 'object' && item.name) {
-                        items.push({ n: `${item.category || '기타'}:${item.name}`, q: 1 });
+            if (rawItems.length > 0) {
+                rawItems.forEach(item => {
+                    let finalName = "";
+                    let finalCat = "기타";
+                    let finalQty = 1;
+
+                    if (typeof item === 'object') {
+                        finalName = cleanText(item.name || item.n || "");
+                        finalCat = cleanText(item.category || "기타");
                     } else {
-                        items.push({ n: item.n || item, q: 1 });
+                        const s = cleanText(item);
+                        if(s.includes(':')) {
+                            const p = s.split(':');
+                            finalCat = cleanText(p[0]);
+                            finalName = cleanText(p[1]);
+                        } else {
+                            finalName = s;
+                        }
+                    }
+
+                    // "물티슈x2" 같은 패턴에서 수량 추출 로직
+                    const qtyMatch = finalName.match(/x(\d+)$/i);
+                    if(qtyMatch) {
+                        finalQty = parseInt(qtyMatch[1]);
+                        finalName = finalName.replace(/x\d+$/i, '').trim();
+                    }
+
+                    if(finalName) {
+                        items.push({ n: `${finalCat}:${finalName}`, q: finalQty });
                     }
                 });
+                
                 localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
                 renderItems();
-                alert(`${analysisItems.length}개 물품이 인식됐어요!`);
+                alert(`${items.length}개 물품이 인식됐어요!`);
             } else {
-                alert("사진에서 물품을 인식하지 못했어요.");
+                alert("사진에서 물품을 찾지 못했어요. 더 밝은 곳에서 찍어보시겠어요?");
             }
         }
     } catch (err) {
@@ -270,7 +291,6 @@ async function confirmUpload() {
         alert("분석 중 오류가 발생했습니다.");
     }
 }
-
 function rotateMedia(deg) { currentRotation = (currentRotation + deg + 360) % 360; document.getElementById('edit-preview').className = `rotate${currentRotation}`; }
 function cancelUpload() { document.getElementById('rotate-window').style.display = 'none'; selectedFile = null; }
 function toggleAll() { isAllOpen = !isAllOpen; document.querySelectorAll('.category-content').forEach(c => c.style.display = isAllOpen ? 'block' : 'none'); }
