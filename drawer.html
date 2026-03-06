@@ -111,7 +111,7 @@ function initMediaEvents() {
             el.style.transform = `translateX(${Math.max(diffX, -100)}px)`; el.style.transition = 'none';
             if(!document.getElementById('media-del-btn')) {
                 const btn = document.createElement('div'); btn.id = 'media-del-btn'; btn.className = 'media-delete-btn'; btn.innerText = '삭제';
-                btn.onclick = (ev) => { ev.stopPropagation(); deleteMedia(); };
+                btn.onclick = (ev) => { ev.stopPropagation(); if(confirm('사진/영상을 삭제하시겠습니까?')) deleteMedia(); };
                 wrap.appendChild(btn);
             }
         }
@@ -236,8 +236,13 @@ async function confirmUpload() {
         localStorage.setItem('mediaPath_' + tag, path); 
         localStorage.setItem('rot_' + tag, currentRotation);
         
-        const { data } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600); 
-        showMedia(data.signedUrl, currentRotation);
+        const { data, error } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600); 
+if (!data?.signedUrl || error) {
+    console.error('❌ Signed URL 실패:', error);
+    document.getElementById('media-wrap').innerHTML = '<div style="color:#ef4444;">이미지 로드 실패</div>';
+    return;
+}
+showMedia(data.signedUrl, currentRotation);
 
         if (file.type.startsWith('image/')) {
             console.log("🤖 AI 분석 요청...");
