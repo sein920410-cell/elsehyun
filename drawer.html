@@ -241,10 +241,12 @@ async function confirmUpload() {
             });
             const resData = await res.json();
             
-            // 데이터 클리닝 함수: 따옴표, 대괄호 제거
-            const cleanText = (txt) => String(txt).replace(/[\[\]"']/g, '').trim();
+            console.log('서버 응답:', resData);  // 디버깅용
+            
+           const rawItems = resData.items || [];
 
-            const rawItems = resData.items || (resData.items_string ? resData.items_string.split(',') : []);
+            
+            console.log('인식된 아이템:', rawItems);  // 디버깅용
             
             if (rawItems.length > 0) {
                 rawItems.forEach(item => {
@@ -252,25 +254,25 @@ async function confirmUpload() {
                     let finalCat = "기타";
                     let finalQty = 1;
 
-                    if (typeof item === 'object') {
-                        finalName = cleanText(item.name || item.n || "");
-                        finalCat = cleanText(item.category || "기타");
+                    if (typeof item === 'object' && item.name) {
+                        finalName = item.name;
+                        finalCat = item.category || "기타";
+                        
+                        // 서버에서 이미 "x수량" 처리했으니 qty만 따로
+                        const qtyMatch = finalName.match(/x(\d+)$/);
+                        if(qtyMatch) {
+                            finalQty = parseInt(qtyMatch[1]);
+                            finalName = finalName.replace(/x\d+$/, '').trim();
+                        }
                     } else {
-                        const s = cleanText(item);
+                        const s = String(item).trim();
                         if(s.includes(':')) {
                             const p = s.split(':');
-                            finalCat = cleanText(p[0]);
-                            finalName = cleanText(p[1]);
+                            finalCat = p[0].trim();
+                            finalName = p[1].trim();
                         } else {
                             finalName = s;
                         }
-                    }
-
-                    // "물티슈x2" 같은 패턴에서 수량 추출 로직
-                    const qtyMatch = finalName.match(/x(\d+)$/i);
-                    if(qtyMatch) {
-                        finalQty = parseInt(qtyMatch[1]);
-                        finalName = finalName.replace(/x\d+$/i, '').trim();
                     }
 
                     if(finalName) {
