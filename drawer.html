@@ -7,31 +7,34 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root { --primary: #007bff; --bg: #f8fafc; --dark: #1e293b; --light-grey: #F2F4F7; }
+* { box-sizing: border-box; }
 body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--dark); }
-.header { background: #fff; padding: 15px 20px; display: flex; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; }
+.header { background: #fff; padding: 15px 20px; display: flex; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; flex-shrink: 0; }
 .header .spacer { width: 40px; }
 .drawer-name { font-size: 18px; font-weight: 800; flex: 1; text-align: center; }
-.icon-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--dark); width: 40px; text-align: right; }
-.main-card { background: #fff; padding: 15px; border-radius: 0 0 25px 25px; flex-shrink: 0; position: relative; }
+.icon-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--dark); width: 40px; text-align: right; padding: 0; }
+.main-card { background: #fff; padding: 15px; border-radius: 0 0 25px 25px; flex-shrink: 0; }
 .media-box { width: 100%; height: 250px; background: #f1f5f9; border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; overflow: hidden; cursor: pointer; -webkit-user-select: none; user-select: none; }
 .media-box img, .media-box video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; position: relative; z-index: 2; transition: transform 0.3s ease; }
-.media-delete-btn { position: absolute; right: 0; top: 0; width: 80px; height: 100%; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 3; border-radius: 0 20px 20px 0; cursor: pointer; }
-.list-header { display: flex; justify-content: flex-end; align-items: center; padding: 10px 15px 5px 15px; }
+.media-delete-btn { position: absolute; right: 0; top: 0; width: 80px; height: 100%; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 3; border-radius: 0 20px 20px 0; cursor: pointer; font-size: 15px; }
+.list-header { display: flex; justify-content: flex-end; align-items: center; padding: 10px 15px 5px 15px; flex-shrink: 0; }
 .toggle-btn { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #94a3b8; font-weight: bold; }
 .round-arrow { width: 26px; height: 26px; background: var(--light-grey); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; }
 .chevron { width: 6px; height: 6px; border-right: 2px solid #64748b; border-bottom: 2px solid #64748b; transform: translateY(-1px) rotate(45deg); }
-.list-container { flex: 1; overflow-y: auto; padding: 0 15px 15px 15px; display: flex; flex-direction: column; }
+.list-container { flex: 1; overflow-y: auto; padding: 0 15px 15px 15px; display: flex; flex-direction: column; -webkit-overflow-scrolling: touch; }
 .add-list-btn { align-self: flex-start; background: none; border: none; color: var(--primary); font-weight: bold; cursor: pointer; font-size: 15px; padding: 0; margin-bottom: 15px; }
 .category-section { margin-bottom: 20px; }
 .category-header { background: #fff; padding: 12px 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #f1f5f9; margin-bottom: 8px; }
-.item-card { background: #fff; border-radius: 18px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; overflow: hidden; }
+.item-card { background: #fff; border-radius: 18px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; overflow: hidden; position: relative; }
+.item-swipe-delete { position: absolute; right: 0; top: 0; bottom: 0; width: 80px; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; border-radius: 0 18px 18px 0; cursor: pointer; z-index: 1; }
+.item-slide-content { position: relative; z-index: 2; background: #fff; border-radius: 18px; transition: transform 0.3s ease; will-change: transform; }
 .item-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-.item-name { font-weight: 700; font-size: 16px; }
-.qty-controls { display: flex; align-items: center; gap: 8px; }
+.item-name { font-weight: 700; font-size: 16px; word-break: keep-all; }
+.qty-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .qty-num { font-weight: 700; color: var(--primary); min-width: 30px; text-align: center; }
-.item-content { padding: 15px; border-top: 1px solid #f8fafc; background: #fff; }
-.action-btn { background: none; border: none; color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer; margin-right: 15px; }
+.item-content { padding: 12px 15px; border-top: 1px solid #f8fafc; background: #fff; display: flex; }
+.action-btn { background: none; border: none; color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer; margin-right: 15px; padding: 0; }
 .bottom-actions { padding: 15px 0; display: flex; flex-direction: column; gap: 10px; }
 .chat-entry { background: var(--dark); color: #fff; padding: 15px; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
 .reset-btn { align-self: center; background: none; border: none; color: #94a3b8; font-size: 12px; text-decoration: underline; cursor: pointer; padding: 5px; }
@@ -45,29 +48,24 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
 #fullscreen-view img, #fullscreen-view video { max-width: 100%; max-height: 100%; object-fit: contain; }
 .rotate90 { transform: rotate(90deg); } .rotate180 { transform: rotate(180deg); } .rotate270 { transform: rotate(270deg); }
 #preview-wrap { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; overflow: hidden; }
-
-/* 미디어 선택 바텀 시트 */
 #picker-window { background: rgba(0,0,0,0.55); justify-content: flex-end; }
 .picker-sheet { background: #fff; border-radius: 20px 20px 0 0; padding: 16px 20px 40px; }
 .picker-handle { width: 40px; height: 4px; background: #e2e8f0; border-radius: 2px; margin: 0 auto 18px; }
 .picker-title { font-weight: 800; font-size: 16px; text-align: center; margin-bottom: 18px; color: var(--dark); }
-.picker-btn { width: 100%; padding: 16px 18px; border-radius: 14px; border: 1px solid #f1f5f9; background: #f8fafc; font-size: 15px; font-weight: 600; cursor: pointer; text-align: left; color: var(--dark); display: flex; align-items: center; gap: 14px; margin-bottom: 10px; box-sizing: border-box; }
+.picker-btn { width: 100%; padding: 16px 18px; border-radius: 14px; border: 1px solid #f1f5f9; background: #f8fafc; font-size: 15px; font-weight: 600; cursor: pointer; text-align: left; color: var(--dark); display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
 .picker-btn:active { background: #e2e8f0; }
 .picker-cancel { width: 100%; padding: 15px; border-radius: 14px; border: none; background: #f1f5f9; font-size: 15px; color: #64748b; cursor: pointer; margin-top: 4px; font-weight: 600; }
-
-/* 영상 촬영 */
 #record-window { background: #000; }
 .record-video-area { flex: 1; background: #000; position: relative; overflow: hidden; }
 .record-video-area video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.rec-indicator { display: none; position: absolute; top: 14px; left: 14px; background: rgba(239,68,68,0.92); color: #fff; padding: 5px 13px; border-radius: 20px; font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+.rec-indicator { display: none; position: absolute; top: 14px; left: 14px; background: rgba(239,68,68,0.92); color: #fff; padding: 5px 13px; border-radius: 20px; font-size: 13px; font-weight: 700; }
 .record-controls { background: #000; padding: 18px 20px 36px; flex-shrink: 0; }
-.record-timer { color: #fff; font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 16px; font-variant-numeric: tabular-nums; letter-spacing: 1px; }
+.record-timer { color: #fff; font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 16px; font-variant-numeric: tabular-nums; }
 .record-timer.danger { color: #ef4444; }
 .record-btn-row { display: flex; align-items: center; justify-content: center; gap: 24px; }
-.record-circle { width: 72px; height: 72px; border-radius: 50%; background: #ef4444; border: 4px solid #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; transition: transform 0.1s; }
-.record-circle:active { transform: scale(0.93); }
+.record-circle { width: 72px; height: 72px; border-radius: 50%; background: #ef4444; border: 4px solid #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
 .record-circle.recording { background: #1e293b; }
-@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); } 50% { box-shadow: 0 0 0 14px rgba(239,68,68,0); } }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.5);}50%{box-shadow:0 0 0 14px rgba(239,68,68,0);} }
 .record-circle.recording { animation: pulse 1.4s infinite; }
 .rec-side-btn { padding: 13px 20px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; min-width: 90px; }
 .rec-hint { color: #6b7280; font-size: 13px; text-align: center; margin-top: 14px; }
@@ -75,29 +73,25 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
 </head>
 <body>
 
-<!-- 헤더 -->
 <header class="header">
   <div class="spacer"></div>
   <div class="drawer-name" id="drawer-title" onclick="renameDrawer()">서랍 1</div>
   <button class="icon-btn" onclick="showPicker()">＋</button>
 </header>
 
-<!-- 미디어 박스 -->
 <div class="main-card">
   <div class="media-box" id="media-wrap" onclick="handleMediaClick()">
     <div id="empty-txt" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>
   </div>
 </div>
 
-<!-- 목록 헤더 -->
 <div class="list-header">
-  <div class="toggle-btn" id="toggle-all-btn" onclick="toggleAll()">
+  <div class="toggle-btn" onclick="toggleAll()">
     <div class="round-arrow"><div class="chevron"></div></div>
     <span id="toggle-text">전체펼치기</span>
   </div>
 </div>
 
-<!-- 목록 -->
 <div class="list-container">
   <button class="add-list-btn" onclick="addItemDirectly()">＋ 목록추가</button>
   <div id="list-items"></div>
@@ -107,7 +101,6 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
   </div>
 </div>
 
-<!-- 채팅 -->
 <div id="chat-window" class="overlay-window">
   <div class="overlay-header-dark">
     <strong>비서 '봄'</strong>
@@ -120,7 +113,6 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
   </div>
 </div>
 
-<!-- 회전 미리보기 -->
 <div id="rotate-window" class="overlay-window">
   <div id="preview-wrap"></div>
   <div style="padding:20px; display:flex; gap:10px; background:#fff; flex-shrink:0;">
@@ -130,42 +122,31 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
   </div>
 </div>
 
-<!-- 미디어 선택 바텀 시트 -->
 <div id="picker-window" class="overlay-window" onclick="closePicker(event)">
   <div class="picker-sheet" onclick="event.stopPropagation()">
     <div class="picker-handle"></div>
     <div class="picker-title">미디어 추가</div>
     <button class="picker-btn" onclick="pickGalleryPhoto()">
       <span style="font-size:22px;">🖼️</span>
-      <div>
-        <div>사진 가져오기</div>
-        <div style="font-size:12px; color:#94a3b8; font-weight:400; margin-top:2px;">갤러리에서 이미지 선택</div>
-      </div>
+      <div><div>사진 가져오기</div><div style="font-size:12px;color:#94a3b8;font-weight:400;margin-top:2px;">갤러리에서 이미지만 선택</div></div>
     </button>
     <button class="picker-btn" onclick="takePhoto()">
       <span style="font-size:22px;">📷</span>
-      <div>
-        <div>사진 촬영</div>
-        <div style="font-size:12px; color:#94a3b8; font-weight:400; margin-top:2px;">카메라로 바로 촬영</div>
-      </div>
+      <div><div>사진 촬영</div><div style="font-size:12px;color:#94a3b8;font-weight:400;margin-top:2px;">카메라로 바로 촬영</div></div>
     </button>
     <button class="picker-btn" onclick="startVideoRecord()">
       <span style="font-size:22px;">🎥</span>
-      <div>
-        <div>영상 촬영</div>
-        <div style="font-size:12px; color:#94a3b8; font-weight:400; margin-top:2px;">최대 30초 · 720p</div>
-      </div>
+      <div><div>영상 촬영</div><div style="font-size:12px;color:#94a3b8;font-weight:400;margin-top:2px;">최대 30초 · 720p</div></div>
     </button>
-    <button class="picker-cancel" onclick="closePicker()">취소</button>
+    <button class="picker-cancel" onclick="document.getElementById('picker-window').style.display='none'">취소</button>
   </div>
 </div>
 
-<!-- 영상 촬영 -->
 <div id="record-window" class="overlay-window">
-  <div style="background:#000; color:#fff; padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+  <div style="background:#000;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
     <div style="width:40px;"></div>
     <strong style="font-size:16px;">영상 촬영</strong>
-    <button onclick="cancelRecording()" style="background:none; border:none; color:#fff; font-size:26px; cursor:pointer; width:40px; display:flex; align-items:center; justify-content:center;">✕</button>
+    <button onclick="cancelRecording()" style="background:none;border:none;color:#fff;font-size:26px;cursor:pointer;width:40px;">✕</button>
   </div>
   <div class="record-video-area">
     <video id="record-live" autoplay muted playsinline></video>
@@ -175,17 +156,16 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
   <div class="record-controls">
     <div class="record-timer" id="record-timer">00:00 / 00:30</div>
     <div class="record-btn-row">
-      <button id="retake-rec-btn" class="rec-side-btn" onclick="retakeRecording()" style="display:none; background:#374151; color:#fff;">다시 촬영</button>
+      <button id="retake-rec-btn" class="rec-side-btn" onclick="retakeRecording()" style="display:none;background:#374151;color:#fff;">다시 촬영</button>
       <button id="record-btn" class="record-circle" onclick="toggleRecording()">⏺</button>
-      <button id="confirm-rec-btn" class="rec-side-btn" onclick="confirmRecording()" style="display:none; background:#007bff; color:#fff;">등록</button>
+      <button id="confirm-rec-btn" class="rec-side-btn" onclick="confirmRecording()" style="display:none;background:#007bff;color:#fff;">등록</button>
     </div>
     <div class="rec-hint" id="rec-hint">⏺ 버튼을 눌러 촬영을 시작하세요</div>
   </div>
 </div>
 
-<!-- 전체화면 뷰어 -->
 <div id="fullscreen-view" onclick="closeFullscreen()">
-  <div id="fs-content" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></div>
+  <div id="fs-content" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
 </div>
 
 <script>
@@ -197,7 +177,7 @@ const params = new URLSearchParams(window.location.search);
 const tag = (params.get('tag') || 'DRAWER001').toUpperCase();
 let items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
 let isAllOpen = false, currentRotation = 0, selectedFile = null;
-
+let userCorrections = JSON.parse(localStorage.getItem('corrections_' + tag) || '[]');
 let mediaStream = null, mediaRecorder = null;
 let recordedChunks = [], recordTimer = null;
 let recordSeconds = 0, recordedBlob = null, isRecording = false;
@@ -220,13 +200,8 @@ function handleMediaClick() {
 function initMediaEvents() {
   const wrap = document.getElementById('media-wrap');
   let startX = 0, isMoving = false;
-
-  wrap.addEventListener('touchstart', (e) => {
-    startX = e.touches[0].clientX;
-    isMoving = false;
-  }, { passive: true });
-
-  wrap.addEventListener('touchmove', (e) => {
+  wrap.addEventListener('touchstart', e => { startX = e.touches[0].clientX; isMoving = false; }, { passive: true });
+  wrap.addEventListener('touchmove', e => {
     const el = document.getElementById('main-media-el');
     if (!el || !localStorage.getItem('mediaPath_' + tag)) return;
     const diffX = e.touches[0].clientX - startX;
@@ -236,74 +211,57 @@ function initMediaEvents() {
       el.style.transition = 'none';
       if (!document.getElementById('media-del-btn')) {
         const btn = document.createElement('div');
-        btn.id = 'media-del-btn';
-        btn.className = 'media-delete-btn';
-        btn.innerText = '삭제';
-        btn.addEventListener('touchstart', (ev) => ev.stopPropagation(), { passive: false });
-        btn.addEventListener('touchend', (ev) => {
-          ev.stopPropagation();
-          ev.preventDefault();
+        btn.id = 'media-del-btn'; btn.className = 'media-delete-btn'; btn.innerText = '삭제';
+        btn.addEventListener('touchstart', ev => ev.stopPropagation(), { passive: false });
+        btn.addEventListener('touchend', ev => {
+          ev.stopPropagation(); ev.preventDefault();
           if (confirm('사진/영상을 삭제하시겠습니까?')) deleteMedia();
         }, { passive: false });
-        btn.onclick = (ev) => ev.stopPropagation();
+        btn.onclick = ev => ev.stopPropagation();
         wrap.appendChild(btn);
       }
     }
   }, { passive: true });
-
-  wrap.addEventListener('touchend', (e) => {
+  wrap.addEventListener('touchend', e => {
     if (document.getElementById('media-del-btn')) return;
-    const el = document.getElementById('main-media-el');
-    if (!el) return;
+    const el = document.getElementById('main-media-el'); if (!el) return;
     el.style.transition = 'transform 0.3s ease';
     if (isMoving) {
       const diffX = e.changedTouches[0].clientX - startX;
-      if (diffX < -50) {
-        el.style.transform = 'translateX(-80px)';
-      } else {
-        el.style.transform = 'translateX(0)';
-        setTimeout(() => { const b = document.getElementById('media-del-btn'); if (b) b.remove(); }, 300);
-      }
-    } else if (localStorage.getItem('mediaPath_' + tag)) {
-      openFullscreen();
-    }
+      if (diffX < -50) { el.style.transform = 'translateX(-80px)'; }
+      else { el.style.transform = 'translateX(0)'; setTimeout(() => { document.getElementById('media-del-btn')?.remove(); }, 300); }
+    } else if (localStorage.getItem('mediaPath_' + tag)) { openFullscreen(); }
   });
 }
 
 function showMedia(url, rot) {
   const wrap = document.getElementById('media-wrap');
-  const isVideo = /\.(mp4|mov|webm|ogg)/i.test(url) || url.includes('video');
-  wrap.innerHTML = isVideo
+  const isVid = /\.(mp4|mov|webm|ogg)/i.test(url) || url.includes('video');
+  wrap.innerHTML = isVid
     ? `<video src="${url}" class="rotate${rot}" id="main-media-el" playsinline muted loop autoplay></video>`
     : `<img src="${url}" class="rotate${rot}" id="main-media-el">`;
 }
 
 function deleteMedia() {
-  const mediaPath = localStorage.getItem('mediaPath_' + tag);
-  if (mediaPath) _supa.storage.from('user_uploads').remove([mediaPath]);
-  localStorage.removeItem('mediaPath_' + tag);
-  localStorage.removeItem('rot_' + tag);
-  const delBtn = document.getElementById('media-del-btn');
-  if (delBtn) delBtn.remove();
-  document.getElementById('media-wrap').innerHTML = '<div id="empty-txt" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>';
+  const p = localStorage.getItem('mediaPath_' + tag);
+  if (p) _supa.storage.from('user_uploads').remove([p]);
+  localStorage.removeItem('mediaPath_' + tag); localStorage.removeItem('rot_' + tag);
+  document.getElementById('media-del-btn')?.remove();
+  document.getElementById('media-wrap').innerHTML = '<div id="empty-txt" style="color:#64748b;font-size:14px;">사진/영상을 등록해 보세요.</div>';
 }
 
 function clearAllItems() {
-  if (confirm('목록과 등록된 사진/영상을 모두 초기화할까요?')) {
-    const mediaPath = localStorage.getItem('mediaPath_' + tag);
-    if (mediaPath) _supa.storage.from('user_uploads').remove([mediaPath]);
-    items = [];
-    localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
-    localStorage.removeItem('mediaPath_' + tag);
-    localStorage.removeItem('rot_' + tag);
-    document.getElementById('media-wrap').innerHTML = '<div id="empty-txt" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>';
+  if (confirm('목록과 사진/영상을 모두 초기화할까요?')) {
+    const p = localStorage.getItem('mediaPath_' + tag);
+    if (p) _supa.storage.from('user_uploads').remove([p]);
+    items = []; localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
+    localStorage.removeItem('mediaPath_' + tag); localStorage.removeItem('rot_' + tag);
+    document.getElementById('media-wrap').innerHTML = '<div id="empty-txt" style="color:#64748b;font-size:14px;">사진/영상을 등록해 보세요.</div>';
     renderItems();
   }
 }
 
-function showPicker() {
-  document.getElementById('picker-window').style.display = 'flex';
-}
+function showPicker() { document.getElementById('picker-window').style.display = 'flex'; }
 function closePicker(e) {
   if (e && e.target !== document.getElementById('picker-window')) return;
   document.getElementById('picker-window').style.display = 'none';
@@ -313,15 +271,9 @@ function pickGalleryPhoto() {
   document.getElementById('picker-window').style.display = 'none';
   const old = document.getElementById('temp-input'); if (old) old.remove();
   const input = document.createElement('input');
-  input.id = 'temp-input'; input.type = 'file';
-  input.accept = 'image/*';
-  input.style.display = 'none';
+  input.id = 'temp-input'; input.type = 'file'; input.accept = 'image/*'; input.style.display = 'none';
   document.body.appendChild(input);
-  input.onchange = (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    selectedFile = file;
-    previewForRotate(file);
-  };
+  input.onchange = e => { const f = e.target.files[0]; if (!f) return; selectedFile = f; previewForRotate(f); };
   input.click();
 }
 
@@ -329,115 +281,73 @@ function takePhoto() {
   document.getElementById('picker-window').style.display = 'none';
   const old = document.getElementById('temp-input'); if (old) old.remove();
   const input = document.createElement('input');
-  input.id = 'temp-input'; input.type = 'file';
-  input.accept = 'image/*';
-  input.capture = 'environment';
-  input.style.display = 'none';
+  input.id = 'temp-input'; input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment'; input.style.display = 'none';
   document.body.appendChild(input);
-  input.onchange = (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    selectedFile = file;
-    previewForRotate(file);
-  };
+  input.onchange = e => { const f = e.target.files[0]; if (!f) return; selectedFile = f; previewForRotate(f); };
   input.click();
 }
 
 function previewForRotate(file) {
   const reader = new FileReader();
-  reader.onload = (re) => {
-    const p = document.getElementById('preview-wrap');
-    p.innerHTML = `<img id="edit-preview" src="${re.target.result}" style="max-width:100%; max-height:100%;">`;
-    currentRotation = 0;
-    document.getElementById('rotate-window').style.display = 'flex';
+  reader.onload = re => {
+    document.getElementById('preview-wrap').innerHTML = `<img id="edit-preview" src="${re.target.result}" style="max-width:100%;max-height:100%;">`;
+    currentRotation = 0; document.getElementById('rotate-window').style.display = 'flex';
   };
   reader.readAsDataURL(file);
 }
 
 async function confirmUpload() {
   if (!selectedFile) return;
-
-  items = [];
-  localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
-
-  const file = selectedFile;
-  selectedFile = null;
+  items = []; localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
+  const file = selectedFile; selectedFile = null;
   document.getElementById('rotate-window').style.display = 'none';
-  document.getElementById('media-wrap').innerHTML = '<div style="font-weight:bold; color:#007bff; font-size:14px;">🔍 분석 중...</div>';
-
+  document.getElementById('media-wrap').innerHTML = '<div style="font-weight:bold;color:#007bff;font-size:14px;">🔍 분석 중...</div>';
   try {
     const extMatch = (file.name || '').match(/\.([0-9a-zA-Z]+)$/);
     const fileExt = extMatch ? extMatch[1].toLowerCase() : (file.type.split('/')[1] || 'jpg');
     const path = `${tag}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${fileExt}`;
-
     const oldPath = localStorage.getItem('mediaPath_' + tag);
-    if (oldPath && oldPath !== path) {
-      _supa.storage.from('user_uploads').remove([oldPath]).catch(() => {});
-    }
-
-    const { error: uploadErr } = await _supa.storage.from('user_uploads').upload(path, file, {
-      cacheControl: '3600', upsert: false, contentType: file.type || `image/${fileExt}`
-    });
+    if (oldPath && oldPath !== path) _supa.storage.from('user_uploads').remove([oldPath]).catch(() => {});
+    const { error: uploadErr } = await _supa.storage.from('user_uploads').upload(path, file, { cacheControl:'3600', upsert:false, contentType: file.type || `image/${fileExt}` });
     if (uploadErr) throw uploadErr;
-
-    localStorage.setItem('mediaPath_' + tag, path);
-    localStorage.setItem('rot_' + tag, currentRotation);
-
+    localStorage.setItem('mediaPath_' + tag, path); localStorage.setItem('rot_' + tag, currentRotation);
     const { data: signData, error: urlErr } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600);
     if (urlErr) throw urlErr;
     showMedia(signData.signedUrl, currentRotation);
-
     if (file.type.startsWith('image/')) {
       const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filePath: path, mimeType: file.type })
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filePath: path, mimeType: file.type, userCorrections: userCorrections.slice(-20) })
       });
       if (!res.ok) throw new Error(`분석 API 오류: ${res.status}`);
       const { items: newItems } = await res.json();
-
-      if (newItems && newItems.length > 0) {
-        newItems.forEach(it => {
-          items.push({ n: `${it.category}:${it.name}`, q: it.qty || 1 });
-        });
+      if (newItems?.length > 0) {
+        newItems.forEach(it => items.push({ n: `${it.category}:${it.name}`, q: it.qty || 1 }));
         localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
         renderItems();
         alert(`✅ ${items.length}개 물품을 찾았습니다!`);
       } else {
         renderItems();
-        alert('물품을 찾지 못했습니다.\n사진을 다시 촬영하거나 직접 추가해 주세요.');
+        alert('물품을 찾지 못했습니다.\n다시 촬영하거나 직접 추가해 주세요.');
       }
     }
-
   } catch (err) {
     console.error('업로드/분석 오류:', err);
-    document.getElementById('media-wrap').innerHTML = '<div style="color:#ef4444; font-size:14px;">업로드/분석 실패</div>';
+    document.getElementById('media-wrap').innerHTML = '<div style="color:#ef4444;font-size:14px;">업로드/분석 실패</div>';
     alert('오류: ' + err.message);
   }
 }
 
-function rotateMedia(deg) {
-  currentRotation = (currentRotation + deg + 360) % 360;
-  document.getElementById('edit-preview').className = `rotate${currentRotation}`;
-}
-function cancelUpload() {
-  document.getElementById('rotate-window').style.display = 'none';
-  selectedFile = null;
-}
+function rotateMedia(deg) { currentRotation = (currentRotation + deg + 360) % 360; document.getElementById('edit-preview').className = `rotate${currentRotation}`; }
+function cancelUpload() { document.getElementById('rotate-window').style.display = 'none'; selectedFile = null; }
 
 async function startVideoRecord() {
   document.getElementById('picker-window').style.display = 'none';
-  if (!navigator.mediaDevices?.getUserMedia) {
-    alert('이 브라우저에서는 영상 촬영이 지원되지 않습니다.');
-    return;
-  }
+  if (!navigator.mediaDevices?.getUserMedia) { alert('이 브라우저에서는 영상 촬영이 지원되지 않습니다.'); return; }
   try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: { ideal: 'environment' } },
-      audio: false
-    });
+    mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width:{ideal:1280}, height:{ideal:720}, facingMode:{ideal:'environment'} }, audio: false });
     const liveEl = document.getElementById('record-live');
-    liveEl.srcObject = mediaStream;
-    liveEl.style.display = 'block';
+    liveEl.srcObject = mediaStream; liveEl.style.display = 'block';
     document.getElementById('record-playback').style.display = 'none';
     document.getElementById('record-timer').textContent = '00:00 / 00:30';
     document.getElementById('record-timer').className = 'record-timer';
@@ -450,24 +360,20 @@ async function startVideoRecord() {
     document.getElementById('rec-hint').textContent = '⏺ 버튼을 눌러 촬영을 시작하세요';
     recordedBlob = null; isRecording = false;
     document.getElementById('record-window').style.display = 'flex';
-  } catch (err) {
-    alert('카메라 접근 실패: ' + err.message);
-  }
+  } catch (err) { alert('카메라 접근 실패: ' + err.message); }
 }
 
 function toggleRecording() {
   if (!isRecording) {
     recordedChunks = [];
-    const mimeType = ['video/webm;codecs=vp9', 'video/webm', 'video/mp4']
-      .find(t => MediaRecorder.isTypeSupported(t)) || '';
-    mediaRecorder = new MediaRecorder(mediaStream, mimeType ? { mimeType } : {});
-    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+    const mt = ['video/webm;codecs=vp9','video/webm','video/mp4'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+    mediaRecorder = new MediaRecorder(mediaStream, mt ? { mimeType: mt } : {});
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
     mediaRecorder.onstop = () => {
-      const type = (mimeType || 'video/webm').split(';')[0];
+      const type = (mt || 'video/webm').split(';')[0];
       recordedBlob = new Blob(recordedChunks, { type });
-      const url = URL.createObjectURL(recordedBlob);
       const pb = document.getElementById('record-playback');
-      pb.src = url; pb.style.display = 'block';
+      pb.src = URL.createObjectURL(recordedBlob); pb.style.display = 'block';
       document.getElementById('record-live').style.display = 'none';
       document.getElementById('rec-indicator').style.display = 'none';
       document.getElementById('record-btn').style.display = 'none';
@@ -476,29 +382,22 @@ function toggleRecording() {
       document.getElementById('rec-hint').textContent = '영상을 확인하고 등록하거나 다시 촬영하세요.';
       isRecording = false;
     };
-    mediaRecorder.start();
-    isRecording = true;
-    recordSeconds = 0;
+    mediaRecorder.start(); isRecording = true; recordSeconds = 0;
     document.getElementById('record-btn').className = 'record-circle recording';
     document.getElementById('record-btn').innerHTML = '⏹';
     document.getElementById('rec-indicator').style.display = 'block';
     document.getElementById('rec-hint').textContent = '촬영 중... (최대 30초)';
     recordTimer = setInterval(() => {
       recordSeconds++;
-      const s = String(recordSeconds).padStart(2, '0');
+      const s = String(recordSeconds).padStart(2,'0');
       document.getElementById('record-timer').textContent = `00:${s} / 00:30`;
       if (recordSeconds >= 25) document.getElementById('record-timer').className = 'record-timer danger';
       if (recordSeconds >= 30) stopRecording();
     }, 1000);
-  } else {
-    stopRecording();
-  }
+  } else { stopRecording(); }
 }
 
-function stopRecording() {
-  clearInterval(recordTimer);
-  if (mediaRecorder?.state !== 'inactive') mediaRecorder.stop();
-}
+function stopRecording() { clearInterval(recordTimer); if (mediaRecorder?.state !== 'inactive') mediaRecorder.stop(); }
 
 function retakeRecording() {
   recordedBlob = null; recordedChunks = [];
@@ -519,34 +418,23 @@ async function confirmRecording() {
   if (!recordedBlob) return;
   if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
   document.getElementById('record-window').style.display = 'none';
-
-  items = [];
-  localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
-  document.getElementById('media-wrap').innerHTML = '<div style="font-weight:bold; color:#007bff; font-size:14px;">📤 업로드 중...</div>';
-
+  items = []; localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
+  document.getElementById('media-wrap').innerHTML = '<div style="font-weight:bold;color:#007bff;font-size:14px;">📤 업로드 중...</div>';
   try {
     const ext = recordedBlob.type.includes('mp4') ? 'mp4' : 'webm';
-    const path = `${tag}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const path = `${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
     const file = new File([recordedBlob], `record.${ext}`, { type: recordedBlob.type });
-
     const oldPath = localStorage.getItem('mediaPath_' + tag);
     if (oldPath) _supa.storage.from('user_uploads').remove([oldPath]).catch(() => {});
-
-    const { error } = await _supa.storage.from('user_uploads').upload(path, file, {
-      cacheControl: '3600', upsert: false, contentType: recordedBlob.type
-    });
+    const { error } = await _supa.storage.from('user_uploads').upload(path, file, { cacheControl:'3600', upsert:false, contentType:recordedBlob.type });
     if (error) throw error;
-
-    localStorage.setItem('mediaPath_' + tag, path);
-    localStorage.setItem('rot_' + tag, 0);
-
-    const { data: signData, error: urlErr } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600);
-    if (urlErr) throw urlErr;
-    showMedia(signData.signedUrl, 0);
-    renderItems();
+    localStorage.setItem('mediaPath_' + tag, path); localStorage.setItem('rot_' + tag, 0);
+    const { data: sd, error: ue } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600);
+    if (ue) throw ue;
+    showMedia(sd.signedUrl, 0); renderItems();
     alert('✅ 영상이 등록되었습니다.\n(AI 분석은 사진만 지원됩니다.)');
   } catch (err) {
-    document.getElementById('media-wrap').innerHTML = '<div style="color:#ef4444; font-size:14px;">업로드 실패</div>';
+    document.getElementById('media-wrap').innerHTML = '<div style="color:#ef4444;font-size:14px;">업로드 실패</div>';
     alert('오류: ' + err.message);
   }
 }
@@ -555,8 +443,7 @@ function cancelRecording() {
   clearInterval(recordTimer);
   if (mediaRecorder?.state !== 'inactive') mediaRecorder?.stop();
   if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
-  document.getElementById('record-window').style.display = 'none';
-  isRecording = false;
+  document.getElementById('record-window').style.display = 'none'; isRecording = false;
 }
 
 function renderItems(filter = '') {
@@ -565,17 +452,11 @@ function renderItems(filter = '') {
   items.forEach((it, idx) => {
     if (filter && !it.n.toLowerCase().includes(filter.toLowerCase())) return;
     let cat = '기타', name = it.n;
-    if (it.n.includes(':')) {
-      const parts = it.n.split(':');
-      cat = parts[0].trim() || '기타';
-      name = parts.slice(1).join(':').trim() || parts[0].trim();
-    }
+    if (it.n.includes(':')) { const p = it.n.split(':'); cat = p[0].trim() || '기타'; name = p.slice(1).join(':').trim() || p[0].trim(); }
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push({ name, qty: it.q || 1, originalIdx: idx });
   });
-
   if (Object.keys(groups).length === 0) { container.innerHTML = ''; return; }
-
   container.innerHTML = Object.keys(groups).map(cat => `
     <div class="category-section">
       <div class="category-header" onclick="this.nextElementSibling.style.display=(this.nextElementSibling.style.display==='none'?'block':'none')">
@@ -584,92 +465,100 @@ function renderItems(filter = '') {
       </div>
       <div class="category-content" style="display:block;">
         ${groups[cat].map(it => `
-          <div class="item-card">
-            <div class="item-header">
-              <span class="item-name">${it.name}</span>
-              <div class="qty-controls">
-                <button class="qty-btn" onclick="changeQty(${it.originalIdx},-1)">-</button>
-                <span class="qty-num">${it.qty}개</span>
-                <button class="qty-btn" onclick="changeQty(${it.originalIdx},1)">+</button>
+          <div class="item-card" id="card-${it.originalIdx}">
+            <div class="item-swipe-delete" onclick="deleteItem(${it.originalIdx})">삭제</div>
+            <div class="item-slide-content" id="slide-${it.originalIdx}">
+              <div class="item-header">
+                <span class="item-name">${it.name}</span>
+                <div class="qty-controls">
+                  <button class="qty-btn" onclick="changeQty(${it.originalIdx},-1)">-</button>
+                  <span class="qty-num">${it.qty}개</span>
+                  <button class="qty-btn" onclick="changeQty(${it.originalIdx},1)">+</button>
+                </div>
               </div>
-            </div>
-            <div class="item-content">
-              <button class="action-btn" onclick="editItem(${it.originalIdx})">편집</button>
-              <button class="action-btn" style="color:#ef4444" onclick="deleteItem(${it.originalIdx})">삭제</button>
+              <div class="item-content">
+                <button class="action-btn" onclick="editItem(${it.originalIdx})">편집</button>
+                <button class="action-btn" style="color:#ef4444" onclick="deleteItem(${it.originalIdx})">삭제</button>
+              </div>
             </div>
           </div>
         `).join('')}
       </div>
     </div>
   `).join('');
+  bindItemSwipeEvents();
 }
 
-function changeQty(idx, val) {
-  items[idx].q = Math.max(1, (items[idx].q || 1) + val);
-  localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
-  renderItems();
+function bindItemSwipeEvents() {
+  let activeSlide = null;
+  document.querySelectorAll('.item-slide-content').forEach(el => {
+    let startX = 0, startY = 0, isDragging = false, isHorizontal = null;
+    el.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+      isDragging = false; isHorizontal = null;
+    }, { passive: true });
+    el.addEventListener('touchmove', e => {
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+      if (isHorizontal === null) isHorizontal = Math.abs(dx) > Math.abs(dy);
+      if (!isHorizontal) return;
+      e.preventDefault();
+      isDragging = true;
+      if (activeSlide && activeSlide !== el) {
+        activeSlide.style.transition = 'transform 0.3s ease';
+        activeSlide.style.transform = 'translateX(0)';
+        activeSlide = null;
+      }
+      el.style.transform = `translateX(${Math.max(-80, Math.min(0, dx))}px)`;
+      el.style.transition = 'none';
+    }, { passive: false });
+    el.addEventListener('touchend', e => {
+      if (!isDragging || !isHorizontal) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      el.style.transition = 'transform 0.3s ease';
+      if (dx < -40) { el.style.transform = 'translateX(-80px)'; activeSlide = el; }
+      else { el.style.transform = 'translateX(0)'; activeSlide = null; }
+    }, { passive: true });
+  });
+  document.getElementById('list-items').addEventListener('touchstart', e => {
+    if (activeSlide && !e.target.closest('.item-slide-content')) {
+      activeSlide.style.transition = 'transform 0.3s ease';
+      activeSlide.style.transform = 'translateX(0)';
+      activeSlide = null;
+    }
+  }, { passive: true });
 }
-function deleteItem(idx) {
-  if (confirm('삭제할까요?')) {
-    items.splice(idx, 1);
-    localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
-    renderItems();
-  }
-}
+
+function changeQty(idx, val) { items[idx].q = Math.max(1, (items[idx].q || 1) + val); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); }
+function deleteItem(idx) { if (confirm('삭제할까요?')) { items.splice(idx, 1); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); } }
 function editItem(idx) {
   const current = items[idx].n.includes(':') ? items[idx].n.split(':').slice(1).join(':').trim() : items[idx].n;
-  const n = prompt('이름:', current);
-  if (n) {
+  const newName = prompt('이름:', current);
+  if (newName && newName !== current) {
     const cat = items[idx].n.includes(':') ? items[idx].n.split(':')[0].trim() : '기타';
-    items[idx].n = `${cat}:${n}`;
+    userCorrections.push({ original: current, corrected: newName });
+    if (userCorrections.length > 50) userCorrections = userCorrections.slice(-50);
+    localStorage.setItem('corrections_' + tag, JSON.stringify(userCorrections));
+    items[idx].n = `${cat}:${newName}`;
     localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
     renderItems();
   }
 }
-function addItemDirectly() {
-  const n = prompt('물품 입력:');
-  if (n) { items.push({ n, q: 1 }); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); }
-}
-function renameDrawer() {
-  const n = prompt('서랍 이름:', document.getElementById('drawer-title').innerText);
-  if (n) { document.getElementById('drawer-title').innerText = n; localStorage.setItem('name_' + tag, n); }
-}
-function toggleAll() {
-  isAllOpen = !isAllOpen;
-  document.querySelectorAll('.category-content').forEach(c => c.style.display = isAllOpen ? 'block' : 'none');
-  document.getElementById('toggle-text').textContent = isAllOpen ? '전체접기' : '전체펼치기';
-}
-function openFullscreen() {
-  const el = document.getElementById('main-media-el'); if (!el) return;
-  const fs = document.getElementById('fs-content');
-  fs.innerHTML = el.tagName === 'VIDEO'
-    ? `<video src="${el.src}" class="${el.className}" controls autoplay></video>`
-    : `<img src="${el.src}" class="${el.className}">`;
-  document.getElementById('fullscreen-view').style.display = 'flex';
-}
+function addItemDirectly() { const n = prompt('물품 입력:'); if (n) { items.push({ n, q: 1 }); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); } }
+function renameDrawer() { const n = prompt('서랍 이름:', document.getElementById('drawer-title').innerText); if (n) { document.getElementById('drawer-title').innerText = n; localStorage.setItem('name_' + tag, n); } }
+function toggleAll() { isAllOpen = !isAllOpen; document.querySelectorAll('.category-content').forEach(c => c.style.display = isAllOpen ? 'block' : 'none'); document.getElementById('toggle-text').textContent = isAllOpen ? '전체접기' : '전체펼치기'; }
+function openFullscreen() { const el = document.getElementById('main-media-el'); if (!el) return; const fs = document.getElementById('fs-content'); fs.innerHTML = el.tagName === 'VIDEO' ? `<video src="${el.src}" class="${el.className}" controls autoplay></video>` : `<img src="${el.src}" class="${el.className}">`; document.getElementById('fullscreen-view').style.display = 'flex'; }
 function closeFullscreen() { document.getElementById('fullscreen-view').style.display = 'none'; }
-function toggleOverlay(id) {
-  const el = document.getElementById(id);
-  el.style.display = (window.getComputedStyle(el).display === 'none') ? 'flex' : 'none';
-}
-
+function toggleOverlay(id) { const el = document.getElementById(id); el.style.display = window.getComputedStyle(el).display === 'none' ? 'flex' : 'none'; }
 async function sendMsg() {
-  const i = document.getElementById('chat-input');
-  const t = i.value.trim(); if (!t) return;
+  const i = document.getElementById('chat-input'); const t = i.value.trim(); if (!t) return;
   const b = document.getElementById('chat-messages');
-  b.innerHTML += `<div class="msg user">${t}</div>`; i.value = '';
-  b.scrollTop = b.scrollHeight;
+  b.innerHTML += `<div class="msg user">${t}</div>`; i.value = ''; b.scrollTop = b.scrollHeight;
   try {
-    const res = await fetch('/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: t, tag, drawerName: document.getElementById('drawer-title').innerText, inventory: JSON.stringify(items.map(it => it.n)) })
-    });
+    const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message:t, tag, drawerName: document.getElementById('drawer-title').innerText, inventory: JSON.stringify(items.map(it => it.n)) }) });
     const d = await res.json();
-    b.innerHTML += `<div class="msg bot">${d.reply}</div>`;
-    b.scrollTop = b.scrollHeight;
-  } catch (err) {
-    b.innerHTML += `<div class="msg bot">오류가 발생했습니다.</div>`;
-  }
+    b.innerHTML += `<div class="msg bot">${d.reply}</div>`; b.scrollTop = b.scrollHeight;
+  } catch (err) { b.innerHTML += `<div class="msg bot">오류가 발생했습니다.</div>`; }
 }
 </script>
 </body>
