@@ -19,15 +19,55 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
 .media-delete-btn { position: absolute; right: 0; top: 0; width: 80px; height: 100%; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 3; border-radius: 0 20px 20px 0; cursor: pointer; font-size: 15px; }
 .list-header { display: flex; justify-content: flex-end; align-items: center; padding: 10px 15px 5px 15px; flex-shrink: 0; }
 .toggle-btn { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #94a3b8; font-weight: bold; }
-.round-arrow { width: 26px; height: 26px; background: var(--light-grey); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; }
+.round-arrow { width: 26px; height: 26px; background: var(--light-grey); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .chevron { width: 6px; height: 6px; border-right: 2px solid #64748b; border-bottom: 2px solid #64748b; transform: translateY(-1px) rotate(45deg); }
 .list-container { flex: 1; overflow-y: auto; padding: 0 15px 15px 15px; display: flex; flex-direction: column; -webkit-overflow-scrolling: touch; }
 .add-list-btn { align-self: flex-start; background: none; border: none; color: var(--primary); font-weight: bold; cursor: pointer; font-size: 15px; padding: 0; margin-bottom: 15px; }
 .category-section { margin-bottom: 20px; }
 .category-header { background: #fff; padding: 12px 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #f1f5f9; margin-bottom: 8px; }
-.item-card { background: #fff; border-radius: 18px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; overflow: hidden; position: relative; }
-.item-swipe-delete { position: absolute; right: 0; top: 0; bottom: 0; width: 80px; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; border-radius: 0 18px 18px 0; cursor: pointer; z-index: 1; }
-.item-slide-content { position: relative; z-index: 2; background: #fff; border-radius: 18px; transition: transform 0.3s ease; will-change: transform; }
+
+/* ── 슬라이드 삭제 구조 ── */
+.item-card {
+  background: #fff;
+  border-radius: 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+  overflow: hidden;
+  position: relative;
+}
+/* 삭제 버튼: 기본적으로 숨김 — slide-open 클래스일 때만 표시 */
+.item-swipe-delete {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 80px;
+  background: #ef4444;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  border-radius: 0 18px 18px 0;
+  cursor: pointer;
+  z-index: 1;
+  visibility: hidden; /* 기본 숨김 */
+}
+/* slide-open 상태일 때만 삭제 버튼 표시 */
+.item-card.slide-open .item-swipe-delete {
+  visibility: visible;
+}
+.item-slide-content {
+  position: relative;
+  z-index: 2;
+  background: #fff;
+  border-radius: 18px;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+  will-change: transform;
+  touch-action: pan-y; /* 수직 스크롤 기본 허용 */
+}
+
 .item-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
 .item-name { font-weight: 700; font-size: 16px; word-break: keep-all; }
 .qty-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
@@ -92,7 +132,7 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
   </div>
 </div>
 
-<div class="list-container">
+<div class="list-container" id="list-container">
   <button class="add-list-btn" onclick="addItemDirectly()">＋ 목록추가</button>
   <div id="list-items"></div>
   <div class="bottom-actions">
@@ -177,11 +217,26 @@ const params = new URLSearchParams(window.location.search);
 const tag = (params.get('tag') || 'DRAWER001').toUpperCase();
 let items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
 let isAllOpen = false, currentRotation = 0, selectedFile = null;
-let activeSlide = null; // 전역으로 관리 - renderItems 재호출 시 초기화 방지
 let userCorrections = JSON.parse(localStorage.getItem('corrections_' + tag) || '[]');
 let mediaStream = null, mediaRecorder = null;
 let recordedChunks = [], recordTimer = null;
 let recordSeconds = 0, recordedBlob = null, isRecording = false;
+
+// ── 슬라이드 상태 전역 관리 ──
+// activeSlideCard: 현재 열려 있는 item-card DOM 요소 (null이면 없음)
+let activeSlideCard = null;
+
+// 슬라이드 닫기 헬퍼 — 어디서든 호출 가능
+function closeActiveSlide() {
+  if (!activeSlideCard) return;
+  const content = activeSlideCard.querySelector('.item-slide-content');
+  if (content) {
+    content.style.transition = 'transform 0.3s ease';
+    content.style.transform = 'translateX(0)';
+  }
+  activeSlideCard.classList.remove('slide-open'); // 삭제 버튼 숨김
+  activeSlideCard = null;
+}
 
 window.onload = async () => {
   document.getElementById('drawer-title').innerText = localStorage.getItem('name_' + tag) || '서랍 1';
@@ -192,8 +247,14 @@ window.onload = async () => {
   }
   initMediaEvents();
   renderItems();
+
+  // 스크롤 시 열린 슬라이드 닫기
+  document.getElementById('list-container').addEventListener('scroll', () => {
+    closeActiveSlide();
+  }, { passive: true });
 };
 
+// ── 미디어 박스 ──
 function handleMediaClick() {
   if (!localStorage.getItem('mediaPath_' + tag)) showPicker();
 }
@@ -202,8 +263,7 @@ function initMediaEvents() {
   const wrap = document.getElementById('media-wrap');
   let startX = 0, isMoving = false;
   wrap.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX;
-    isMoving = false;
+    startX = e.touches[0].clientX; isMoving = false;
   }, { passive: true });
   wrap.addEventListener('touchmove', e => {
     const el = document.getElementById('main-media-el');
@@ -261,10 +321,12 @@ function clearAllItems() {
     items = []; localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
     localStorage.removeItem('mediaPath_' + tag); localStorage.removeItem('rot_' + tag);
     document.getElementById('media-wrap').innerHTML = '<div id="empty-txt" style="color:#64748b;font-size:14px;">사진/영상을 등록해 보세요.</div>';
+    activeSlideCard = null;
     renderItems();
   }
 }
 
+// ── 미디어 선택 ──
 function showPicker() { document.getElementById('picker-window').style.display = 'flex'; }
 function closePicker(e) {
   if (e && e.target !== document.getElementById('picker-window')) return;
@@ -347,6 +409,7 @@ async function confirmUpload() {
 function rotateMedia(deg) { currentRotation = (currentRotation + deg + 360) % 360; document.getElementById('edit-preview').className = `rotate${currentRotation}`; }
 function cancelUpload() { document.getElementById('rotate-window').style.display = 'none'; selectedFile = null; }
 
+// ── 영상 촬영 ──
 async function startVideoRecord() {
   document.getElementById('picker-window').style.display = 'none';
   if (!navigator.mediaDevices?.getUserMedia) { alert('이 브라우저에서는 영상 촬영이 지원되지 않습니다.'); return; }
@@ -454,7 +517,11 @@ function cancelRecording() {
   document.getElementById('record-window').style.display = 'none'; isRecording = false;
 }
 
+// ── 목록 렌더링 ──
 function renderItems(filter = '') {
+  // 렌더링 전 슬라이드 상태 초기화
+  activeSlideCard = null;
+
   const container = document.getElementById('list-items');
   const groups = {};
   items.forEach((it, idx) => {
@@ -468,7 +535,9 @@ function renderItems(filter = '') {
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push({ name, qty: it.q || 1, originalIdx: idx });
   });
+
   if (Object.keys(groups).length === 0) { container.innerHTML = ''; return; }
+
   container.innerHTML = Object.keys(groups).map(cat => `
     <div class="category-section">
       <div class="category-header" onclick="this.nextElementSibling.style.display=(this.nextElementSibling.style.display==='none'?'block':'none')">
@@ -498,93 +567,86 @@ function renderItems(filter = '') {
       </div>
     </div>
   `).join('');
+
   bindItemSwipeEvents();
 }
 
+// ── 슬라이드 삭제 이벤트 ──
 function bindItemSwipeEvents() {
-  document.querySelectorAll('.item-slide-content').forEach(el => {
-    let startX = 0, startY = 0, isDragging = false, isHorizontal = null;
+  document.querySelectorAll('.item-slide-content').forEach(slideContent => {
+    const card = slideContent.closest('.item-card');
+    let startX = 0, startY = 0;
+    let directionLocked = false; // 이 터치에서 방향이 결정됐는지
+    let isHorizontalGesture = false; // 수평 제스처인지
 
-    el.addEventListener('touchstart', e => {
+    slideContent.addEventListener('touchstart', e => {
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
-      isDragging = false;
-      isHorizontal = null;
+      directionLocked = false;
+      isHorizontalGesture = false;
+      // 이미 열린 다른 슬라이드 닫기
+      if (activeSlideCard && activeSlideCard !== card) {
+        closeActiveSlide();
+      }
     }, { passive: true });
 
-    el.addEventListener('touchmove', e => {
+    slideContent.addEventListener('touchmove', e => {
       const dx = e.touches[0].clientX - startX;
       const dy = e.touches[0].clientY - startY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
 
-      // 방향 판단: 최소 8px 이상 움직였을 때만 결정
-      // 수평:수직 비율 2배 이상이어야 수평으로 인식 → 스크롤 중 오인식 방지
-      if (isHorizontal === null) {
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 8) return;
-        isHorizontal = Math.abs(dx) > Math.abs(dy) * 2;
+      // 8px 이상 움직였을 때 방향 결정 (한 번만)
+      if (!directionLocked && dist >= 8) {
+        directionLocked = true;
+        // 수평:수직 = 2:1 이상일 때만 수평으로 판정
+        isHorizontalGesture = Math.abs(dx) >= Math.abs(dy) * 2;
       }
 
-      // 수직 스크롤 → 열린 슬라이드 닫고 무시
-      if (!isHorizontal) {
-        if (activeSlide) {
-          activeSlide.style.transition = 'transform 0.3s ease';
-          activeSlide.style.transform = 'translateX(0)';
-          activeSlide = null;
-        }
-        return;
-      }
+      if (!directionLocked) return; // 아직 방향 미결정
+      if (!isHorizontalGesture) return; // 수직 스크롤 → 터치 이벤트 방해 안 함
 
       // 수평 슬라이드 처리
-      e.preventDefault();
-      isDragging = true;
+      e.preventDefault(); // 수평일 때만 스크롤 방지
+      const clampedX = Math.max(-80, Math.min(0, dx));
+      slideContent.style.transition = 'none';
+      slideContent.style.transform = `translateX(${clampedX}px)`;
 
-      // 다른 열린 슬라이드 닫기
-      if (activeSlide && activeSlide !== el) {
-        activeSlide.style.transition = 'transform 0.3s ease';
-        activeSlide.style.transform = 'translateX(0)';
-        activeSlide = null;
+      // 조금이라도 열리면 삭제버튼 미리 표시
+      if (clampedX < 0) {
+        card.classList.add('slide-open');
+        activeSlideCard = card;
       }
-
-      el.style.transform = `translateX(${Math.max(-80, Math.min(0, dx))}px)`;
-      el.style.transition = 'none';
     }, { passive: false });
 
-    el.addEventListener('touchend', e => {
-      if (!isDragging || !isHorizontal) return;
+    slideContent.addEventListener('touchend', e => {
+      if (!directionLocked || !isHorizontalGesture) return;
+
       const dx = e.changedTouches[0].clientX - startX;
-      el.style.transition = 'transform 0.3s ease';
+      slideContent.style.transition = 'transform 0.3s ease';
+
       if (dx < -40) {
-        el.style.transform = 'translateX(-80px)';
-        activeSlide = el;
+        // 충분히 밀었으면 삭제버튼 표시 상태 유지
+        slideContent.style.transform = 'translateX(-80px)';
+        card.classList.add('slide-open');
+        activeSlideCard = card;
       } else {
-        el.style.transform = 'translateX(0)';
-        activeSlide = null;
+        // 원위치 → 슬라이드 상태 완전 초기화
+        slideContent.style.transform = 'translateX(0)';
+        card.classList.remove('slide-open'); // 삭제버튼 숨김
+        if (activeSlideCard === card) activeSlideCard = null; // 상태 reset
       }
     }, { passive: true });
   });
 
-  // 스크롤 시 열린 슬라이드 즉시 닫기
-  const listContainer = document.querySelector('.list-container');
-  if (listContainer) {
-    listContainer.addEventListener('scroll', () => {
-      if (activeSlide) {
-        activeSlide.style.transition = 'transform 0.3s ease';
-        activeSlide.style.transform = 'translateX(0)';
-        activeSlide = null;
-      }
-    }, { passive: true });
-  }
-
-  // 목록 바깥 터치 시 열린 슬라이드 닫기
+  // 목록 내 슬라이드 콘텐츠 밖 터치 시 닫기
   document.getElementById('list-items').addEventListener('touchstart', e => {
-    if (activeSlide && !e.target.closest('.item-slide-content')) {
-      activeSlide.style.transition = 'transform 0.3s ease';
-      activeSlide.style.transform = 'translateX(0)';
-      activeSlide = null;
+    if (activeSlideCard && !e.target.closest('.item-slide-content')) {
+      closeActiveSlide();
     }
   }, { passive: true });
 }
 
+// ── 목록 관리 ──
 function changeQty(idx, val) {
   items[idx].q = Math.max(1, (items[idx].q || 1) + val);
   localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
