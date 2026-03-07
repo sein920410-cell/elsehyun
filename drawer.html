@@ -177,6 +177,7 @@ const params = new URLSearchParams(window.location.search);
 const tag = (params.get('tag') || 'DRAWER001').toUpperCase();
 let items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
 let isAllOpen = false, currentRotation = 0, selectedFile = null;
+let activeSlide = null; // 전역으로 관리 - renderItems 재호출 시 초기화 방지
 let userCorrections = JSON.parse(localStorage.getItem('corrections_' + tag) || '[]');
 let mediaStream = null, mediaRecorder = null;
 let recordedChunks = [], recordTimer = null;
@@ -200,7 +201,10 @@ function handleMediaClick() {
 function initMediaEvents() {
   const wrap = document.getElementById('media-wrap');
   let startX = 0, isMoving = false;
-  wrap.addEventListener('touchstart', e => { startX = e.touches[0].clientX; isMoving = false; }, { passive: true });
+  wrap.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    isMoving = false;
+  }, { passive: true });
   wrap.addEventListener('touchmove', e => {
     const el = document.getElementById('main-media-el');
     if (!el || !localStorage.getItem('mediaPath_' + tag)) return;
@@ -308,7 +312,9 @@ async function confirmUpload() {
     const path = `${tag}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${fileExt}`;
     const oldPath = localStorage.getItem('mediaPath_' + tag);
     if (oldPath && oldPath !== path) _supa.storage.from('user_uploads').remove([oldPath]).catch(() => {});
-    const { error: uploadErr } = await _supa.storage.from('user_uploads').upload(path, file, { cacheControl:'3600', upsert:false, contentType: file.type || `image/${fileExt}` });
+    const { error: uploadErr } = await _supa.storage.from('user_uploads').upload(path, file, {
+      cacheControl: '3600', upsert: false, contentType: file.type || `image/${fileExt}`
+    });
     if (uploadErr) throw uploadErr;
     localStorage.setItem('mediaPath_' + tag, path); localStorage.setItem('rot_' + tag, currentRotation);
     const { data: signData, error: urlErr } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600);
@@ -345,7 +351,9 @@ async function startVideoRecord() {
   document.getElementById('picker-window').style.display = 'none';
   if (!navigator.mediaDevices?.getUserMedia) { alert('이 브라우저에서는 영상 촬영이 지원되지 않습니다.'); return; }
   try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width:{ideal:1280}, height:{ideal:720}, facingMode:{ideal:'environment'} }, audio: false });
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: { ideal: 'environment' } }, audio: false
+    });
     const liveEl = document.getElementById('record-live');
     liveEl.srcObject = mediaStream; liveEl.style.display = 'block';
     document.getElementById('record-playback').style.display = 'none';
@@ -452,7 +460,11 @@ function renderItems(filter = '') {
   items.forEach((it, idx) => {
     if (filter && !it.n.toLowerCase().includes(filter.toLowerCase())) return;
     let cat = '기타', name = it.n;
-    if (it.n.includes(':')) { const p = it.n.split(':'); cat = p[0].trim() || '기타'; name = p.slice(1).join(':').trim() || p[0].trim(); }
+    if (it.n.includes(':')) {
+      const parts = it.n.split(':');
+      cat = parts[0].trim() || '기타';
+      name = parts.slice(1).join(':').trim() || parts[0].trim();
+    }
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push({ name, qty: it.q || 1, originalIdx: idx });
   });
@@ -490,36 +502,80 @@ function renderItems(filter = '') {
 }
 
 function bindItemSwipeEvents() {
-  let activeSlide = null;
   document.querySelectorAll('.item-slide-content').forEach(el => {
     let startX = 0, startY = 0, isDragging = false, isHorizontal = null;
+
     el.addEventListener('touchstart', e => {
-      startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-      isDragging = false; isHorizontal = null;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      isDragging = false;
+      isHorizontal = null;
     }, { passive: true });
+
     el.addEventListener('touchmove', e => {
       const dx = e.touches[0].clientX - startX;
       const dy = e.touches[0].clientY - startY;
-      if (isHorizontal === null) isHorizontal = Math.abs(dx) > Math.abs(dy);
-      if (!isHorizontal) return;
+
+      // 방향 판단: 최소 8px 이상 움직였을 때만 결정
+      // 수평:수직 비율 2배 이상이어야 수평으로 인식 → 스크롤 중 오인식 방지
+      if (isHorizontal === null) {
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 8) return;
+        isHorizontal = Math.abs(dx) > Math.abs(dy) * 2;
+      }
+
+      // 수직 스크롤 → 열린 슬라이드 닫고 무시
+      if (!isHorizontal) {
+        if (activeSlide) {
+          activeSlide.style.transition = 'transform 0.3s ease';
+          activeSlide.style.transform = 'translateX(0)';
+          activeSlide = null;
+        }
+        return;
+      }
+
+      // 수평 슬라이드 처리
       e.preventDefault();
       isDragging = true;
+
+      // 다른 열린 슬라이드 닫기
       if (activeSlide && activeSlide !== el) {
         activeSlide.style.transition = 'transform 0.3s ease';
         activeSlide.style.transform = 'translateX(0)';
         activeSlide = null;
       }
+
       el.style.transform = `translateX(${Math.max(-80, Math.min(0, dx))}px)`;
       el.style.transition = 'none';
     }, { passive: false });
+
     el.addEventListener('touchend', e => {
       if (!isDragging || !isHorizontal) return;
       const dx = e.changedTouches[0].clientX - startX;
       el.style.transition = 'transform 0.3s ease';
-      if (dx < -40) { el.style.transform = 'translateX(-80px)'; activeSlide = el; }
-      else { el.style.transform = 'translateX(0)'; activeSlide = null; }
+      if (dx < -40) {
+        el.style.transform = 'translateX(-80px)';
+        activeSlide = el;
+      } else {
+        el.style.transform = 'translateX(0)';
+        activeSlide = null;
+      }
     }, { passive: true });
   });
+
+  // 스크롤 시 열린 슬라이드 즉시 닫기
+  const listContainer = document.querySelector('.list-container');
+  if (listContainer) {
+    listContainer.addEventListener('scroll', () => {
+      if (activeSlide) {
+        activeSlide.style.transition = 'transform 0.3s ease';
+        activeSlide.style.transform = 'translateX(0)';
+        activeSlide = null;
+      }
+    }, { passive: true });
+  }
+
+  // 목록 바깥 터치 시 열린 슬라이드 닫기
   document.getElementById('list-items').addEventListener('touchstart', e => {
     if (activeSlide && !e.target.closest('.item-slide-content')) {
       activeSlide.style.transition = 'transform 0.3s ease';
@@ -529,10 +585,24 @@ function bindItemSwipeEvents() {
   }, { passive: true });
 }
 
-function changeQty(idx, val) { items[idx].q = Math.max(1, (items[idx].q || 1) + val); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); }
-function deleteItem(idx) { if (confirm('삭제할까요?')) { items.splice(idx, 1); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); } }
+function changeQty(idx, val) {
+  items[idx].q = Math.max(1, (items[idx].q || 1) + val);
+  localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
+  renderItems();
+}
+
+function deleteItem(idx) {
+  if (confirm('삭제할까요?')) {
+    items.splice(idx, 1);
+    localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
+    renderItems();
+  }
+}
+
 function editItem(idx) {
-  const current = items[idx].n.includes(':') ? items[idx].n.split(':').slice(1).join(':').trim() : items[idx].n;
+  const current = items[idx].n.includes(':')
+    ? items[idx].n.split(':').slice(1).join(':').trim()
+    : items[idx].n;
   const newName = prompt('이름:', current);
   if (newName && newName !== current) {
     const cat = items[idx].n.includes(':') ? items[idx].n.split(':')[0].trim() : '기타';
@@ -544,21 +614,54 @@ function editItem(idx) {
     renderItems();
   }
 }
-function addItemDirectly() { const n = prompt('물품 입력:'); if (n) { items.push({ n, q: 1 }); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); } }
-function renameDrawer() { const n = prompt('서랍 이름:', document.getElementById('drawer-title').innerText); if (n) { document.getElementById('drawer-title').innerText = n; localStorage.setItem('name_' + tag, n); } }
-function toggleAll() { isAllOpen = !isAllOpen; document.querySelectorAll('.category-content').forEach(c => c.style.display = isAllOpen ? 'block' : 'none'); document.getElementById('toggle-text').textContent = isAllOpen ? '전체접기' : '전체펼치기'; }
-function openFullscreen() { const el = document.getElementById('main-media-el'); if (!el) return; const fs = document.getElementById('fs-content'); fs.innerHTML = el.tagName === 'VIDEO' ? `<video src="${el.src}" class="${el.className}" controls autoplay></video>` : `<img src="${el.src}" class="${el.className}">`; document.getElementById('fullscreen-view').style.display = 'flex'; }
+
+function addItemDirectly() {
+  const n = prompt('물품 입력:');
+  if (n) { items.push({ n, q: 1 }); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); }
+}
+
+function renameDrawer() {
+  const n = prompt('서랍 이름:', document.getElementById('drawer-title').innerText);
+  if (n) { document.getElementById('drawer-title').innerText = n; localStorage.setItem('name_' + tag, n); }
+}
+
+function toggleAll() {
+  isAllOpen = !isAllOpen;
+  document.querySelectorAll('.category-content').forEach(c => c.style.display = isAllOpen ? 'block' : 'none');
+  document.getElementById('toggle-text').textContent = isAllOpen ? '전체접기' : '전체펼치기';
+}
+
+function openFullscreen() {
+  const el = document.getElementById('main-media-el'); if (!el) return;
+  const fs = document.getElementById('fs-content');
+  fs.innerHTML = el.tagName === 'VIDEO'
+    ? `<video src="${el.src}" class="${el.className}" controls autoplay></video>`
+    : `<img src="${el.src}" class="${el.className}">`;
+  document.getElementById('fullscreen-view').style.display = 'flex';
+}
 function closeFullscreen() { document.getElementById('fullscreen-view').style.display = 'none'; }
-function toggleOverlay(id) { const el = document.getElementById(id); el.style.display = window.getComputedStyle(el).display === 'none' ? 'flex' : 'none'; }
+function toggleOverlay(id) {
+  const el = document.getElementById(id);
+  el.style.display = window.getComputedStyle(el).display === 'none' ? 'flex' : 'none';
+}
+
 async function sendMsg() {
-  const i = document.getElementById('chat-input'); const t = i.value.trim(); if (!t) return;
+  const i = document.getElementById('chat-input');
+  const t = i.value.trim(); if (!t) return;
   const b = document.getElementById('chat-messages');
-  b.innerHTML += `<div class="msg user">${t}</div>`; i.value = ''; b.scrollTop = b.scrollHeight;
+  b.innerHTML += `<div class="msg user">${t}</div>`; i.value = '';
+  b.scrollTop = b.scrollHeight;
   try {
-    const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message:t, tag, drawerName: document.getElementById('drawer-title').innerText, inventory: JSON.stringify(items.map(it => it.n)) }) });
+    const res = await fetch('/api/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: t, tag, drawerName: document.getElementById('drawer-title').innerText, inventory: JSON.stringify(items.map(it => it.n)) })
+    });
     const d = await res.json();
-    b.innerHTML += `<div class="msg bot">${d.reply}</div>`; b.scrollTop = b.scrollHeight;
-  } catch (err) { b.innerHTML += `<div class="msg bot">오류가 발생했습니다.</div>`; }
+    b.innerHTML += `<div class="msg bot">${d.reply}</div>`;
+    b.scrollTop = b.scrollHeight;
+  } catch (err) {
+    b.innerHTML += `<div class="msg bot">오류가 발생했습니다.</div>`;
+  }
 }
 </script>
 </body>
