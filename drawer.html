@@ -124,14 +124,17 @@ function initMediaEvents() {
         }
     }, {passive: true});
     wrap.addEventListener('touchend', (e) => {
-        const el = document.getElementById('main-media-el'); if(!el) return;
-        el.style.transition = 'transform 0.3s ease';
-        if(isMoving) {
-            const diffX = e.changedTouches[0].clientX - startX;
-            if(diffX < -50) el.style.transform = 'translateX(-80px)';
-            else { el.style.transform = 'translateX(0)'; setTimeout(() => { const b = document.getElementById('media-del-btn'); if(b) b.remove(); }, 300); }
-        } else if (localStorage.getItem('mediaPath_' + tag)) openFullscreen();
-    });
+    // ✅ 삭제버튼이 화면에 있을 때 wrap touchend 완전 무시 → 삭제버튼 오작동 방지
+    if (document.getElementById('media-del-btn')) return;
+
+    const el = document.getElementById('main-media-el'); if(!el) return;
+    el.style.transition = 'transform 0.3s ease';
+    if(isMoving) {
+        const diffX = e.changedTouches[0].clientX - startX;
+        if(diffX < -50) el.style.transform = 'translateX(-80px)';
+        else { el.style.transform = 'translateX(0)'; setTimeout(() => { const b = document.getElementById('media-del-btn'); if(b) b.remove(); }, 300); }
+    } else if (localStorage.getItem('mediaPath_' + tag)) openFullscreen();
+});
 }
 
 function showMedia(url, rot) {
