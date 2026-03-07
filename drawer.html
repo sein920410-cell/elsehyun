@@ -215,83 +215,86 @@ function renderItems(filter = '') {
 }
 
 async function confirmUpload() {
-    console.log("🎬 분석 시작!");
-    
-    if(!selectedFile) {
-        console.log("❌ 파일 없음");
-        return;
+  if (!selectedFile) return;
+
+  // 기존 목록 초기화 확인 (기존 로직 유지)
+  if (items.length > 0) {
+    if (!confirm('기존 목록을 초기화할까요?')) {
+      cancelUpload();
+      return;
+    }
+    items = [];
+  }
+
+  const file = selectedFile;
+  document.getElementById('rotate-window').style.display = 'none';
+  document.getElementById('media-wrap').innerHTML = '<div style="font-weight:bold; color:#007bff;">분석 중...</div>';
+
+  try {
+    // 1. 파일명 안전하게 생성 (작성하신 로직 적용)
+    const originalName = file.name || '';
+    const extMatch = originalName.match(/\.([0-9a-zA-Z]+)$/);
+    const fileExt = extMatch ? extMatch[1].toLowerCase() : (file.type.split('/')[1] || 'png');
+    const uniqueSuffix = Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+    const fileName = `${uniqueSuffix}.${fileExt}`;
+    const path = `${tag}/${fileName}`;
+
+    console.log("📤 업로드 시도 경로:", path);
+
+    // 2. Supabase 업로드
+    const { data, error } = await _supa.storage
+      .from('user_uploads')
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type || `image/${fileExt}`
+      });
+
+    if (error) throw error;
+
+    // 3. 로컬 저장 및 화면 표시 (Signed URL 사용 추천)
+    localStorage.setItem('mediaPath_' + tag, path);
+    localStorage.setItem('rot_' + tag, currentRotation);
+
+    // 보안을 위해 publicUrl 대신 기존처럼 Signed URL을 생성해 화면에 보여줍니다
+    const { data: signData, error: urlError } = await _supa.storage
+      .from('user_uploads')
+      .createSignedUrl(path, 3600);
+
+    if (urlError) throw urlError;
+    showMedia(signData.signedUrl, currentRotation);
+
+    // 4. AI 분석 실행 (기존 핵심 로직 연동)
+    if (file.type.startsWith('image/')) {
+      console.log("🤖 AI 분석 요청 중...");
+      const res = await fetch('/api/analyze', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ filePath: path, mimeType: file.type }) 
+      });
+      const resData = await res.json();
+      const rawItems = resData.items || [];
+      
+      if (rawItems.length > 0) {
+        rawItems.forEach(item => {
+          let finalCat = item.category || "기타";
+          let finalName = item.name;
+          let finalQty = item.qty || 1;
+          items.push({ n: `${finalCat}:${finalName}`, q: finalQty });
+        });
+        localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
+        renderItems();
+        alert(`${items.length}개 물품을 찾았습니다!`);
+      } else {
+        alert("물품을 찾지 못했습니다. 직접 추가하거나 다시 촬영해 주세요.");
+      }
     }
 
-    if (items.length > 0) {
-        if (!confirm('기존 목록을 초기화할까요?')) {
-            cancelUpload();
-            return;
-        }
-        items = [];
-    }
-
-    const file = selectedFile;
-    document.getElementById('rotate-window').style.display = 'none';
-    document.getElementById('media-wrap').innerHTML = '<div style="font-weight:bold; color:#007bff;">분석 중...</div>';
-    
-    try {
-        console.log("📤 업로드 중...");
-        const path = `${tag}/${Date.now()}_${file.name}`;
-        await _supa.storage.from('user_uploads').upload(path, file);
-        localStorage.setItem('mediaPath_' + tag, path); 
-        localStorage.setItem('rot_' + tag, currentRotation);
-        
-        const { data, error } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600); 
-if (!data?.signedUrl || error) {
-    console.error('❌ Signed URL 실패:', error);
-    document.getElementById('media-wrap').innerHTML = '<div style="color:#ef4444;">이미지 로드 실패</div>';
-    return;
-}
-showMedia(data.signedUrl, currentRotation);
-
-        if (file.type.startsWith('image/')) {
-            console.log("🤖 AI 분석 요청...");
-            const res = await fetch('/api/analyze', { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ filePath: path, mimeType: file.type }) 
-            });
-            const resData = await res.json();
-            
-            console.log('✅ 서버 응답:', resData);
-            console.log('📦 아이템 수:', resData.items?.length || 0);
-            
-            const rawItems = resData.items || [];
-            
-            if (rawItems.length > 0) {
-                console.log('🎉 인식 성공:', rawItems);
-                rawItems.forEach((item, i) => {
-                    console.log(`  ${i+1}. ${item.category}: ${item.name}`);
-                    let finalCat = item.category || "기타";
-                    let finalName = item.name;
-                    let finalQty = item.qty || 1;
-                    
-                    const qtyMatch = finalName.match(/x(\d+)$/);
-                    if(qtyMatch) {
-                        finalQty = parseInt(qtyMatch[1]);
-                        finalName = finalName.replace(/x\d+$/, '').trim();
-                    }
-                    
-                    items.push({ n: `${finalCat}:${finalName}`, q: finalQty });
-                });
-                
-                localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
-                renderItems();
-                alert(`${items.length}개 물품이 인식됐어요!`);
-            } else {
-                console.log('😞 인식 실패 - 빈 배열');
-                alert("사진에서 물품을 찾지 못했어요. 더 밝은 곳에서 찍어보시겠어요?");
-            }
-        }
-    } catch (err) {
-        console.error('💥 오류:', err);
-        alert("분석 중 오류가 발생했습니다.");
-    }
+  } catch (err) {
+    console.error('💥 오류 발생:', err);
+    document.getElementById('media-wrap').innerHTML = '<div style="color:#ef4444;">업로드/분석 실패</div>';
+    alert("오류가 발생했습니다: " + err.message);
+  }
 }
 
 function rotateMedia(deg) { currentRotation = (currentRotation + deg + 360) % 360; document.getElementById('edit-preview').className = `rotate${currentRotation}`; }
