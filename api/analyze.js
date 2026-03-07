@@ -1,6 +1,6 @@
 // api/analyze.js
 import { createClient } from "@supabase/supabase-js";
-import fetch from "node-fetch"; 
+import fetch from "node-fetch";
 
 const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -8,17 +8,15 @@ function safeParseItems(raw) {
   if (!raw || typeof raw !== "string") return [];
 
   let text = raw.trim();
-
   text = text.replace(/```json[\s\S]*?```/gi, (m) =>
     m.replace(/```json/i, "").replace(/```/g, "")
   ).trim();
   text = text.replace(/```/g, "").trim();
 
-  // 1차: 전체 JSON 파싱 시도
+  // 1차: 전체 정상 파싱
   try {
     const parsed = JSON.parse(text);
     if (Array.isArray(parsed)) return parsed;
-    // { items: [...] } 또는 { data: [...] } 형태 대응
     if (parsed && typeof parsed === "object") {
       const key = Object.keys(parsed).find((k) => Array.isArray(parsed[k]));
       if (key) return parsed[key];
@@ -26,19 +24,36 @@ function safeParseItems(raw) {
     return [];
   } catch (_) {}
 
-  // 2차: 배열 부분만 잘라서 파싱
+  // 2차: [ ] 사이 슬라이스 파싱
   const start = text.indexOf("[");
   const end = text.lastIndexOf("]");
-  if (start === -1 || end === -1 || end <= start) return [];
-
-  try {
-    const sliced = text.slice(start, end + 1);
-    const parsed = JSON.parse(sliced);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
-    console.error("JSON 파싱 최종 실패:", e, "\n원본:", raw);
-    return [];
+  if (start !== -1 && end !== -1 && end > start) {
+    try {
+      const parsed = JSON.parse(text.slice(start, end + 1));
+      if (Array.isArray(parsed)) return parsed;
+    } catch (_) {}
   }
+
+  // 3차: JSON이 중간에 잘린 경우 → 완성된 객체만 추출
+  if (start !== -1) {
+    const results = [];
+    const fragment = text.slice(start);
+    const objRegex = /\{[^{}]+\}/g;
+    let match;
+    while ((match = objRegex.exec(fragment)) !== null) {
+      try {
+        const obj = JSON.parse(match[0]);
+        if (obj && obj.name) results.push(obj);
+      } catch (_) {}
+    }
+    if (results.length > 0) {
+      console.log(`[복구] 잘린 JSON에서 ${results.length}개 객체 복구`);
+      return results;
+    }
+  }
+
+  console.error("JSON 파싱 최종 실패. 원본:", raw);
+  return [];
 }
 
 export default async function handler(req, res) {
@@ -51,6 +66,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    // 1. Supabase Signed URL 생성
     const { data: signedData, error: signedErr } = await supa
       .storage
       .from("user_uploads")
@@ -61,10 +77,12 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "이미지 URL 생성 오류" });
     }
 
+    // 2. 이미지 base64 변환
     const imgResp = await fetch(signedData.signedUrl);
     const arrayBuf = await imgResp.arrayBuffer();
     const b64 = Buffer.from(arrayBuf).toString("base64");
 
+    // 3. 프롬프트
     const geminiPrompt = `당신은 창고·서랍 재고 목록을 만드는 전문 분류 AI입니다.
 사진 속 모든 물건을 하나도 빠짐없이 찾아내고, 아래 규칙을 100% 준수하여 JSON 배열만 출력하세요.
 
@@ -89,6 +107,7 @@ export default async function handler(req, res) {
   {"category": "청소", "name": "페브리즈 섬유탈취제", "qty": 1}
 ]`;
 
+    // 4. Gemini 호출
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
@@ -105,8 +124,7 @@ export default async function handler(req, res) {
           ],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 2048
-            // response_mime_type 제거 → Gemini 오동작 원인이었음
+            maxOutputTokens: 8192
           }
         })
       }
@@ -114,6 +132,7 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // 5. 응답 텍스트 추출
     let botText = "";
     if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
       botText = data.candidates[0].content.parts[0].text;
@@ -130,6 +149,7 @@ export default async function handler(req, res) {
     const rawItems = safeParseItems(botText);
     console.log("파싱된 아이템:", rawItems);
 
+    // 6. 데이터 정리
     const items = rawItems
       .filter((it) => it && it.name)
       .map((it) => ({
@@ -139,6 +159,7 @@ export default async function handler(req, res) {
       }));
 
     return res.status(200).json({ items });
+
   } catch (err) {
     console.error("분석 오류:", err);
     return res.status(500).json({ error: "분석 오류", details: err.message });
