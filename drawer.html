@@ -84,7 +84,6 @@ const tag = (params.get('tag') || 'DRAWER001').toUpperCase();
 let items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
 let isAllOpen = false, currentRotation = 0, selectedFile = null;
 
-// [수정] window 변수 충돌 해결
 window.onload = async () => {
     document.getElementById('drawer-title').innerText = localStorage.getItem('name_' + tag) || '서랍 1';
     const mediaPath = localStorage.getItem('mediaPath_' + tag);
@@ -111,7 +110,15 @@ function initMediaEvents() {
             el.style.transform = `translateX(${Math.max(diffX, -100)}px)`; el.style.transition = 'none';
             if(!document.getElementById('media-del-btn')) {
                 const btn = document.createElement('div'); btn.id = 'media-del-btn'; btn.className = 'media-delete-btn'; btn.innerText = '삭제';
-                btn.onclick = (ev) => { ev.stopPropagation(); if(confirm('사진/영상을 삭제하시겠습니까?')) deleteMedia(); };
+                // ✅ [버그수정] touchstart/touchend 버블링 완전 차단
+                // 버블링되면 wrap의 touchend에서 isMoving=false로 openFullscreen() 실행됨
+                btn.addEventListener('touchstart', (ev) => { ev.stopPropagation(); }, {passive: false});
+                btn.addEventListener('touchend', (ev) => {
+                    ev.stopPropagation();
+                    ev.preventDefault(); // 합성 click 이벤트 방지
+                    if(confirm('사진/영상을 삭제하시겠습니까?')) deleteMedia();
+                }, {passive: false});
+                btn.onclick = (ev) => { ev.stopPropagation(); };
                 wrap.appendChild(btn);
             }
         }
@@ -134,15 +141,15 @@ function showMedia(url, rot) {
 }
 
 function deleteMedia() {
-    if(confirm('사진/영상을 삭제하시겠습니까?')) {
-        const mediaPath = localStorage.getItem('mediaPath_' + tag);
-        if(mediaPath) {
-            _supa.storage.from('user_uploads').remove([mediaPath]);
-        }
-        localStorage.removeItem('mediaPath_' + tag); 
-        localStorage.removeItem('rot_' + tag);
-        document.getElementById('media-wrap').innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>';
+    // confirm은 touchend 핸들러에서 처리 (중복 방지)
+    const mediaPath = localStorage.getItem('mediaPath_' + tag);
+    if(mediaPath) {
+        _supa.storage.from('user_uploads').remove([mediaPath]);
     }
+    localStorage.removeItem('mediaPath_' + tag);
+    localStorage.removeItem('rot_' + tag);
+    const delBtn = document.getElementById('media-del-btn'); if(delBtn) delBtn.remove();
+    document.getElementById('media-wrap').innerHTML = '<div class="empty-text" style="color:#64748b; font-size:14px;">사진/영상을 등록해 보세요.</div>';
 }
 
 function clearAllItems() {
@@ -217,7 +224,6 @@ function renderItems(filter = '') {
 async function confirmUpload() {
   if (!selectedFile) return;
 
-  // 기존 목록 초기화 확인 (기존 로직 유지)
   if (items.length > 0) {
     if (!confirm('기존 목록을 초기화할까요?')) {
       cancelUpload();
@@ -231,7 +237,6 @@ async function confirmUpload() {
   document.getElementById('media-wrap').innerHTML = '<div style="font-weight:bold; color:#007bff;">분석 중...</div>';
 
   try {
-    // 1. 파일명 안전하게 생성 (작성하신 로직 적용)
     const originalName = file.name || '';
     const extMatch = originalName.match(/\.([0-9a-zA-Z]+)$/);
     const fileExt = extMatch ? extMatch[1].toLowerCase() : (file.type.split('/')[1] || 'png');
@@ -239,9 +244,6 @@ async function confirmUpload() {
     const fileName = `${uniqueSuffix}.${fileExt}`;
     const path = `${tag}/${fileName}`;
 
-    console.log("📤 업로드 시도 경로:", path);
-
-    // 2. Supabase 업로드
     const { data, error } = await _supa.storage
       .from('user_uploads')
       .upload(path, file, {
@@ -252,11 +254,9 @@ async function confirmUpload() {
 
     if (error) throw error;
 
-    // 3. 로컬 저장 및 화면 표시 (Signed URL 사용 추천)
     localStorage.setItem('mediaPath_' + tag, path);
     localStorage.setItem('rot_' + tag, currentRotation);
 
-    // 보안을 위해 publicUrl 대신 기존처럼 Signed URL을 생성해 화면에 보여줍니다
     const { data: signData, error: urlError } = await _supa.storage
       .from('user_uploads')
       .createSignedUrl(path, 3600);
@@ -264,23 +264,18 @@ async function confirmUpload() {
     if (urlError) throw urlError;
     showMedia(signData.signedUrl, currentRotation);
 
-    // 4. AI 분석 실행 (기존 핵심 로직 연동)
     if (file.type.startsWith('image/')) {
-      console.log("🤖 AI 분석 요청 중...");
-      const res = await fetch('/api/analyze', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ filePath: path, mimeType: file.type }) 
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filePath: path, mimeType: file.type })
       });
       const resData = await res.json();
       const rawItems = resData.items || [];
-      
+
       if (rawItems.length > 0) {
         rawItems.forEach(item => {
-          let finalCat = item.category || "기타";
-          let finalName = item.name;
-          let finalQty = item.qty || 1;
-          items.push({ n: `${finalCat}:${finalName}`, q: finalQty });
+          items.push({ n: `${item.category || '기타'}:${item.name}`, q: item.qty || 1 });
         });
         localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
         renderItems();
@@ -291,7 +286,7 @@ async function confirmUpload() {
     }
 
   } catch (err) {
-    console.error('💥 오류 발생:', err);
+    console.error('오류 발생:', err);
     document.getElementById('media-wrap').innerHTML = '<div style="color:#ef4444;">업로드/분석 실패</div>';
     alert("오류가 발생했습니다: " + err.message);
   }
