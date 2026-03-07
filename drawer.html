@@ -26,48 +26,24 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
 .category-section { margin-bottom: 20px; }
 .category-header { background: #fff; padding: 12px 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid #f1f5f9; margin-bottom: 8px; }
 
-/* ── 슬라이드 삭제 구조 ── */
+/* ── 슬라이드 삭제 ── */
 .item-card {
-  background: #fff;
-  border-radius: 18px;
-  margin-bottom: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
-  overflow: hidden;
-  position: relative;
+  background: #fff; border-radius: 18px; margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;
+  overflow: hidden; position: relative;
 }
-/* 삭제 버튼: 기본적으로 숨김 — slide-open 클래스일 때만 표시 */
 .item-swipe-delete {
-  position: absolute;
-  right: 0; top: 0; bottom: 0;
-  width: 80px;
-  background: #ef4444;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 14px;
-  border-radius: 0 18px 18px 0;
-  cursor: pointer;
-  z-index: 1;
+  position: absolute; right: 0; top: 0; bottom: 0; width: 80px;
+  background: #ef4444; color: #fff; display: flex; align-items: center;
+  justify-content: center; font-weight: bold; font-size: 14px;
+  border-radius: 0 18px 18px 0; cursor: pointer; z-index: 1;
   visibility: hidden; /* 기본 숨김 */
 }
-/* slide-open 상태일 때만 삭제 버튼 표시 */
-.item-card.slide-open .item-swipe-delete {
-  visibility: visible;
-}
+.item-card.slide-open .item-swipe-delete { visibility: visible; }
 .item-slide-content {
-  position: relative;
-  z-index: 2;
-  background: #fff;
-  border-radius: 18px;
-  transform: translateX(0);
-  transition: transform 0.3s ease;
-  will-change: transform;
-  touch-action: pan-y; /* 수직 스크롤 기본 허용 */
+  position: relative; z-index: 2; background: #fff; border-radius: 18px;
+  transform: translateX(0); transition: transform 0.3s ease; will-change: transform;
 }
-
 .item-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
 .item-name { font-weight: 700; font-size: 16px; word-break: keep-all; }
 .qty-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
@@ -109,6 +85,60 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
 .record-circle.recording { animation: pulse 1.4s infinite; }
 .rec-side-btn { padding: 13px 20px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; min-width: 90px; }
 .rec-hint { color: #6b7280; font-size: 13px; text-align: center; margin-top: 14px; }
+
+/* ── 확인 오버레이 (confidence 40~79) ── */
+#confirm-overlay {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); z-index: 30000;
+  align-items: flex-end; justify-content: center;
+}
+#confirm-overlay.active { display: flex; }
+.confirm-sheet {
+  background: #fff; border-radius: 24px 24px 0 0;
+  width: 100%; max-height: 85vh; overflow-y: auto;
+  padding: 20px 20px 40px;
+}
+.confirm-sheet-handle { width: 40px; height: 4px; background: #e2e8f0; border-radius: 2px; margin: 0 auto 16px; }
+.confirm-sheet-title { font-size: 16px; font-weight: 800; color: var(--dark); margin-bottom: 6px; }
+.confirm-sheet-sub { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+.confirm-item-block {
+  background: #f8fafc; border-radius: 16px; padding: 14px 16px;
+  margin-bottom: 14px; border: 1px solid #f1f5f9;
+}
+.confirm-item-question { font-size: 13px; color: #64748b; margin-bottom: 10px; font-weight: 600; }
+.confirm-item-question span { color: var(--primary); }
+.confirm-candidate-btn {
+  display: block; width: 100%; text-align: left;
+  padding: 11px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0;
+  background: #fff; font-size: 14px; font-weight: 600; color: var(--dark);
+  margin-bottom: 8px; cursor: pointer;
+}
+.confirm-candidate-btn:active, .confirm-candidate-btn.selected {
+  background: var(--primary); color: #fff; border-color: var(--primary);
+}
+.confirm-skip-btn {
+  display: block; width: 100%; text-align: center;
+  padding: 9px; border-radius: 10px; border: none;
+  background: none; font-size: 13px; color: #94a3b8;
+  cursor: pointer; margin-top: 2px;
+}
+.confirm-actions { display: flex; gap: 10px; margin-top: 20px; }
+.confirm-done-btn {
+  flex: 1; padding: 15px; border-radius: 14px; border: none;
+  background: var(--dark); color: #fff; font-size: 15px;
+  font-weight: 700; cursor: pointer;
+}
+
+/* ── 저확신 아이템 스타일 ── */
+.item-low-confidence .item-name {
+  color: #94a3b8;
+}
+.item-low-confidence .item-name::after {
+  content: ' (확인 필요)';
+  font-size: 11px;
+  color: #cbd5e1;
+  font-weight: 500;
+}
 </style>
 </head>
 <body>
@@ -141,6 +171,7 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
   </div>
 </div>
 
+<!-- 채팅 -->
 <div id="chat-window" class="overlay-window">
   <div class="overlay-header-dark">
     <strong>비서 '봄'</strong>
@@ -153,6 +184,7 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
   </div>
 </div>
 
+<!-- 회전 미리보기 -->
 <div id="rotate-window" class="overlay-window">
   <div id="preview-wrap"></div>
   <div style="padding:20px; display:flex; gap:10px; background:#fff; flex-shrink:0;">
@@ -162,6 +194,7 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
   </div>
 </div>
 
+<!-- 미디어 선택 -->
 <div id="picker-window" class="overlay-window" onclick="closePicker(event)">
   <div class="picker-sheet" onclick="event.stopPropagation()">
     <div class="picker-handle"></div>
@@ -182,6 +215,7 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
   </div>
 </div>
 
+<!-- 영상 촬영 -->
 <div id="record-window" class="overlay-window">
   <div style="background:#000;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
     <div style="width:40px;"></div>
@@ -204,8 +238,22 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0;
   </div>
 </div>
 
+<!-- 전체화면 -->
 <div id="fullscreen-view" onclick="closeFullscreen()">
   <div id="fs-content" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
+</div>
+
+<!-- ── Confidence 확인 오버레이 ── -->
+<div id="confirm-overlay">
+  <div class="confirm-sheet">
+    <div class="confirm-sheet-handle"></div>
+    <div class="confirm-sheet-title">🔍 물품을 확인해 주세요</div>
+    <div class="confirm-sheet-sub">AI가 확실하지 않은 물품이 있어요. 맞는 이름을 선택해 주세요.</div>
+    <div id="confirm-item-list"></div>
+    <div class="confirm-actions">
+      <button class="confirm-done-btn" onclick="confirmReviewItems()">선택 완료</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -223,18 +271,17 @@ let recordedChunks = [], recordTimer = null;
 let recordSeconds = 0, recordedBlob = null, isRecording = false;
 
 // ── 슬라이드 상태 전역 관리 ──
-// activeSlideCard: 현재 열려 있는 item-card DOM 요소 (null이면 없음)
 let activeSlideCard = null;
 
-// 슬라이드 닫기 헬퍼 — 어디서든 호출 가능
 function closeActiveSlide() {
   if (!activeSlideCard) return;
   const content = activeSlideCard.querySelector('.item-slide-content');
   if (content) {
     content.style.transition = 'transform 0.3s ease';
     content.style.transform = 'translateX(0)';
+    content._slideOffset = 0; // ★ offset 초기화
   }
-  activeSlideCard.classList.remove('slide-open'); // 삭제 버튼 숨김
+  activeSlideCard.classList.remove('slide-open');
   activeSlideCard = null;
 }
 
@@ -248,7 +295,6 @@ window.onload = async () => {
   initMediaEvents();
   renderItems();
 
-  // 스크롤 시 열린 슬라이드 닫기
   document.getElementById('list-container').addEventListener('scroll', () => {
     closeActiveSlide();
   }, { passive: true });
@@ -262,9 +308,7 @@ function handleMediaClick() {
 function initMediaEvents() {
   const wrap = document.getElementById('media-wrap');
   let startX = 0, isMoving = false;
-  wrap.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX; isMoving = false;
-  }, { passive: true });
+  wrap.addEventListener('touchstart', e => { startX = e.touches[0].clientX; isMoving = false; }, { passive: true });
   wrap.addEventListener('touchmove', e => {
     const el = document.getElementById('main-media-el');
     if (!el || !localStorage.getItem('mediaPath_' + tag)) return;
@@ -332,7 +376,6 @@ function closePicker(e) {
   if (e && e.target !== document.getElementById('picker-window')) return;
   document.getElementById('picker-window').style.display = 'none';
 }
-
 function pickGalleryPhoto() {
   document.getElementById('picker-window').style.display = 'none';
   const old = document.getElementById('temp-input'); if (old) old.remove();
@@ -342,7 +385,6 @@ function pickGalleryPhoto() {
   input.onchange = e => { const f = e.target.files[0]; if (!f) return; selectedFile = f; previewForRotate(f); };
   input.click();
 }
-
 function takePhoto() {
   document.getElementById('picker-window').style.display = 'none';
   const old = document.getElementById('temp-input'); if (old) old.remove();
@@ -352,7 +394,6 @@ function takePhoto() {
   input.onchange = e => { const f = e.target.files[0]; if (!f) return; selectedFile = f; previewForRotate(f); };
   input.click();
 }
-
 function previewForRotate(file) {
   const reader = new FileReader();
   reader.onload = re => {
@@ -362,6 +403,7 @@ function previewForRotate(file) {
   reader.readAsDataURL(file);
 }
 
+// ── 사진 업로드 & AI 분석 ──
 async function confirmUpload() {
   if (!selectedFile) return;
   items = []; localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
@@ -382,21 +424,35 @@ async function confirmUpload() {
     const { data: signData, error: urlErr } = await _supa.storage.from('user_uploads').createSignedUrl(path, 3600);
     if (urlErr) throw urlErr;
     showMedia(signData.signedUrl, currentRotation);
+
     if (file.type.startsWith('image/')) {
       const res = await fetch('/api/analyze', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filePath: path, mimeType: file.type, userCorrections: userCorrections.slice(-20) })
       });
       if (!res.ok) throw new Error(`분석 API 오류: ${res.status}`);
-      const { items: newItems } = await res.json();
-      if (newItems?.length > 0) {
-        newItems.forEach(it => items.push({ n: `${it.category}:${it.name}`, q: it.qty || 1 }));
-        localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
-        renderItems();
-        alert(`✅ ${items.length}개 물품을 찾았습니다!`);
+      const { items: autoItems, reviewItems, lowItems } = await res.json();
+
+      // 1. 자동 등록 (confidence >= 80)
+      if (autoItems?.length > 0) {
+        autoItems.forEach(it => items.push({ n: `${it.category}:${it.name}`, q: it.qty || 1 }));
+      }
+
+      // 2. 저확신 항목 일반 유형으로 추가 (confidence < 40)
+      if (lowItems?.length > 0) {
+        lowItems.forEach(it => items.push({ n: `${it.category}:${it.name}`, q: it.qty || 1, low: true }));
+      }
+
+      localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
+      renderItems();
+
+      // 3. 중간 확신 항목 사용자 확인 UI (confidence 40~79)
+      if (reviewItems?.length > 0) {
+        showConfirmOverlay(reviewItems);
       } else {
-        renderItems();
-        alert('물품을 찾지 못했습니다.\n다시 촬영하거나 직접 추가해 주세요.');
+        const total = (autoItems?.length || 0) + (lowItems?.length || 0);
+        if (total > 0) alert(`✅ ${total}개 물품을 찾았습니다!`);
+        else alert('물품을 찾지 못했습니다.\n다시 촬영하거나 직접 추가해 주세요.');
       }
     }
   } catch (err) {
@@ -404,6 +460,83 @@ async function confirmUpload() {
     document.getElementById('media-wrap').innerHTML = '<div style="color:#ef4444;font-size:14px;">업로드/분석 실패</div>';
     alert('오류: ' + err.message);
   }
+}
+
+// ── Confidence 확인 UI ──
+let pendingReviewItems = [];
+let reviewSelections = {}; // index → 선택된 name or null(건너뜀)
+
+function showConfirmOverlay(reviewItems) {
+  pendingReviewItems = reviewItems;
+  reviewSelections = {};
+
+  const listEl = document.getElementById('confirm-item-list');
+  listEl.innerHTML = reviewItems.map((it, idx) => {
+    const candidates = it.candidates?.length > 0
+      ? it.candidates
+      : [it.name];
+    // 기본 선택: 첫 번째 후보
+    reviewSelections[idx] = candidates[0];
+
+    return `
+      <div class="confirm-item-block">
+        <div class="confirm-item-question">이 물건이 맞나요? <span>(${it.category})</span></div>
+        ${candidates.map((c, ci) => `
+          <button class="confirm-candidate-btn ${ci === 0 ? 'selected' : ''}"
+            id="cand-${idx}-${ci}"
+            onclick="selectCandidate(${idx}, ${ci}, '${c.replace(/'/g, "\\'")}', ${candidates.length})">
+            ${ci === 0 ? '✓ ' : ''}${c}
+          </button>
+        `).join('')}
+        <button class="confirm-skip-btn" onclick="skipReviewItem(${idx})">이 항목 건너뛰기</button>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('confirm-overlay').classList.add('active');
+}
+
+function selectCandidate(itemIdx, candIdx, name, total) {
+  reviewSelections[itemIdx] = name;
+  for (let ci = 0; ci < total; ci++) {
+    const btn = document.getElementById(`cand-${itemIdx}-${ci}`);
+    if (!btn) continue;
+    if (ci === candIdx) {
+      btn.classList.add('selected');
+      btn.textContent = '✓ ' + name;
+    } else {
+      btn.classList.remove('selected');
+      const originalText = btn.textContent.replace(/^✓ /, '');
+      btn.textContent = originalText;
+    }
+  }
+}
+
+function skipReviewItem(idx) {
+  reviewSelections[idx] = null;
+  const block = document.getElementById(`cand-${idx}-0`)?.closest('.confirm-item-block');
+  if (block) block.style.opacity = '0.4';
+}
+
+function confirmReviewItems() {
+  document.getElementById('confirm-overlay').classList.remove('active');
+
+  let addedCount = 0;
+  pendingReviewItems.forEach((it, idx) => {
+    const selectedName = reviewSelections[idx];
+    if (!selectedName) return; // 건너뜀
+    items.push({ n: `${it.category}:${selectedName}`, q: it.qty || 1 });
+    addedCount++;
+  });
+
+  if (addedCount > 0) {
+    localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
+    renderItems();
+  }
+
+  const total = items.length;
+  if (total > 0) alert(`✅ 총 ${total}개 물품이 등록되었습니다!`);
+  else alert('물품을 찾지 못했습니다.\n직접 추가해 주세요.');
 }
 
 function rotateMedia(deg) { currentRotation = (currentRotation + deg + 360) % 360; document.getElementById('edit-preview').className = `rotate${currentRotation}`; }
@@ -467,9 +600,7 @@ function toggleRecording() {
     }, 1000);
   } else { stopRecording(); }
 }
-
 function stopRecording() { clearInterval(recordTimer); if (mediaRecorder?.state !== 'inactive') mediaRecorder.stop(); }
-
 function retakeRecording() {
   recordedBlob = null; recordedChunks = [];
   document.getElementById('record-live').style.display = 'block';
@@ -484,7 +615,6 @@ function retakeRecording() {
   document.getElementById('rec-hint').textContent = '⏺ 버튼을 눌러 촬영을 시작하세요';
   isRecording = false;
 }
-
 async function confirmRecording() {
   if (!recordedBlob) return;
   if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
@@ -509,7 +639,6 @@ async function confirmRecording() {
     alert('오류: ' + err.message);
   }
 }
-
 function cancelRecording() {
   clearInterval(recordTimer);
   if (mediaRecorder?.state !== 'inactive') mediaRecorder?.stop();
@@ -519,9 +648,7 @@ function cancelRecording() {
 
 // ── 목록 렌더링 ──
 function renderItems(filter = '') {
-  // 렌더링 전 슬라이드 상태 초기화
   activeSlideCard = null;
-
   const container = document.getElementById('list-items');
   const groups = {};
   items.forEach((it, idx) => {
@@ -533,11 +660,9 @@ function renderItems(filter = '') {
       name = parts.slice(1).join(':').trim() || parts[0].trim();
     }
     if (!groups[cat]) groups[cat] = [];
-    groups[cat].push({ name, qty: it.q || 1, originalIdx: idx });
+    groups[cat].push({ name, qty: it.q || 1, originalIdx: idx, low: !!it.low });
   });
-
   if (Object.keys(groups).length === 0) { container.innerHTML = ''; return; }
-
   container.innerHTML = Object.keys(groups).map(cat => `
     <div class="category-section">
       <div class="category-header" onclick="this.nextElementSibling.style.display=(this.nextElementSibling.style.display==='none'?'block':'none')">
@@ -546,7 +671,7 @@ function renderItems(filter = '') {
       </div>
       <div class="category-content" style="display:block;">
         ${groups[cat].map(it => `
-          <div class="item-card" id="card-${it.originalIdx}">
+          <div class="item-card${it.low ? ' item-low-confidence' : ''}" id="card-${it.originalIdx}">
             <div class="item-swipe-delete" onclick="deleteItem(${it.originalIdx})">삭제</div>
             <div class="item-slide-content" id="slide-${it.originalIdx}">
               <div class="item-header">
@@ -567,24 +692,27 @@ function renderItems(filter = '') {
       </div>
     </div>
   `).join('');
-
   bindItemSwipeEvents();
 }
 
-// ── 슬라이드 삭제 이벤트 ──
+// ── 슬라이드 삭제 (★ initialOffset 추적으로 복귀 버그 완전 수정) ──
 function bindItemSwipeEvents() {
   document.querySelectorAll('.item-slide-content').forEach(slideContent => {
     const card = slideContent.closest('.item-card');
+    slideContent._slideOffset = 0; // 현재 슬라이드 위치 추적 (핵심!)
+
     let startX = 0, startY = 0;
-    let directionLocked = false; // 이 터치에서 방향이 결정됐는지
-    let isHorizontalGesture = false; // 수평 제스처인지
+    let directionLocked = false;
+    let isHorizontalGesture = false;
+    let initialOffset = 0; // 이 터치가 시작될 때 카드의 현재 위치
 
     slideContent.addEventListener('touchstart', e => {
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
       directionLocked = false;
       isHorizontalGesture = false;
-      // 이미 열린 다른 슬라이드 닫기
+      initialOffset = slideContent._slideOffset || 0; // ★ 현재 위치 기억
+
       if (activeSlideCard && activeSlideCard !== card) {
         closeActiveSlide();
       }
@@ -595,50 +723,63 @@ function bindItemSwipeEvents() {
       const dy = e.touches[0].clientY - startY;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      // 8px 이상 움직였을 때 방향 결정 (한 번만)
       if (!directionLocked && dist >= 8) {
         directionLocked = true;
-        // 수평:수직 = 2:1 이상일 때만 수평으로 판정
         isHorizontalGesture = Math.abs(dx) >= Math.abs(dy) * 2;
       }
+      if (!directionLocked) return;
+      if (!isHorizontalGesture) return;
 
-      if (!directionLocked) return; // 아직 방향 미결정
-      if (!isHorizontalGesture) return; // 수직 스크롤 → 터치 이벤트 방해 안 함
-
-      // 수평 슬라이드 처리
-      e.preventDefault(); // 수평일 때만 스크롤 방지
-      const clampedX = Math.max(-80, Math.min(0, dx));
+      e.preventDefault();
+      // ★ initialOffset 더해서 현재 열린 위치에서부터 자연스럽게 이동
+      const rawX = initialOffset + dx;
+      const clampedX = Math.max(-80, Math.min(0, rawX));
       slideContent.style.transition = 'none';
       slideContent.style.transform = `translateX(${clampedX}px)`;
 
-      // 조금이라도 열리면 삭제버튼 미리 표시
       if (clampedX < 0) {
         card.classList.add('slide-open');
         activeSlideCard = card;
+      } else {
+        card.classList.remove('slide-open');
       }
     }, { passive: false });
 
     slideContent.addEventListener('touchend', e => {
-      if (!directionLocked || !isHorizontalGesture) return;
-
       const dx = e.changedTouches[0].clientX - startX;
+      const finalX = initialOffset + dx;
+
+      // ★ 방향 결정 안 됐거나 수직이면: 열린 카드는 오른쪽 스와이프/탭으로 닫기
+      if (!directionLocked || !isHorizontalGesture) {
+        if (card.classList.contains('slide-open') && dx >= -5) {
+          // 탭 or 오른쪽 방향이면 닫기
+          slideContent.style.transition = 'transform 0.3s ease';
+          slideContent.style.transform = 'translateX(0)';
+          slideContent._slideOffset = 0;
+          card.classList.remove('slide-open');
+          if (activeSlideCard === card) activeSlideCard = null;
+        }
+        return;
+      }
+
       slideContent.style.transition = 'transform 0.3s ease';
 
-      if (dx < -40) {
-        // 충분히 밀었으면 삭제버튼 표시 상태 유지
+      if (finalX < -40) {
+        // 열기
         slideContent.style.transform = 'translateX(-80px)';
+        slideContent._slideOffset = -80; // ★ 위치 저장
         card.classList.add('slide-open');
         activeSlideCard = card;
       } else {
-        // 원위치 → 슬라이드 상태 완전 초기화
+        // 닫기 — ★ 항상 완전히 원위치로 reset
         slideContent.style.transform = 'translateX(0)';
-        card.classList.remove('slide-open'); // 삭제버튼 숨김
-        if (activeSlideCard === card) activeSlideCard = null; // 상태 reset
+        slideContent._slideOffset = 0; // ★ 위치 초기화
+        card.classList.remove('slide-open');
+        if (activeSlideCard === card) activeSlideCard = null;
       }
     }, { passive: true });
   });
 
-  // 목록 내 슬라이드 콘텐츠 밖 터치 시 닫기
   document.getElementById('list-items').addEventListener('touchstart', e => {
     if (activeSlideCard && !e.target.closest('.item-slide-content')) {
       closeActiveSlide();
@@ -652,7 +793,6 @@ function changeQty(idx, val) {
   localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
   renderItems();
 }
-
 function deleteItem(idx) {
   if (confirm('삭제할까요?')) {
     items.splice(idx, 1);
@@ -660,7 +800,6 @@ function deleteItem(idx) {
     renderItems();
   }
 }
-
 function editItem(idx) {
   const current = items[idx].n.includes(':')
     ? items[idx].n.split(':').slice(1).join(':').trim()
@@ -672,27 +811,24 @@ function editItem(idx) {
     if (userCorrections.length > 50) userCorrections = userCorrections.slice(-50);
     localStorage.setItem('corrections_' + tag, JSON.stringify(userCorrections));
     items[idx].n = `${cat}:${newName}`;
+    items[idx].low = false; // 수동 수정하면 저확신 표시 제거
     localStorage.setItem('gyeol_' + tag, JSON.stringify(items));
     renderItems();
   }
 }
-
 function addItemDirectly() {
   const n = prompt('물품 입력:');
   if (n) { items.push({ n, q: 1 }); localStorage.setItem('gyeol_' + tag, JSON.stringify(items)); renderItems(); }
 }
-
 function renameDrawer() {
   const n = prompt('서랍 이름:', document.getElementById('drawer-title').innerText);
   if (n) { document.getElementById('drawer-title').innerText = n; localStorage.setItem('name_' + tag, n); }
 }
-
 function toggleAll() {
   isAllOpen = !isAllOpen;
   document.querySelectorAll('.category-content').forEach(c => c.style.display = isAllOpen ? 'block' : 'none');
   document.getElementById('toggle-text').textContent = isAllOpen ? '전체접기' : '전체펼치기';
 }
-
 function openFullscreen() {
   const el = document.getElementById('main-media-el'); if (!el) return;
   const fs = document.getElementById('fs-content');
@@ -706,7 +842,6 @@ function toggleOverlay(id) {
   const el = document.getElementById(id);
   el.style.display = window.getComputedStyle(el).display === 'none' ? 'flex' : 'none';
 }
-
 async function sendMsg() {
   const i = document.getElementById('chat-input');
   const t = i.value.trim(); if (!t) return;
