@@ -29,6 +29,19 @@ const BRAND_MAP = {
   "sony": "소니", "panasonic": "파나소닉", "philips": "필립스",
   "dyson": "다이슨", "xiaomi": "샤오미", "anker": "앙커",
   "tefal": "테팔", "lock&lock": "락앤락", "lock & lock": "락앤락",
+  "omo": "오모", "surf": "서프", "skip": "스킵",
+  "burt's bees": "버츠비", "burts bees": "버츠비",
+  "weleda": "벨레다", "la mer": "라메르", "lamer": "라메르",
+  "laneige": "라네즈", "sulwhasoo": "설화수", "whoo": "후",
+  "innisfree": "이니스프리", "etude": "에뛰드", "tonymoly": "토니모리",
+  "missha": "미샤", "clio": "클리오", "rom&nd": "롬앤",
+  "mediheal": "메디힐", "cosrx": "코스알엑스",
+  "oral-b": "오랄비", "colgate": "콜게이트", "sensodyne": "센소다인",
+  "listerine": "리스테린",
+  "glade": "글레이드", "airwick": "에어윅",
+  "bounce": "바운스", "gain": "게인",
+  "mr.muscle": "미스터머슬", "mr muscle": "미스터머슬",
+  "finish": "피니쉬", "cascade": "캐스케이드",
 };
 
 const PRODUCT_TYPE_MAP = {
@@ -36,8 +49,8 @@ const PRODUCT_TYPE_MAP = {
   "shampoo": "샴푸", "conditioner": "컨디셔너", "treatment": "트리트먼트",
   "body wash": "바디워시", "shower gel": "샤워젤",
   "lotion": "로션", "cream": "크림", "serum": "세럼", "essence": "에센스",
-  "sunscreen": "선크림", "sun cream": "선크림",
-  "toner": "토너",
+  "sunscreen": "선크림", "sun cream": "선크림", "sunblock": "선블록",
+  "toner": "토너", "mist": "미스트",
   "detergent": "세제", "laundry detergent": "세탁세제", "fabric softener": "섬유유연제",
   "cleaner": "클리너", "spray": "스프레이", "disinfectant": "소독제",
   "toothpaste": "치약", "toothbrush": "칫솔", "mouthwash": "구강청결제",
@@ -50,7 +63,15 @@ const PRODUCT_TYPE_MAP = {
   "speaker": "스피커", "headphone": "헤드폰", "earphone": "이어폰",
   "charger": "충전기", "adapter": "어댑터",
   "vacuum": "청소기", "air purifier": "공기청정기",
-  "humidifier": "가습기",
+  "humidifier": "가습기", "dehumidifier": "제습기",
+  "mask": "마스크", "gloves": "장갑",
+  "sponge": "스펀지", "scrub": "수세미",
+  "soap": "비누", "hand wash": "핸드워시", "hand sanitizer": "손소독제",
+  "razor": "면도기", "shaving": "면도",
+  "cotton": "면봉", "cotton pad": "화장솜",
+  "hair dryer": "헤어드라이어", "straightener": "고데기",
+  "supplement": "영양제", "vitamin": "비타민", "omega": "오메가",
+  "medicine": "약", "tablet": "알약", "capsule": "캡슐",
 };
 
 function preprocessProductName(name) {
@@ -80,11 +101,11 @@ function preprocessProductName(name) {
 
   n = n.split(" ").filter(w => w.length > 1 && !/^\d+$/.test(w)).join(" ").trim();
 
-  if (n.length > 20) {
+  if (n.length > 22) {
     const words = n.split(" ");
     let result = words[0];
     for (let i = 1; i < words.length; i++) {
-      if ((result + " " + words[i]).length <= 20) result += " " + words[i];
+      if ((result + " " + words[i]).length <= 22) result += " " + words[i];
       else break;
     }
     n = result;
@@ -167,60 +188,58 @@ export default async function handler(req, res) {
       ? `\n━━━ 사용자 교정 데이터 (최우선 적용) ━━━\n${userCorrections.map(c => `- "${c.original}" → "${c.corrected}"`).join("\n")}\n`
       : "";
 
-    const geminiPrompt = `당신은 재고 분류 AI입니다. 사진 속 물건을 분석하여 목록을 생성하세요.
+    const geminiPrompt = `당신은 재고 분류 전문 AI입니다. 사진 속 물건을 빠짐없이 분석하여 목록을 생성하세요.
 ${correctionHint}
 
-━━━ 핵심 원칙: 보이는 것만 기록 ━━━
-절대로 추측하거나 없는 물건을 만들어 내지 마세요.
-사진에서 명확하게 보이지 않는 물건은 목록에 넣지 마세요.
+━━━ 핵심 목표: 모든 물건을 빠짐없이 기록 ━━━
+사진에 보이는 모든 물건을 빠짐없이 목록화하는 것이 최우선입니다.
+좌상단 → 우상단 → 중간 → 하단 순서로 체계적으로 스캔하세요.
+숨겨져 있거나 일부만 보이더라도 식별 가능하면 반드시 포함하세요.
+같은 제품이 여러 개라면 qty로 통합하세요.
 
 ━━━ confidence(확신도) 기준 ━━━
-각 물품을 인식할 때 아래 기준으로 confidence를 0~100 사이 숫자로 설정하세요:
+[80~100] 브랜드+제품유형 모두 명확히 식별
+         → confidence:85
+[65~79]  브랜드 OR 제품유형 하나는 확실
+         → confidence:72
+[40~64]  물건은 보이나 브랜드/유형 불확실 (candidates 2~3개 제공)
+         → confidence:50, candidates:["후보1","후보2"]
+[0~39]   형태만 보여 정확한 식별 불가
+         → confidence:25, name:"스프레이류"
 
-[90~100] 브랜드 텍스트가 명확히 읽히고 제품 유형도 확실한 경우
-         예) 페브리즈 로고 + 스프레이 형태 → confidence:95
-         
-[70~89]  브랜드 OR 제품 유형 중 하나는 확실한 경우
-         예) 브랜드는 읽히지만 제품 유형이 약간 불확실 → confidence:75
+━━━ 브랜드 인식 규칙 (OCR 최우선) ━━━
+패키지 텍스트를 반드시 OCR로 읽으세요:
+Febreze→페브리즈, RYO/려→려, Illiyoon→일리윤, Bebeen→베베앙
+Dove→도브, Pantene→팬틴, Dettol→데톨, Pigeon→피죤
+Downy→다우니, Scotch-Brite→스카치브라이트, Neutrogena→뉴트로지나
 
-[40~69]  물건이 보이지만 브랜드도 모르고 제품 유형도 비슷한 것이 여럿인 경우
-         이 경우 candidates 배열에 가능한 이름 2~3개를 함께 제공하세요.
-         name에는 가장 가능성 높은 것을 쓰세요.
-         예) 스프레이 형태이나 브랜드 불명 → confidence:55, candidates:["탈취 스프레이","방향제","청소 스프레이"]
-
-[0~39]   형태만 보이고 정확히 무엇인지 모르는 경우
-         name에 일반 유형만 쓰고 브랜드는 쓰지 마세요.
-         예) 용기인데 내용물 불명 → confidence:25, name:"스프레이류"
-
-━━━ 브랜드 인식 규칙 (OCR 우선) ━━━
-패키지에 브랜드 텍스트가 보이면 반드시 OCR로 읽어 한글로 변환하세요:
-HP→HP, Samsung/삼성→삼성, LG→LG, Febreze→페브리즈
-RYO/려→려, Illiyoon→일리윤, Bebeen/베베앙→베베앙
-Dove→도브, Pantene→팬틴, Dettol→데톨
-
-━━━ 상품명 작성 규칙 ━━━
-✅ 올바른 예: "HP 노트북", "삼성 모니터", "페브리즈 섬유탈취제", "려 탈모 샴푸"
-❌ 잘못된 예: "노트북"(브랜드 생략), "청소 스프레이"(추측), "벽걸이 가방"(없는 물건)
-
-규칙1: 브랜드가 보이면 반드시 한글 브랜드 + 제품 유형 형태
-규칙2: 브랜드가 없으면 제품 유형만 (추측 금지)
-규칙3: 2~5단어, 20자 이내
-규칙4: 같은 제품 여러 개면 qty로 표현
+━━━ 상품명 규칙 ━━━
+✅ "페브리즈 섬유탈취제", "려 탈모샴푸", "하기스 물티슈"
+✅ 브랜드 없으면 제품유형만: "세탁세제", "바디워시"
+❌ "세정제류" 같은 모호한 분류 지양 (더 구체적으로)
+- 2~5단어, 22자 이내
 
 ━━━ 카테고리 ━━━
-"의류" "위생" "청소" "케어" "생활" "기타"
+"의류" / "위생" / "청소" / "케어" / "생활" / "기타"
+
+의류: 옷, 속옷, 양말, 신발, 가방, 모자, 벨트
+위생: 샴푸, 바디워시, 치약, 칫솔, 비누, 물티슈, 화장품, 구강용품, 면도용품
+청소: 세탁세제, 섬유유연제, 주방세제, 청소용 스프레이, 수세미, 청소도구
+케어: 비타민, 영양제, 의약품, 의료기기, 마스크팩, 스킨케어
+생활: 전자기기, 배터리, 충전기, 수납용품, 문구류, 식품, 주방용품
+기타: 위 카테고리에 해당하지 않는 물건
 
 ━━━ 출력 형식 ━━━
-confidence 70 이상:
-{"category":"카테고리","name":"브랜드 제품명","qty":숫자,"confidence":숫자}
+confidence 65 이상:
+{"category":"카테고리","name":"제품명","qty":숫자,"confidence":숫자}
 
-confidence 40~69:
+confidence 40~64:
 {"category":"카테고리","name":"가장 가능한 이름","qty":숫자,"confidence":숫자,"candidates":["후보1","후보2","후보3"]}
 
 confidence 40 미만:
 {"category":"카테고리","name":"일반 유형명","qty":숫자,"confidence":숫자}
 
-전체를 JSON 배열로만 출력. 설명문 없음.`;
+JSON 배열만 출력. 설명 텍스트 없음. 최대한 많은 물건을 포함하세요.`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -232,7 +251,11 @@ confidence 40 미만:
             { inline_data: { mime_type: mimeType || "image/jpeg", data: b64 } },
             { text: geminiPrompt }
           ]}],
-          generationConfig: { temperature: 0.05, maxOutputTokens: 8192 }
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 8192,
+            thinkingConfig: { thinkingBudget: 8000 }
+          }
         })
       }
     );
@@ -243,16 +266,21 @@ confidence 40 미만:
     }
 
     const data = await response.json();
-    let botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+    // thinkingConfig 사용 시 parts가 여러 개일 수 있으므로 text 파트만 추출
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    let botText = parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "[]";
     console.log("Gemini 응답 앞 500자:", botText.slice(0, 500));
 
     const rawItems = safeParseItems(botText);
     console.log("파싱 아이템 수:", rawItems.length);
 
-    // confidence에 따라 세 그룹으로 분류
-    const autoItems = [];   // confidence >= 80 → 자동 등록
-    const reviewItems = []; // confidence 40~79 → 사용자 확인
-    const lowItems = [];    // confidence < 40 → 일반 유형으로만
+    // ── confidence에 따라 세 그룹 분류 ──
+    // 65 이상 → 자동 등록 (기존 80에서 하향)
+    // 40~64 → 사용자 확인 (기존 40~79)
+    // 40 미만 → 저확신 등록
+    const autoItems = [];
+    const reviewItems = [];
+    const lowItems = [];
 
     for (const it of rawItems) {
       if (!it?.name || String(it.name).length <= 1) continue;
@@ -267,7 +295,7 @@ confidence 40 미만:
 
       if (base.name.length <= 1) continue;
 
-      if (conf >= 80) {
+      if (conf >= 65) {
         autoItems.push(base);
       } else if (conf >= 40) {
         reviewItems.push({
