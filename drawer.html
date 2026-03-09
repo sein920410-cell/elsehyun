@@ -383,6 +383,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     <div class="sh-handle"></div><div class="sh-title">미디어 추가</div>
     <div class="mpick" onclick="pickPhoto()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div><div><div class="mpick-title">사진 선택</div><div class="mpick-sub">갤러리 또는 카메라로 촬영</div></div></div>
     <div class="mpick" onclick="startVideoRecord()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div><div class="mpick-title">영상 촬영</div><div class="mpick-sub">최대 30초 · 720p</div></div></div>
+    <div class="mpick" id="mpick-re" style="display:none" onclick="mpickReanalyze()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg></div><div><div class="mpick-title">재분석</div><div class="mpick-sub">등록된 사진으로 다시 분석</div></div></div>
     <button class="sh-cancel" onclick="closeMediaPicker()">취소</button>
   </div>
 </div>
@@ -689,7 +690,7 @@ function initMediaEvents(){
   box.addEventListener('contextmenu',e=>e.preventDefault());
   box.onclick=()=>{if(localStorage.getItem('mediaPath_'+tag))openFull();else showMediaPicker();};
 }
-function showMediaPicker(){document.getElementById('media-picker-ov').classList.add('open');}
+function showMediaPicker(){const re=document.getElementById('mpick-re');if(re)re.style.display=localStorage.getItem('mediaPath_'+tag)?'flex':'none';document.getElementById('media-picker-ov').classList.add('open');}
 function closeMediaPicker(e){if(e&&e.target!==document.getElementById('media-picker-ov'))return;document.getElementById('media-picker-ov').classList.remove('open');}
 function closeMctx(){document.getElementById('mctx-ov').classList.remove('open');}
 function confirmDelMedia(){closeMctx();if(!confirm('사진/영상을 삭제할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();}
@@ -717,6 +718,15 @@ function showResultModal(icon, title, sub) {
   document.getElementById('result-modal-ov').classList.add('open');
 }
 
+function mpickReanalyze(){
+  closeMediaPicker();
+  const fp=localStorage.getItem('mediaPath_'+tag);
+  const mt=localStorage.getItem('mime_'+tag)||'image/jpeg';
+  if(!fp){showResultModal('📷','등록된 사진이 없습니다','+ 버튼으로 사진을 먼저 추가하세요');return;}
+  if(!confirm('사진을 다시 분석할까요?\n기존 목록이 초기화됩니다.'))return;
+  items=[];localStorage.setItem('gyeol_'+tag,'[]');
+  renderItems();runAnalysis(fp,mt);
+}
 async function runAnalysis(filePath,mimeType){
   const box=document.getElementById('media-box');
   const el=document.getElementById('media-el');
