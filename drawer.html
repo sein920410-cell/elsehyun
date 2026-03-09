@@ -52,7 +52,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .header-right{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-left:auto;z-index:1}
 .hdr-sq{width:36px;height:36px;border-radius:10px;background:var(--h-btn);border:1px solid var(--h-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--h-txt);font-size:18px;font-weight:300;flex-shrink:0}
 .hdr-sq:active{opacity:.75}
-.hdr-re{width:36px;height:36px;border-radius:10px;background:var(--h-btn);border:1px solid var(--h-border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;display:none}
+.hdr-re{width:36px;height:36px;border-radius:10px;background:var(--h-btn);border:1px solid var(--h-border);display:none;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .hdr-re.visible{display:flex}
 .hdr-re:active{opacity:.75}
 .hdr-re svg{width:15px;height:15px;stroke:var(--h-txt);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -368,8 +368,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <div class="ov" id="media-picker-ov" onclick="closeMediaPicker(event)">
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="sh-handle"></div><div class="sh-title">미디어 추가</div>
-    <div class="mpick" onclick="pickPhoto()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div><div><div class="mpick-title">갤러리에서 선택</div><div class="mpick-sub">저장된 사진 불러오기</div></div></div>
-    <div class="mpick" onclick="takePhoto()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div><div class="mpick-title">사진 촬영</div><div class="mpick-sub">카메라로 직접 촬영</div></div></div>
+    <div class="mpick" onclick="pickPhoto()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div><div><div class="mpick-title">사진 선택</div><div class="mpick-sub">갤러리 또는 카메라로 촬영</div></div></div>
     <div class="mpick" onclick="startVideoRecord()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div><div class="mpick-title">영상 촬영</div><div class="mpick-sub">최대 30초 · 720p</div></div></div>
     <button class="sh-cancel" onclick="closeMediaPicker()">취소</button>
   </div>
@@ -676,13 +675,13 @@ function closeMediaPicker(e){if(e&&e.target!==document.getElementById('media-pic
 function closeMctx(){document.getElementById('mctx-ov').classList.remove('open');}
 function confirmDelMedia(){closeMctx();if(!confirm('사진/영상을 삭제할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();}
 function pickPhoto(){closeMediaPicker();const f=document.getElementById('file-in');f.removeAttribute('capture');f.click();}
-function takePhoto(){closeMediaPicker();const f=document.getElementById('file-in');f.setAttribute('capture','environment');f.click();}
+
 function handleFile(e){const f=e.target.files?.[0];if(!f)return;selFile=f;rot=0;const url=URL.createObjectURL(f);const rc=document.getElementById('rot-content');rc.innerHTML=f.type.startsWith('video')?`<video src="${url}" class="rotate0" style="max-width:100%;max-height:100%" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate0" style="max-width:100%;max-height:100%">`;document.getElementById('rot-ov').classList.add('open');e.target.value='';}
 function rotateMedia(d){rot=(rot+d)%360;const el=document.getElementById('rot-content').firstChild;if(el)el.className='rotate'+rot;}
 function cancelUpload(){selFile=null;document.getElementById('rot-ov').classList.remove('open');}
 async function confirmUpload(){if(!selFile)return;document.getElementById('rot-ov').classList.remove('open');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>업로드 중...</div></div>`;try{const ext=selFile.name.split('.').pop()||'jpg';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});const{error:ue}=await _sb.storage.from('user_uploads').upload(path,selFile,{cacheControl:'3600',upsert:false,contentType:selFile.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,rot);localStorage.setItem('mime_'+tag,selFile.type||'image/jpeg');const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;showMedia(sd.signedUrl,rot);await runAnalysis(path,selFile.type);}catch(err){resetMediaBox();alert('오류: '+err.message);}selFile=null;}
-function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;const reBtn=document.getElementById('hdr-re-btn');if(reBtn&&!isV)reBtn.classList.add('visible');}
-function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';const reBtn=document.getElementById('hdr-re-btn');if(reBtn)reBtn.classList.remove('visible');box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진 또는 영상 등록</div><div class="media-empty-sub">탭하여 추가 · AI가 자동 인식</div></div>`;}
+function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;const rb=document.getElementById('hdr-re-btn');if(rb)rb.classList.toggle('visible',!isV);}
+function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';const rb=document.getElementById('hdr-re-btn');if(rb)rb.classList.remove('visible');box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진 또는 영상 등록</div><div class="media-empty-sub">탭하여 추가 · AI가 자동 인식</div></div>`;}
 function openFull(){const el=document.getElementById('media-el');if(!el)return;const fc=document.getElementById('fs-content');fc.innerHTML=el.tagName==='VIDEO'?`<video src="${el.src}" class="${el.className}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`:`<img src="${el.src}" class="${el.className}" style="max-width:100%;max-height:100%;object-fit:contain">`;document.getElementById('fs-ov').classList.add('open');}
 function closeFull(){document.getElementById('fs-ov').classList.remove('open');}
 
@@ -695,19 +694,18 @@ async function runAnalysis(filePath,mimeType){
   const box=document.getElementById('media-box');
   const el=document.getElementById('media-el');
   if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px;background:linear-gradient(transparent,rgba(0,0,0,.45))"><div class="analyzing-badge"><div class="spinner"></div>물품 분석 중...</div></div>`;
-  const removeOverlay=()=>{const ov=document.getElementById('analyze-overlay');if(ov)ov.remove();};
+  const rmOv=()=>{const o=document.getElementById('analyze-overlay');if(o)o.remove();};
   try{
     const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filePath,mimeType:mimeType||'image/jpeg',userCorrections:corrections})});
     if(!r.ok)throw new Error('분석 오류');
     const d=await r.json();
     items=[];localStorage.setItem('gyeol_'+tag,'[]');
     if(d.items?.length){d.items.forEach(it=>items.push({n:`${it.category}:${it.name}`,q:it.qty||1}));localStorage.setItem('gyeol_'+tag,JSON.stringify(items));}
-    removeOverlay();
-    renderItems();
+    rmOv();renderItems();
     if(d.reviewItems?.length)showReview(d.reviewItems);
     else if(items.length>0)alert(`✅ ${items.length}개 물품이 등록되었습니다!`);
     else alert('물품을 찾지 못했습니다.\n직접 추가해 주세요.');
-  }catch(err){removeOverlay();alert('분석 오류: '+err.message);renderItems();}
+  }catch(err){rmOv();alert('분석 오류: '+err.message);renderItems();}
 }
 function triggerReanalyze(){
   const fp=localStorage.getItem('mediaPath_'+tag);
@@ -715,8 +713,7 @@ function triggerReanalyze(){
   if(!fp){alert('등록된 사진이 없습니다.');return;}
   if(!confirm('사진을 다시 분석할까요?\n기존 목록이 초기화됩니다.'))return;
   items=[];localStorage.setItem('gyeol_'+tag,'[]');
-  renderItems();
-  runAnalysis(fp,mt);
+  renderItems();runAnalysis(fp,mt);
 }
 function showReview(rv){pendingReview=rv;reviewSel={};document.getElementById('confirm-list').innerHTML=rv.map((it,i)=>`<div class="confirm-block"><div class="confirm-q">항목 ${i+1}</div>${(it.candidates||[it.name]).map((c,ci)=>`<button class="confirm-cand" id="cand-${i}-${ci}" onclick="selCand(${i},${ci},'${c}',${(it.candidates||[it.name]).length})">${c}</button>`).join('')}<button class="confirm-skip" onclick="skipCand(${i})">건너뛰기</button></div>`).join('');document.getElementById('confirm-ov').classList.add('open');}
 function selCand(ii,ci,name,tot){reviewSel[ii]=name;for(let c=0;c<tot;c++){const b=document.getElementById(`cand-${ii}-${c}`);if(b)b.classList.toggle('selected',c===ci);}}
