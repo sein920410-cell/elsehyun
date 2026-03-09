@@ -34,26 +34,26 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 /* HEADER */
 .header{background:var(--h-bg);height:56px;padding:0 16px;display:flex;align-items:center;flex-shrink:0;position:relative;z-index:100;transition:background .4s}
 .header::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--h-border)}
-.brand{display:flex;align-items:center;gap:7px;width:84px;flex-shrink:0;cursor:pointer;padding:5px 7px;border-radius:8px;transition:background .15s}
+.brand{display:flex;align-items:center;gap:8px;flex-shrink:0;cursor:pointer;padding:6px 10px;border-radius:10px;transition:background .15s}
 .brand:active{background:var(--h-btn)}
-.brand img{width:19px;height:19px;object-fit:contain;flex-shrink:0}
-.brand-anim{position:relative;height:17px;overflow:hidden}
-.brand-a,.brand-b{position:absolute;left:0;top:0;font-size:11px;font-weight:700;letter-spacing:.03em;color:var(--h-txt);white-space:nowrap;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s}
+.brand img{width:22px;height:22px;object-fit:contain;flex-shrink:0}
+.brand-anim{position:relative;height:20px;overflow:hidden;min-width:60px}
+.brand-a,.brand-b{position:absolute;left:0;top:0;font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--h-txt);white-space:nowrap;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s}
 .brand-a{transform:translateY(0);opacity:1}
-.brand-b{transform:translateY(110%);opacity:0;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--h-sub)}
+.brand-b{transform:translateY(110%);opacity:0;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--h-sub)}
 .brand.swap .brand-a{transform:translateY(-110%);opacity:0}
 .brand.swap .brand-b{transform:translateY(0);opacity:1}
 .header-mid{flex:1;display:flex;align-items:center;justify-content:center}
 .drawer-btn{display:flex;align-items:center;padding:6px 12px;border-radius:9px;background:transparent;border:none;cursor:pointer;font-family:var(--font);transition:background .15s}
 .drawer-btn:active{background:var(--h-btn)}
 .drawer-btn-txt{font-size:13.5px;font-weight:600;color:var(--h-txt);letter-spacing:-.01em}
-.header-right{width:84px;display:flex;justify-content:flex-end}
-.hdr-sq{width:32px;height:32px;border-radius:8px;background:var(--h-btn);border:1px solid var(--h-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--h-txt);font-size:18px;font-weight:300}
+.header-right{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+.hdr-sq{width:36px;height:36px;border-radius:10px;background:var(--h-btn);border:1px solid var(--h-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--h-txt);font-size:18px;font-weight:300;flex-shrink:0}
 .hdr-sq:active{opacity:.75}
 
 /* MEDIA */
 .media-section{background:var(--h-bg);padding:0 14px 13px;flex-shrink:0;transition:background .4s}
-.media-box{height:148px;border-radius:13px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation}
+.media-box{height:210px;border-radius:13px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation}
 .media-box.empty{border:1px dashed var(--h-border);background:rgba(255,255,255,.03)}
 .media-box.filled{border:1px solid rgba(255,255,255,.07)}
 .media-box img,.media-box video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
@@ -64,9 +64,12 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .media-empty-sub{font-size:9.5px;color:rgba(255,255,255,.18);text-align:center;line-height:1.4}
 .analyzed-badge{position:absolute;bottom:9px;right:10px;font-size:8px;font-weight:700;padding:3.5px 10px;border-radius:20px;letter-spacing:.04em;pointer-events:none;background:var(--a-bg);color:var(--a-color);border:1px solid var(--a-border);backdrop-filter:blur(4px)}
 
-/* TOOLBAR */
 .toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 7px;flex-shrink:0;background:var(--bg)}
-.toolbar-cnt{font-size:9px;font-weight:800;padding:0 11px;border-radius:20px;background:var(--h-bg);color:var(--h-txt,#fff);letter-spacing:.04em;display:none;transition:background .4s;cursor:pointer;min-width:40px;height:26px;overflow:hidden;position:relative}
+.toolbar-left{display:flex;align-items:center}
+.toolbar-search{width:36px;height:36px;border-radius:10px;background:var(--h-bg);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .4s}
+.toolbar-search svg{width:15px;height:15px;stroke:var(--h-txt,#fff);stroke-width:2;fill:none;stroke-linecap:round}
+.toolbar-search:active{opacity:.75}
+.toolbar-cnt{font-size:11px;font-weight:800;padding:0 13px;border-radius:10px;background:var(--h-bg);color:var(--h-txt,#fff);letter-spacing:.04em;display:none;transition:background .4s;cursor:pointer;min-width:48px;height:36px;overflow:hidden;position:relative}
 .toolbar-cnt.vis{display:inline-flex;align-items:center;justify-content:center}
 .cnt-num,.cnt-ico{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:transform .45s cubic-bezier(.4,0,.2,1),opacity .45s}
 .cnt-num{transform:translateY(0);opacity:1}
@@ -74,7 +77,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .cnt-ico svg{width:12px;height:12px;stroke:var(--h-txt,#fff);stroke-width:2.2;fill:none;stroke-linecap:round}
 .toolbar-cnt.show-ico .cnt-num{transform:translateY(-110%);opacity:0}
 .toolbar-cnt.show-ico .cnt-ico{transform:translateY(0);opacity:1}
-.toolbar-toggle{font-size:8.5px;font-weight:600;color:var(--muted);padding:5px 11px;background:var(--surface);border:1px solid var(--border);border-radius:7px;cursor:pointer}
+.toolbar-toggle{font-size:11px;font-weight:600;color:var(--muted);padding:0 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;height:36px;display:flex;align-items:center;justify-content:center;margin-left:auto}
 
 /* SEARCH BAR */
 .search-bar{display:none;align-items:center;gap:8px;padding:8px 14px 9px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
@@ -91,9 +94,13 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .list-wrap::-webkit-scrollbar{display:none}
 .list-inner{padding:2px 12px 24px}
 .cat-section{margin-bottom:2px}
-.cat-header{display:flex;align-items:center;padding:8px 3px 7px;cursor:pointer}
-.cat-name-lbl{font-size:8px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);flex:1}
-.cat-count-lbl{font-size:8px;font-weight:600;color:var(--muted2)}
+.cat-header{display:flex;align-items:center;padding:8px 3px 7px}
+.cat-name-lbl{font-size:8px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);flex:1;cursor:pointer;padding:2px 4px;border-radius:4px;transition:background .15s}
+.cat-name-lbl:active{background:var(--border)}
+.cat-chevron{width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:6px;transition:background .15s,transform .25s}
+.cat-chevron:active{background:var(--border)}
+.cat-chevron svg{width:12px;height:12px;stroke:var(--muted2);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.cat-chevron.closed svg{transform:rotate(-90deg)}
 
 /* ITEM CARD */
 .item-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:transform .1s,box-shadow .1s}
@@ -193,8 +200,10 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .icon-cat-btn{padding:5px 12px;background:var(--bg);border-radius:20px;font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:.04em;white-space:nowrap;cursor:pointer}
 .icon-cat-btn.active{background:var(--ink);color:#fff}
 .icon-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.icon-cell{width:42px;height:42px;border-radius:10px;background:var(--bg);border:1.5px solid transparent;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer}
+.icon-cell{width:42px;height:42px;border-radius:10px;background:var(--bg);border:1.5px solid transparent;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.icon-cell svg{width:20px;height:20px;stroke:#3A4050;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .icon-cell.sel{border-color:var(--ink);background:#EEF3FF;box-shadow:0 0 0 2px rgba(26,31,46,.1)}
+.icon-cell.sel svg{stroke:var(--ink)}
 .icon-done{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:12px;font-size:13.5px;font-weight:700;cursor:pointer;margin-top:14px;font-family:var(--font)}
 
 /* CHAT (72% bottom sheet) */
@@ -473,8 +482,85 @@ let isAllOpen=true,rot=0,selFile=null,mediaStream=null,mediaRec=null,recChunks=[
 let ctxIdx=-1,icoIdx=-1,selIco=null,pendingReview=[],reviewSel={};
 let currentTheme=localStorage.getItem('theme_'+tag)||'navy',pendingTheme=currentTheme;
 let lpTimer=null,mLpTimer=null;
+let catOpenState={};
 
-const ICO_CATS={'위생':['🧴','🧼','🪥','🧻','💧','🫧','🪒','🛁','🚿','🪷','🌿','🌸','🧖','💆','✨','💊','🩹','🩺'],'청소':['🧹','🧺','🧽','🪣','🪠','🗑️','🧲','🔧','🔨','🪛','🗝️','🔑','🕯️','💡','🪴','📦','🗃️','🗄️'],'전자':['💻','🖥️','📱','⌨️','🖱️','🎧','📷','📹','🔋','🔌','📺','🎮','🖨️','📡','⌚','🎙️','📻','🖲️'],'의류':['👗','👔','👖','👟','👠','🧤','🧣','🎩','👜','💍','🕶️','🧦','👒','🪖','🥾','👝','💼','🎒'],'기타':['☕','🍵','🥤','🍎','🫙','📌','📎','✏️','📏','🪙','🎁','📚','🎨','🧸','🎵','🌟','⭐','🔮']};
+const SVG_ICONS={
+  bottle:'<path d="M9 2h6l1 4H8L9 2z"/><rect x="6" y="6" width="12" height="14" rx="3"/><path d="M10 11h4"/>',
+  soap:'<rect x="4" y="7" width="16" height="11" rx="2.5"/><path d="M8 7V5a2 2 0 014 0v2"/>',
+  toothbrush:'<path d="M12 2v12m0 0c-3 0-5 1-5 3s2 3 5 3 5-1 5-3-2-3-5-3z"/><path d="M12 2h4"/>',
+  tissue:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8m-4-4h8"/>',
+  drop:'<path d="M12 2C8 8 6 12 6 15a6 6 0 0012 0c0-3-2-7-6-13z"/>',
+  bubble:'<circle cx="7" cy="7" r="3"/><circle cx="16" cy="9" r="4"/><circle cx="10" cy="17" r="2.5"/>',
+  razor:'<rect x="2" y="3" width="20" height="5" rx="2"/><path d="M6 8v13M18 8v13m-6-13v13"/>',
+  bathtub:'<path d="M3 17h18M3 17V9h2M21 9H3M7 9V5a3 3 0 016 0v4"/>',
+  shower:'<path d="M4 4l6 6M10 10c0 5 3 9 8 11M10 10C5 10 2 13 1 18"/><circle cx="13" cy="7" r="3"/>',
+  flower:'<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"/>',
+  pill:'<rect x="2" y="9" width="20" height="6" rx="3"/><line x1="12" y1="9" x2="12" y2="15"/>',
+  bandage:'<rect x="3" y="9" width="18" height="6" rx="3"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>',
+  stethoscope:'<path d="M4 4a3 3 0 005.3 1.9V9a5 5 0 005 5"/><circle cx="16" cy="16" r="3"/>',
+  leaf:'<path d="M2 22C2 13 8 4 22 4c-2 10-10 18-20 18z"/><path d="M22 4L2 22"/>',
+  broom:'<path d="M4 20L16 8M16 8l2-2a2 2 0 00-3-3l-2 2M4 20c4-1 8-4 10-8"/>',
+  basket:'<path d="M7 3L3 9h18L17 3M2 9v11a2 2 0 002 2h16a2 2 0 002-2V9"/><line x1="12" y1="9" x2="12" y2="22"/>',
+  sponge:'<rect x="3" y="7" width="18" height="10" rx="3"/><path d="M8 7V5m4 2V4m4 3V5"/>',
+  bucket:'<path d="M6 8h12l-1.5 11a2 2 0 01-2 1.5H9.5a2 2 0 01-2-1.5L6 8z"/><path d="M5 8a7 7 0 0114 0"/>',
+  trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M9 6V4h6v2"/>',
+  wrench:'<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',
+  key:'<path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>',
+  lightbulb:'<path d="M9 18h6M10 22h4M12 2a7 7 0 015 11.95V16a2 2 0 01-2 2H9a2 2 0 01-2-2v-2.05A7 7 0 0112 2z"/>',
+  plant:'<path d="M12 22V12m0 0C8 12 4 8 4 4c4 0 8 2 8 8 0-6 4-8 8-8 0 4-4 8-8 8z"/>',
+  box:'<path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+  cabinet:'<rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 3v18M2 12h6m8 0h6"/><circle cx="6" cy="12" r="1"/><circle cx="18" cy="12" r="1"/>',
+  laptop:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M0 20h24"/>',
+  monitor:'<rect x="2" y="2" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  phone:'<rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/>',
+  keyboard:'<rect x="1" y="7" width="22" height="10" rx="2"/><path d="M5 11h2m2 0h2m2 0h2m2 0h2M5 15h14"/>',
+  mouse:'<rect x="8" y="2" width="8" height="14" rx="4"/><line x1="12" y1="2" x2="12" y2="8"/>',
+  headphone:'<path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/>',
+  camera:'<path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/>',
+  video:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',
+  battery:'<rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2"/>',
+  plug:'<path d="M9 9H5v4l3 3v6h8v-6l3-3V9h-4M9 3v6M15 3v6"/>',
+  tv:'<rect x="2" y="7" width="20" height="13" rx="2"/><polyline points="17 2 12 7 7 2"/>',
+  gamepad:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="17" cy="12" r="2"/><path d="M6 10h4M8 8v4"/>',
+  printer:'<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+  watch:'<circle cx="12" cy="12" r="7"/><polyline points="12 9 12 12 13.5 13.5"/><path d="M16.51 17.35l-.35 3.83a2 2 0 01-2 1.82H9.83a2 2 0 01-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 019.83 1h4.35a2 2 0 011.99 1.82l.35 3.83"/>',
+  mic:'<path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4m-4 0h8"/>',
+  speaker:'<rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r="1.5"/>',
+  shirt:'<path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10a2 2 0 002 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/>',
+  pants:'<path d="M6 2h12v10l-3 10H9L6 12V2z"/><line x1="12" y1="2" x2="12" y2="12"/>',
+  shoe:'<path d="M3 17l1-7 5-1 5 3 5-1 2 5-4 3H5l-2-3z"/>',
+  hat:'<path d="M12 4a8 8 0 018 8H4a8 8 0 018-8z"/><rect x="2" y="12" width="20" height="3" rx="1.5"/>',
+  bag:'<path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M9 2v3a3 3 0 006 0V2"/>',
+  glasses:'<path d="M2 12h4m12 0h4m-4 0a4 4 0 01-8 0 4 4 0 018 0z"/>',
+  sock:'<path d="M6 2v10l5 10h6l2-4-5-6V2"/><line x1="6" y1="7" x2="11" y2="7"/>',
+  boot:'<path d="M3 20h18M7 20V6a2 2 0 012-2h4a2 2 0 012 2v5l3 5-3 4H7z"/>',
+  backpack:'<path d="M9 2a3 3 0 006 0M4 6h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/><path d="M9 6v4h6V6"/>',
+  hanger:'<path d="M12 3a2 2 0 012 2 2 2 0 01-2 2v2L4 18h16L12 9V7"/>',
+  suitcase:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M12 12v4M8 21v-3M16 21v-3"/>',
+  coffee:'<path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>',
+  cup:'<path d="M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/>',
+  jar:'<path d="M7 4h10v2H7V4z"/><rect x="5" y="6" width="14" height="15" rx="2"/><path d="M9 10h6m-6 4h4"/>',
+  pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>',
+  pencil:'<path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>',
+  ruler:'<path d="M2 2l20 20M8 2L2 8m0 0l2 2m2-6l4 4m0-4l4 4m0-4l4 4"/>',
+  coin:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10m-3-8h5a2 2 0 010 4H9"/>',
+  gift:'<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/>',
+  book:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/>',
+  music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  star:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+  fan:'<circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>',
+  table:'<rect x="2" y="5" width="20" height="8" rx="2"/><path d="M8 13v6M16 13v6"/>',
+  chair:'<path d="M5 22v-7M19 22v-7M3 15h18M7 9v6M17 9v6M5 9V5a2 2 0 014 0v4M15 9V5a2 2 0 014 0v4"/>',
+  lamp:'<path d="M12 2v2m0 14v4M8 22h8M9 6l3 8 3-8H9zm0 0H6L4 12h16l-2-6h-3"/>',
+  bed:'<path d="M2 20v-8a2 2 0 012-2h16a2 2 0 012 2v8M2 14h20M7 14v-4a1 1 0 011-1h8a1 1 0 011 1v4"/>',
+  fridge:'<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/><path d="M8 6v2M8 14v4"/>',
+  washer:'<rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="12" cy="13" r="5"/><path d="M5 5h1m3 0h1"/>',
+  vacuum:'<path d="M4 20l4-4M8 16l8-8m0 0l2-2a3 3 0 014 4l-2 2m-4-6L6 18"/><circle cx="18" cy="6" r="2"/>',
+  default:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/>',
+};
+const ICO_CATS={'위생':['bottle','soap','toothbrush','tissue','drop','bubble','razor','bathtub','shower','flower','leaf','pill','bandage','stethoscope'],'청소':['broom','basket','sponge','bucket','trash','wrench','key','lightbulb','plant','box','cabinet','lamp','washer','vacuum'],'전자':['laptop','monitor','phone','keyboard','mouse','headphone','camera','video','battery','plug','tv','gamepad','printer','watch','mic','speaker'],'의류':['shirt','pants','shoe','hat','bag','glasses','sock','boot','backpack','hanger','suitcase'],'기타':['coffee','cup','jar','pin','pencil','ruler','coin','gift','book','music','star','fan','table','chair','bed','fridge']};
+function getIconSVG(icon){const path=SVG_ICONS[icon]||SVG_ICONS.default;return`<svg viewBox="0 0 24 24">${path}</svg>`;}
+
 
 // Brand + 배지 애니메이션
 (()=>{
@@ -516,12 +602,15 @@ function renderItems(filter=''){
   document.getElementById('bottom-section').style.display=total>0?'flex':'none';
   function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hl">$1</span>');}
   if(!Object.keys(groups).length){container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.<br>사진을 등록하거나 + 로 직접 추가하세요.</div></div>`;return;}
-  container.innerHTML=Object.keys(groups).map(cat=>`<div class="cat-section"><div class="cat-header" onclick="toggleCat(this)"><span class="cat-name-lbl">${cat}</span><span class="cat-count-lbl">${groups[cat].length}</span></div><div class="cat-content">${groups[cat].map(it=>{const ic=it.icon?`<span style="font-size:22px">${it.icon}</span>`:`<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg>`;return`<div class="item-card${it.low?' low-stock':''}" id="card-${it.idx}" ontouchstart="startLP(${it.idx})" ontouchend="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="return false"><div class="item-row"><div class="item-ico">${ic}</div><div class="item-info"><div class="item-name">${hl(it.name,filter)}</div><div class="item-cat-lbl">${cat}</div></div><div class="qty-wrap"><div class="qty-btn" ontouchstart="event.stopPropagation()" onclick="changeQty(${it.idx},-1)">−</div><span class="qty-num">${it.qty}</span><div class="qty-btn" ontouchstart="event.stopPropagation()" onclick="changeQty(${it.idx},1)">+</div></div></div></div>`;}).join('')}</div></div>`).join('');
+  container.innerHTML=Object.keys(groups).map(cat=>{
+    const isOpen=catOpenState[cat]!==false;
+    return`<div class="cat-section"><div class="cat-header"><span class="cat-name-lbl" onclick="renameCat('${cat.replace(/'/g,"\\'")}',this)">${cat}</span><span class="cat-chevron${isOpen?'':' closed'}" onclick="toggleCat('${cat.replace(/'/g,"\\'")}',this)"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span></div><div class="cat-content" style="display:${isOpen?'block':'none'}">${groups[cat].map(it=>{const ic=getIconSVG(it.icon);return`<div class="item-card${it.low?' low-stock':''}" id="card-${it.idx}" ontouchstart="startLP(${it.idx})" ontouchend="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="return false"><div class="item-row"><div class="item-ico">${ic}</div><div class="item-info"><div class="item-name">${hl(it.name,filter)}</div><div class="item-cat-lbl">${cat}</div></div><div class="qty-wrap"><div class="qty-btn" ontouchstart="event.stopPropagation()" onclick="changeQty(${it.idx},-1)">−</div><span class="qty-num">${it.qty}</span><div class="qty-btn" ontouchstart="event.stopPropagation()" onclick="changeQty(${it.idx},1)">+</div></div></div></div>`;}).join('')}</div></div>`;
+  }).join('');
 }
 
 function startLP(idx){cancelLP();lpTimer=setTimeout(()=>{if(navigator.vibrate)navigator.vibrate(35);openCtx(idx);},500);}
 function cancelLP(){clearTimeout(lpTimer);lpTimer=null;}
-function openCtx(idx){ctxIdx=idx;const it=items[idx];let cat='기타',name=it.n;if(it.n.includes(':')){const p=it.n.split(':');cat=p[0];name=p.slice(1).join(':');}document.getElementById('ctx-ico').textContent=it.icon||'📦';document.getElementById('ctx-name').textContent=name;document.getElementById('ctx-cat').textContent=cat;document.getElementById('ctx-ov').classList.add('open');}
+function openCtx(idx){ctxIdx=idx;const it=items[idx];let cat='기타',name=it.n;if(it.n.includes(':')){const p=it.n.split(':');cat=p[0];name=p.slice(1).join(':');}const icoEl=document.getElementById('ctx-ico');icoEl.innerHTML=getIconSVG(it.icon||'default');icoEl.style.cssText='width:34px;height:34px;background:var(--bg);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:6px';const svg=icoEl.querySelector('svg');if(svg){svg.style.cssText='width:100%;height:100%;stroke:#3A4050;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round';}document.getElementById('ctx-name').textContent=name;document.getElementById('ctx-cat').textContent=cat;document.getElementById('ctx-ov').classList.add('open');}
 function closeCtx(){document.getElementById('ctx-ov').classList.remove('open');}
 function ctxEditName(){closeCtx();const it=items[ctxIdx];let cat='기타',name=it.n;if(it.n.includes(':')){const p=it.n.split(':');cat=p[0];name=p.slice(1).join(':');}const n=prompt('물품명 수정:',name);if(n&&n!==name){corrections.push({original:name,corrected:n});if(corrections.length>50)corrections=corrections.slice(-50);localStorage.setItem('corrections_'+tag,JSON.stringify(corrections));items[ctxIdx].n=cat+':'+n;items[ctxIdx].low=false;save();}}
 function ctxDelete(){closeCtx();let name=items[ctxIdx].n;if(name.includes(':'))name=name.split(':').slice(1).join(':');if(confirm(`"${name}" 항목을 삭제할까요?`)){items.splice(ctxIdx,1);save();}}
@@ -530,14 +619,15 @@ function ctxEditIcon(){closeCtx();openIconPicker(ctxIdx);}
 function openIconPicker(idx){icoIdx=idx;selIco=items[idx]?.icon||null;const cats=Object.keys(ICO_CATS);document.getElementById('icon-cats').innerHTML=cats.map((c,i)=>`<div class="icon-cat-btn${i===0?' active':''}" onclick="switchIcoCat('${c}',this)">${c}</div>`).join('');renderIcoGrid(cats[0]);document.getElementById('icon-ov').classList.add('open');}
 function closeIconPicker(e){if(e&&e.target!==document.getElementById('icon-ov'))return;document.getElementById('icon-ov').classList.remove('open');}
 function switchIcoCat(cat,el){document.querySelectorAll('.icon-cat-btn').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderIcoGrid(cat);}
-function renderIcoGrid(cat){document.getElementById('icon-grid').innerHTML=ICO_CATS[cat].map(ic=>`<div class="icon-cell${selIco===ic?' sel':''}" onclick="pickIco('${ic}')">${ic}</div>`).join('');}
+function renderIcoGrid(cat){document.getElementById('icon-grid').innerHTML=ICO_CATS[cat].map(ic=>`<div class="icon-cell${selIco===ic?' sel':''}" onclick="pickIco('${ic}')">${getIconSVG(ic)}</div>`).join('');}
 function pickIco(ic){selIco=ic;document.querySelectorAll('.icon-cell').forEach(c=>c.classList.remove('sel'));event.currentTarget.classList.add('sel');}
 function saveIcon(){if(icoIdx>=0&&selIco){items[icoIdx].icon=selIco;save();}document.getElementById('icon-ov').classList.remove('open');}
 
-function toggleCat(h){const c=h.nextElementSibling;c.style.display=c.style.display==='none'?'block':'none';}
+function toggleCat(catName,chevronEl){catOpenState[catName]=catOpenState[catName]===false?true:false;const header=chevronEl.closest('.cat-header');const content=header.nextElementSibling;const open=catOpenState[catName]!==false;content.style.display=open?'block':'none';chevronEl.classList.toggle('closed',!open);}
+function renameCat(oldName,el){const n=prompt('카테고리 이름 수정:',oldName);if(!n||n.trim()===oldName)return;const nn=n.trim();items=items.map(it=>{if(it.n.startsWith(oldName+':')){return{...it,n:nn+':'+it.n.slice(oldName.length+1)};}return it;});save();}
 function changeQty(idx,d){items[idx].q=Math.max(1,(items[idx].q||1)+d);save();}
 function addItemDirectly(){const n=prompt('물품명 입력 (예: 위생:샴푸 또는 샴푸):');if(n){items.push({n:n.trim(),q:1});save();}}
-function toggleAll(){isAllOpen=!isAllOpen;document.querySelectorAll('.cat-content').forEach(c=>{c.style.display=isAllOpen?'block':'none';});document.getElementById('toggle-btn').textContent=isAllOpen?'접기':'펼치기';}
+function toggleAll(){isAllOpen=!isAllOpen;document.querySelectorAll('.cat-content').forEach(c=>{c.style.display=isAllOpen?'block':'none';});document.querySelectorAll('.cat-chevron').forEach(c=>{c.classList.toggle('closed',!isAllOpen);});document.querySelectorAll('.cat-name-lbl').forEach(el=>{const cat=el.textContent;catOpenState[cat]=isAllOpen;});document.getElementById('toggle-btn').textContent=isAllOpen?'접기':'펼치기';}
 function save(){localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();}
 function clearAll(){if(!confirm('목록과 미디어를 모두 초기화할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);items=[];localStorage.setItem('gyeol_'+tag,'[]');localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();renderItems();}
 
