@@ -621,7 +621,13 @@ window.onload=async()=>{
   applyTheme(currentTheme,false);
   document.getElementById('drawer-title').textContent=localStorage.getItem('name_'+tag)||'서랍 1';
   const mp=localStorage.getItem('mediaPath_'+tag);
-  if(mp){const{data}=await _sb.storage.from('user_uploads').createSignedUrl(mp,3600);if(data?.signedUrl){showMedia(data.signedUrl,localStorage.getItem('rot_'+tag)||0);updateSmartBtn(true);}}
+  if(mp){
+    const{data}=await _sb.storage.from('user_uploads').createSignedUrl(mp,3600);
+    if(data?.signedUrl){showMedia(data.signedUrl,localStorage.getItem('rot_'+tag)||0);}
+    else{localStorage.removeItem('mediaPath_'+tag);const ab=document.getElementById('hdr-action-btn');if(ab)ab.classList.remove('has-media');}
+  } else {
+    const ab=document.getElementById('hdr-action-btn');if(ab)ab.classList.remove('has-media');
+  }
   initMediaEvents();renderItems();
 };
 
@@ -711,31 +717,6 @@ function showResultModal(icon, title, sub) {
   document.getElementById('result-modal-ov').classList.add('open');
 }
 
-function smartBtnClick(){
-  const fp=localStorage.getItem('mediaPath_'+tag);
-  if(fp){
-    // 사진 있으면 → 재분석
-    if(!confirm('사진을 다시 분석할까요?\n기존 목록이 초기화됩니다.'))return;
-    items=[];localStorage.setItem('gyeol_'+tag,'[]');
-    renderItems();
-    const mt=localStorage.getItem('mime_'+tag)||'image/jpeg';
-    runAnalysis(fp,mt);
-  } else {
-    // 사진 없으면 → 추가
-    showMediaPicker();
-  }
-}
-function updateSmartBtn(hasPhoto){
-  const btn=document.getElementById('smart-btn');
-  if(!btn)return;
-  if(hasPhoto){
-    btn.innerHTML=`<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--h-txt);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg>`;
-    btn.title='재분석';
-  } else {
-    btn.innerHTML='+';
-    btn.title='추가';
-  }
-}
 async function runAnalysis(filePath,mimeType){
   const box=document.getElementById('media-box');
   const el=document.getElementById('media-el');
