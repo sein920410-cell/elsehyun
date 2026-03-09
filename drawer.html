@@ -298,6 +298,16 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .fs-close{position:absolute;top:14px;right:14px;width:32px;height:32px;background:rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1}
 .fs-close svg{width:14px;height:14px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round}
 #fs-content img,#fs-content video{max-width:100%;max-height:100%;object-fit:contain}
+
+.result-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;align-items:center;justify-content:center;padding:24px}
+.result-modal-ov.open{display:flex}
+.result-modal{background:var(--surface,#fff);border-radius:18px;width:100%;max-width:320px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.result-modal-body{padding:28px 24px 20px;text-align:center}
+.result-modal-icon{font-size:32px;margin-bottom:12px}
+.result-modal-title{font-size:16px;font-weight:700;color:var(--ink,#1a1f2e);letter-spacing:-.02em;margin-bottom:6px}
+.result-modal-sub{font-size:13px;color:var(--muted,#888);line-height:1.5}
+.result-modal-btn{width:100%;padding:15px;border:none;border-top:1px solid var(--border,rgba(0,0,0,.08));background:transparent;font-family:var(--font);font-size:15px;font-weight:600;color:var(--h-bg,#0c1220);cursor:pointer;letter-spacing:-.01em}
+.result-modal-btn:active{background:var(--bg,#f5f5f5)}
 </style>
 </head>
 <body data-theme="navy">
@@ -316,9 +326,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     </button>
   </div>
   <div class="header-right">
-    <div class="hdr-re" id="hdr-re-btn" onclick="triggerReanalyze()" title="재분석">
-      <svg viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg>
-    </div>
+    <div class="hdr-re" id="hdr-re-btn" onclick="triggerReanalyze()" title="재분석"><svg viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg></div>
     <div class="hdr-sq" onclick="showMediaPicker()">+</div>
   </div>
 </header>
@@ -690,6 +698,13 @@ function closeChat(){document.getElementById('chat-ov').classList.remove('open')
 document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
 async function sendMsg(){const inp=document.getElementById('chat-inp');const t=inp.value.trim();if(!t)return;const msgs=document.getElementById('chat-msgs');msgs.innerHTML+=`<div class="msg user">${t}</div>`;inp.value='';msgs.scrollTop=msgs.scrollHeight;try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:t,tag,drawerName:document.getElementById('drawer-title').textContent,inventory:JSON.stringify(items.map(i=>i.n))})});const d=await r.json();msgs.innerHTML+=`<div class="msg bot">${d.reply}</div>`;}catch{msgs.innerHTML+=`<div class="msg bot">오류가 발생했습니다.</div>`;}msgs.scrollTop=msgs.scrollHeight;}
 
+
+function showResultModal(icon, title, sub) {
+  document.getElementById('result-modal-icon').textContent = icon;
+  document.getElementById('result-modal-title').textContent = title;
+  document.getElementById('result-modal-sub').textContent = sub || '';
+  document.getElementById('result-modal-ov').classList.add('open');
+}
 async function runAnalysis(filePath,mimeType){
   const box=document.getElementById('media-box');
   const el=document.getElementById('media-el');
@@ -703,14 +718,14 @@ async function runAnalysis(filePath,mimeType){
     if(d.items?.length){d.items.forEach(it=>items.push({n:`${it.category}:${it.name}`,q:it.qty||1}));localStorage.setItem('gyeol_'+tag,JSON.stringify(items));}
     rmOv();renderItems();
     if(d.reviewItems?.length)showReview(d.reviewItems);
-    else if(items.length>0)alert(`✅ ${items.length}개 물품이 등록되었습니다!`);
-    else alert('물품을 찾지 못했습니다.\n직접 추가해 주세요.');
-  }catch(err){rmOv();alert('분석 오류: '+err.message);renderItems();}
+    else if(items.length>0)showResultModal('✅',`${items.length}개 물품 등록 완료`,'목록에서 확인하고 수정할 수 있어요');
+    else showResultModal('🔍','물품을 찾지 못했습니다','직접 추가하거나 사진을 바꿔보세요');
+  }catch(err){rmOv();showResultModal('⚠️','분석 오류',err.message);renderItems();}
 }
 function triggerReanalyze(){
   const fp=localStorage.getItem('mediaPath_'+tag);
   const mt=localStorage.getItem('mime_'+tag)||'image/jpeg';
-  if(!fp){alert('등록된 사진이 없습니다.');return;}
+  if(!fp){showResultModal('📷','등록된 사진이 없습니다','+ 버튼으로 사진을 먼저 추가하세요');return;}
   if(!confirm('사진을 다시 분석할까요?\n기존 목록이 초기화됩니다.'))return;
   items=[];localStorage.setItem('gyeol_'+tag,'[]');
   renderItems();runAnalysis(fp,mt);
@@ -718,7 +733,7 @@ function triggerReanalyze(){
 function showReview(rv){pendingReview=rv;reviewSel={};document.getElementById('confirm-list').innerHTML=rv.map((it,i)=>`<div class="confirm-block"><div class="confirm-q">항목 ${i+1}</div>${(it.candidates||[it.name]).map((c,ci)=>`<button class="confirm-cand" id="cand-${i}-${ci}" onclick="selCand(${i},${ci},'${c}',${(it.candidates||[it.name]).length})">${c}</button>`).join('')}<button class="confirm-skip" onclick="skipCand(${i})">건너뛰기</button></div>`).join('');document.getElementById('confirm-ov').classList.add('open');}
 function selCand(ii,ci,name,tot){reviewSel[ii]=name;for(let c=0;c<tot;c++){const b=document.getElementById(`cand-${ii}-${c}`);if(b)b.classList.toggle('selected',c===ci);}}
 function skipCand(i){reviewSel[i]=null;document.getElementById(`cand-${i}-0`)?.closest('.confirm-block')?.style.setProperty('opacity','.4');}
-function confirmReview(){document.getElementById('confirm-ov').classList.remove('open');pendingReview.forEach((it,i)=>{const n=reviewSel[i];if(n)items.push({n:`${it.category}:${n}`,q:it.qty||1});});if(items.length)localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();if(items.length>0)alert(`✅ 총 ${items.length}개 물품이 등록되었습니다!`);}
+function confirmReview(){document.getElementById('confirm-ov').classList.remove('open');pendingReview.forEach((it,i)=>{const n=reviewSel[i];if(n)items.push({n:`${it.category}:${n}`,q:it.qty||1});});if(items.length)localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();if(items.length>0)showResultModal('✅',`${items.length}개 물품 등록 완료`,'목록에서 확인하고 수정할 수 있어요');}
 
 async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?.getUserMedia){alert('이 브라우저는 영상 촬영을 지원하지 않습니다.');return;}try{mediaStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720},facingMode:{ideal:'environment'}},audio:false});const lv=document.getElementById('rec-live');lv.srcObject=mediaStream;lv.style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-timer').textContent='00:00 / 00:30';document.getElementById('rec-timer').className='rec-timer';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='⏺';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-hint').textContent='⏺ 버튼을 눌러 촬영을 시작하세요';recBlob=null;isRec=false;document.getElementById('rec-ov').classList.add('open');}catch(err){alert('카메라 접근 실패: '+err.message);}}
 function toggleRec(){if(!isRec){recChunks=[];const mt=['video/webm;codecs=vp9','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';mediaRec=new MediaRecorder(mediaStream,mt?{mimeType:mt}:{});mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};mediaRec.onstop=()=>{const type=(mt||'video/webm').split(';')[0];recBlob=new Blob(recChunks,{type});const pb=document.getElementById('rec-playback');pb.src=URL.createObjectURL(recBlob);pb.style.display='block';document.getElementById('rec-live').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-btn').style.display='none';document.getElementById('rec-confirm').style.display='inline-flex';document.getElementById('rec-retake').style.display='inline-flex';document.getElementById('rec-hint').textContent='영상을 확인하고 등록하거나 다시 촬영하세요.';isRec=false;};mediaRec.start();isRec=true;recSec=0;document.getElementById('rec-btn').className='rec-circle recording';document.getElementById('rec-btn').innerHTML='⏹';document.getElementById('rec-ind').style.display='block';document.getElementById('rec-hint').textContent='촬영 중... (최대 30초)';recTimer=setInterval(()=>{recSec++;document.getElementById('rec-timer').textContent=`00:${String(recSec).padStart(2,'0')} / 00:30`;if(recSec>=25)document.getElementById('rec-timer').className='rec-timer danger';if(recSec>=30)stopRec();},1000);}else{stopRec();}}
@@ -727,5 +742,16 @@ function retakeRec(){recBlob=null;recChunks=[];document.getElementById('rec-live
 async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>업로드 중...</div></div>`;try{const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});const{error:ue}=await _sb.storage.from('user_uploads').upload(path,new File([recBlob],`rec.${ext}`,{type:recBlob.type}),{cacheControl:'3600',upsert:false,contentType:recBlob.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,0);const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;showMedia(sd.signedUrl,0);renderItems();alert('✅ 영상이 등록되었습니다.\n(AI 분석은 사진만 지원됩니다.)');}catch(err){resetMediaBox();alert('오류: '+err.message);}}
 function cancelRecording(){clearInterval(recTimer);if(mediaRec?.state!=='inactive')mediaRec?.stop();if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');isRec=false;}
 </script>
+
+<div class="result-modal-ov" id="result-modal-ov">
+  <div class="result-modal">
+    <div class="result-modal-body">
+      <div class="result-modal-icon" id="result-modal-icon">✅</div>
+      <div class="result-modal-title" id="result-modal-title"></div>
+      <div class="result-modal-sub" id="result-modal-sub"></div>
+    </div>
+    <button class="result-modal-btn" onclick="document.getElementById('result-modal-ov').classList.remove('open')">확인</button>
+  </div>
+</div>
 </body>
 </html>
