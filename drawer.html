@@ -564,16 +564,39 @@ const ICO_CATS={'위생':['bottle','soap','toothbrush','tissue','drop','bubble',
 function getIconSVG(icon){const path=SVG_ICONS[icon]||SVG_ICONS.default;return`<svg viewBox="0 0 24 24">${path}</svg>`;}
 
 
-// Brand + 배지 애니메이션
+
+// Brand + 배지 애니메이션 — 순차적으로 실행
 (()=>{
-  const b=document.getElementById('brand-btn');let sw=false;
-  b.onclick=()=>openChat();
-  setInterval(()=>{sw=!sw;b.classList.toggle('swap',sw);},3800);
+  const brand=document.getElementById('brand-btn');
+  const cnt=document.getElementById('toolbar-cnt');
+  let phase=0;
+  // 단계: 0=둘다 기본, 1=brand swap, 2=brand 복귀+badge swap, 3=badge 복귀
+  // 타이밍: 0→1: 4초, 1→2: 2초, 2→3: 2초, 3→0: 4초 (총 12초 사이클)
+  brand.onclick=()=>openChat();
+
+  function tick(){
+    phase=(phase+1)%4;
+    if(phase===1){
+      // brand 헤드셋으로 전환
+      brand.classList.add('swap');
+      setTimeout(tick,2000);
+    } else if(phase===2){
+      // brand 복귀 + badge 돋보기로 전환
+      brand.classList.remove('swap');
+      if(cnt.classList.contains('vis')) cnt.classList.add('show-ico');
+      setTimeout(tick,2000);
+    } else if(phase===3){
+      // badge 복귀
+      cnt.classList.remove('show-ico');
+      setTimeout(tick,4000);
+    } else {
+      // phase 0 — 대기
+      setTimeout(tick,4000);
+    }
+  }
+  setTimeout(tick,4000);
 })();
-(()=>{
-  const cnt=document.getElementById('toolbar-cnt');let ico=false;
-  setInterval(()=>{if(!cnt.classList.contains('vis'))return;ico=!ico;cnt.classList.toggle('show-ico',ico);},3200);
-})();
+
 
 window.onload=async()=>{
   applyTheme(currentTheme,false);
