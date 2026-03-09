@@ -24,7 +24,7 @@
 [data-theme="rose"]   {--h-bg:#C4909E;--h-txt:#fff;--h-sub:rgba(255,255,255,.65);--h-border:rgba(255,255,255,.18);--h-btn:rgba(255,255,255,.14);--bom-bg:#8B3A4A;--a-color:#FECDD3;--a-bg:rgba(254,205,211,.14);--a-border:rgba(254,205,211,.35)}
 [data-theme="crimson"]{--h-bg:#A93226;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#6B1A12;--a-color:#FCA5A5;--a-bg:rgba(252,165,165,.13);--a-border:rgba(252,165,165,.3)}
 [data-theme="sage"]   {--h-bg:#5A7A62;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#2E4A36;--a-color:#86EFAC;--a-bg:rgba(134,239,172,.12);--a-border:rgba(134,239,172,.3)}
-[data-theme="amber"]  {--h-bg:#efd308;--h-txt:#1A1400;--h-sub:rgba(26,20,0,.52);--h-border:rgba(26,20,0,.12);--h-btn:rgba(26,20,0,.07);--bom-bg:#B89800;--a-color:#A07800;--a-bg:rgba(160,120,0,.1);--a-border:rgba(160,120,0,.22)}
+[data-theme="amber"]  {--h-bg:#efd308;--h-txt:#fff;--h-sub:rgba(255,255,255,.75);--h-border:rgba(255,255,255,.22);--h-btn:rgba(255,255,255,.15);--bom-bg:#B89800;--a-color:#7A5C00;--a-bg:rgba(122,92,0,.12);--a-border:rgba(122,92,0,.28)}
 [data-theme="blue"]   {--h-bg:#6fa8dc;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#0D3B5E;--a-color:#7DD3FC;--a-bg:rgba(125,211,252,.13);--a-border:rgba(125,211,252,.3)}
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -52,10 +52,13 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .header-right{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-left:auto;z-index:1}
 .hdr-sq{width:36px;height:36px;border-radius:10px;background:var(--h-btn);border:1px solid var(--h-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--h-txt);font-size:18px;font-weight:300;flex-shrink:0}
 .hdr-sq:active{opacity:.75}
-.hdr-re{width:36px;height:36px;border-radius:10px;background:var(--h-btn);border:1px solid var(--h-border);display:none;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-.hdr-re.visible{display:flex}
-.hdr-re:active{opacity:.75}
-.hdr-re svg{width:15px;height:15px;stroke:var(--h-txt);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.hdr-action{width:36px;height:36px;border-radius:10px;background:var(--h-btn);border:1px solid var(--h-border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative}
+.hdr-action:active{opacity:.75}
+.hdr-action svg{width:15px;height:15px;stroke:var(--h-txt);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;position:absolute;transition:opacity .2s,transform .2s}
+.hdr-action .ico-add{opacity:1;transform:rotate(0deg)}
+.hdr-action .ico-re{opacity:0;transform:rotate(-45deg)}
+.hdr-action.has-media .ico-add{opacity:0;transform:rotate(45deg)}
+.hdr-action.has-media .ico-re{opacity:1;transform:rotate(0deg)}
 
 /* MEDIA */
 .media-section{background:var(--h-bg);padding:0 14px 13px;flex-shrink:0;transition:background .4s}
@@ -326,8 +329,10 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     </button>
   </div>
   <div class="header-right">
-    <div class="hdr-re" id="hdr-re-btn" onclick="triggerReanalyze()" title="재분석"><svg viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg></div>
-    <div class="hdr-sq" onclick="showMediaPicker()">+</div>
+    <div class="hdr-action" id="hdr-action-btn" onclick="handleActionBtn()" title="추가/재분석">
+      <svg class="ico-add" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <svg class="ico-re" viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg>
+    </div>
   </div>
 </header>
 
@@ -616,7 +621,7 @@ window.onload=async()=>{
   applyTheme(currentTheme,false);
   document.getElementById('drawer-title').textContent=localStorage.getItem('name_'+tag)||'서랍 1';
   const mp=localStorage.getItem('mediaPath_'+tag);
-  if(mp){const{data}=await _sb.storage.from('user_uploads').createSignedUrl(mp,3600);if(data?.signedUrl)showMedia(data.signedUrl,localStorage.getItem('rot_'+tag)||0);}
+  if(mp){const{data}=await _sb.storage.from('user_uploads').createSignedUrl(mp,3600);if(data?.signedUrl){showMedia(data.signedUrl,localStorage.getItem('rot_'+tag)||0);updateSmartBtn(true);}}
   initMediaEvents();renderItems();
 };
 
@@ -688,8 +693,8 @@ function handleFile(e){const f=e.target.files?.[0];if(!f)return;selFile=f;rot=0;
 function rotateMedia(d){rot=(rot+d)%360;const el=document.getElementById('rot-content').firstChild;if(el)el.className='rotate'+rot;}
 function cancelUpload(){selFile=null;document.getElementById('rot-ov').classList.remove('open');}
 async function confirmUpload(){if(!selFile)return;document.getElementById('rot-ov').classList.remove('open');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>업로드 중...</div></div>`;try{const ext=selFile.name.split('.').pop()||'jpg';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});const{error:ue}=await _sb.storage.from('user_uploads').upload(path,selFile,{cacheControl:'3600',upsert:false,contentType:selFile.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,rot);localStorage.setItem('mime_'+tag,selFile.type||'image/jpeg');const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;showMedia(sd.signedUrl,rot);await runAnalysis(path,selFile.type);}catch(err){resetMediaBox();alert('오류: '+err.message);}selFile=null;}
-function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;const rb=document.getElementById('hdr-re-btn');if(rb)rb.classList.toggle('visible',!isV);}
-function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';const rb=document.getElementById('hdr-re-btn');if(rb)rb.classList.remove('visible');box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진 또는 영상 등록</div><div class="media-empty-sub">탭하여 추가 · AI가 자동 인식</div></div>`;}
+function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;const ab=document.getElementById('hdr-action-btn');if(ab)ab.classList.toggle('has-media',!isV);}
+function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';const ab=document.getElementById('hdr-action-btn');if(ab)ab.classList.remove('has-media');box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진 또는 영상 등록</div><div class="media-empty-sub">탭하여 추가 · AI가 자동 인식</div></div>`;}
 function openFull(){const el=document.getElementById('media-el');if(!el)return;const fc=document.getElementById('fs-content');fc.innerHTML=el.tagName==='VIDEO'?`<video src="${el.src}" class="${el.className}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`:`<img src="${el.src}" class="${el.className}" style="max-width:100%;max-height:100%;object-fit:contain">`;document.getElementById('fs-ov').classList.add('open');}
 function closeFull(){document.getElementById('fs-ov').classList.remove('open');}
 
@@ -704,6 +709,32 @@ function showResultModal(icon, title, sub) {
   document.getElementById('result-modal-title').textContent = title;
   document.getElementById('result-modal-sub').textContent = sub || '';
   document.getElementById('result-modal-ov').classList.add('open');
+}
+
+function smartBtnClick(){
+  const fp=localStorage.getItem('mediaPath_'+tag);
+  if(fp){
+    // 사진 있으면 → 재분석
+    if(!confirm('사진을 다시 분석할까요?\n기존 목록이 초기화됩니다.'))return;
+    items=[];localStorage.setItem('gyeol_'+tag,'[]');
+    renderItems();
+    const mt=localStorage.getItem('mime_'+tag)||'image/jpeg';
+    runAnalysis(fp,mt);
+  } else {
+    // 사진 없으면 → 추가
+    showMediaPicker();
+  }
+}
+function updateSmartBtn(hasPhoto){
+  const btn=document.getElementById('smart-btn');
+  if(!btn)return;
+  if(hasPhoto){
+    btn.innerHTML=`<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--h-txt);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg>`;
+    btn.title='재분석';
+  } else {
+    btn.innerHTML='+';
+    btn.title='추가';
+  }
 }
 async function runAnalysis(filePath,mimeType){
   const box=document.getElementById('media-box');
@@ -722,14 +753,21 @@ async function runAnalysis(filePath,mimeType){
     else showResultModal('🔍','물품을 찾지 못했습니다','직접 추가하거나 사진을 바꿔보세요');
   }catch(err){rmOv();showResultModal('⚠️','분석 오류',err.message);renderItems();}
 }
-function triggerReanalyze(){
+function handleActionBtn(){
   const fp=localStorage.getItem('mediaPath_'+tag);
-  const mt=localStorage.getItem('mime_'+tag)||'image/jpeg';
-  if(!fp){showResultModal('📷','등록된 사진이 없습니다','+ 버튼으로 사진을 먼저 추가하세요');return;}
-  if(!confirm('사진을 다시 분석할까요?\n기존 목록이 초기화됩니다.'))return;
-  items=[];localStorage.setItem('gyeol_'+tag,'[]');
-  renderItems();runAnalysis(fp,mt);
+  if(fp){
+    // 사진 있으면 → 재분석
+    if(!confirm('사진을 다시 분석할까요?\n기존 목록이 초기화됩니다.'))return;
+    items=[];localStorage.setItem('gyeol_'+tag,'[]');
+    renderItems();
+    const mt=localStorage.getItem('mime_'+tag)||'image/jpeg';
+    runAnalysis(fp,mt);
+  } else {
+    // 사진 없으면 → 추가
+    showMediaPicker();
+  }
 }
+
 function showReview(rv){pendingReview=rv;reviewSel={};document.getElementById('confirm-list').innerHTML=rv.map((it,i)=>`<div class="confirm-block"><div class="confirm-q">항목 ${i+1}</div>${(it.candidates||[it.name]).map((c,ci)=>`<button class="confirm-cand" id="cand-${i}-${ci}" onclick="selCand(${i},${ci},'${c}',${(it.candidates||[it.name]).length})">${c}</button>`).join('')}<button class="confirm-skip" onclick="skipCand(${i})">건너뛰기</button></div>`).join('');document.getElementById('confirm-ov').classList.add('open');}
 function selCand(ii,ci,name,tot){reviewSel[ii]=name;for(let c=0;c<tot;c++){const b=document.getElementById(`cand-${ii}-${c}`);if(b)b.classList.toggle('selected',c===ci);}}
 function skipCand(i){reviewSel[i]=null;document.getElementById(`cand-${i}-0`)?.closest('.confirm-block')?.style.setProperty('opacity','.4');}
