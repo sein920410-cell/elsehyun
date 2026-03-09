@@ -59,7 +59,7 @@ async function callGemini(parts, temperature = 0.05) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts }],
-        generationConfig: { temperature, maxOutputTokens: 8192, thinkingConfig: { thinkingBudget: 8000 } }
+        generationConfig: { temperature, maxOutputTokens: 4096 }
       })
     }
   );
@@ -90,19 +90,21 @@ export default async function handler(req, res) {
 
     // ══ 1단계: 이미지 직접 스캔 → 물건 목록 (텍스트) ══
     console.log("1단계: 이미지 스캔");
-    const scanPrompt = `당신은 사진 속 물건을 빠짐없이 목록화하는 전문가입니다.
+    const scanPrompt = `당신은 사진 속 물건을 정확하게 목록화하는 전문가입니다.
 
-[임무] 사진을 구역별로(왼쪽→오른쪽, 위→아래) 스캔하여 보이는 모든 물건을 번호 붙여 나열하세요.
+[임무] 사진을 왼쪽→오른쪽, 위→아래 순서로 스캔하여 눈에 보이는 물건을 번호 붙여 나열하세요.
 
 [절대 규칙]
-1. 사진에 실제로 보이는 물건만. 추측·추론·상상 절대 금지.
-2. 라벨/텍스트 보이면 읽어서 그대로 적는다. 예: "라벨: Febreze FABRIC"
-3. 라벨 없으면 형태 설명만. 색상은 의류/신발/가방처럼 색이 중요한 것에만 기재. 가구/전자기기/콘센트/세제 등엔 색상 표현 불필요.
-4. 절대 "이 공간에 있을 법한" 물건을 상상해서 추가하지 않는다. 선풍기, 에어컨 등은 실제 화면에 명확히 보일 때만.
-5. 여러 개면 (×N개) 표시.
-6. 달력은 보이는 월(月)만 적고 연도는 절대 판단하지 않는다. 예: "7월 달력"
-7. 반드시 제외: 신분증, 주민등록증, 운전면허증, 여권, 현금(지폐/동전), 통장, 신용카드, 체크카드 — 보여도 목록 미포함.
-8. JSON 아님, 번호 목록으로만 응답.`;
+1. 사진에 실제로 명확히 보이는 물건만. 추측·추론·상상·유추 절대 금지.
+   예: "부엌이니까 선풍기가 있겠지" 같은 추론 금지. 화면에 선명히 보여야 포함.
+2. 라벨/텍스트 보이면 그대로 읽는다. 예: "라벨: Febreze FABRIC"
+3. 라벨 없으면 형태 설명만. 예: "직사각형 플라스틱 바구니"
+   색상은 의류·신발·가방처럼 색이 식별에 필수적인 경우에만 기재.
+   콘센트, 식탁, 가전, 세제통, 수납함 등에는 색상 표현 불필요.
+4. 여러 개면 (xN개) 표시.
+5. 달력은 보이는 월(月)만 적고 연도 판단 절대 금지. 예: "1월 달력"
+6. 절대 제외(보여도 목록 미포함): 신분증, 주민등록증, 운전면허증, 여권, 현금(지폐·동전), 통장, 신용카드, 체크카드.
+7. JSON 아님, 번호 목록으로만 응답.`;
 
     const scanText = await callGemini([
       { inline_data: { mime_type: mime, data: b64 } },
@@ -134,17 +136,15 @@ ${scanText}
 "기타" — 위 해당 없음
 
 [이름 규칙]
-- "브랜드 제품유형" 형식, 20자 이내
+- "브랜드 제품유형" 형식, 20자 이내. 목록에 없는 물건 절대 추가 금지.
 - 라벨 텍스트 있으면: 읽은 텍스트 기반으로 정확하게
 - 라벨 없으면: 한국어 형태 설명 (예: "플라스틱 바구니", "접이식 의자") — 색상 prefix 불필요
-- 색상은 의류/신발/가방/모자처럼 색상이 구별에 의미있는 경우에만 이름 앞에 기재. 가구/전자기기/콘센트/세제/식기/수납용품/청소도구는 색상 절대 붙이지 않는다.
-  ✅ 좋은 예: "검정 후드티", "베이지 스니커즈"
-  ❌ 나쁜 예: "흰색 콘센트", "아이보리색 식탁", "회색 세탁기"
+- 색상은 의류/신발/가방/모자에만 붙인다. ✅ "검정 후드티" / ❌ "흰색 콘센트" "아이보리 식탁"
 - 영양제: 라벨 성분명 그대로 (아르기닌≠비타민, 오메가3≠비타민, 콜라겐≠비타민)
 - 신발: "슬리퍼", "운동화", "샌들" 등 실제 보이는 형태로
 - 세제: 라벨 읽은 것만, 보이지 않으면 "세탁세제" 아닌 "세제 용기"
-- 달력: "○월 달력" 형식만 사용. 연도 절대 표기 금지. (예: "1월 달력", "7월 달력")
-- 목록에 신분증/여권/현금/통장/카드류가 있어도 JSON에 포함하지 않는다.
+- 달력: "N월 달력" 형식만. 연도 표기 절대 금지. ✅ "1월 달력" / ❌ "2020년 1월 달력"
+- 민감정보(신분증/여권/현금/통장/카드류)는 JSON에 포함하지 않는다.
 
 [출력 — JSON 배열만, 다른 텍스트 없이]
 [{"category":"카테고리","name":"상품명","qty":1},...]`;
@@ -155,14 +155,19 @@ ${scanText}
     const rawItems = safeParseItems(jsonText);
     console.log("파싱 수:", rawItems.length);
 
+    // 비의류 카테고리 색상 prefix 안전망 제거
+    const COLOR_RE = /^(흰색|흰|화이트|검정|검은|블랙|회색|회|그레이|아이보리|베이지|갈색|브라운|노란|노랑|파란|파랑|블루|빨간|빨강|레드|초록|녹색|그린|핑크|분홍|보라|퍼플|은색|실버|금색|골드|투명)\s+/u;
+    const NO_COLOR_CATS = new Set(["생활", "청소", "위생", "기타"]);
+
     const items = deduplicateItems(
       rawItems
         .filter(it => it?.name && String(it.name).trim().length > 1)
-        .map(it => ({
-          category: normCat(it.category),
-          name: String(it.name).trim().slice(0, 25),
-          qty: Math.max(1, Number(it.qty) || 1),
-        }))
+        .map(it => {
+          const category = normCat(it.category);
+          let name = String(it.name).trim().slice(0, 25);
+          if (NO_COLOR_CATS.has(category)) name = name.replace(COLOR_RE, "");
+          return { category, name, qty: Math.max(1, Number(it.qty) || 1) };
+        })
     );
 
     console.log(`최종: ${items.length}개`);
