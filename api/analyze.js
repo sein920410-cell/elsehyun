@@ -54,7 +54,7 @@ function deduplicateItems(items) {
 async function callGemini(parts, temperature = 0.05) {
   // 모델명을 gemini-3-flash로 업데이트했습니다.
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
