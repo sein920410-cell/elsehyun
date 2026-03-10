@@ -2,12 +2,14 @@ import fetch from "node-fetch";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
-  
+
   // drawerName을 추가로 받습니다.
   const { message, inventory, tag, drawerName } = req.body;
 
   try {
-    const model = "gemini-2.5-flash-lite";
+    // 변경 전: gemini-2.5-flash-lite
+    // 변경 후: gemini-3-flash
+    const model = "gemini-3-flash";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
     // 장소 이름을 tag(코드) 대신 사용자가 설정한 이름(drawerName)으로 우선 사용합니다.
