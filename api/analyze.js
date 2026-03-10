@@ -39,7 +39,7 @@ function deduplicateItems(items) {
 }
 
 async function callGemini(parts, temperature = 0) { // 온도를 0으로 낮춰 더 정확하게 설정
-  const model = process.env.GEMINI_MODEL || "gemini-3.1-pro-preview";
+  const model = process.env.GEMINI_MODEL || "gemini-3-flash-preview";
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
