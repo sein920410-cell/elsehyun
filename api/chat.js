@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   try {
     // 💰 가성비를 위해 'lite' 모델로 변경했습니다. 대화 성능은 충분해요!
-    const model = "gemini-3-flash-lite";
+    const model = "gemini-3.1-flash-lite-preview";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
     const location = drawerName || tag;
