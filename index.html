@@ -22,210 +22,157 @@ input { -webkit-user-select: text; user-select: text; }
 
 body {
   font-family: 'DM Sans','Noto Sans KR',sans-serif;
-  background: linear-gradient(160deg, #1a3a5c 0%, #0f2540 100%);
+  background: #d9ead2;
   min-height: 100dvh;
-  color: #fff;
+  color: #1a2e1a;
   -webkit-font-smoothing: antialiased;
 }
 
-/* HEADER */
 .header {
   padding: 28px 20px 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
-.logo {
-  width: 34px; height: 34px;
-  border-radius: 8px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 2.5px;
-  background: #0a1e38;
-  padding: 3px;
-  flex-shrink: 0;
-}
-.logo-cell { border-radius: 2px; background: #fff; }
-.logo-cell.dim { background: rgba(255,255,255,0.2); }
 .brand {
-  flex: 1;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.02em;
+  flex: 1;
 }
-.brand-accent { color: #52C498; }
 .header-sub {
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.3);
+  color: rgba(26,46,26,0.35);
   font-weight: 600;
 }
 
-/* SEARCH */
-.search-area { padding: 20px 20px 0; }
+.search-area { padding: 60px 20px 0; }
+
+.hero-text {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.hero-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+  color: #1a2e1a;
+}
+.hero-sub {
+  font-size: 13px;
+  color: rgba(26,46,26,0.45);
+}
+
 .search-wrap { position: relative; }
 .search-icon {
   position: absolute; left: 16px; top: 50%;
   transform: translateY(-50%);
   width: 17px; height: 17px;
-  stroke: rgba(255,255,255,0.3);
+  stroke: rgba(26,46,26,0.35);
   stroke-width: 2; fill: none;
   stroke-linecap: round; stroke-linejoin: round;
-  pointer-events: none; transition: stroke 0.2s;
+  pointer-events: none;
 }
-.search-wrap:focus-within .search-icon { stroke: #52C498; }
 .search-input {
   width: 100%;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: #fff;
+  border: none;
   border-radius: 16px;
-  padding: 15px 44px 15px 46px;
+  padding: 16px 44px 16px 46px;
   font-size: 15px;
   font-family: inherit;
-  color: #fff;
+  color: #1a2e1a;
   outline: none;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
   -webkit-appearance: none;
-  transition: border-color 0.2s, background 0.2s;
 }
-.search-input::placeholder { color: rgba(255,255,255,0.28); }
-.search-input:focus {
-  border-color: rgba(255,255,255,0.22);
-  background: rgba(255,255,255,0.11);
-}
+.search-input::placeholder { color: rgba(26,46,26,0.3); }
 .clear-btn {
   position: absolute; right: 12px; top: 50%;
   transform: translateY(-50%);
   width: 26px; height: 26px; border-radius: 50%;
-  background: rgba(255,255,255,0.1); border: none;
-  color: rgba(255,255,255,0.5); cursor: pointer;
+  background: rgba(0,0,0,0.06); border: none;
+  color: rgba(26,46,26,0.5); cursor: pointer;
   font-size: 12px; display: none;
   align-items: center; justify-content: center;
 }
 .clear-btn.vis { display: flex; }
 
-/* SECTION LABEL */
-.section { padding: 24px 20px 0; }
-.section-label {
+.result-area { padding: 20px 20px 0; }
+.result-label {
   font-size: 10px; font-weight: 700;
   letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(255,255,255,0.3); margin-bottom: 12px;
+  color: rgba(26,46,26,0.35); margin-bottom: 12px;
 }
 
-/* DRAWER GRID */
-.drawer-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.drawer-card {
-  background: #fff;
-  border-radius: 18px;
-  padding: 18px 16px;
-  cursor: pointer;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-  text-decoration: none;
-  display: block;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform 0.1s, box-shadow 0.1s;
-}
-.drawer-card:active {
-  transform: scale(0.97);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-}
-.drawer-card-name {
-  font-size: 15px; font-weight: 700;
-  color: #0f2540; letter-spacing: -0.01em;
-  margin-bottom: 6px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.drawer-card-count {
-  font-size: 11px; color: #94a3b8;
-}
-.drawer-card-count b { color: #52C498; font-weight: 700; }
-.drawer-card-arrow {
-  margin-top: 14px; width: 18px; height: 18px;
-  stroke: #cbd5e1; stroke-width: 2; fill: none;
-  stroke-linecap: round; stroke-linejoin: round;
-}
-
-/* RESULT HEADER */
-.result-header { padding: 20px 20px 0; display: none; }
-.result-header.vis { display: block; }
-.result-count {
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(255,255,255,0.3);
-}
-.result-count b { color: #52C498; }
-
-/* RESULT LIST */
-.result-list {
-  padding: 12px 20px 0;
-  display: flex; flex-direction: column; gap: 8px;
-}
 .result-item {
   background: #fff;
   border-radius: 16px;
   padding: 14px 16px;
   display: flex; align-items: center; gap: 12px;
-  cursor: pointer;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  margin-bottom: 8px; cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
   transition: transform 0.1s;
 }
 .result-item:active { transform: scale(0.98); }
+
 .result-ico {
   width: 38px; height: 38px; border-radius: 11px;
-  background: rgba(82,196,152,0.12);
+  background: rgba(26,46,26,0.07);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
 .result-ico svg {
   width: 18px; height: 18px;
-  stroke: #52C498; stroke-width: 1.8; fill: none;
+  stroke: #1a2e1a; stroke-width: 1.8; fill: none;
   stroke-linecap: round; stroke-linejoin: round;
 }
 .result-info { flex: 1; min-width: 0; }
 .result-name {
   font-size: 14px; font-weight: 700;
-  color: #0f2540; letter-spacing: -0.01em;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: #1a2e1a; letter-spacing: -0.01em;
 }
-.result-name mark { background: none; color: #52C498; }
+.result-name mark { background: none; color: #1a2e1a; font-weight: 900; text-decoration: underline; }
 .result-meta { font-size: 11px; color: #94a3b8; margin-top: 3px; }
 .result-meta b { color: #64748b; font-weight: 600; }
+
 .go-btn {
-  flex-shrink: 0;
   padding: 7px 14px; border-radius: 10px;
-  background: #0f2540; border: none;
+  background: #111; border: none;
   color: #fff; font-size: 12px; font-weight: 700;
   font-family: inherit; cursor: pointer; white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* EMPTY */
-.empty-state { padding: 60px 20px; text-align: center; display: none; }
-.empty-state.vis { display: block; }
-.empty-txt { font-size: 14px; color: rgba(255,255,255,0.3); margin-top: 8px; }
-.empty-kw { color: rgba(255,255,255,0.5); font-weight: 600; }
-
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  color: rgba(26,46,26,0.35); font-size: 14px;
+}
 .bottom-safe { height: 40px; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="logo">
-    <div class="logo-cell"></div>
-    <div class="logo-cell"></div>
-    <div class="logo-cell"></div>
-    <div class="logo-cell dim"></div>
-  </div>
-  <div class="brand">공간<span class="brand-accent">:</span>결</div>
+  <!-- 로고 SVG (사진 패턴 재현) -->
+  <svg width="36" height="36" viewBox="0 0 36 36" style="flex-shrink:0">
+    <rect width="36" height="36" rx="7" fill="#111"/>
+    <rect x="3" y="3" width="13" height="10" rx="1.5" fill="#fff"/>
+    <rect x="18" y="3" width="15" height="14" rx="1.5" fill="#fff"/>
+    <rect x="3" y="19" width="30" height="14" rx="1.5" fill="#fff"/>
+  </svg>
+  <div class="brand">공간:결</div>
   <div class="header-sub">Smart Storage</div>
 </div>
 
 <div class="search-area">
+  <div class="hero-text" id="hero-text">
+    <div class="hero-title">무엇을 찾으시나요?</div>
+    <div class="hero-sub">물건 이름을 입력하면 위치를 알려드려요</div>
+  </div>
   <div class="search-wrap">
     <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input id="search-input" class="search-input" type="text" placeholder="물건 이름으로 검색" autocomplete="off" autocorrect="off" spellcheck="false" oninput="onSearch()">
@@ -233,22 +180,9 @@ body {
   </div>
 </div>
 
-<!-- 서랍 목록 -->
-<div class="section" id="drawer-section">
-  <div class="section-label">내 서랍 목록</div>
-  <div class="drawer-grid" id="drawer-grid"></div>
-</div>
-
-<!-- 검색 결과 -->
-<div class="result-header" id="result-header">
-  <div class="result-count" id="result-count"></div>
-</div>
-<div class="result-list" id="result-list"></div>
-
-<!-- 결과 없음 -->
-<div class="empty-state" id="empty-state">
-  <div style="font-size:36px">🔍</div>
-  <div class="empty-txt"><span class="empty-kw" id="empty-kw"></span>에 대한 결과가 없어요</div>
+<div id="result-area" style="display:none" class="result-area">
+  <div class="result-label" id="result-label"></div>
+  <div id="result-list"></div>
 </div>
 
 <div class="bottom-safe"></div>
@@ -260,33 +194,21 @@ function getAllDrawers() {
     const key = localStorage.key(i);
     if (!key || !key.startsWith('gyeol_')) continue;
     const tag = key.replace('gyeol_', '');
-    // 오래된 테스트 키 제외 (v3_ 등 prefix 있는 것)
-    if (tag.includes('_') && !tag.startsWith('DRAWER')) continue;
     const raw = localStorage.getItem(key);
     let items = [];
     try { items = JSON.parse(raw) || []; } catch(e) {}
     if (!Array.isArray(items)) continue;
-    const name = localStorage.getItem('name_' + tag) || tag;
-    drawers.push({ tag, name, count: items.length, items });
+    const name = localStorage.getItem('name_' + tag) || formatTag(tag);
+    drawers.push({ tag, name, items });
   }
-  drawers.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
   return drawers;
 }
 
-function renderDrawers() {
-  const drawers = getAllDrawers();
-  const grid = document.getElementById('drawer-grid');
-  if (!drawers.length) {
-    grid.innerHTML = '<div style="color:rgba(255,255,255,0.25);font-size:13px;padding:8px 0;grid-column:1/-1;">등록된 서랍이 없습니다</div>';
-    return;
-  }
-  grid.innerHTML = drawers.map(d => `
-    <a class="drawer-card" href="drawer.html?tag=${d.tag}">
-      <div class="drawer-card-name">${d.name}</div>
-      <div class="drawer-card-count"><b>${d.count}</b> 종류</div>
-      <svg class="drawer-card-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </a>
-  `).join('');
+function formatTag(tag) {
+  // DRAWER001 → 서랍 1, DRAWER002 → 서랍 2
+  const m = tag.match(/DRAWER0*(\d+)/i);
+  if (m) return '서랍 ' + parseInt(m[1]);
+  return tag;
 }
 
 function highlight(text, query) {
@@ -301,22 +223,22 @@ function highlight(text, query) {
 function onSearch() {
   const query = document.getElementById('search-input').value.trim();
   const clearBtn = document.getElementById('clear-btn');
-  const drawerSection = document.getElementById('drawer-section');
-  const resultHeader = document.getElementById('result-header');
+  const heroText = document.getElementById('hero-text');
+  const resultArea = document.getElementById('result-area');
+  const resultLabel = document.getElementById('result-label');
   const resultList = document.getElementById('result-list');
-  const emptyState = document.getElementById('empty-state');
 
   clearBtn.classList.toggle('vis', query.length > 0);
 
   if (!query) {
-    drawerSection.style.display = '';
-    resultHeader.classList.remove('vis');
+    heroText.style.display = '';
+    resultArea.style.display = 'none';
     resultList.innerHTML = '';
-    emptyState.classList.remove('vis');
     return;
   }
 
-  drawerSection.style.display = 'none';
+  heroText.style.display = 'none';
+  resultArea.style.display = 'block';
 
   const drawers = getAllDrawers();
   const results = [];
@@ -335,17 +257,13 @@ function onSearch() {
     });
   });
 
-  document.getElementById('result-count').innerHTML = `검색결과 <b>${results.length}</b>건`;
-  resultHeader.classList.add('vis');
+  resultLabel.textContent = '검색결과 ' + results.length + '건';
 
   if (!results.length) {
-    resultList.innerHTML = '';
-    document.getElementById('empty-kw').textContent = '"' + query + '"';
-    emptyState.classList.add('vis');
+    resultList.innerHTML = '<div class="empty-state"><div style="font-size:36px;margin-bottom:12px">🔍</div>"' + query + '"에 대한 결과가 없어요</div>';
     return;
   }
 
-  emptyState.classList.remove('vis');
   resultList.innerHTML = results.map(r => `
     <div class="result-item" onclick="location.href='drawer.html?tag=${r.tag}'">
       <div class="result-ico">
@@ -355,7 +273,7 @@ function onSearch() {
         <div class="result-name">${highlight(r.name, query)}</div>
         <div class="result-meta"><b>${r.drawerName}</b> · ${r.cat} · ${r.qty}개</div>
       </div>
-      <button class="go-btn" onclick="event.stopPropagation(); location.href='drawer.html?tag=${r.tag}'">이동</button>
+      <button class="go-btn" onclick="event.stopPropagation();location.href='drawer.html?tag=${r.tag}'">이동</button>
     </div>
   `).join('');
 }
@@ -365,8 +283,6 @@ function clearSearch() {
   onSearch();
   document.getElementById('search-input').focus();
 }
-
-renderDrawers();
 </script>
 </body>
 </html>
