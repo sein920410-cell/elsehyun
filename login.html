@@ -2,29 +2,75 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>공간:결 - 로그인</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>공간:결 - 스마트 수납 관리</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .login-card { background: #fff; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 350px; text-align: center; }
-        input { width: 100%; padding: 15px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: #007bff; color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #111827; color: white; }
+        /* 로딩 중 화면 가리기 (로그인 체크 전까지) */
+        #auth-overlay { position: fixed; inset: 0; background: #111827; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        
+        // 1. 세인 님의 Supabase 정보 입력 (Vercel 환경변수와 동일하게 설정)
+        const SUPABASE_URL = '세인님의_SUPABASE_URL'; 
+        const SUPABASE_KEY = '세인님의_SUPABASE_ANON_KEY';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function checkAuth() {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                // 로그인 세션이 없거나 에러가 나면 로그인 페이지로 퇴출
+                if (error || !session) {
+                    window.location.replace("login.html"); 
+                    return;
+                }
+
+                // 로그인 확인 완료 시 로딩 화면 제거
+                document.getElementById('auth-overlay').style.opacity = '0';
+                setTimeout(() => document.getElementById('auth-overlay').remove(), 300);
+                
+                console.log("환영합니다, " + session.user.email + " 님!");
+            } catch (e) {
+                window.location.replace("login.html");
+            }
+        }
+
+        // 페이지 로드와 동시에 실행
+        checkAuth();
+    </script>
 </head>
 <body>
-    <div class="login-card">
-        <h2>✨ 공간:결 로그인</h2>
-        <input type="email" id="email" placeholder="이메일 주소">
-        <input type="password" id="pw" placeholder="비밀번호">
-        <button onclick="login()">로그인하기</button>
+    <div id="auth-overlay">
+        <div class="text-xl font-bold animate-pulse">보안 연결 중...</div>
     </div>
-    <script>
-        const _supa = supabase.createClient('https://tqhtggusphhcsygiitrv.supabase.co', 'sb_publishable_lJeKpO0aRv9mTBE1qnbkow_JqTmhnHQ');
-        async function login() {
-            const { error } = await _supa.auth.signInWithPassword({ email: document.getElementById('email').value, password: document.getElementById('pw').value });
-            if (error) alert("실패: " + error.message);
-            else { alert("반가워요!"); window.location.href = "index.html"; }
+
+    <div class="max-w-md mx-auto min-h-screen pb-24">
+        <header class="p-6 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">공간:결</h1>
+            <button onclick="handleLogout()" class="text-sm text-gray-400 underline">로그아웃</button>
+        </header>
+
+        <main class="px-6">
+            <div class="bg-gray-800 rounded-2xl p-8 text-center border-2 border-dashed border-gray-700">
+                <p class="text-gray-400">서랍을 촬영하여 물건을 등록하세요.</p>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        const supabase = createClient('세인님의_SUPABASE_URL', '세인님의_SUPABASE_ANON_KEY');
+
+        // 로그아웃 기능
+        window.handleLogout = async () => {
+            await supabase.auth.signOut();
+            window.location.replace("login.html");
         }
     </script>
 </body>
