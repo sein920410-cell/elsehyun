@@ -17,8 +17,8 @@
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
         
         // 1. 세인 님의 Supabase 정보 입력 (Vercel 환경변수와 동일하게 설정)
-        const SUPABASE_URL = '세인님의_SUPABASE_URL'; 
-        const SUPABASE_KEY = '세인님의_SUPABASE_ANON_KEY';
+        const SUPABASE_URL = 'https://tqhtggusphhcsygiitrv.supabase.co'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'; 
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function checkAuth() {
