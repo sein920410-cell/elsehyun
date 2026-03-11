@@ -3,6 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <title>공간:결 - 검색</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async () => {
+    const _authClient = supabase.createClient(
+        'https://tqhtggusphhcsygiitrv.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
+    );
+    const { data: { session } } = await _authClient.auth.getSession();
+    if (!session) window.location.replace('login.html');
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 :root { --primary: #007bff; --bg: #f8fafc; }
