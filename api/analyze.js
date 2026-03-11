@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import fetch from "node-fetch";
 
-const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+const supa = supabase.createClient('https://tqhtggusphhcsygiitrv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc');
 
 const VALID_CATS = ["의류", "위생", "청소", "케어", "생활", "주방", "공구", "기타"];
 function normCat(c) {
