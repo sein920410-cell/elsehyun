@@ -20,299 +20,208 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 input { -webkit-user-select: text; user-select: text; }
 
-:root {
-  --bg: #0C1220;
-  --surface: #161D2E;
-  --surface2: #1E2740;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --txt: #FFFFFF;
-  --txt2: rgba(255,255,255,0.55);
-  --txt3: rgba(255,255,255,0.28);
-  --accent: #52C498;
-  --accent-bg: rgba(82,196,152,0.1);
-  --font: 'DM Sans','Noto Sans KR',sans-serif;
-}
-
 body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--txt);
+  font-family: 'DM Sans','Noto Sans KR',sans-serif;
+  background: linear-gradient(160deg, #1a3a5c 0%, #0f2540 100%);
   min-height: 100dvh;
+  color: #fff;
   -webkit-font-smoothing: antialiased;
 }
 
 /* HEADER */
 .header {
-  padding: 20px 20px 0;
+  padding: 28px 20px 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
 }
+.logo {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2.5px;
+  background: #0a1e38;
+  padding: 3px;
+  flex-shrink: 0;
+}
+.logo-cell { border-radius: 2px; background: #fff; }
+.logo-cell.dim { background: rgba(255,255,255,0.2); }
 .brand {
+  flex: 1;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--txt);
 }
-.brand span {
-  color: var(--accent);
-}
+.brand-accent { color: #52C498; }
 .header-sub {
-  font-size: 11px;
-  color: var(--txt3);
-  letter-spacing: 0.12em;
+  font-size: 10px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  font-weight: 500;
+  color: rgba(255,255,255,0.3);
+  font-weight: 600;
 }
 
-/* SEARCH AREA */
-.search-area {
-  padding: 24px 20px 0;
-}
-.search-wrap {
-  position: relative;
-}
+/* SEARCH */
+.search-area { padding: 20px 20px 0; }
+.search-wrap { position: relative; }
 .search-icon {
-  position: absolute;
-  left: 16px;
-  top: 50%;
+  position: absolute; left: 16px; top: 50%;
   transform: translateY(-50%);
-  width: 18px;
-  height: 18px;
-  stroke: var(--txt3);
-  stroke-width: 2;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  pointer-events: none;
-  transition: stroke 0.2s;
+  width: 17px; height: 17px;
+  stroke: rgba(255,255,255,0.3);
+  stroke-width: 2; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+  pointer-events: none; transition: stroke 0.2s;
 }
-.search-wrap:focus-within .search-icon {
-  stroke: var(--accent);
-}
+.search-wrap:focus-within .search-icon { stroke: #52C498; }
 .search-input {
   width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 16px;
-  padding: 16px 16px 16px 48px;
+  padding: 15px 44px 15px 46px;
   font-size: 15px;
-  font-family: var(--font);
-  font-weight: 400;
-  color: var(--txt);
+  font-family: inherit;
+  color: #fff;
   outline: none;
-  transition: border-color 0.2s, background 0.2s;
   -webkit-appearance: none;
+  transition: border-color 0.2s, background 0.2s;
 }
-.search-input::placeholder { color: var(--txt3); }
+.search-input::placeholder { color: rgba(255,255,255,0.28); }
 .search-input:focus {
-  border-color: var(--border2);
-  background: var(--surface2);
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.11);
 }
 .clear-btn {
-  position: absolute;
-  right: 14px;
-  top: 50%;
+  position: absolute; right: 12px; top: 50%;
   transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.08);
-  border: none;
-  cursor: pointer;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  color: var(--txt2);
-  font-size: 14px;
-  line-height: 1;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(255,255,255,0.1); border: none;
+  color: rgba(255,255,255,0.5); cursor: pointer;
+  font-size: 12px; display: none;
+  align-items: center; justify-content: center;
 }
 .clear-btn.vis { display: flex; }
 
-/* DRAWER LIST (기본 상태) */
-.section {
-  padding: 28px 20px 0;
-}
+/* SECTION LABEL */
+.section { padding: 24px 20px 0; }
 .section-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--txt3);
-  margin-bottom: 12px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.3); margin-bottom: 12px;
 }
 
+/* DRAWER GRID */
 .drawer-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 .drawer-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: #fff;
   border-radius: 18px;
   padding: 18px 16px;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
   text-decoration: none;
   display: block;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s, box-shadow 0.1s;
 }
 .drawer-card:active {
-  background: var(--surface2);
-  border-color: var(--border2);
+  transform: scale(0.97);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
 }
 .drawer-card-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--txt);
-  letter-spacing: -0.01em;
+  font-size: 15px; font-weight: 700;
+  color: #0f2540; letter-spacing: -0.01em;
   margin-bottom: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .drawer-card-count {
-  font-size: 11px;
-  color: var(--txt3);
-  font-weight: 400;
+  font-size: 11px; color: #94a3b8;
 }
-.drawer-card-count b {
-  color: var(--accent);
-  font-weight: 600;
-}
+.drawer-card-count b { color: #52C498; font-weight: 700; }
 .drawer-card-arrow {
-  margin-top: 14px;
-  width: 20px;
-  height: 20px;
-  stroke: var(--txt3);
-  stroke-width: 2;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  margin-top: 14px; width: 18px; height: 18px;
+  stroke: #cbd5e1; stroke-width: 2; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
 }
+
+/* RESULT HEADER */
+.result-header { padding: 20px 20px 0; display: none; }
+.result-header.vis { display: block; }
+.result-count {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+}
+.result-count b { color: #52C498; }
 
 /* RESULT LIST */
 .result-list {
-  padding: 16px 20px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  padding: 12px 20px 0;
+  display: flex; flex-direction: column; gap: 8px;
 }
 .result-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: #fff;
   border-radius: 16px;
   padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: flex; align-items: center; gap: 12px;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  text-decoration: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  transition: transform 0.1s;
 }
-.result-item:active {
-  background: var(--surface2);
-  border-color: var(--border2);
-}
+.result-item:active { transform: scale(0.98); }
 .result-ico {
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-  background: var(--accent-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 38px; height: 38px; border-radius: 11px;
+  background: rgba(82,196,152,0.12);
+  display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
 .result-ico svg {
-  width: 18px;
-  height: 18px;
-  stroke: var(--accent);
-  stroke-width: 1.8;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  width: 18px; height: 18px;
+  stroke: #52C498; stroke-width: 1.8; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
 }
 .result-info { flex: 1; min-width: 0; }
 .result-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--txt);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 14px; font-weight: 700;
+  color: #0f2540; letter-spacing: -0.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.result-name mark {
-  background: none;
-  color: var(--accent);
-}
-.result-meta {
-  font-size: 11px;
-  color: var(--txt3);
-  margin-top: 3px;
-}
-.result-meta b { color: var(--txt2); font-weight: 500; }
+.result-name mark { background: none; color: #52C498; }
+.result-meta { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+.result-meta b { color: #64748b; font-weight: 600; }
 .go-btn {
   flex-shrink: 0;
-  padding: 7px 14px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid var(--border2);
-  color: var(--txt2);
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font);
-  cursor: pointer;
-  transition: background 0.15s;
-  white-space: nowrap;
+  padding: 7px 14px; border-radius: 10px;
+  background: #0f2540; border: none;
+  color: #fff; font-size: 12px; font-weight: 700;
+  font-family: inherit; cursor: pointer; white-space: nowrap;
 }
-.go-btn:active { background: rgba(255,255,255,0.12); }
 
-/* EMPTY STATE */
-.empty-state {
-  padding: 60px 20px;
-  text-align: center;
-  display: none;
-}
+/* EMPTY */
+.empty-state { padding: 60px 20px; text-align: center; display: none; }
 .empty-state.vis { display: block; }
-.empty-ico {
-  width: 48px;
-  height: 48px;
-  stroke: var(--txt3);
-  stroke-width: 1.5;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  margin: 0 auto 14px;
-}
-.empty-txt { font-size: 14px; color: var(--txt3); }
-.empty-kw { color: var(--txt2); font-weight: 600; }
+.empty-txt { font-size: 14px; color: rgba(255,255,255,0.3); margin-top: 8px; }
+.empty-kw { color: rgba(255,255,255,0.5); font-weight: 600; }
 
-/* RESULT HEADER */
-.result-header {
-  padding: 20px 20px 0;
-  display: none;
-}
-.result-header.vis { display: block; }
-.result-count {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--txt3);
-}
-.result-count b { color: var(--accent); }
-
-/* BOTTOM SAFE */
 .bottom-safe { height: 40px; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="brand">공간<span>:</span>결</div>
+  <div class="logo">
+    <div class="logo-cell"></div>
+    <div class="logo-cell"></div>
+    <div class="logo-cell"></div>
+    <div class="logo-cell dim"></div>
+  </div>
+  <div class="brand">공간<span class="brand-accent">:</span>결</div>
   <div class="header-sub">Smart Storage</div>
 </div>
 
@@ -324,7 +233,7 @@ body {
   </div>
 </div>
 
-<!-- 기본: 서랍 목록 -->
+<!-- 서랍 목록 -->
 <div class="section" id="drawer-section">
   <div class="section-label">내 서랍 목록</div>
   <div class="drawer-grid" id="drawer-grid"></div>
@@ -336,33 +245,34 @@ body {
 </div>
 <div class="result-list" id="result-list"></div>
 
-<!-- 검색 결과 없음 -->
+<!-- 결과 없음 -->
 <div class="empty-state" id="empty-state">
-  <svg class="empty-ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+  <div style="font-size:36px">🔍</div>
   <div class="empty-txt"><span class="empty-kw" id="empty-kw"></span>에 대한 결과가 없어요</div>
 </div>
 
 <div class="bottom-safe"></div>
 
 <script>
-// ── 데이터 로드 ──────────────────────────────────────────
 function getAllDrawers() {
   const drawers = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith('gyeol_')) {
-      const tag = key.replace('gyeol_', '');
-      const items = JSON.parse(localStorage.getItem(key) || '[]');
-      const name = localStorage.getItem('name_' + tag) || tag;
-      drawers.push({ tag, name, items });
-    }
+    if (!key || !key.startsWith('gyeol_')) continue;
+    const tag = key.replace('gyeol_', '');
+    // 오래된 테스트 키 제외 (v3_ 등 prefix 있는 것)
+    if (tag.includes('_') && !tag.startsWith('DRAWER')) continue;
+    const raw = localStorage.getItem(key);
+    let items = [];
+    try { items = JSON.parse(raw) || []; } catch(e) {}
+    if (!Array.isArray(items)) continue;
+    const name = localStorage.getItem('name_' + tag) || tag;
+    drawers.push({ tag, name, count: items.length, items });
   }
-  // 이름 기준 정렬
   drawers.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
   return drawers;
 }
 
-// ── 서랍 목록 렌더 ───────────────────────────────────────
 function renderDrawers() {
   const drawers = getAllDrawers();
   const grid = document.getElementById('drawer-grid');
@@ -373,18 +283,19 @@ function renderDrawers() {
   grid.innerHTML = drawers.map(d => `
     <a class="drawer-card" href="drawer.html?tag=${d.tag}">
       <div class="drawer-card-name">${d.name}</div>
-      <div class="drawer-card-count"><b>${d.items.length}</b> 종류</div>
+      <div class="drawer-card-count"><b>${d.count}</b> 종류</div>
       <svg class="drawer-card-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
     </a>
   `).join('');
 }
 
-// ── 검색 ─────────────────────────────────────────────────
 function highlight(text, query) {
   if (!query) return text;
   const idx = text.toLowerCase().indexOf(query.toLowerCase());
   if (idx === -1) return text;
-  return text.slice(0, idx) + '<mark>' + text.slice(idx, idx + query.length) + '</mark>' + text.slice(idx + query.length);
+  return text.slice(0, idx)
+    + '<mark>' + text.slice(idx, idx + query.length) + '</mark>'
+    + text.slice(idx + query.length);
 }
 
 function onSearch() {
@@ -409,9 +320,9 @@ function onSearch() {
 
   const drawers = getAllDrawers();
   const results = [];
-
   drawers.forEach(d => {
     d.items.forEach(it => {
+      if (!it || !it.n) return;
       let cat = '기타', name = it.n;
       if (it.n.includes(':')) {
         const p = it.n.split(':');
@@ -424,14 +335,12 @@ function onSearch() {
     });
   });
 
-  // 결과 카운트
-  document.getElementById('result-count').innerHTML =
-    `검색결과 <b>${results.length}</b>건`;
-  resultHeader.classList.toggle('vis', true);
+  document.getElementById('result-count').innerHTML = `검색결과 <b>${results.length}</b>건`;
+  resultHeader.classList.add('vis');
 
   if (!results.length) {
     resultList.innerHTML = '';
-    document.getElementById('empty-kw').textContent = query;
+    document.getElementById('empty-kw').textContent = '"' + query + '"';
     emptyState.classList.add('vis');
     return;
   }
@@ -457,7 +366,6 @@ function clearSearch() {
   document.getElementById('search-input').focus();
 }
 
-// ── 초기화 ───────────────────────────────────────────────
 renderDrawers();
 </script>
 </body>
