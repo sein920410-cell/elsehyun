@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>공간:결 - 시리얼 번호 등록</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <style>body { font-family: 'Pretendard', sans-serif; background-color: #0C1220; color: white; }</style>
+</head>
+<body>
+    <div class="max-w-sm mx-auto min-h-screen flex flex-col justify-center px-6">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-bold tracking-tight">공간:결</h1>
+            <p class="text-gray-400 text-sm mt-2">제품 시리얼 번호를 등록해주세요</p>
+        </div>
+        <div class="bg-gray-800 rounded-2xl p-8 space-y-5">
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">시리얼 번호</label>
+                <input id="serial" type="text" placeholder="시리얼 번호를 입력하세요"
+                    class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 transition uppercase tracking-widest">
+            </div>
+            <div id="error-msg" class="text-red-400 text-sm text-center hidden"></div>
+            <div id="success-msg" class="text-green-400 text-sm text-center hidden"></div>
+            <button id="submit-btn" onclick="handleSerial()"
+                class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold py-3 rounded-xl transition text-sm">
+                등록하기
+            </button>
+            <button onclick="handleLogout()" class="w-full text-gray-500 text-xs py-2 hover:text-gray-300 transition">
+                로그아웃
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        const supabase = createClient(
+            'https://tqhtggusphhcsygiitrv.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
+        );
+
+        // 로그인 안 된 상태면 로그인 페이지로
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { window.location.replace('login.html'); }
+
+        // 이미 시리얼 등록된 유저면 바로 메인으로
+        const { data: existing } = await supabase
+            .from('serial_codes')
+            .select('*')
+            .eq('used_by', session.user.email)
+            .single();
+        if (existing) { window.location.replace('index.html'); }
+
+        window.handleSerial = async () => {
+            const code = document.getElementById('serial').value.trim().toUpperCase();
+            const errEl = document.getElementById('error-msg');
+            const sucEl = document.getElementById('success-msg');
+            const btn = document.getElementById('submit-btn');
+
+            errEl.classList.add('hidden');
+            sucEl.classList.add('hidden');
+
+            if (!code) {
+                errEl.textContent = '시리얼 번호를 입력해주세요.';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            btn.textContent = '확인 중...';
+            btn.disabled = true;
+
+            // 시리얼 번호가 DB에 있는지 + 아직 미사용인지 확인
+            const { data: serial, error } = await supabase
+                .from('serial_codes')
+                .select('*')
+                .eq('code', code)
+                .is('used_by', null)
+                .single();
+
+            if (error || !serial) {
+                errEl.textContent = '유효하지 않은 시리얼 번호예요. 다시 확인해주세요.';
+                errEl.classList.remove('hidden');
+                btn.textContent = '등록하기';
+                btn.disabled = false;
+                return;
+            }
+
+            // 시리얼에 내 이메일 등록
+            const { error: updateError } = await supabase
+                .from('serial_codes')
+                .update({ used_by: session.user.email, used_at: new Date().toISOString() })
+                .eq('code', code);
+
+            if (updateError) {
+                errEl.textContent = '등록 중 오류가 발생했어요. 다시 시도해주세요.';
+                errEl.classList.remove('hidden');
+                btn.textContent = '등록하기';
+                btn.disabled = false;
+                return;
+            }
+
+            sucEl.textContent = '등록 완료! 잠시 후 이동합니다.';
+            sucEl.classList.remove('hidden');
+            btn.textContent = '완료';
+
+            setTimeout(() => { window.location.replace('index.html'); }, 1500);
+        };
+
+        window.handleLogout = async () => {
+            await supabase.auth.signOut();
+            window.location.replace('login.html');
+        };
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSerial(); });
+    </script>
+</body>
+</html>
