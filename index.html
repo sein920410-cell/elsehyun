@@ -285,6 +285,14 @@ function clearSearch() {
   onSearch();
   document.getElementById('search-input').focus();
 }
+async function handleLogout() {
+const sb = supabase.createClient(
+'https://tqhtggusphhcsygiitrv.supabase.co',
+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
+);
+await sb.auth.signOut();
+window.location.replace('login.html');
+}
 </script>
 </body>
 </html>
