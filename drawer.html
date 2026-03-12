@@ -7,16 +7,31 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// 인증 체크 - 로그인 안 되어 있으면 login.html로 이동
+// [수정반영] 인증 체크 - 로그인 및 시리얼 번호 등록 여부 통합 확인
 (async () => {
     const _authClient = supabase.createClient(
         'https://tqhtggusphhcsygiitrv.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
     );
     const { data: { session } } = await _authClient.auth.getSession();
+    
+    // 1. 로그인이 안 되어 있으면 로그인 페이지로 보냄
     if (!session) {
         const currentPage = encodeURIComponent(location.pathname + location.search);
         window.location.replace('login.html?redirect=' + currentPage);
+        return;
+    }
+
+    // 2. 로그인된 사용자가 시리얼 번호를 등록했는지 DB에서 확인
+    const { data: serialData } = await _authClient
+        .from('serial_codes')
+        .select('*')
+        .eq('used_by', session.user.email)
+        .single();
+
+    // 3. 등록된 시리얼이 없으면 제품 등록(serial.html) 페이지로 쫓아냄
+    if (!serialData) {
+        window.location.replace('serial.html');
     }
 })();
 </script>
