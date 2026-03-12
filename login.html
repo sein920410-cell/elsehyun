@@ -6,75 +6,35 @@
     <title>공간:결 - 로그인</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-    <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #0C1220; color: white; }
-    </style>
+    <style>body { font-family: 'Pretendard', sans-serif; background-color: #0C1220; color: white; }</style>
 </head>
 <body>
     <div class="max-w-sm mx-auto min-h-screen flex flex-col justify-center px-6">
-        <div class="text-center mb-10">
-            <h1 class="text-3xl font-bold tracking-tight">공간:결</h1>
-            <p class="text-gray-400 text-sm mt-2">Premium Storage Management</p>
-        </div>
+        <div class="text-center mb-10"><h1 class="text-3xl font-bold tracking-tight">공간:결</h1></div>
         <div class="bg-gray-800 rounded-2xl p-8 space-y-5">
-            <div>
-                <label class="block text-sm text-gray-400 mb-1">이메일</label>
-                <input id="email" type="email" placeholder="이메일을 입력하세요"
-                    class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 transition">
-            </div>
-            <div>
-                <label class="block text-sm text-gray-400 mb-1">비밀번호</label>
-                <input id="password" type="password" placeholder="비밀번호를 입력하세요"
-                    class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 transition">
-            </div>
+            <div><label class="block text-sm text-gray-400 mb-1">이메일</label><input id="email" type="email" placeholder="이메일" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 transition"></div>
+            <div><label class="block text-sm text-gray-400 mb-1">비밀번호</label><input id="password" type="password" placeholder="비밀번호" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 transition"></div>
             <div id="error-msg" class="text-red-400 text-sm text-center hidden"></div>
-            <button id="login-btn" onclick="handleLogin()"
-                class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold py-3 rounded-xl transition text-sm">
-                로그인
-            </button>
+            <button id="login-btn" onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition text-sm">로그인</button>
         </div>
     </div>
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-        const SUPABASE_URL = 'https://tqhtggusphhcsygiitrv.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc';
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
+        const supabase = createClient('https://tqhtggusphhcsygiitrv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc');
         window.handleLogin = async () => {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const errEl = document.getElementById('error-msg');
             const btn = document.getElementById('login-btn');
-            
-            errEl.classList.add('hidden');
-            btn.textContent = '로그인 중...';
-            btn.disabled = true;
-
+            errEl.classList.add('hidden'); btn.textContent = '로그인 중...'; btn.disabled = true;
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
             if (error) {
-                errEl.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.';
-                errEl.classList.remove('hidden');
-                btn.textContent = '로그인';
-                btn.disabled = false;
+                errEl.textContent = '로그인 실패'; errEl.classList.remove('hidden'); btn.textContent = '로그인'; btn.disabled = false;
             } else {
-                // [수정반영] 시리얼 번호 등록 여부 확인
-                const { data: serialData } = await supabase
-                    .from('serial_codes')
-                    .select('*')
-                    .eq('used_by', data.user.email)
-                    .single();
-
-                if (serialData) {
-                    const redirect = new URLSearchParams(location.search).get('redirect') || 'drawer.html';
-                    window.location.replace(redirect);
-                } else {
-                    // 시리얼 번호가 없으면 등록 페이지로 이동
-                    window.location.replace('serial.html');
-                }
+                const { data: s } = await supabase.from('serial_codes').select('*').eq('used_by', data.user.email).single();
+                if (s) { window.location.replace('drawer.html'); } else { window.location.replace('serial.html'); }
             }
         };
-        document.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
     </script>
 </body>
 </html>
