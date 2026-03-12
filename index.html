@@ -53,11 +53,10 @@ body {
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(26,46,26,0.55);
+  color: rgba(26,46,26,0.45);
   font-weight: 600;
-  border: 1px solid rgba(26,46,26,0.25);
-  padding: 4px 10px;
-  border-radius: 8px;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .search-area { padding: 60px 20px 0; }
@@ -170,7 +169,6 @@ body {
 
 <div class="header">
   <div class="brand">공간:결</div>
-  <div class="header-sub" onclick="handleLogout()" style="cursor:pointer">로그아웃</div>
 </div>
 
 <div class="search-area">
@@ -191,6 +189,9 @@ body {
 </div>
 
 <div class="bottom-safe"></div>
+<div style="text-align:center;">
+  <span class="header-sub" onclick="handleLogout()">로그아웃</span>
+</div>
 
 <script>
 function getAllDrawers() {
