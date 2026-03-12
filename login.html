@@ -32,7 +32,7 @@
                 errEl.textContent = '로그인 실패'; errEl.classList.remove('hidden'); btn.textContent = '로그인'; btn.disabled = false;
             } else {
                 const { data: s } = await supabase.from('serial_codes').select('*').eq('used_by', data.user.email).single();
-                if (s) { window.location.replace('drawer.html'); } else { window.location.replace('serial.html'); }
+                if (s) { window.location.replace('index.html'); } else { window.location.replace('serial.html'); }
             }
         };
     </script>
