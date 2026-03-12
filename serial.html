@@ -39,19 +39,52 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
         );
 
-        // 로그인 안 된 상태면 로그인 페이지로
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) { window.location.replace('login.html'); }
+        // 세션 확인 - OAuth 콜백(구글 로그인)도 처리
+        // onAuthStateChange를 먼저 등록해야 URL hash 토큰 파싱 타이밍 놓치지 않음
+        let currentSession = null;
+        let authResolved = false;
 
-        // 이미 시리얼 등록된 유저면 바로 메인으로
-        const { data: existing } = await supabase
-            .from('serial_codes')
-            .select('*')
-            .eq('used_by', session.user.email)
-            .single();
-        if (existing) { window.location.replace('index.html'); }
+        await new Promise((resolve) => {
+            const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+                if (authResolved) return;
+                authResolved = true;
+                subscription.unsubscribe();
+
+                if (!session) {
+                    window.location.replace('login.html');
+                    resolve();
+                    return;
+                }
+
+                // 이미 시리얼 등록된 유저면 바로 메인으로
+                const { data: existing } = await supabase
+                    .from('serial_codes')
+                    .select('*')
+                    .eq('used_by', session.user.email)
+                    .single();
+
+                if (existing) {
+                    window.location.replace('index.html');
+                    resolve();
+                    return;
+                }
+
+                currentSession = session;
+                resolve();
+            });
+
+            // 5초 안에 응답 없으면 login으로
+            setTimeout(() => {
+                if (!authResolved) {
+                    authResolved = true;
+                    window.location.replace('login.html');
+                    resolve();
+                }
+            }, 5000);
+        });
 
         window.handleSerial = async () => {
+            const session = currentSession;
             const code = document.getElementById('serial').value.trim().toUpperCase();
             const errEl = document.getElementById('error-msg');
             const sucEl = document.getElementById('success-msg');
@@ -63,6 +96,11 @@
             if (!code) {
                 errEl.textContent = '시리얼 번호를 입력해주세요.';
                 errEl.classList.remove('hidden');
+                return;
+            }
+
+            if (!session) {
+                window.location.replace('login.html');
                 return;
             }
 
