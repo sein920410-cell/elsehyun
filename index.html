@@ -39,7 +39,7 @@ body {
   font-weight: 700;
   letter-spacing: -0.02em;
   flex: 1;
-  color: #f3f6f4; /* 수정된 색상 */
+  color: #fff;
 }
 .header-sub {
   font-size: 10px;
@@ -199,6 +199,7 @@ function getAllDrawers() {
 }
 
 function formatTag(tag) {
+  // DRAWER001 → 서랍 1, DRAWER002 → 서랍 2
   const m = tag.match(/DRAWER0*(\d+)/i);
   if (m) return '서랍 ' + parseInt(m[1]);
   return tag;
