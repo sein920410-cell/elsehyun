@@ -12,7 +12,6 @@
     );
     const { data: { session } } = await _authClient.auth.getSession();
     if (!session) { window.location.replace('login.html'); return; }
-
     // 시리얼 번호 확인
     const { data: serial } = await _authClient
         .from('serial_codes')
