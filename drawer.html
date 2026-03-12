@@ -15,9 +15,15 @@
     );
     const { data: { session } } = await _authClient.auth.getSession();
     if (!session) {
-        const currentPage = encodeURIComponent(location.pathname + location.search);
-        window.location.replace('login.html?redirect=' + currentPage);
+        window.location.replace('login.html');
+        return;
     }
+    const { data: serial } = await _authClient
+        .from('serial_codes')
+        .select('*')
+        .eq('used_by', session.user.email)
+        .single();
+    if (!serial) { window.location.replace('serial.html'); }
 })();
 </script>
 <style>
