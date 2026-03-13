@@ -1,7 +1,3 @@
-오후 1:32 2026-03-13
-
-api/analyze.js
-
 import { createClient } from "@supabase/supabase-js";
 import fetch from "node-fetch";
 
