@@ -52,14 +52,21 @@ function deduplicateItems(items) {
 }
 
 async function callGemini(parts, temperature = 0.05) {
+  // ✅ gemini-2.5-pro: 무료 티어 지원 (하루 100건, 분당 5건) — Flash보다 인식 품질 우수
+  const model = "gemini-2.5-pro";
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts }],
-        generationConfig: { temperature, maxOutputTokens: 6000 }
+        generationConfig: {
+          temperature,
+          maxOutputTokens: 6000,
+          // ✅ thinking 비활성화: JSON 정확도 향상 + 토큰 낭비 방지
+          thinkingConfig: { thinkingBudget: 0 }
+        }
       })
     }
   );
