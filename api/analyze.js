@@ -52,8 +52,7 @@ function deduplicateItems(items) {
 }
 
 async function callGemini(parts, temperature = 0.05) {
-  // ✅ gemini-2.5-pro: 무료 티어 지원 (하루 100건, 분당 5건) — Flash보다 인식 품질 우수
-  const model = "gemini-2.5-pro";
+  const model = "gemini-3.1-flash-preview";
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
