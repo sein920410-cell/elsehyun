@@ -162,12 +162,29 @@ body {
   color: rgba(26,46,26,0.35); font-size: 14px;
 }
 .bottom-safe { height: 40px; }
+
+.mypage-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(26,46,26,0.08);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background 0.15s;
+}
+.mypage-btn:active { background: rgba(26,46,26,0.16); }
+.mypage-btn svg {
+  width: 17px; height: 17px;
+  stroke: #1a2e1a; stroke-width: 1.8; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+}
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="brand">공간:결</div>
+  <button class="mypage-btn" onclick="location.href='mypage.html'" title="마이페이지">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+  </button>
 </div>
 
 <div class="search-area">
