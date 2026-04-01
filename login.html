@@ -61,16 +61,47 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
         );
 
+        // 로그인 후 pending_serial 처리 (시리얼 → 로그인 흐름)
+        async function handlePendingSerial(userEmail) {
+            const pendingCode = sessionStorage.getItem('pending_serial');
+            if (!pendingCode) return false;
+
+            const { data: serial } = await supabase
+                .from('serial_codes')
+                .select('*')
+                .eq('code', pendingCode)
+                .is('used_by', null)
+                .single();
+
+            if (serial) {
+                await supabase
+                    .from('serial_codes')
+                    .update({ used_by: userEmail, used_at: new Date().toISOString() })
+                    .eq('code', pendingCode);
+            }
+
+            sessionStorage.removeItem('pending_serial');
+            return true;
+        }
+
         // 구글 로그인
         window.handleGoogle = async () => {
             const btn = document.getElementById('google-btn');
             btn.textContent = '연결 중...';
             btn.disabled = true;
+            // 구글 로그인 후 이 페이지로 돌아와서 pending_serial 처리
             await supabase.auth.signInWithOAuth({
                 provider: 'google',
-                options: { redirectTo: 'https://qr-test-sage.vercel.app/serial.html' }
+                options: { redirectTo: 'https://qr-test-sage.vercel.app/login.html?mode=register' }
             });
         };
+
+        // 구글 OAuth 콜백 처리 (페이지 로드 시)
+        const { data: { session: oauthSession } } = await supabase.auth.getSession();
+        if (oauthSession && new URLSearchParams(window.location.search).get('mode') === 'register') {
+            await handlePendingSerial(oauthSession.user.email);
+            window.location.replace('index.html');
+        }
 
         // 이메일 로그인
         window.handleLogin = async () => {
@@ -81,10 +112,10 @@
             errEl.classList.add('hidden'); btn.textContent = '로그인 중...'; btn.disabled = true;
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) {
-                errEl.textContent = '로그인 실패'; errEl.classList.remove('hidden'); btn.textContent = '이메일로 로그인'; btn.disabled = false;
+                errEl.textContent = '이메일 또는 비밀번호를 확인해주세요.'; errEl.classList.remove('hidden'); btn.textContent = '이메일로 로그인'; btn.disabled = false;
             } else {
-                const { data: s } = await supabase.from('serial_codes').select('*').eq('used_by', data.user.email).single();
-                if (s) { window.location.replace('index.html'); } else { window.location.replace('serial.html'); }
+                await handlePendingSerial(data.user.email);
+                window.location.replace('index.html');
             }
         };
 
