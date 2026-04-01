@@ -120,8 +120,13 @@
 
             } else if (!serial.used_by) {
                 // ── 미등록 태그 ──────────────────────────────────────
-                // 로그인 여부와 관계없이 시리얼 입력 페이지로 먼저
-                window.location.replace('serial.html');
+                // 로그인 안 된 경우 → login 후 serial 등록으로
+                if (!session) {
+                    window.location.replace(`login.html?redirect=${encodeURIComponent('serial.html')}`);
+                } else {
+                    // 로그인 됐지만 시리얼 미등록 → serial.html로
+                    window.location.replace('serial.html');
+                }
 
             } else {
                 // ── 등록된 태그 ──────────────────────────────────────
