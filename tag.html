@@ -114,9 +114,8 @@
                 .single();
 
             if (serialError || !serial) {
-                // DB에 없는 코드
-                document.getElementById('invalid-code').textContent = code;
-                show('state-invalid');
+                // 등록되지 않은 새 QR 코드를 찍으면 즉시 시리얼 입력창으로 보냅니다.
+                window.location.replace('serial.html');
 
             } else if (!serial.used_by) {
                 // ── 미등록 태그 ──────────────────────────────────────
