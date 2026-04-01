@@ -114,6 +114,16 @@ body { font-family: var(--font); background: var(--bg); min-height: 100dvh; colo
 .toggle-input:checked + .toggle-slider { background: var(--bar-fill); }
 .toggle-input:checked + .toggle-slider::after { transform: translateX(18px); }
 
+/* 구성원 관리 전용 스타일 */
+.member-row { display: flex; align-items: center; padding: 14px 18px; gap: 12px; }
+.member-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(26,46,26,0.08); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; overflow: hidden; }
+.member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.member-info { flex: 1; min-width: 0; }
+.member-name { font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.member-email { font-size: 11px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.member-role { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+.member-role svg { width: 14px; height: 14px; stroke: var(--muted2); stroke-width: 2; fill: none; stroke-linecap: round; }
+
 /* 사용량 바 */
 .usage-section { padding: 14px 18px; }
 .usage-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
@@ -315,15 +325,24 @@ body { font-family: var(--font); background: var(--bg); min-height: 100dvh; colo
     </div>
 
     <div class="section-card">
-        <div class="section-label">계정</div>
-        <div class="row" onclick="showInviteCode()">
-            <div class="row-ico">
-                <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-8 0v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        <div class="section-label">구성원 관리</div>
+        <div class="member-row">
+            <div class="member-avatar" id="member-owner-avatar">👤</div>
+            <div class="member-info">
+                <div class="member-name" id="member-owner-name">불러오는 중…</div>
+                <div class="member-email" id="member-owner-email"></div>
             </div>
+            <div class="member-role">장소 소유자 <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="row" style="border-top: 1px solid var(--divider);" onclick="showInviteCode()">
             <div class="row-info">
-                <div class="row-title">멤버 초대 및 코드 등록</div>
+                <div class="row-title" style="color: var(--badge-ok); font-weight: 700;">+ 구성원 초대 코드 생성</div>
             </div>
         </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-label">계정</div>
         <div class="row danger" onclick="handleLogout()">
             <div class="row-ico">
                 <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -381,9 +400,8 @@ var sb = supabase.createClient(
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
 );
 
-/* ★ 본인 이메일 입력 → 공간:결 운영자 배지 표시 */
 var FOUNDER_EMAILS = [
-    'gngn5803@nate.com'   /* ← 여기에 본인 이메일 주소로 변경하세요 */
+    'gngn5803@nate.com'
 ];
 
 var MAX_ITEMS = 20;
@@ -414,7 +432,6 @@ sb.auth.getSession().then(function(res) {
     var user = session.user;
     var email = user.email || '';
 
-    /* 닉네임 우선순위: display_name(직접 설정) > full_name(구글) > 이메일 앞부분 */
     var displayName =
         (user.user_metadata && user.user_metadata.display_name) ||
         (user.user_metadata && user.user_metadata.full_name) ||
@@ -422,14 +439,18 @@ sb.auth.getSession().then(function(res) {
 
     document.getElementById('profile-name').textContent = displayName;
     document.getElementById('profile-email').textContent = email;
+    
+    // 구성원 관리의 소유자 정보에도 똑같이 넣어줍니다.
+    document.getElementById('member-owner-name').textContent = displayName;
+    document.getElementById('member-owner-email').textContent = email;
 
     /* 구글 아바타 */
     if (user.user_metadata && user.user_metadata.avatar_url) {
-        document.getElementById('avatar-wrap').innerHTML =
-            '<img src="' + user.user_metadata.avatar_url + '" alt="">';
+        var imgTag = '<img src="' + user.user_metadata.avatar_url + '" alt="">';
+        document.getElementById('avatar-wrap').innerHTML = imgTag;
+        document.getElementById('member-owner-avatar').innerHTML = imgTag;
     }
 
-    /* 역할 배지: FOUNDER_EMAILS에 있으면 운영자, 아니면 멤버 */
     var badge = document.getElementById('profile-badge');
     if (FOUNDER_EMAILS.indexOf(email) !== -1) {
         badge.textContent = '공간:결 운영자';
@@ -508,7 +529,6 @@ function renderDrawers() {
 }
 function toggleDrawerMore() { showAll = !showAll; renderDrawers(); }
 
-/* 다크모드 / 글씨크기 */
 function toggleDark() {
     var dark = document.getElementById('dark-toggle').checked;
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
@@ -522,7 +542,6 @@ function setSize(val) {
     });
 }
 
-/* ── 닉네임 편집 ── */
 function openNameModal() {
     var current = document.getElementById('profile-name').textContent;
     var input = document.getElementById('name-input');
@@ -538,17 +557,16 @@ function saveName() {
     if (newName.length > 16) { document.getElementById('name-error').textContent = '16자 이내로 입력해주세요'; return; }
     var btn = document.getElementById('name-save-btn');
     btn.textContent = '저장 중…'; btn.disabled = true;
-    /* Supabase user_metadata.display_name에 저장 → 영구 반영 */
     sb.auth.updateUser({ data: { display_name: newName } }).then(function(r) {
         btn.textContent = '저장'; btn.disabled = false;
         if (r.error) { document.getElementById('name-error').textContent = '저장에 실패했어요. 다시 시도해주세요'; return; }
         document.getElementById('profile-name').textContent = newName;
+        document.getElementById('member-owner-name').textContent = newName;
         document.getElementById('name-modal').classList.remove('open');
         showToast('닉네임이 변경됐어요 ✓');
     });
 }
 
-/* ── 시리얼 모달 ── */
 function openSerialModal() {
     clearError('modal-error');
     document.getElementById('serial-pw').value = '';
@@ -573,7 +591,6 @@ function hideSerial() {
     document.getElementById('serial-revealed').style.display = 'none';
 }
 
-/* ── 공통 유틸 ── */
 function handleModalOutsideClick(e, id) {
     if (e.target === document.getElementById(id)) document.getElementById(id).classList.remove('open');
 }
@@ -593,45 +610,33 @@ function handleLogout() {
     sb.auth.signOut().then(function() { window.location.replace('login.html'); });
 }
 
-/* ── 멤버 초대 (임시 기능) ── */
+/* 멤버 초대 코드 생성 */
 function showInviteCode() {
-    // 세인님이 말씀하신 구매한 수량만큼 발급되는 코드함과 연결될 자리입니다.
-    // 당장 테스트해보실 수 있도록 랜덤 코드를 띄워주는 안전 장치를 달아두었습니다.
     const code = "GYEOL-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-    alert("가족이나 멤버에게 전달할 1회용 초대 코드입니다.\n\n[초대 코드: " + code + "]\n\n(추후 구매 수량에 맞춰 자동 생성되도록 안전하게 연동됩니다.)");
+    alert("멤버 구성원에게 전달할 1회 초대 코드 입니다.\n\n[초대 코드: " + code + "]\n\n(추후 구매 수량에 맞춰 자동 생성되도록 안전하게 연동됩니다.)");
 }
 
-/* ── 계정 삭제 기능 ── */
+/* 계정 삭제 기능 */
 async function deleteAccount() {
     if(!confirm('정말 공간:결 계정을 삭제하시겠습니까?\n등록된 시리얼 번호와 모든 서랍 정보가 완전히 삭제되며 복구할 수 없습니다.')) return;
-    
     try {
-        // 1. 금고(수파베이스)에서 시리얼 번호 연결 깨끗하게 해제하기
         if(currentSession && currentSession.user) {
-            await sb.from('serial_codes')
-                    .update({ used_by: null, used_at: null })
-                    .eq('used_by', currentSession.user.email);
+            await sb.from('serial_codes').update({ used_by: null, used_at: null }).eq('used_by', currentSession.user.email);
         }
-        
-        // 2. 스마트폰(로컬)에 저장된 서랍 내용물 전부 안전하게 비우기
         for(let i = localStorage.length - 1; i >= 0; i--) {
             const k = localStorage.key(i);
             if(k && (k.startsWith('gyeol_') || k.startsWith('name_') || k.startsWith('theme_') || k.startsWith('mediaPath_'))) {
                 localStorage.removeItem(k);
             }
         }
-        
-        // 3. 로그아웃 후 첫 화면으로 튕겨내기
         await sb.auth.signOut();
         alert('계정이 안전하게 삭제되었습니다. 그동안 공간:결을 이용해주셔서 감사합니다.');
         window.location.replace('login.html');
-        
     } catch(err) {
         alert('계정 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     }
 }
 
-/* Enter 키 */
 document.getElementById('serial-pw').addEventListener('keydown', function(e) { if (e.key === 'Enter') verifyAndRevealSerial(); });
 document.getElementById('name-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') saveName(); });
 </script>
