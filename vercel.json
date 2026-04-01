@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/GYEOL-:path*",
+      "destination": "/tag.html"
+    }
+  ]
+}
