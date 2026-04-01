@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>공간:결</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background-color: #0C1220; color: white; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease forwards; }
+    </style>
+</head>
+<body>
+    <div class="max-w-sm mx-auto min-h-screen flex flex-col justify-center px-6">
+
+        <!-- 로딩 상태 -->
+        <div id="state-loading" class="text-center">
+            <div class="flex justify-center mb-6">
+                <svg class="spinner w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+            </div>
+            <p class="text-gray-400 text-sm">태그를 확인하는 중이에요...</p>
+        </div>
+
+        <!-- 에러 상태 (코드 없음) -->
+        <div id="state-no-code" class="hidden fade-in text-center">
+            <div class="text-5xl mb-5">🏷️</div>
+            <h2 class="text-xl font-bold mb-2">유효하지 않은 태그예요</h2>
+            <p class="text-gray-400 text-sm mb-6">QR코드를 다시 스캔해주세요.</p>
+            <button onclick="location.href='index.html'" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-xl transition text-sm">
+                홈으로 이동
+            </button>
+        </div>
+
+        <!-- 이미 다른 사용자가 등록한 태그 -->
+        <div id="state-taken" class="hidden fade-in text-center">
+            <div class="text-5xl mb-5">🔒</div>
+            <h2 class="text-xl font-bold mb-2">이미 등록된 태그예요</h2>
+            <p class="text-gray-400 text-sm mb-6">다른 사용자가 등록한 태그입니다.<br>본인 태그가 아닌 경우 고객센터로 문의해주세요.</p>
+            <button onclick="location.href='index.html'" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-xl transition text-sm">
+                내 보관함으로
+            </button>
+        </div>
+
+        <!-- DB에 없는 코드 -->
+        <div id="state-invalid" class="hidden fade-in text-center">
+            <div class="text-5xl mb-5">❓</div>
+            <h2 class="text-xl font-bold mb-2">등록되지 않은 태그예요</h2>
+            <p class="text-gray-400 text-sm mb-4">코드: <span id="invalid-code" class="font-mono text-white text-xs bg-gray-700 px-2 py-1 rounded"></span></p>
+            <p class="text-gray-500 text-xs">공식 제품이 아닌 경우 이 메시지가 표시될 수 있어요.</p>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+        const SUPABASE_URL = 'https://tqhtggusphhcsygiitrv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        function show(id) {
+            ['state-loading','state-no-code','state-taken','state-invalid'].forEach(s => {
+                document.getElementById(s).classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        // ── 코드 추출 ──────────────────────────────────────────────
+        // 1순위: URL 경로 (/GYEOL-01-MAIN)
+        // 2순위: 쿼리 파라미터 (?code=GYEOL-01-MAIN)
+        function extractCode() {
+            const path = window.location.pathname.replace(/^\//, '').replace(/\.html.*$/, '');
+            if (path && path.toUpperCase().startsWith('GYEOL-')) return path.toUpperCase();
+            const params = new URLSearchParams(window.location.search);
+            const q = params.get('code');
+            if (q && q.toUpperCase().startsWith('GYEOL-')) return q.toUpperCase();
+            return null;
+        }
+
+        // ── 코드 타입 분석 ─────────────────────────────────────────
+        // GYEOL-01-MAIN → 메인 보관함, GYEOL-01-DR1/DR2 → 서랍
+        function getRedirectUrl(code, email) {
+            const upper = code.toUpperCase();
+            if (upper.endsWith('-MAIN')) {
+                // 메인 태그 → 보관함 홈
+                return 'index.html';
+            } else {
+                // 서랍 태그 → drawer.html?tag=GYEOL-01-DR1
+                return `drawer.html?tag=${encodeURIComponent(code)}`;
+            }
+        }
+
+        // ── 메인 로직 ──────────────────────────────────────────────
+        const code = extractCode();
+
+        if (!code) {
+            show('state-no-code');
+        } else {
+            // 1. 세션 확인
+            const { data: { session } } = await supabase.auth.getSession();
+
+            // 2. serial_codes 에서 해당 코드 조회
+            const { data: serial, error: serialError } = await supabase
+                .from('serial_codes')
+                .select('*')
+                .eq('code', code)
+                .single();
+
+            if (serialError || !serial) {
+                // DB에 없는 코드
+                document.getElementById('invalid-code').textContent = code;
+                show('state-invalid');
+
+            } else if (!serial.used_by) {
+                // ── 미등록 태그 ──────────────────────────────────────
+                // 로그인 안 된 경우 → login 후 serial 등록으로
+                if (!session) {
+                    window.location.replace(`login.html?redirect=${encodeURIComponent('serial.html')}`);
+                } else {
+                    // 로그인 됐지만 시리얼 미등록 → serial.html로
+                    window.location.replace('serial.html');
+                }
+
+            } else {
+                // ── 등록된 태그 ──────────────────────────────────────
+                if (!session) {
+                    // 로그인 필요 → login으로, 로그인 후 다시 이 태그로 돌아오도록
+                    const redirectBack = encodeURIComponent(`tag.html?code=${code}`);
+                    window.location.replace(`login.html?redirect=${redirectBack}`);
+
+                } else if (serial.used_by === session.user.email) {
+                    // 내 태그 → 해당 보관함/서랍으로 이동
+                    window.location.replace(getRedirectUrl(code, session.user.email));
+
+                } else {
+                    // 다른 사람 태그
+                    show('state-taken');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
