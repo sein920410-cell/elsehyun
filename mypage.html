@@ -114,16 +114,6 @@ body { font-family: var(--font); background: var(--bg); min-height: 100dvh; colo
 .toggle-input:checked + .toggle-slider { background: var(--bar-fill); }
 .toggle-input:checked + .toggle-slider::after { transform: translateX(18px); }
 
-/* 구성원 관리 전용 스타일 */
-.member-row { display: flex; align-items: center; padding: 14px 18px; gap: 12px; }
-.member-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(26,46,26,0.08); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; overflow: hidden; }
-.member-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.member-info { flex: 1; min-width: 0; }
-.member-name { font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.member-email { font-size: 11px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.member-role { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
-.member-role svg { width: 14px; height: 14px; stroke: var(--muted2); stroke-width: 2; fill: none; stroke-linecap: round; }
-
 /* 사용량 바 */
 .usage-section { padding: 14px 18px; }
 .usage-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
@@ -326,15 +316,7 @@ body { font-family: var(--font); background: var(--bg); min-height: 100dvh; colo
 
     <div class="section-card">
         <div class="section-label">구성원 관리</div>
-        <div class="member-row">
-            <div class="member-avatar" id="member-owner-avatar">👤</div>
-            <div class="member-info">
-                <div class="member-name" id="member-owner-name">불러오는 중…</div>
-                <div class="member-email" id="member-owner-email"></div>
-            </div>
-            <div class="member-role">장소 소유자 <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-        </div>
-        <div class="row" style="border-top: 1px solid var(--divider);" onclick="showInviteCode()">
+        <div class="row" onclick="showInviteCode()">
             <div class="row-info">
                 <div class="row-title" style="color: var(--badge-ok); font-weight: 700;">+ 구성원 초대 코드 생성</div>
             </div>
@@ -439,16 +421,11 @@ sb.auth.getSession().then(function(res) {
 
     document.getElementById('profile-name').textContent = displayName;
     document.getElementById('profile-email').textContent = email;
-    
-    // 구성원 관리의 소유자 정보에도 똑같이 넣어줍니다.
-    document.getElementById('member-owner-name').textContent = displayName;
-    document.getElementById('member-owner-email').textContent = email;
 
     /* 구글 아바타 */
     if (user.user_metadata && user.user_metadata.avatar_url) {
         var imgTag = '<img src="' + user.user_metadata.avatar_url + '" alt="">';
         document.getElementById('avatar-wrap').innerHTML = imgTag;
-        document.getElementById('member-owner-avatar').innerHTML = imgTag;
     }
 
     var badge = document.getElementById('profile-badge');
@@ -561,7 +538,6 @@ function saveName() {
         btn.textContent = '저장'; btn.disabled = false;
         if (r.error) { document.getElementById('name-error').textContent = '저장에 실패했어요. 다시 시도해주세요'; return; }
         document.getElementById('profile-name').textContent = newName;
-        document.getElementById('member-owner-name').textContent = newName;
         document.getElementById('name-modal').classList.remove('open');
         showToast('닉네임이 변경됐어요 ✓');
     });
