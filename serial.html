@@ -12,18 +12,22 @@
     <div class="max-w-sm mx-auto min-h-screen flex flex-col justify-center px-6">
         <div class="text-center mb-10">
             <h1 class="text-3xl font-bold tracking-tight">공간:결</h1>
-            <p class="text-gray-400 text-sm mt-2">제품 시리얼 번호를 입력해주세요</p>
+            <p class="text-gray-400 text-sm mt-2">제품 시리얼 번호를 등록해주세요</p>
         </div>
         <div class="bg-gray-800 rounded-2xl p-8 space-y-5">
             <div>
                 <label class="block text-sm text-gray-400 mb-1">시리얼 번호</label>
-                <input id="serial" type="text" placeholder="동봉된 시리얼 번호를 입력하세요"
+                <input id="serial" type="text" placeholder="시리얼 번호를 입력하세요"
                     class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 transition uppercase tracking-widest">
             </div>
             <div id="error-msg" class="text-red-400 text-sm text-center hidden"></div>
+            <div id="success-msg" class="text-green-400 text-sm text-center hidden"></div>
             <button id="submit-btn" onclick="handleSerial()"
                 class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold py-3 rounded-xl transition text-sm">
-                다음
+                등록하기
+            </button>
+            <button onclick="handleLogout()" class="w-full text-gray-500 text-xs py-2 hover:text-gray-300 transition">
+                로그아웃
             </button>
         </div>
     </div>
@@ -35,29 +39,68 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
         );
 
-        // 이미 로그인 + 시리얼 등록된 유저 → 바로 메인으로
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-            const { data: existing } = await supabase
-                .from('serial_codes')
-                .select('*')
-                .eq('used_by', session.user.email)
-                .single();
-            if (existing) {
-                window.location.replace('index.html');
-            }
-        }
+        // 세션 확인 - OAuth 콜백(구글 로그인)도 처리
+        // onAuthStateChange를 먼저 등록해야 URL hash 토큰 파싱 타이밍 놓치지 않음
+        let currentSession = null;
+        let authResolved = false;
 
+        await new Promise((resolve) => {
+            const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+                if (authResolved) return;
+                authResolved = true;
+                subscription.unsubscribe();
+
+                if (!session) {
+                    window.location.replace('login.html');
+                    resolve();
+                    return;
+                }
+
+                // 이미 시리얼 등록된 유저면 바로 메인으로
+                const { data: existing } = await supabase
+                    .from('serial_codes')
+                    .select('*')
+                    .eq('used_by', session.user.email)
+                    .single();
+
+                if (existing) {
+                    window.location.replace('index.html');
+                    resolve();
+                    return;
+                }
+
+                currentSession = session;
+                resolve();
+            });
+
+            // 5초 안에 응답 없으면 login으로
+            setTimeout(() => {
+                if (!authResolved) {
+                    authResolved = true;
+                    window.location.replace('login.html');
+                    resolve();
+                }
+            }, 5000);
+        });
+        
         window.handleSerial = async () => {
+            const session = currentSession;
             const code = document.getElementById('serial').value.trim().toUpperCase();
             const errEl = document.getElementById('error-msg');
+            const sucEl = document.getElementById('success-msg');
             const btn = document.getElementById('submit-btn');
 
             errEl.classList.add('hidden');
+            sucEl.classList.add('hidden');
 
             if (!code) {
                 errEl.textContent = '시리얼 번호를 입력해주세요.';
                 errEl.classList.remove('hidden');
+                return;
+            }
+
+            if (!session) {
+                window.location.replace('login.html');
                 return;
             }
 
@@ -75,14 +118,35 @@
             if (error || !serial) {
                 errEl.textContent = '유효하지 않은 시리얼 번호예요. 다시 확인해주세요.';
                 errEl.classList.remove('hidden');
-                btn.textContent = '다음';
+                btn.textContent = '등록하기';
                 btn.disabled = false;
                 return;
             }
 
-            // 유효한 시리얼 → sessionStorage에 임시 저장 후 로그인/회원가입으로
-            sessionStorage.setItem('pending_serial', code);
-            window.location.replace('login.html?mode=register');
+            // 시리얼에 내 이메일 등록
+            const { error: updateError } = await supabase
+                .from('serial_codes')
+                .update({ used_by: session.user.email, used_at: new Date().toISOString() })
+                .eq('code', code);
+
+            if (updateError) {
+                errEl.textContent = '등록 중 오류가 발생했어요. 다시 시도해주세요.';
+                errEl.classList.remove('hidden');
+                btn.textContent = '등록하기';
+                btn.disabled = false;
+                return;
+            }
+
+            sucEl.textContent = '등록 완료! 잠시 후 이동합니다.';
+            sucEl.classList.remove('hidden');
+            btn.textContent = '완료';
+
+            setTimeout(() => { window.location.replace('index.html'); }, 1500);
+        };
+
+        window.handleLogout = async () => {
+            await supabase.auth.signOut();
+            window.location.replace('login.html');
         };
 
         document.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSerial(); });
