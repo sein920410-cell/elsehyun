@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>공간:결 - 마이페이지</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async () => {
+    const _sb = supabase.createClient(
+        'https://tqhtggusphhcsygiitrv.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
+    );
+    const { data: { session } } = await _sb.auth.getSession();
+    if (!session) { window.location.replace('login.html'); return; }
+    const { data: serial } = await _sb.from('serial_codes').select('*').eq('used_by', session.user.email).single();
+    if (!serial) { window.location.replace('serial.html'); }
+})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+input { -webkit-user-select: text; user-select: text; }
+
+/* ── 테마 변수 ── */
+:root {
+  --font: 'DM Sans', 'Noto Sans KR', sans-serif;
+  --fs-base: 14px;
+  /* light (default) */
+  --bg: #d9ead2;
+  --surface: #fff;
+  --border: #D4DFC8;
+  --ink: #1a2e1a;
+  --ink2: #3a4e3a;
+  --muted: rgba(26,46,26,0.45);
+  --muted2: rgba(26,46,26,0.3);
+  --header-bg: #1a2e1a;
+  --header-txt: #fff;
+  --header-sub: rgba(255,255,255,0.5);
+  --header-border: rgba(255,255,255,0.08);
+  --card-bg: #fff;
+  --card-border: #D4DFC8;
+  --tag-bg: rgba(26,46,26,0.07);
+  --divider: rgba(26,46,26,0.08);
+  --danger: #c0392b;
+  --accent: #1a2e1a;
+  --bar-fill: #1a2e1a;
+  --bar-track: rgba(26,46,26,0.12);
+  --modal-bg: rgba(0,0,0,0.45);
+  --badge-ok: #2d6a4f;
+  --badge-ok-bg: #d8f3dc;
+}
+
+/* 다크 모드 */
+[data-theme="dark"] {
+  --bg: #0C1220;
+  --surface: #1A1F2E;
+  --border: rgba(255,255,255,0.09);
+  --ink: #f0f4f0;
+  --ink2: #c0cfc0;
+  --muted: rgba(255,255,255,0.42);
+  --muted2: rgba(255,255,255,0.25);
+  --header-bg: #080E1A;
+  --header-txt: #fff;
+  --header-sub: rgba(255,255,255,0.4);
+  --header-border: rgba(255,255,255,0.06);
+  --card-bg: #1A1F2E;
+  --card-border: rgba(255,255,255,0.09);
+  --tag-bg: rgba(255,255,255,0.07);
+  --divider: rgba(255,255,255,0.07);
+  --danger: #e55;
+  --accent: #86efac;
+  --bar-fill: #86efac;
+  --bar-track: rgba(255,255,255,0.1);
+  --badge-ok: #52c496;
+  --badge-ok-bg: rgba(82,196,150,0.15);
+}
+
+/* 폰트 크기 */
+[data-size="sm"] { --fs-base: 12px; }
+[data-size="md"] { --fs-base: 14px; }
+[data-size="lg"] { --fs-base: 16px; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  min-height: 100dvh;
+  color: var(--ink);
+  font-size: var(--fs-base);
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ── 헤더 ── */
+.header {
+  background: var(--header-bg);
+  padding: 0 20px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--header-border);
+  position: sticky; top: 0; z-index: 100;
+  transition: background 0.3s;
+}
+.back-btn {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.back-btn svg { width: 16px; height: 16px; stroke: var(--header-txt); stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.back-btn:active { opacity: 0.7; }
+.header-title { font-size: 15px; font-weight: 700; color: var(--header-txt); flex: 1; letter-spacing: -0.02em; }
+
+/* ── 스크롤 영역 ── */
+.scroll-body {
+  padding: 20px 20px 60px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+/* ── 프로필 카드 ── */
+.profile-card {
+  background: var(--header-bg);
+  border-radius: 18px;
+  padding: 20px;
+  display: flex; align-items: center; gap: 14px;
+  transition: background 0.3s;
+}
+.avatar {
+  width: 50px; height: 50px; border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 2px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  overflow: hidden;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-info { flex: 1; min-width: 0; }
+.profile-name { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.profile-email { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.profile-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.1); border-radius: 6px;
+  padding: 3px 8px; margin-top: 5px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.75); text-transform: uppercase;
+}
+.profile-badge::before { content: '●'; font-size: 7px; color: #86efac; }
+
+/* ── 섹션 카드 ── */
+.section-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: background 0.3s, border-color 0.3s;
+}
+.section-label {
+  font-size: 9px; font-weight: 800; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--muted);
+  padding: 14px 18px 8px;
+}
+
+/* ── 일반 행 ── */
+.row {
+  display: flex; align-items: center;
+  padding: 13px 18px; gap: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-top: 1px solid var(--divider);
+}
+.row:first-of-type { border-top: none; }
+.row:active { background: var(--tag-bg); }
+.row-ico {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--tag-bg);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.row-ico svg { width: 16px; height: 16px; stroke: var(--ink); stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.row-info { flex: 1; min-width: 0; }
+.row-title { font-size: calc(var(--fs-base) * 1); font-weight: 600; color: var(--ink); }
+.row-sub { font-size: calc(var(--fs-base) * 0.8); color: var(--muted); margin-top: 2px; }
+.row-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.row-value { font-size: 12px; font-weight: 600; color: var(--muted); }
+.chevron svg { width: 14px; height: 14px; stroke: var(--muted2); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── 토글 스위치 ── */
+.toggle-wrap { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+.toggle-input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-slider {
+  position: absolute; inset: 0;
+  background: var(--bar-track);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background 0.25s;
+}
+.toggle-slider::after {
+  content: ''; position: absolute;
+  left: 3px; top: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; transition: transform 0.25s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.toggle-input:checked + .toggle-slider { background: var(--bar-fill); }
+.toggle-input:checked + .toggle-slider::after { transform: translateX(18px); }
+
+/* ── 이용량 바 ── */
+.usage-section { padding: 14px 18px; }
+.usage-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+.usage-title { font-size: calc(var(--fs-base) * 1); font-weight: 700; color: var(--ink); }
+.usage-count { font-size: 11px; font-weight: 700; color: var(--muted); }
+.usage-count span { color: var(--ink); font-size: 18px; font-weight: 800; }
+.usage-bar-wrap { height: 7px; background: var(--bar-track); border-radius: 99px; overflow: hidden; }
+.usage-bar-fill { height: 100%; background: var(--bar-fill); border-radius: 99px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
+.usage-meta { display: flex; justify-content: space-between; margin-top: 7px; }
+.usage-meta-item { font-size: 10px; color: var(--muted); }
+.usage-meta-item b { color: var(--ink); font-weight: 700; }
+.usage-divider { height: 1px; background: var(--divider); margin: 0 18px; }
+
+/* ── 보관함 목록 미리보기 ── */
+.drawer-list { padding: 0 18px 14px; }
+.drawer-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--divider);
+}
+.drawer-item:last-child { border-bottom: none; }
+.drawer-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--bar-fill); flex-shrink: 0;
+}
+.drawer-item-name { flex: 1; font-size: calc(var(--fs-base) * 0.93); font-weight: 600; color: var(--ink); }
+.drawer-item-cnt { font-size: 11px; color: var(--muted); font-weight: 600; }
+.drawer-item-badge {
+  font-size: 9px; font-weight: 700; padding: 2px 7px;
+  border-radius: 5px; background: var(--badge-ok-bg); color: var(--badge-ok);
+  letter-spacing: 0.04em;
+}
+.drawer-item-badge.warn { background: rgba(234,179,8,0.15); color: #a16207; }
+[data-theme="dark"] .drawer-item-badge.warn { color: #fcd34d; }
+.more-btn {
+  display: block; text-align: center;
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  padding: 10px 18px; cursor: pointer;
+  border-top: 1px solid var(--divider);
+  transition: color 0.15s;
+}
+.more-btn:active { color: var(--ink); }
+
+/* ── 시리얼 영역 ── */
+.serial-locked {
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px 18px; gap: 10px; cursor: pointer; flex-direction: column;
+}
+.serial-lock-ico { font-size: 28px; }
+.serial-lock-lbl { font-size: 12px; font-weight: 600; color: var(--muted); text-align: center; }
+.serial-lock-hint { font-size: 10px; color: var(--muted2); }
+.serial-revealed { padding: 16px 18px; }
+.serial-revealed-label { font-size: 9px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.serial-code-box {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--tag-bg); border-radius: 11px;
+  padding: 11px 14px; margin-bottom: 8px;
+}
+.serial-code-txt { font-family: 'DM Sans', monospace; font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: 0.08em; flex: 1; }
+.copy-btn {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--accent); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.15s;
+}
+[data-theme="dark"] .copy-btn { background: rgba(134,239,172,0.2); }
+.copy-btn:active { opacity: 0.7; }
+.copy-btn svg { width: 13px; height: 13px; stroke: #fff; stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+[data-theme="dark"] .copy-btn svg { stroke: #86efac; }
+.serial-reg-date { font-size: 10px; color: var(--muted2); text-align: right; }
+.hide-serial-btn { font-size: 11px; font-weight: 600; color: var(--muted); cursor: pointer; display: inline-block; margin-top: 4px; }
+
+/* ── 글씨 크기 선택 ── */
+.size-picker { display: flex; gap: 8px; flex-shrink: 0; }
+.size-btn {
+  width: 32px; height: 28px; border-radius: 8px;
+  background: var(--tag-bg); border: 1px solid var(--card-border);
+  color: var(--ink); font-family: var(--font); font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+.size-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+[data-theme="dark"] .size-btn.active { background: rgba(134,239,172,0.25); border-color: #86efac; color: #86efac; }
+.size-btn[data-val="sm"] { font-size: 10px; }
+.size-btn[data-val="md"] { font-size: 13px; }
+.size-btn[data-val="lg"] { font-size: 16px; }
+
+/* ── 위험 버튼 행 ── */
+.row.danger .row-ico svg { stroke: var(--danger); }
+.row.danger .row-title { color: var(--danger); }
+
+/* ── 비밀번호 모달 ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--modal-bg);
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-sheet {
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  padding: 20px 20px 40px;
+  width: 100%; max-width: 420px;
+  transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+.modal-handle { width: 36px; height: 4px; border-radius: 99px; background: var(--divider); margin: 0 auto 20px; }
+.modal-title { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.modal-sub { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+.modal-input {
+  width: 100%; background: var(--tag-bg);
+  border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 13px 16px; font-size: 15px; font-family: var(--font);
+  color: var(--ink); outline: none; margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+.modal-input:focus { border-color: var(--accent); }
+.modal-error { font-size: 11px; color: var(--danger); margin-bottom: 12px; min-height: 16px; }
+.modal-btn {
+  width: 100%; background: var(--accent); border: none;
+  border-radius: 12px; padding: 14px; font-size: 14px;
+  font-weight: 700; font-family: var(--font); color: #fff;
+  cursor: pointer; transition: opacity 0.15s;
+}
+[data-theme="dark"] .modal-btn { background: rgba(134,239,172,0.2); color: #86efac; border: 1px solid rgba(134,239,172,0.3); }
+.modal-btn:active { opacity: 0.75; }
+
+/* ── 복사 토스트 ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--header-bg); color: var(--header-txt);
+  padding: 10px 20px; border-radius: 12px;
+  font-size: 13px; font-weight: 600;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 300; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+    <div class="back-btn" onclick="history.back()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="header-title">마이페이지</div>
+</div>
+
+<!-- 스크롤 바디 -->
+<div class="scroll-body">
+
+    <!-- 프로필 카드 -->
+    <div class="profile-card" id="profile-card">
+        <div class="avatar" id="avatar-wrap">👤</div>
+        <div class="profile-info">
+            <div class="profile-name" id="profile-name">불러오는 중…</div>
+            <div class="profile-email" id="profile-email"></div>
+            <div class="profile-badge">공간:결 멤버</div>
+        </div>
+    </div>
+
+    <!-- 이용량 카드 -->
+    <div class="section-card">
+        <div class="section-label">보관함 현황</div>
+        <div class="usage-section">
+            <div class="usage-header">
+                <div class="usage-title">물건 목록</div>
+                <div class="usage-count"><span id="used-count">–</span> / <span id="max-count">20</span>건</div>
+            </div>
+            <div class="usage-bar-wrap">
+                <div class="usage-bar-fill" id="usage-bar" style="width:0%"></div>
+            </div>
+            <div class="usage-meta">
+                <div class="usage-meta-item">사용 <b id="used-count2">–</b>건</div>
+                <div class="usage-meta-item">잔여 <b id="remain-count">–</b>건</div>
+            </div>
+        </div>
+        <div class="usage-divider"></div>
+        <!-- 서랍 목록 미리보기 -->
+        <div class="drawer-list" id="drawer-list">
+            <div style="text-align:center;padding:16px 0;color:var(--muted);font-size:12px;">불러오는 중…</div>
+        </div>
+        <div class="more-btn" id="more-btn" style="display:none" onclick="toggleDrawerMore()">▾ 더 보기</div>
+    </div>
+
+    <!-- 시리얼 번호 카드 -->
+    <div class="section-card">
+        <div class="section-label">등록 정보</div>
+        <!-- 잠긴 상태 -->
+        <div class="serial-locked" id="serial-locked" onclick="openSerialModal()">
+            <div class="serial-lock-ico">🔐</div>
+            <div class="serial-lock-lbl">시리얼 번호 확인</div>
+            <div class="serial-lock-hint">비밀번호를 입력하면 열람할 수 있어요</div>
+        </div>
+        <!-- 열람 상태 (숨김) -->
+        <div class="serial-revealed" id="serial-revealed" style="display:none">
+            <div class="serial-revealed-label">시리얼 번호</div>
+            <div class="serial-code-box">
+                <div class="serial-code-txt" id="serial-code-txt">–</div>
+                <button class="copy-btn" onclick="copySerial()">
+                    <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                </button>
+            </div>
+            <div class="serial-reg-date" id="serial-reg-date"></div>
+            <div class="hide-serial-btn" onclick="hideSerial()">🔒 다시 숨기기</div>
+        </div>
+    </div>
+
+    <!-- 표시 설정 카드 -->
+    <div class="section-card">
+        <div class="section-label">표시 설정</div>
+
+        <!-- 다크 모드 -->
+        <div class="row" style="cursor:default">
+            <div class="row-ico">
+                <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            </div>
+            <div class="row-info">
+                <div class="row-title">다크 모드</div>
+                <div class="row-sub">어두운 배경으로 전환</div>
+            </div>
+            <label class="toggle-wrap">
+                <input type="checkbox" class="toggle-input" id="dark-toggle" onchange="toggleDark()">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <!-- 글씨 크기 -->
+        <div class="row" style="cursor:default; border-top:1px solid var(--divider)">
+            <div class="row-ico">
+                <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            </div>
+            <div class="row-info">
+                <div class="row-title">글씨 크기</div>
+            </div>
+            <div class="size-picker">
+                <button class="size-btn" data-val="sm" onclick="setSize('sm')">가</button>
+                <button class="size-btn active" data-val="md" onclick="setSize('md')">가</button>
+                <button class="size-btn" data-val="lg" onclick="setSize('lg')">가</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 앱 기능 카드 -->
+    <div class="section-card">
+        <div class="section-label">보관함 관리</div>
+
+        <div class="row" onclick="location.href='index.html'">
+            <div class="row-ico">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </div>
+            <div class="row-info">
+                <div class="row-title">전체 검색</div>
+                <div class="row-sub">모든 보관함에서 물건 찾기</div>
+            </div>
+            <div class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+
+
+    </div>
+
+    <!-- 계정 카드 -->
+    <div class="section-card">
+        <div class="section-label">계정</div>
+        <div class="row danger" onclick="handleLogout()">
+            <div class="row-ico">
+                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+            <div class="row-info">
+                <div class="row-title">로그아웃</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 앱 정보 -->
+    <div style="text-align:center;padding:8px 0 4px">
+        <div style="font-size:10px;color:var(--muted2);font-weight:600;letter-spacing:0.1em">공간:결 · v1.0.0</div>
+        <div style="font-size:10px;color:var(--muted2);margin-top:3px">스마트 보관 태그 서비스</div>
+    </div>
+
+</div>
+
+<!-- 시리얼 비밀번호 모달 -->
+<div class="modal-overlay" id="serial-modal" onclick="handleModalOutsideClick(event)">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">🔐 시리얼 번호 확인</div>
+        <div class="modal-sub">본인 확인을 위해 비밀번호를 입력해주세요</div>
+        <input class="modal-input" type="password" id="serial-pw" placeholder="비밀번호" oninput="clearModalError()">
+        <div class="modal-error" id="modal-error"></div>
+        <button class="modal-btn" onclick="verifyAndRevealSerial()">확인</button>
+    </div>
+</div>
+
+<!-- 복사 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const supabase = createClient(
+    'https://tqhtggusphhcsygiitrv.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
+);
+
+const MAX_ITEMS = 20;
+let currentSession = null;
+let serialCode = null;
+let allDrawers = [];
+let showAll = false;
+
+// ── 설정 불러오기 ───────────────────────────────────────────
+function loadSettings() {
+    const theme = localStorage.getItem('gyeol_theme') || 'light';
+    const size  = localStorage.getItem('gyeol_size')  || 'md';
+    if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('dark-toggle').checked = true;
+    }
+    setSize(size, true);
+}
+
+// ── 초기화 ──────────────────────────────────────────────────
+loadSettings();
+
+const { data: { session } } = await supabase.auth.getSession();
+if (!session) { window.location.replace('login.html'); }
+currentSession = session;
+
+// 프로필
+const user = session.user;
+document.getElementById('profile-name').textContent = user.user_metadata?.full_name || user.email?.split('@')[0] || '사용자';
+document.getElementById('profile-email').textContent = user.email;
+if (user.user_metadata?.avatar_url) {
+    document.getElementById('avatar-wrap').innerHTML = `<img src="${user.user_metadata.avatar_url}" alt="">`;
+}
+
+// 시리얼 코드 조회
+const { data: serialData } = await supabase
+    .from('serial_codes')
+    .select('*')
+    .eq('used_by', user.email)
+    .single();
+if (serialData) {
+    serialCode = serialData.code;
+    const regDate = new Date(serialData.used_at);
+    document.getElementById('serial-code-txt').textContent = serialData.code;
+    document.getElementById('serial-reg-date').textContent =
+        `등록일 ${regDate.getFullYear()}.${String(regDate.getMonth()+1).padStart(2,'0')}.${String(regDate.getDate()).padStart(2,'0')}`;
+}
+
+// localStorage 보관함 목록 불러오기
+function getDrawers() {
+    const list = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || !key.startsWith('gyeol_')) continue;
+        if (key.startsWith('gyeol_theme') || key.startsWith('gyeol_size')) continue;
+        const tag = key.replace('gyeol_', '');
+        let items = [];
+        try { items = JSON.parse(localStorage.getItem(key)) || []; } catch(e) {}
+        if (!Array.isArray(items)) continue;
+        const name = localStorage.getItem('name_' + tag) || formatTag(tag);
+        list.push({ tag, name, items });
+    }
+    return list;
+}
+function formatTag(tag) {
+    const m = tag.match(/DRAWER0*(\d+)/i);
+    if (m) return '서랍 ' + parseInt(m[1]);
+    return tag;
+}
+
+allDrawers = getDrawers();
+
+// 이용량 계산
+const totalItems = allDrawers.reduce((sum, d) => sum + d.items.length, 0);
+const remain = Math.max(0, MAX_ITEMS - totalItems);
+const pct = Math.min(100, Math.round(totalItems / MAX_ITEMS * 100));
+document.getElementById('used-count').textContent = totalItems;
+document.getElementById('used-count2').textContent = totalItems;
+document.getElementById('remain-count').textContent = remain;
+setTimeout(() => {
+    document.getElementById('usage-bar').style.width = pct + '%';
+}, 100);
+
+// 서랍 목록 렌더링
+function renderDrawers() {
+    const list = document.getElementById('drawer-list');
+    const moreBtn = document.getElementById('more-btn');
+
+    if (!allDrawers.length) {
+        list.innerHTML = '<div style="text-align:center;padding:16px 0;color:var(--muted);font-size:12px">등록된 보관함이 없어요</div>';
+        return;
+    }
+
+    const visible = showAll ? allDrawers : allDrawers.slice(0, 5);
+    list.innerHTML = visible.map(d => {
+        const cnt = d.items.length;
+        const isWarn = cnt >= MAX_ITEMS * 0.8;
+        return `<div class="drawer-item" onclick="location.href='drawer.html?tag=${d.tag}'">
+            <div class="drawer-dot"></div>
+            <div class="drawer-item-name">${d.name}</div>
+            <div class="drawer-item-cnt">${cnt}개</div>
+            <div class="drawer-item-badge ${isWarn ? 'warn' : ''}">${isWarn ? '거의 찼어요' : '여유 있음'}</div>
+        </div>`;
+    }).join('');
+
+    if (allDrawers.length > 5) {
+        moreBtn.style.display = 'block';
+        moreBtn.textContent = showAll ? '▴ 접기' : `▾ ${allDrawers.length - 5}개 더 보기`;
+    }
+}
+renderDrawers();
+
+// ── 전역 함수들 ─────────────────────────────────────────────
+window.toggleDrawerMore = () => { showAll = !showAll; renderDrawers(); };
+
+window.toggleDark = () => {
+    const isDark = document.getElementById('dark-toggle').checked;
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
+    localStorage.setItem('gyeol_theme', isDark ? 'dark' : 'light');
+};
+
+window.setSize = (val, silent) => {
+    document.documentElement.setAttribute('data-size', val);
+    localStorage.setItem('gyeol_size', val);
+    document.querySelectorAll('.size-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.val === val);
+    });
+};
+
+// 시리얼 모달
+window.openSerialModal = () => {
+    document.getElementById('serial-modal').classList.add('open');
+    setTimeout(() => document.getElementById('serial-pw').focus(), 300);
+};
+window.handleModalOutsideClick = (e) => {
+    if (e.target === document.getElementById('serial-modal')) closeSerialModal();
+};
+function closeSerialModal() {
+    document.getElementById('serial-modal').classList.remove('open');
+    document.getElementById('serial-pw').value = '';
+    document.getElementById('modal-error').textContent = '';
+}
+window.clearModalError = () => { document.getElementById('modal-error').textContent = ''; };
+
+window.verifyAndRevealSerial = async () => {
+    const pw = document.getElementById('serial-pw').value;
+    if (!pw) { document.getElementById('modal-error').textContent = '비밀번호를 입력해주세요'; return; }
+    const btn = document.querySelector('.modal-btn');
+    btn.textContent = '확인 중…'; btn.disabled = true;
+    const { error } = await supabase.auth.signInWithPassword({ email: currentSession.user.email, password: pw });
+    btn.textContent = '확인'; btn.disabled = false;
+    if (error) { document.getElementById('modal-error').textContent = '비밀번호가 올바르지 않아요'; return; }
+    closeSerialModal();
+    document.getElementById('serial-locked').style.display = 'none';
+    document.getElementById('serial-revealed').style.display = 'block';
+};
+
+window.hideSerial = () => {
+    document.getElementById('serial-locked').style.display = '';
+    document.getElementById('serial-revealed').style.display = 'none';
+};
+
+// 복사
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+}
+window.copySerial = () => {
+    const code = document.getElementById('serial-code-txt').textContent;
+    navigator.clipboard?.writeText(code).then(() => showToast('시리얼 번호가 복사됐어요'));
+};
+
+
+
+// 로그아웃
+window.handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.replace('login.html');
+};
+
+// 모달 엔터키
+document.getElementById('serial-pw').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.verifyAndRevealSerial();
+});
+</script>
+</body>
+</html>
