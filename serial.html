@@ -83,10 +83,6 @@
             }, 5000);
         });
         
-// URL에서 code 파라미터 자동 입력
-const urlParams = new URLSearchParams(window.location.search);
-const codeParam = urlParams.get('code');
-if (codeParam) document.getElementById('serial').value = codeParam;
         window.handleSerial = async () => {
             const session = currentSession;
             const code = document.getElementById('serial').value.trim().toUpperCase();
