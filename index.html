@@ -29,9 +29,9 @@ input { -webkit-user-select: text; user-select: text; }
 
 body {
   font-family: 'DM Sans','Noto Sans KR',sans-serif;
-  background: #d9ead2;
+  background: #FFF5F2; /* 은은한 로즈빛 흰색 */
   min-height: 100dvh;
-  color: #1a2e1a;
+  color: #2C2C2C; /* 전체 기본 글씨: 차콜 블랙 */
   -webkit-font-smoothing: antialiased;
 }
 
@@ -46,13 +46,13 @@ body {
   font-weight: 700;
   letter-spacing: -0.02em;
   flex: 1;
-  color: #1a2e1a;
+  color: #2C2C2C; /* 로고 글씨: 차콜 블랙 */
 }
 .header-sub {
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(26,46,26,0.45);
+  color: #8A7F78; /* 서브 글씨: 따뜻한 회갈색 */
   font-weight: 600;
   text-decoration: underline;
   cursor: pointer;
@@ -69,11 +69,11 @@ body {
   font-weight: 700;
   letter-spacing: -0.02em;
   margin-bottom: 6px;
-  color: #0d1a0d;
+  color: #2C2C2C; /* 큰 제목: 차콜 블랙 */
 }
 .hero-sub {
   font-size: 13px;
-  color: rgba(26,46,26,0.45);
+  color: #8A7F78; /* 설명 글씨: 따뜻한 회갈색 */
 }
 
 .search-wrap { position: relative; }
@@ -81,7 +81,7 @@ body {
   position: absolute; left: 16px; top: 50%;
   transform: translateY(-50%);
   width: 17px; height: 17px;
-  stroke: rgba(26,46,26,0.35);
+  stroke: #8A7F78; /* 돋보기 아이콘: 따뜻한 회갈색 */
   stroke-width: 2; fill: none;
   stroke-linecap: round; stroke-linejoin: round;
   pointer-events: none;
@@ -94,18 +94,19 @@ body {
   padding: 16px 44px 16px 46px;
   font-size: 15px;
   font-family: inherit;
-  color: #1a2e1a;
+  color: #2C2C2C; /* 검색어 입력 글씨: 차콜 블랙 */
   outline: none;
   box-shadow: 0 2px 16px rgba(0,0,0,0.08);
   -webkit-appearance: none;
 }
-.search-input::placeholder { color: rgba(26,46,26,0.3); }
+.search-input::placeholder { color: #8A7F78; /* 검색창 안내 문구: 따뜻한 회갈색 */ }
 .clear-btn {
   position: absolute; right: 12px; top: 50%;
   transform: translateY(-50%);
   width: 26px; height: 26px; border-radius: 50%;
   background: rgba(0,0,0,0.06); border: none;
-  color: rgba(26,46,26,0.5); cursor: pointer;
+  color: #8A7F78; /* X 버튼: 따뜻한 회갈색 */
+  cursor: pointer;
   font-size: 12px; display: none;
   align-items: center; justify-content: center;
 }
@@ -115,7 +116,8 @@ body {
 .result-label {
   font-size: 10px; font-weight: 700;
   letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(26,46,26,0.35); margin-bottom: 12px;
+  color: #8A7F78; /* 결과 텍스트: 따뜻한 회갈색 */
+  margin-bottom: 12px;
 }
 
 .result-item {
@@ -131,27 +133,35 @@ body {
 
 .result-ico {
   width: 38px; height: 38px; border-radius: 11px;
-  background: rgba(26,46,26,0.07);
+  background: rgba(197, 131, 115, 0.15); /* 아이콘 배경: 딥 로즈 골드를 아주 연하게 */
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
 .result-ico svg {
   width: 18px; height: 18px;
-  stroke: #1a2e1a; stroke-width: 1.8; fill: none;
+  stroke: #C58373; /* 아이콘 선: 딥 로즈 골드 */
+  stroke-width: 1.8; fill: none;
   stroke-linecap: round; stroke-linejoin: round;
 }
 .result-info { flex: 1; min-width: 0; }
 .result-name {
   font-size: 14px; font-weight: 700;
-  color: #1a2e1a; letter-spacing: -0.01em;
+  color: #2C2C2C; /* 결과 물건 이름: 차콜 블랙 */
+  letter-spacing: -0.01em;
 }
-.result-name mark { background: none; color: #1a2e1a; font-weight: 900; text-decoration: underline; }
-.result-meta { font-size: 11px; color: #94a3b8; margin-top: 3px; }
-.result-meta b { color: #64748b; font-weight: 600; }
+.result-name mark { 
+  background: none; 
+  color: #C58373; /* 검색된 단어 강조: 딥 로즈 골드 */
+  font-weight: 900; 
+  text-decoration: underline; 
+}
+.result-meta { font-size: 11px; color: #8A7F78; margin-top: 3px; } /* 위치 설명: 따뜻한 회갈색 */
+.result-meta b { color: #2C2C2C; font-weight: 600; } /* 서랍 이름: 차콜 블랙 */
 
 .go-btn {
   padding: 7px 14px; border-radius: 10px;
-  background: #111; border: none;
+  background: #C58373; /* 이동 버튼 배경: 딥 로즈 골드 */
+  border: none;
   color: #fff; font-size: 12px; font-weight: 700;
   font-family: inherit; cursor: pointer; white-space: nowrap;
   flex-shrink: 0;
@@ -159,21 +169,23 @@ body {
 
 .empty-state {
   text-align: center; padding: 60px 20px;
-  color: rgba(26,46,26,0.35); font-size: 14px;
+  color: #8A7F78; /* 빈 상태 안내: 따뜻한 회갈색 */ 
+  font-size: 14px;
 }
 .bottom-safe { height: 40px; }
 
 .mypage-btn {
   width: 34px; height: 34px; border-radius: 50%;
-  background: rgba(26,46,26,0.08);
+  background: rgba(197, 131, 115, 0.15); /* 마이페이지 배경: 딥 로즈 골드를 연하게 */
   border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: background 0.15s;
 }
-.mypage-btn:active { background: rgba(26,46,26,0.16); }
+.mypage-btn:active { background: rgba(197, 131, 115, 0.25); }
 .mypage-btn svg {
   width: 17px; height: 17px;
-  stroke: #1a2e1a; stroke-width: 1.8; fill: none;
+  stroke: #C58373; /* 마이페이지 사람 선: 딥 로즈 골드 */
+  stroke-width: 1.8; fill: none;
   stroke-linecap: round; stroke-linejoin: round;
 }
 </style>
