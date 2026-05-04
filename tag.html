@@ -103,43 +103,39 @@
         if (!code) {
             show('state-no-code');
         } else {
-            // 1. 세션 확인
+            // 1. 로그인 먼저 확인 (항상 최우선)
             const { data: { session } } = await supabase.auth.getSession();
 
-            // 2. serial_codes 에서 해당 코드 조회
-            const { data: serial, error: serialError } = await supabase
-                .from('serial_codes')
-                .select('*')
-                .eq('code', code)
-                .single();
-
-            if (serialError || !serial) {
-                // 등록되지 않은 새 QR 코드를 찍으면 즉시 시리얼 입력창으로 보냅니다.
-                window.location.replace('serial.html');
-
-            } else if (!serial.used_by) {
-                // ── 미등록 태그 ──────────────────────────────────────
-                // 로그인 안 된 경우 → login 후 serial 등록으로
-                if (!session) {
-                    window.location.replace(`login.html?redirect=${encodeURIComponent('serial.html')}`);
-                } else {
-                    // 로그인 됐지만 시리얼 미등록 → serial.html로
-                    window.location.replace('serial.html');
-                }
+            if (!session) {
+                // 로그인 안 됐으면 무조건 로그인 먼저
+                // 로그인 후 이 태그 URL로 다시 돌아오도록 현재 주소 저장
+                const redirectBack = encodeURIComponent(window.location.href);
+                window.location.replace(`login.html?redirect=${redirectBack}`);
 
             } else {
-                // ── 등록된 태그 ──────────────────────────────────────
-                if (!session) {
-                    // 로그인 필요 → login으로, 로그인 후 다시 이 태그로 돌아오도록
-                    const redirectBack = encodeURIComponent(`tag.html?code=${code}`);
-                    window.location.replace(`login.html?redirect=${redirectBack}`);
+                // 2. 로그인 된 경우에만 시리얼 코드 조회
+                const { data: serial, error: serialError } = await supabase
+                    .from('serial_codes')
+                    .select('*')
+                    .eq('code', code)
+                    .single();
+
+                if (serialError || !serial) {
+                    // DB에 없는 코드 → 유효하지 않은 태그
+                    document.getElementById('invalid-code').textContent = code;
+                    show('state-invalid');
+
+                } else if (!serial.used_by) {
+                    // ── 미등록 태그: 로그인은 됐으니 시리얼 입력으로 ──
+                    // 현재 태그 코드를 serial.html에 넘겨서 자동 입력되게
+                    window.location.replace(`serial.html?qr=${encodeURIComponent(code)}`);
 
                 } else if (serial.used_by === session.user.email) {
-                    // 내 태그 → 해당 보관함/서랍으로 이동
+                    // ── 내 태그 → 해당 보관함/서랍으로 이동 ──
                     window.location.replace(getRedirectUrl(code, session.user.email));
 
                 } else {
-                    // 다른 사람 태그
+                    // ── 다른 사람 태그 ──
                     show('state-taken');
                 }
             }
