@@ -12,7 +12,7 @@
     );
     const { data: { session } } = await _sb.auth.getSession();
     if (!session) { window.location.replace('login.html'); return; }
-    const { data: serial } = await _sb.from('serial_codes').select('*').eq('used_by', session.user.email).single();
+    const { data: serial } = await _sb.from('serials').select('id').eq('used_by', session.user.email).maybeSingle();
     if (!serial) { window.location.replace('serial.html'); }
 })();
 </script>
@@ -438,9 +438,9 @@ sb.auth.getSession().then(function(res) {
     }
 
     /* 시리얼 번호 불러오기 */
-    sb.from('serial_codes').select('*').eq('used_by', email).single().then(function(r) {
+    sb.from('serials').select('*').eq('used_by', email).maybeSingle().then(function(r) {
         if (r.data) {
-            document.getElementById('serial-code-txt').textContent = r.data.code;
+            document.getElementById('serial-code-txt').textContent = r.data.serial_code;
             var d = new Date(r.data.used_at);
             document.getElementById('serial-reg-date').textContent =
                 '등록일 ' + d.getFullYear() + '.' +
@@ -598,6 +598,7 @@ async function deleteAccount() {
     try {
         if(currentSession && currentSession.user) {
             await sb.from('serial_codes').update({ used_by: null, used_at: null }).eq('used_by', currentSession.user.email);
+            await sb.from('serials').update({ used_by: null, used_at: null }).eq('used_by', currentSession.user.email);
         }
         for(let i = localStorage.length - 1; i >= 0; i--) {
             const k = localStorage.key(i);
