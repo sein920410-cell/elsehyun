@@ -19,10 +19,10 @@
         return;
     }
     const { data: serial } = await _authClient
-        .from('serial_codes')
-        .select('*')
+        .from('serials')
+        .select('id')
         .eq('used_by', session.user.email)
-        .single();
+        .maybeSingle();
     if (!serial) { window.location.replace('serial.html'); }
 })();
 </script>
