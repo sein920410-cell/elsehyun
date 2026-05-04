@@ -22,11 +22,11 @@
             </div>
             <div id="error-msg" class="text-red-400 text-sm text-center hidden"></div>
             <div id="success-msg" class="text-green-400 text-sm text-center hidden"></div>
-            <button id="submit-btn" onclick="handleSerial()"
+            <button id="submit-btn"
                 class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold py-3 rounded-xl transition text-sm">
                 등록하기
             </button>
-            <button onclick="handleLogout()" class="w-full text-gray-500 text-xs py-2 hover:text-gray-300 transition">
+            <button id="logout-btn" class="w-full text-gray-500 text-xs py-2 hover:text-gray-300 transition">
                 로그아웃
             </button>
         </div>
@@ -156,11 +156,11 @@
             setTimeout(() => { window.location.replace('index.html'); }, 1500);
         };
 
-        window.handleLogout = async () => {
+        document.getElementById('submit-btn').addEventListener('click', handleSerial);
+        document.getElementById('logout-btn').addEventListener('click', async () => {
             await supabase.auth.signOut();
             window.location.replace('login.html');
-        };
-
+        });
         document.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSerial(); });
     </script>
 </body>
