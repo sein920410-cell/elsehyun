@@ -40,7 +40,6 @@
         );
 
         // 세션 확인 - OAuth 콜백(구글 로그인)도 처리
-        // onAuthStateChange를 먼저 등록해야 URL hash 토큰 파싱 타이밍 놓치지 않음
         let currentSession = null;
         let authResolved = false;
 
@@ -58,7 +57,7 @@
 
                 // 이미 시리얼 등록된 유저면 바로 메인으로
                 const { data: existing } = await supabase
-                    .from('serial_codes')
+                    .from('serials')
                     .select('*')
                     .eq('used_by', session.user.email)
                     .single();
@@ -73,7 +72,6 @@
                 resolve();
             });
 
-            // 5초 안에 응답 없으면 login으로
             setTimeout(() => {
                 if (!authResolved) {
                     authResolved = true;
@@ -82,7 +80,7 @@
                 }
             }, 5000);
         });
-        
+
         window.handleSerial = async () => {
             const session = currentSession;
             const code = document.getElementById('serial').value.trim().toUpperCase();
@@ -107,11 +105,11 @@
             btn.textContent = '확인 중...';
             btn.disabled = true;
 
-            // 시리얼 번호가 DB에 있는지 + 아직 미사용인지 확인
+            // 1. serials 테이블에서 시리얼 코드 조회 (미사용 것만)
             const { data: serial, error } = await supabase
-                .from('serial_codes')
+                .from('serials')
                 .select('*')
-                .eq('code', code)
+                .eq('serial_code', code)
                 .is('used_by', null)
                 .single();
 
@@ -123,19 +121,33 @@
                 return;
             }
 
-            // 시리얼에 내 이메일 등록
-            const { error: updateError } = await supabase
-                .from('serial_codes')
-                .update({ used_by: session.user.email, used_at: new Date().toISOString() })
-                .eq('code', code);
+            // 2. 세트번호로 QR 태그 3개 (MAIN, DR1, DR2) 한꺼번에 등록
+            const setNum = serial.set_number;
+            const now = new Date().toISOString();
+            const tagCodes = [
+                `GYEOL-${setNum}-MAIN`,
+                `GYEOL-${setNum}-DR1`,
+                `GYEOL-${setNum}-DR2`
+            ];
 
-            if (updateError) {
+            const { error: tagError } = await supabase
+                .from('serial_codes')
+                .update({ used_by: session.user.email, used_at: now })
+                .in('code', tagCodes);
+
+            if (tagError) {
                 errEl.textContent = '등록 중 오류가 발생했어요. 다시 시도해주세요.';
                 errEl.classList.remove('hidden');
                 btn.textContent = '등록하기';
                 btn.disabled = false;
                 return;
             }
+
+            // 3. serials 테이블에 사용자 이메일 기록
+            await supabase
+                .from('serials')
+                .update({ used_by: session.user.email, used_at: now })
+                .eq('serial_code', code);
 
             sucEl.textContent = '등록 완료! 잠시 후 이동합니다.';
             sucEl.classList.remove('hidden');
