@@ -39,49 +39,30 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
         );
 
-        // 세션 확인 - OAuth 콜백(구글 로그인)도 처리
         let currentSession = null;
-        let authResolved = false;
 
-        await new Promise((resolve) => {
-            const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-                if (authResolved) return;
-                authResolved = true;
-                subscription.unsubscribe();
+        // 1. 세션 확인
+        const { data: { session } } = await supabase.auth.getSession();
 
-                if (!session) {
-                    window.location.replace('login.html');
-                    resolve();
-                    return;
-                }
+        if (!session) {
+            window.location.replace('login.html');
+        } else {
+            // 이미 등록된 유저면 메인으로
+            const { data: existing } = await supabase
+                .from('serials')
+                .select('id')
+                .eq('used_by', session.user.email)
+                .maybeSingle();
 
-                // 이미 시리얼 등록된 유저면 바로 메인으로
-                const { data: existing } = await supabase
-                    .from('serials')
-                    .select('*')
-                    .eq('used_by', session.user.email)
-                    .single();
-
-                if (existing) {
-                    window.location.replace('index.html');
-                    resolve();
-                    return;
-                }
-
+            if (existing) {
+                window.location.replace('index.html');
+            } else {
                 currentSession = session;
-                resolve();
-            });
+            }
+        }
 
-            setTimeout(() => {
-                if (!authResolved) {
-                    authResolved = true;
-                    window.location.replace('login.html');
-                    resolve();
-                }
-            }, 5000);
-        });
-
-        const handleSerial = async () => {
+        // 2. 등록하기 버튼
+        document.getElementById('submit-btn').addEventListener('click', async () => {
             const session = currentSession;
             const code = document.getElementById('serial').value.trim().toUpperCase();
             const errEl = document.getElementById('error-msg');
@@ -96,7 +77,6 @@
                 errEl.classList.remove('hidden');
                 return;
             }
-
             if (!session) {
                 window.location.replace('login.html');
                 return;
@@ -105,13 +85,13 @@
             btn.textContent = '확인 중...';
             btn.disabled = true;
 
-            // 1. serials 테이블에서 시리얼 코드 조회 (미사용 것만)
+            // serials 테이블에서 시리얼 조회
             const { data: serial, error } = await supabase
                 .from('serials')
                 .select('*')
                 .eq('serial_code', code)
                 .is('used_by', null)
-                .single();
+                .maybeSingle();
 
             if (error || !serial) {
                 errEl.textContent = '유효하지 않은 시리얼 번호예요. 다시 확인해주세요.';
@@ -121,7 +101,7 @@
                 return;
             }
 
-            // 2. 세트번호로 QR 태그 3개 (MAIN, DR1, DR2) 한꺼번에 등록
+            // 세트번호로 QR 태그 3개 한꺼번에 등록
             const setNum = serial.set_number;
             const now = new Date().toISOString();
             const tagCodes = [
@@ -143,7 +123,7 @@
                 return;
             }
 
-            // 3. serials 테이블에 사용자 이메일 기록
+            // serials 테이블에 사용자 이메일 기록
             await supabase
                 .from('serials')
                 .update({ used_by: session.user.email, used_at: now })
@@ -152,16 +132,18 @@
             sucEl.textContent = '등록 완료! 잠시 후 이동합니다.';
             sucEl.classList.remove('hidden');
             btn.textContent = '완료';
-
             setTimeout(() => { window.location.replace('index.html'); }, 1500);
-        };
+        });
 
-        document.getElementById('submit-btn').addEventListener('click', handleSerial);
+        // 3. 로그아웃 버튼
         document.getElementById('logout-btn').addEventListener('click', async () => {
             await supabase.auth.signOut();
             window.location.replace('login.html');
         });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSerial(); });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('submit-btn').click();
+        });
     </script>
 </body>
 </html>
