@@ -81,7 +81,7 @@
             }, 5000);
         });
 
-        window.handleSerial = async () => {
+        const handleSerial = async () => {
             const session = currentSession;
             const code = document.getElementById('serial').value.trim().toUpperCase();
             const errEl = document.getElementById('error-msg');
