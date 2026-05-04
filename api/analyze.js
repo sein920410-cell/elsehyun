@@ -53,7 +53,7 @@ function deduplicateItems(items) {
 
 async function callGemini(parts, temperature = 0.05) {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${process.env.GEMINI\_API\_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${process.env.GEMINI\_API\_KEY}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
