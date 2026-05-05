@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>공간:결 - 검색</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>body { visibility: hidden; }</style>
 <script>
 (async () => {
     const _authClient = supabase.createClient(
@@ -12,13 +13,14 @@
     );
     const { data: { session } } = await _authClient.auth.getSession();
     if (!session) { window.location.replace('login.html'); return; }
-    // 시리얼 번호 확인
     const { data: serial } = await _authClient
         .from('serials')
         .select('id')
         .eq('used_by', session.user.email)
         .maybeSingle();
-    if (!serial) { window.location.replace('serial.html'); }
+    if (!serial) { window.location.replace('serial.html'); return; }
+    // 인증 통과 → 화면 표시
+    document.body.style.visibility = 'visible';
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
