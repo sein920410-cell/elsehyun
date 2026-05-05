@@ -597,7 +597,7 @@ function showInviteCode() {
 
 /* 계정 삭제 기능 */
 async function deleteAccount() {
-    if(!confirm('정말 공간:결 계정을 삭제하시겠습니까?\n등록된 시리얼 번호와 모든 서랍 정보가 완전히 삭제되며 복구할 수 없습니다.')) return;
+    if(!confirm('정말 계정을 삭제하시겠습니까?\n\n· 태그와 시리얼 코드 연결이 해제됩니다\n· 모든 서랍 목록이 삭제됩니다\n· 같은 시리얼 코드로 재등록은 가능합니다\n\n삭제 후 복구할 수 없습니다.')) return;
     try {
         if(currentSession && currentSession.user) {
             await sb.from('serial_codes').update({ used_by: null, used_at: null }).eq('used_by', currentSession.user.email);
