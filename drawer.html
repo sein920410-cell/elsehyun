@@ -21,7 +21,6 @@
         .eq('used_by', session.user.email)
         .maybeSingle();
     if (!serial) { window.location.replace('serial.html'); return; }
-    // 인증 통과 → 화면 표시
     document.body.style.visibility = 'visible';
 })();
 </script>
@@ -50,7 +49,6 @@
 input,textarea{-webkit-user-select:text;user-select:text}
 body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;flex-direction:column;overflow:hidden;color:var(--ink);-webkit-font-smoothing:antialiased}
 
-/* HEADER */
 .header{background:var(--h-bg);height:58px;padding:0 16px;display:flex;align-items:center;flex-shrink:0;position:relative;z-index:100;transition:background .4s}
 .header::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--h-border)}
 .brand{display:flex;align-items:center;gap:8px;flex-shrink:0;cursor:pointer;padding:6px 10px;border-radius:10px;transition:background .15s;z-index:1}
@@ -72,8 +70,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .hdr-sq{width:36px;height:36px;border-radius:10px;background:var(--h-btn);border:1px solid var(--h-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--h-txt);font-size:18px;font-weight:300;flex-shrink:0}
 .hdr-sq:active{opacity:.75}
 
-
-/* MEDIA */
 .media-section{background:var(--h-bg);padding:0 14px 13px;flex-shrink:0;transition:background .4s}
 .media-box{height:210px;border-radius:13px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation}
 .media-box.empty{border:1px dashed var(--h-border);background:rgba(255,255,255,.03)}
@@ -84,7 +80,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .media-empty-sq svg{width:22px;height:22px;stroke:var(--h-sub);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .media-empty-lbl{font-size:11.5px;font-weight:500;color:var(--h-sub)}
 .media-empty-sub{font-size:9.5px;color:rgba(255,255,255,.18);text-align:center;line-height:1.4}
-
 
 .toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 7px;flex-shrink:0;background:var(--bg)}
 .toolbar-left{display:flex;align-items:center}
@@ -101,7 +96,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .toolbar-cnt.show-ico .cnt-ico{transform:translateY(0);opacity:1}
 .toolbar-toggle{font-size:11px;font-weight:600;color:var(--muted);padding:0 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;height:36px;display:flex;align-items:center;justify-content:center;margin-left:auto}
 
-/* SEARCH BAR */
 .search-bar{display:none;align-items:center;gap:8px;padding:8px 14px 9px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
 .search-bar.open{display:flex}
 .search-inner{flex:1;display:flex;align-items:center;gap:7px;background:var(--bg);border-radius:9px;padding:8px 12px;border:1px solid var(--border)}
@@ -111,7 +105,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .search-cancel{font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
 .hl{background:#FFF3C4;border-radius:2px;padding:0 1px}
 
-/* LIST */
 .list-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .list-wrap::-webkit-scrollbar{display:none}
 .list-inner{padding:2px 12px 24px}
@@ -124,7 +117,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .cat-chevron svg{width:12px;height:12px;stroke:var(--muted2);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s cubic-bezier(.4,0,.2,1)}
 .cat-chevron.closed svg{transform:rotate(-90deg)}
 
-/* ITEM CARD */
 .item-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:transform .1s,box-shadow .1s}
 .item-card.pressing{transform:scale(.982);box-shadow:0 3px 10px rgba(0,0,0,.1)}
 .item-row{display:flex;align-items:center;padding:13px 14px;gap:12px}
@@ -139,7 +131,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .qty-num{font-size:12px;font-weight:700;color:var(--ink);width:26px;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);height:30px;line-height:30px}
 .item-card.low-stock .qty-num{color:#E8A020}
 
-/* BOTTOM SECTION */
 .bottom-section{padding:10px 0 8px;display:flex;flex-direction:column;gap:9px}
 .action-row{display:flex;gap:8px}
 .add-row{flex:1;display:flex;align-items:center;gap:9px;padding:12px 14px;background:rgba(255,255,255,.65);border:1px solid var(--border);border-radius:12px;cursor:pointer}
@@ -147,26 +138,12 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .add-sq{width:22px;height:22px;border-radius:5px;background:#ECEEF4;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .add-sq svg{width:11px;height:11px;stroke:#6E7A8E;stroke-width:2.3;fill:none;stroke-linecap:round}
 .add-lbl{font-size:12px;font-weight:600;color:#6E7A8E;letter-spacing:-.01em}
-.search-btn-row{width:48px;height:48px;background:rgba(255,255,255,.65);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-.search-btn-row:active{background:var(--surface)}
-.search-btn-row svg{width:17px;height:17px;stroke:#6E7A8E;stroke-width:1.8;fill:none;stroke-linecap:round}
-.bom-btn{display:flex;align-items:center;height:50px;padding:0 15px;background:var(--bom-bg);border-radius:13px;gap:11px;position:relative;overflow:hidden;cursor:pointer;transition:background .4s}
-.bom-btn::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:rgba(255,255,255,.07)}
-.bom-btn:active{opacity:.88}
-.bom-ico{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.bom-ico svg{width:14px;height:14px;stroke:rgba(255,255,255,.78);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.bom-txt{flex:1}
-.bom-title{font-size:11.5px;font-weight:600;color:rgba(255,255,255,.9);letter-spacing:-.01em}
-.bom-sub{font-size:9px;color:rgba(255,255,255,.3);margin-top:1px}
-.bom-arr{font-size:14px;color:rgba(255,255,255,.2)}
 .reset-link{text-align:center;font-size:9.5px;color:var(--muted2);text-decoration:underline;text-underline-offset:3px;padding:3px;cursor:pointer}
 
-/* EMPTY */
 .empty-state{display:flex;flex-direction:column;align-items:center;gap:10px;padding:36px 16px 16px}
 .empty-state svg{width:34px;height:34px;stroke:var(--border2);stroke-width:1.2;fill:none;stroke-linecap:round}
 .empty-txt{font-size:12px;font-weight:500;color:var(--muted2);text-align:center;line-height:1.8}
 
-/* OVERLAYS */
 .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:200;backdrop-filter:blur(6px);align-items:flex-end}
 .ov.open{display:flex}
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -175,7 +152,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .sh-handle{width:32px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 18px}
 .sh-title{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.01em;margin-bottom:16px}
 
-/* MEDIA PICKER */
 .mpick{display:flex;align-items:center;gap:14px;padding:14px 15px;background:var(--bg);border:1px solid var(--border);border-radius:13px;margin-bottom:9px;cursor:pointer}
 .mpick:active{opacity:.8}
 .mpick-ico{width:42px;height:42px;border-radius:10px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -184,7 +160,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .mpick-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .sh-cancel{width:100%;padding:13px;background:var(--bg);border:none;border-radius:12px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font);margin-top:4px}
 
-/* DRAWER SETTINGS */
 .dt-sect{font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .dt-field{background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:0 14px;margin-bottom:20px;display:flex;align-items:center;height:50px}
 .dt-input{flex:1;border:none;outline:none;font-size:15px;font-weight:600;color:var(--ink);background:transparent;font-family:var(--font);letter-spacing:-.01em;-webkit-user-select:text;user-select:text}
@@ -198,7 +173,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .theme-lbl{font-size:7.5px;font-weight:600;color:var(--muted2);letter-spacing:.03em;text-transform:uppercase;text-align:center;line-height:1.3}
 .dt-save{width:100%;padding:14px;background:var(--ink);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)}
 
-/* CTX MENU */
 .ctx-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:300;backdrop-filter:blur(7px);align-items:center;justify-content:center}
 .ctx-ov.open{display:flex}
 @keyframes popIn{from{transform:scale(.86);opacity:0}to{transform:scale(1);opacity:1}}
@@ -216,7 +190,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .ctx-del{border-top:1px solid var(--bg)}
 .ctx-del svg{stroke:var(--danger)}.ctx-del span{color:var(--danger)}
 
-/* ICON PICKER */
 .icon-cats{display:flex;gap:5px;overflow-x:auto;margin-bottom:13px;padding-bottom:2px}
 .icon-cats::-webkit-scrollbar{display:none}
 .icon-cat-btn{padding:5px 12px;background:var(--bg);border-radius:20px;font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:.04em;white-space:nowrap;cursor:pointer}
@@ -228,7 +201,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .icon-cell.sel svg{stroke:var(--ink)}
 .icon-done{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:12px;font-size:13.5px;font-weight:700;cursor:pointer;margin-top:14px;font-family:var(--font)}
 
-/* CHAT (72% bottom sheet) */
 .chat-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;backdrop-filter:blur(6px);align-items:flex-end}
 .chat-ov.open{display:flex}
 .chat-sheet{background:var(--surface);border-radius:22px 22px 0 0;width:100%;height:72dvh;display:flex;flex-direction:column;animation:sheetUp .28s cubic-bezier(.32,0,0,1);overflow:hidden}
@@ -250,7 +222,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .chat-send{width:34px;height:34px;background:var(--ink);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .chat-send svg{width:13px;height:13px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round}
 
-/* MEDIA CTX */
 .mctx-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:250;backdrop-filter:blur(6px);align-items:center;justify-content:center}
 .mctx-ov.open{display:flex}
 .mctx-menu{background:var(--surface);border-radius:18px;width:214px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.28);animation:popIn .2s cubic-bezier(.34,1.56,.64,1)}
@@ -261,7 +232,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .mctx-cancel{border-top:1px solid var(--bg)}
 .mctx-cancel svg{stroke:var(--muted)}.mctx-cancel span{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:-.01em}
 
-/* CONFIRM */
 .confirm-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;backdrop-filter:blur(5px);align-items:flex-end}
 .confirm-ov.open{display:flex}
 .confirm-sheet{background:var(--surface);border-radius:22px 22px 0 0;width:100%;max-height:88dvh;overflow-y:auto;padding:0 18px 44px;animation:sheetUp .28s cubic-bezier(.32,0,0,1)}
@@ -275,7 +245,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .confirm-skip{display:block;width:100%;text-align:center;padding:7px;border:none;background:none;font-size:11.5px;color:var(--muted2);cursor:pointer;font-family:var(--font)}
 .confirm-done{width:100%;padding:14px;border-radius:13px;border:none;background:var(--ink);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:14px;font-family:var(--font)}
 
-/* ROTATE */
 .rot-ov{display:none;position:fixed;inset:0;background:#000;z-index:600;flex-direction:column}
 .rot-ov.open{display:flex}
 .rot-hdr{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0}
@@ -290,7 +259,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .r-btn.pri{background:#fff;color:#000}
 .rotate0{transform:rotate(0deg)}.rotate90{transform:rotate(90deg)}.rotate180{transform:rotate(180deg)}.rotate270{transform:rotate(270deg)}
 
-/* RECORD */
 .rec-ov{display:none;position:fixed;inset:0;background:#000;z-index:600;flex-direction:column}
 .rec-ov.open{display:flex}
 .rec-hdr{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0}
@@ -330,7 +298,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 
 <header class="header">
   <div class="brand" id="brand-btn">
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAh4AAAIXCAYAAADTzFeCAAAJe0lEQVR4nO3dwWrCQBRA0Unx/395uumiCNa2JHdiPGfjJsJDMblOILPNOecAntn+cOz8Ot5vC+DOx+oBAID3ITxgX/PuFYBvhAcAkBEeAEBGeAAAGeEBAGSEBwCQER6wr7887wPg7QgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgOe21YPAHAVwgMAyAgP+JnVDoAd3YYTKwAQseIBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkbmOMuXoIfsUTZgF4eVY8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzw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" alt="logo">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAh4AAAIXCAYAAADTzFeCAAAJe0lEQVR4nO3dwWrCQBRA0Unx/395uumiCNa2JHdiPGfjJsJDMblOILPNOecAntn+cOz8Ot5vC+DOx+oBAID3ITxgX/PuFYBvhAcAkBEeAEBGeAAAGeEBAGSEBwCQER6wr7887wPg7QgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgOe21YPAHAVwgMAyAgP+JnVDoAd3YYTKwAQseIBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkbmOMuXoIfsUTZgF4eVY8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzw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" alt="logo">
     <div class="brand-anim">
       <span class="brand-a">공간:결</span>
       <span class="brand-b"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/></svg></span>
@@ -470,7 +438,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <div class="chat-ov" id="chat-ov">
   <div class="chat-sheet">
     <div class="chat-hdr">
-      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAh4AAAIXCAYAAADTzFeCAAAJe0lEQVR4nO3dwWrCQBRA0Unx/395uumiCNa2JHdiPGfjJsJDMblOILPNOecAntn+cOz8Ot5vC+DOx+oBAID3ITxgX/PuFYBvhAcAkBEeAEBGeAAAGeEBAGSEBwCQER6wr7887wPg7QgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgOe21YPAHAVwgMAyAgP+JnVDoAd3YYTKwAQseIBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkbmOMuXoIfsUTZgF4eVY8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzw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" alt="">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAh4AAAIXCAYAAADTzFeCAAAJe0lEQVR4nO3dwWrCQBRA0Unx/395uumiCNa2JHdiPGfjJsJDMblOILPNOecAntn+cOz8Ot5vC+DOx+oBAID3ITxgX/PuFYBvhAcAkBEeAEBGeAAAGeEBAGSEBwCQER6wr7887wPg7QgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgOe21YPAHAVwgMAyAgP+JnVDoAd3YYTKwAQseIBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkbmOMuXoIfsUTZgF4eVY8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgP2t60eAOCsbqsHgIvaxhhz9RAAB/rXnyzhAcex8gFwx60WACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAy9mq5NpuUHe/Zfiy+A+CsluwnJTyuywWv4XMGXtWS85dbLdfkYgjAKQkPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLC43rm6gEA4BHhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeFzPtnoAAHhEeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEe57dF7wGAwwkPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsLj/ObqAQBgL8IDAMgIDwAgIzwAgIzwAAAywgMAyAgPACDzCVwAFjgGLUAsAAAAAElFTkSuQmCC" alt="">
       <div class="chat-hdr-sp"><svg viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg></div>
       <span class="chat-hdr-name">비서 봄</span>
       <div class="chat-close-btn" onclick="closeChat()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
@@ -516,185 +484,19 @@ let currentTheme=localStorage.getItem('theme_'+tag)||'navy',pendingTheme=current
 let lpTimer=null,mLpTimer=null;
 let catOpenState={};
 
-const SVG_ICONS={
-  bottle:'<path d="M9 2h6l1 4H8L9 2z"/><rect x="6" y="6" width="12" height="14" rx="3"/><path d="M10 11h4"/>',
-  soap:'<rect x="4" y="7" width="16" height="11" rx="2.5"/><path d="M8 7V5a2 2 0 014 0v2"/>',
-  toothbrush:'<path d="M12 2v12m0 0c-3 0-5 1-5 3s2 3 5 3 5-1 5-3-2-3-5-3z"/><path d="M12 2h4"/>',
-  tissue:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8m-4-4h8"/>',
-  drop:'<path d="M12 2C8 8 6 12 6 15a6 6 0 0012 0c0-3-2-7-6-13z"/>',
-  bubble:'<circle cx="7" cy="7" r="3"/><circle cx="16" cy="9" r="4"/><circle cx="10" cy="17" r="2.5"/>',
-  razor:'<rect x="2" y="3" width="20" height="5" rx="2"/><path d="M6 8v13M18 8v13m-6-13v13"/>',
-  bathtub:'<path d="M3 17h18M3 17V9h2M21 9H3M7 9V5a3 3 0 016 0v4"/>',
-  shower:'<path d="M4 4l6 6M10 10c0 5 3 9 8 11M10 10C5 10 2 13 1 18"/><circle cx="13" cy="7" r="3"/>',
-  flower:'<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"/>',
-  pill:'<rect x="2" y="9" width="20" height="6" rx="3"/><line x1="12" y1="9" x2="12" y2="15"/>',
-  bandage:'<rect x="3" y="9" width="18" height="6" rx="3"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>',
-  stethoscope:'<path d="M4 4a3 3 0 005.3 1.9V9a5 5 0 005 5"/><circle cx="16" cy="16" r="3"/>',
-  leaf:'<path d="M2 22C2 13 8 4 22 4c-2 10-10 18-20 18z"/><path d="M22 4L2 22"/>',
-  broom:'<path d="M4 20L16 8M16 8l2-2a2 2 0 00-3-3l-2 2M4 20c4-1 8-4 10-8"/>',
-  basket:'<path d="M7 3L3 9h18L17 3M2 9v11a2 2 0 002 2h16a2 2 0 002-2V9"/><line x1="12" y1="9" x2="12" y2="22"/>',
-  sponge:'<rect x="3" y="7" width="18" height="10" rx="3"/><path d="M8 7V5m4 2V4m4 3V5"/>',
-  bucket:'<path d="M6 8h12l-1.5 11a2 2 0 01-2 1.5H9.5a2 2 0 01-2-1.5L6 8z"/><path d="M5 8a7 7 0 0114 0"/>',
-  trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M9 6V4h6v2"/>',
-  wrench:'<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',
-  key:'<path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>',
-  lightbulb:'<path d="M9 18h6M10 22h4M12 2a7 7 0 015 11.95V16a2 2 0 01-2 2H9a2 2 0 01-2-2v-2.05A7 7 0 0112 2z"/>',
-  plant:'<path d="M12 22V12m0 0C8 12 4 8 4 4c4 0 8 2 8 8 0-6 4-8 8-8 0 4-4 8-8 8z"/>',
-  box:'<path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
-  cabinet:'<rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 3v18M2 12h6m8 0h6"/><circle cx="6" cy="12" r="1"/><circle cx="18" cy="12" r="1"/>',
-  laptop:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M0 20h24"/>',
-  monitor:'<rect x="2" y="2" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/>',
-  phone:'<rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/>',
-  keyboard:'<rect x="1" y="7" width="22" height="10" rx="2"/><path d="M5 11h2m2 0h2m2 0h2m2 0h2M5 15h14"/>',
-  mouse:'<rect x="8" y="2" width="8" height="14" rx="4"/><line x1="12" y1="2" x2="12" y2="8"/>',
-  headphone:'<path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/>',
-  camera:'<path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/>',
-  video:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',
-  battery:'<rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2"/>',
-  plug:'<path d="M9 9H5v4l3 3v6h8v-6l3-3V9h-4M9 3v6M15 3v6"/>',
-  tv:'<rect x="2" y="7" width="20" height="13" rx="2"/><polyline points="17 2 12 7 7 2"/>',
-  gamepad:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="17" cy="12" r="2"/><path d="M6 10h4M8 8v4"/>',
-  printer:'<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
-  watch:'<circle cx="12" cy="12" r="7"/><polyline points="12 9 12 12 13.5 13.5"/><path d="M16.51 17.35l-.35 3.83a2 2 0 01-2 1.82H9.83a2 2 0 01-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 019.83 1h4.35a2 2 0 011.99 1.82l.35 3.83"/>',
-  mic:'<path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4m-4 0h8"/>',
-  speaker:'<rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r="1.5"/>',
-  shirt:'<path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10a2 2 0 002 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/>',
-  pants:'<path d="M6 2h12v10l-3 10H9L6 12V2z"/><line x1="12" y1="2" x2="12" y2="12"/>',
-  shoe:'<path d="M3 17l1-7 5-1 5 3 5-1 2 5-4 3H5l-2-3z"/>',
-  hat:'<path d="M12 4a8 8 0 018 8H4a8 8 0 018-8z"/><rect x="2" y="12" width="20" height="3" rx="1.5"/>',
-  bag:'<path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M9 2v3a3 3 0 006 0V2"/>',
-  glasses:'<path d="M2 12h4m12 0h4m-4 0a4 4 0 01-8 0 4 4 0 018 0z"/>',
-  sock:'<path d="M6 2v10l5 10h6l2-4-5-6V2"/><line x1="6" y1="7" x2="11" y2="7"/>',
-  boot:'<path d="M3 20h18M7 20V6a2 2 0 012-2h4a2 2 0 012 2v5l3 5-3 4H7z"/>',
-  backpack:'<path d="M9 2a3 3 0 006 0M4 6h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/><path d="M9 6v4h6V6"/>',
-  hanger:'<path d="M12 3a2 2 0 012 2 2 2 0 01-2 2v2L4 18h16L12 9V7"/>',
-  suitcase:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M12 12v4M8 21v-3M16 21v-3"/>',
-  coffee:'<path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>',
-  cup:'<path d="M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/>',
-  jar:'<path d="M7 4h10v2H7V4z"/><rect x="5" y="6" width="14" height="15" rx="2"/><path d="M9 10h6m-6 4h4"/>',
-  pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>',
-  pencil:'<path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>',
-  ruler:'<path d="M2 2l20 20M8 2L2 8m0 0l2 2m2-6l4 4m0-4l4 4m0-4l4 4"/>',
-  coin:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10m-3-8h5a2 2 0 010 4H9"/>',
-  gift:'<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/>',
-  book:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/>',
-  music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
-  star:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
-  fan:'<circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>',
-  table:'<rect x="2" y="5" width="20" height="8" rx="2"/><path d="M8 13v6M16 13v6"/>',
-  chair:'<path d="M5 22v-7M19 22v-7M3 15h18M7 9v6M17 9v6M5 9V5a2 2 0 014 0v4M15 9V5a2 2 0 014 0v4"/>',
-  lamp:'<path d="M12 2v2m0 14v4M8 22h8M9 6l3 8 3-8H9zm0 0H6L4 12h16l-2-6h-3"/>',
-  bed:'<path d="M2 20v-8a2 2 0 012-2h16a2 2 0 012 2v8M2 14h20M7 14v-4a1 1 0 011-1h8a1 1 0 011 1v4"/>',
-  fridge:'<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/><path d="M8 6v2M8 14v4"/>',
-  washer:'<rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="12" cy="13" r="5"/><path d="M5 5h1m3 0h1"/>',
-  vacuum:'<path d="M4 20l4-4M8 16l8-8m0 0l2-2a3 3 0 014 4l-2 2m-4-6L6 18"/><circle cx="18" cy="6" r="2"/>',
-  default:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/>',
-};
+const SVG_ICONS={bottle:'<path d="M9 2h6l1 4H8L9 2z"/><rect x="6" y="6" width="12" height="14" rx="3"/><path d="M10 11h4"/>',soap:'<rect x="4" y="7" width="16" height="11" rx="2.5"/><path d="M8 7V5a2 2 0 014 0v2"/>',toothbrush:'<path d="M12 2v12m0 0c-3 0-5 1-5 3s2 3 5 3 5-1 5-3-2-3-5-3z"/><path d="M12 2h4"/>',tissue:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8m-4-4h8"/>',drop:'<path d="M12 2C8 8 6 12 6 15a6 6 0 0012 0c0-3-2-7-6-13z"/>',bubble:'<circle cx="7" cy="7" r="3"/><circle cx="16" cy="9" r="4"/><circle cx="10" cy="17" r="2.5"/>',razor:'<rect x="2" y="3" width="20" height="5" rx="2"/><path d="M6 8v13M18 8v13m-6-13v13"/>',bathtub:'<path d="M3 17h18M3 17V9h2M21 9H3M7 9V5a3 3 0 016 0v4"/>',shower:'<path d="M4 4l6 6M10 10c0 5 3 9 8 11M10 10C5 10 2 13 1 18"/><circle cx="13" cy="7" r="3"/>',flower:'<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"/>',pill:'<rect x="2" y="9" width="20" height="6" rx="3"/><line x1="12" y1="9" x2="12" y2="15"/>',bandage:'<rect x="3" y="9" width="18" height="6" rx="3"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>',stethoscope:'<path d="M4 4a3 3 0 005.3 1.9V9a5 5 0 005 5"/><circle cx="16" cy="16" r="3"/>',leaf:'<path d="M2 22C2 13 8 4 22 4c-2 10-10 18-20 18z"/><path d="M22 4L2 22"/>',broom:'<path d="M4 20L16 8M16 8l2-2a2 2 0 00-3-3l-2 2M4 20c4-1 8-4 10-8"/>',basket:'<path d="M7 3L3 9h18L17 3M2 9v11a2 2 0 002 2h16a2 2 0 002-2V9"/><line x1="12" y1="9" x2="12" y2="22"/>',sponge:'<rect x="3" y="7" width="18" height="10" rx="3"/><path d="M8 7V5m4 2V4m4 3V5"/>',bucket:'<path d="M6 8h12l-1.5 11a2 2 0 01-2 1.5H9.5a2 2 0 01-2-1.5L6 8z"/><path d="M5 8a7 7 0 0114 0"/>',trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M9 6V4h6v2"/>',wrench:'<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',key:'<path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>',lightbulb:'<path d="M9 18h6M10 22h4M12 2a7 7 0 015 11.95V16a2 2 0 01-2 2H9a2 2 0 01-2-2v-2.05A7 7 0 0112 2z"/>',plant:'<path d="M12 22V12m0 0C8 12 4 8 4 4c4 0 8 2 8 8 0-6 4-8 8-8 0 4-4 8-8 8z"/>',box:'<path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',cabinet:'<rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 3v18M2 12h6m8 0h6"/><circle cx="6" cy="12" r="1"/><circle cx="18" cy="12" r="1"/>',laptop:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M0 20h24"/>',monitor:'<rect x="2" y="2" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/>',phone:'<rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/>',keyboard:'<rect x="1" y="7" width="22" height="10" rx="2"/><path d="M5 11h2m2 0h2m2 0h2m2 0h2M5 15h14"/>',mouse:'<rect x="8" y="2" width="8" height="14" rx="4"/><line x1="12" y1="2" x2="12" y2="8"/>',headphone:'<path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/>',camera:'<path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/>',video:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',battery:'<rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2"/>',plug:'<path d="M9 9H5v4l3 3v6h8v-6l3-3V9h-4M9 3v6M15 3v6"/>',tv:'<rect x="2" y="7" width="20" height="13" rx="2"/><polyline points="17 2 12 7 7 2"/>',gamepad:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="17" cy="12" r="2"/><path d="M6 10h4M8 8v4"/>',printer:'<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',watch:'<circle cx="12" cy="12" r="7"/><polyline points="12 9 12 12 13.5 13.5"/><path d="M16.51 17.35l-.35 3.83a2 2 0 01-2 1.82H9.83a2 2 0 01-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 019.83 1h4.35a2 2 0 011.99 1.82l.35 3.83"/>',mic:'<path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4m-4 0h8"/>',speaker:'<rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r="1.5"/>',shirt:'<path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10a2 2 0 002 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/>',pants:'<path d="M6 2h12v10l-3 10H9L6 12V2z"/><line x1="12" y1="2" x2="12" y2="12"/>',shoe:'<path d="M3 17l1-7 5-1 5 3 5-1 2 5-4 3H5l-2-3z"/>',hat:'<path d="M12 4a8 8 0 018 8H4a8 8 0 018-8z"/><rect x="2" y="12" width="20" height="3" rx="1.5"/>',bag:'<path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M9 2v3a3 3 0 006 0V2"/>',glasses:'<path d="M2 12h4m12 0h4m-4 0a4 4 0 01-8 0 4 4 0 018 0z"/>',sock:'<path d="M6 2v10l5 10h6l2-4-5-6V2"/><line x1="6" y1="7" x2="11" y2="7"/>',boot:'<path d="M3 20h18M7 20V6a2 2 0 012-2h4a2 2 0 012 2v5l3 5-3 4H7z"/>',backpack:'<path d="M9 2a3 3 0 006 0M4 6h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/><path d="M9 6v4h6V6"/>',hanger:'<path d="M12 3a2 2 0 012 2 2 2 0 01-2 2v2L4 18h16L12 9V7"/>',suitcase:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M12 12v4M8 21v-3M16 21v-3"/>',coffee:'<path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>',cup:'<path d="M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/>',jar:'<path d="M7 4h10v2H7V4z"/><rect x="5" y="6" width="14" height="15" rx="2"/><path d="M9 10h6m-6 4h4"/>',pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>',pencil:'<path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>',ruler:'<path d="M2 2l20 20M8 2L2 8m0 0l2 2m2-6l4 4m0-4l4 4m0-4l4 4"/>',coin:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10m-3-8h5a2 2 0 010 4H9"/>',gift:'<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/>',book:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/>',music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',star:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',fan:'<circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>',table:'<rect x="2" y="5" width="20" height="8" rx="2"/><path d="M8 13v6M16 13v6"/>',chair:'<path d="M5 22v-7M19 22v-7M3 15h18M7 9v6M17 9v6M5 9V5a2 2 0 014 0v4M15 9V5a2 2 0 014 0v4"/>',lamp:'<path d="M12 2v2m0 14v4M8 22h8M9 6l3 8 3-8H9zm0 0H6L4 12h16l-2-6h-3"/>',bed:'<path d="M2 20v-8a2 2 0 012-2h16a2 2 0 012 2v8M2 14h20M7 14v-4a1 1 0 011-1h8a1 1 0 011 1v4"/>',fridge:'<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/><path d="M8 6v2M8 14v4"/>',washer:'<rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="12" cy="13" r="5"/><path d="M5 5h1m3 0h1"/>',vacuum:'<path d="M4 20l4-4M8 16l8-8m0 0l2-2a3 3 0 014 4l-2 2m-4-6L6 18"/><circle cx="18" cy="6" r="2"/>',default:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/>'};
 const ICO_CATS={'위생':['bottle','soap','toothbrush','tissue','drop','bubble','razor','bathtub','shower','flower','leaf','pill','bandage','stethoscope'],'청소':['broom','basket','sponge','bucket','trash','wrench','key','lightbulb','plant','box','cabinet','lamp','washer','vacuum'],'전자':['laptop','monitor','phone','keyboard','mouse','headphone','camera','video','battery','plug','tv','gamepad','printer','watch','mic','speaker'],'의류':['shirt','pants','shoe','hat','bag','glasses','sock','boot','backpack','hanger','suitcase'],'기타':['coffee','cup','jar','pin','pencil','ruler','coin','gift','book','music','star','fan','table','chair','bed','fridge']};
 
-function getAutoIcon(name, cat) {
-  const n = name.toLowerCase();
-  // 위생
-  if (/샴푸|헤어워시/.test(n)) return 'bottle';
-  if (/린스|컨디셔너|트리트먼트/.test(n)) return 'bottle';
-  if (/바디워시|바디로션|바디크림/.test(n)) return 'bottle';
-  if (/로션|크림|세럼|에센스|토너|스킨/.test(n)) return 'bottle';
-  if (/비누|폼클렌징|클렌저/.test(n)) return 'soap';
-  if (/칫솔|치약/.test(n)) return 'toothbrush';
-  if (/면봉/.test(n)) return 'toothbrush';
-  if (/화장솜|패드/.test(n)) return 'tissue';
-  if (/물티슈|티슈|휴지/.test(n)) return 'tissue';
-  if (/생리대|패드|탐폰/.test(n)) return 'tissue';
-  if (/면도|쉐이빙/.test(n)) return 'razor';
-  if (/여성청결제|청결제/.test(n)) return 'drop';
-  if (/향수|디퓨저/.test(n)) return 'flower';
-  if (/마스크팩|팩/.test(n)) return 'leaf';
-  // 케어
-  if (/영양제|비타민|오메가|콜라겐|유산균|프로바이오/.test(n)) return 'pill';
-  if (/연고|밴드|반창고|상처/.test(n)) return 'bandage';
-  if (/약|캡슐|타블렛/.test(n)) return 'pill';
-  // 청소
-  if (/세제|세탁|섬유유연제/.test(n)) return 'bubble';
-  if (/밀대|대걸레|청소포/.test(n)) return 'broom';
-  if (/빗자루|솔/.test(n)) return 'broom';
-  if (/수세미|스펀지/.test(n)) return 'sponge';
-  if (/스프레이|탈취|방향제/.test(n)) return 'bucket';
-  if (/쓰레기|봉투/.test(n)) return 'trash';
-  // 의류
-  if (/티셔츠|반팔|긴팔|니트|스웨터|후드|맨투맨/.test(n)) return 'shirt';
-  if (/바지|청바지|반바지|레깅스/.test(n)) return 'pants';
-  if (/운동화|슬리퍼|샌들|구두|신발/.test(n)) return 'shoe';
-  if (/모자|캡|비니/.test(n)) return 'hat';
-  if (/가방|백팩|숄더/.test(n)) return 'bag';
-  if (/양말|스타킹/.test(n)) return 'sock';
-  if (/장갑/.test(n)) return 'hanger';
-  // 생활
-  if (/우산/.test(n)) return 'shower';
-  if (/소화기/.test(n)) return 'wrench';
-  if (/배터리/.test(n)) return 'battery';
-  if (/충전기|케이블/.test(n)) return 'plug';
-  if (/볼펜|펜|연필/.test(n)) return 'pencil';
-  if (/노트|메모|다이어리/.test(n)) return 'book';
-  if (/가위/.test(n)) return 'wrench';
-  if (/테이프/.test(n)) return 'ruler';
-  if (/바구니|수납함|수납/.test(n)) return 'basket';
-  if (/달력/.test(n)) return 'pin';
-  // 카테고리 기본
-  if (cat === '위생') return 'bottle';
-  if (cat === '청소') return 'broom';
-  if (cat === '케어') return 'pill';
-  if (cat === '의류') return 'shirt';
-  if (cat === '생활') return 'box';
-  return 'default';
-}
+function getAutoIcon(name,cat){const n=name.toLowerCase();if(/샴푸|헤어워시/.test(n))return'bottle';if(/린스|컨디셔너|트리트먼트/.test(n))return'bottle';if(/바디워시|바디로션|바디크림/.test(n))return'bottle';if(/로션|크림|세럼|에센스|토너|스킨/.test(n))return'bottle';if(/비누|폼클렌징|클렌저/.test(n))return'soap';if(/칫솔|치약/.test(n))return'toothbrush';if(/면봉/.test(n))return'toothbrush';if(/화장솜|패드/.test(n))return'tissue';if(/물티슈|티슈|휴지/.test(n))return'tissue';if(/생리대|패드|탐폰/.test(n))return'tissue';if(/면도|쉐이빙/.test(n))return'razor';if(/여성청결제|청결제/.test(n))return'drop';if(/향수|디퓨저/.test(n))return'flower';if(/마스크팩|팩/.test(n))return'leaf';if(/영양제|비타민|오메가|콜라겐|유산균|프로바이오/.test(n))return'pill';if(/연고|밴드|반창고|상처/.test(n))return'bandage';if(/약|캡슐|타블렛/.test(n))return'pill';if(/세제|세탁|섬유유연제/.test(n))return'bubble';if(/밀대|대걸레|청소포/.test(n))return'broom';if(/빗자루|솔/.test(n))return'broom';if(/수세미|스펀지/.test(n))return'sponge';if(/스프레이|탈취|방향제/.test(n))return'bucket';if(/쓰레기|봉투/.test(n))return'trash';if(/티셔츠|반팔|긴팔|니트|스웨터|후드|맨투맨/.test(n))return'shirt';if(/바지|청바지|반바지|레깅스/.test(n))return'pants';if(/운동화|슬리퍼|샌들|구두|신발/.test(n))return'shoe';if(/모자|캡|비니/.test(n))return'hat';if(/가방|백팩|숄더/.test(n))return'bag';if(/양말|스타킹/.test(n))return'sock';if(/장갑/.test(n))return'hanger';if(/우산/.test(n))return'shower';if(/소화기/.test(n))return'wrench';if(/배터리/.test(n))return'battery';if(/충전기|케이블/.test(n))return'plug';if(/볼펜|펜|연필/.test(n))return'pencil';if(/노트|메모|다이어리/.test(n))return'book';if(/가위/.test(n))return'wrench';if(/테이프/.test(n))return'ruler';if(/바구니|수납함|수납/.test(n))return'basket';if(/달력/.test(n))return'pin';if(cat==='위생')return'bottle';if(cat==='청소')return'broom';if(cat==='케어')return'pill';if(cat==='의류')return'shirt';if(cat==='생활')return'box';return'default';}
 function getIconSVG(icon){const path=SVG_ICONS[icon]||SVG_ICONS.default;return`<svg viewBox="0 0 24 24">${path}</svg>`;}
 
-
-
-// Brand + 배지 애니메이션 — 순차적으로 실행
-(()=>{
-  const brand=document.getElementById('brand-btn');
-  const cnt=document.getElementById('toolbar-cnt');
-  let phase=0;
-  // 단계: 0=둘다 기본, 1=brand swap, 2=brand 복귀+badge swap, 3=badge 복귀
-  // 타이밍: 0→1: 4초, 1→2: 2초, 2→3: 2초, 3→0: 4초 (총 12초 사이클)
-  brand.onclick=()=>openChat();
-
-  function tick(){
-    phase=(phase+1)%4;
-    if(phase===1){
-      // brand 헤드셋으로 전환
-      brand.classList.add('swap');
-      setTimeout(tick,2000);
-    } else if(phase===2){
-      // brand 복귀 + badge 돋보기로 전환
-      brand.classList.remove('swap');
-      if(cnt.classList.contains('vis')) cnt.classList.add('show-ico');
-      setTimeout(tick,2000);
-    } else if(phase===3){
-      // badge 복귀
-      cnt.classList.remove('show-ico');
-      setTimeout(tick,4000);
-    } else {
-      // phase 0 — 대기
-      setTimeout(tick,4000);
-    }
-  }
-  setTimeout(tick,4000);
-})();
-
+(()=>{const brand=document.getElementById('brand-btn');const cnt=document.getElementById('toolbar-cnt');let phase=0;brand.onclick=()=>openChat();function tick(){phase=(phase+1)%4;if(phase===1){brand.classList.add('swap');setTimeout(tick,2000);}else if(phase===2){brand.classList.remove('swap');if(cnt.classList.contains('vis'))cnt.classList.add('show-ico');setTimeout(tick,2000);}else if(phase===3){cnt.classList.remove('show-ico');setTimeout(tick,4000);}else{setTimeout(tick,4000);}}setTimeout(tick,4000);})();
 
 window.onload=async()=>{
   applyTheme(currentTheme,false);
   document.getElementById('drawer-title').textContent=localStorage.getItem('name_'+tag)||'서랍 1';
   const mp=localStorage.getItem('mediaPath_'+tag);
-  if(mp){
-    const{data}=await _sb.storage.from('user_uploads').createSignedUrl(mp,3600);
-    if(data?.signedUrl){showMedia(data.signedUrl,localStorage.getItem('rot_'+tag)||0);}
-    else{localStorage.removeItem('mediaPath_'+tag);}
-  } else {
-    
-  }
+  if(mp){const{data}=await _sb.storage.from('user_uploads').createSignedUrl(mp,3600);if(data?.signedUrl){showMedia(data.signedUrl,localStorage.getItem('rot_'+tag)||0);}else{localStorage.removeItem('mediaPath_'+tag);}}
   initMediaEvents();renderItems();
 };
 
@@ -709,20 +511,12 @@ function closeSearch(){document.getElementById('search-bar').classList.remove('o
 
 function renderItems(filter=''){
   const container=document.getElementById('list-items');const groups={};
-  items.forEach((it,idx)=>{
-    let cat='기타',name=it.n;
-    if(it.n.includes(':')){const p=it.n.split(':');cat=p[0].trim()||'기타';name=p.slice(1).join(':').trim()||p[0];}
-    const f=filter.toLowerCase();if(f&&!name.toLowerCase().includes(f)&&!cat.toLowerCase().includes(f))return;
-    if(!groups[cat])groups[cat]=[];groups[cat].push({name,qty:it.q||1,idx,low:!!it.low,icon:it.icon||null});
-  });
+  items.forEach((it,idx)=>{let cat='기타',name=it.n;if(it.n.includes(':')){const p=it.n.split(':');cat=p[0].trim()||'기타';name=p.slice(1).join(':').trim()||p[0];}const f=filter.toLowerCase();if(f&&!name.toLowerCase().includes(f)&&!cat.toLowerCase().includes(f))return;if(!groups[cat])groups[cat]=[];groups[cat].push({name,qty:it.q||1,idx,low:!!it.low,icon:it.icon||null});});
   const total=items.length;const cnt=document.getElementById('toolbar-cnt');document.getElementById('cnt-num').textContent=total;cnt.classList.toggle('vis',total>0);
   document.getElementById('bottom-section').style.display=total>0?'flex':'none';
   function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hl">$1</span>');}
   if(!Object.keys(groups).length){container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.<br>사진을 등록하거나 + 로 직접 추가하세요.</div></div>`;return;}
-  container.innerHTML=Object.keys(groups).map(cat=>{
-    const isOpen=catOpenState[cat]!==false;
-    return`<div class="cat-section"><div class="cat-header"><span class="cat-name-lbl" onclick="renameCat('${cat.replace(/'/g,"\\'")}',this)">${cat}</span><span class="cat-chevron${isOpen?'':' closed'}" onclick="toggleCat('${cat.replace(/'/g,"\\'")}',this)"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span></div><div class="cat-content" style="display:${isOpen?'block':'none'}">${groups[cat].map(it=>{const ic=getIconSVG(it.icon||getAutoIcon(it.name,cat));return`<div class="item-card${it.low?' low-stock':''}" id="card-${it.idx}" ontouchstart="startLP(${it.idx})" ontouchend="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="return false"><div class="item-row"><div class="item-ico">${ic}</div><div class="item-info"><div class="item-name">${hl(it.name,filter)}</div><div class="item-cat-lbl">${cat}</div></div><div class="qty-wrap"><div class="qty-btn" ontouchstart="event.stopPropagation()" onclick="changeQty(${it.idx},-1)">−</div><span class="qty-num">${it.qty}</span><div class="qty-btn" ontouchstart="event.stopPropagation()" onclick="changeQty(${it.idx},1)">+</div></div></div></div>`;}).join('')}</div></div>`;
-  }).join('');
+  container.innerHTML=Object.keys(groups).map(cat=>{const isOpen=catOpenState[cat]!==false;return`<div class="cat-section"><div class="cat-header"><span class="cat-name-lbl" onclick="renameCat('${cat.replace(/'/g,"\\'")}',this)">${cat}</span><span class="cat-chevron${isOpen?'':' closed'}" onclick="toggleCat('${cat.replace(/'/g,"\\'")}',this)"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span></div><div class="cat-content" style="display:${isOpen?'block':'none'}">${groups[cat].map(it=>{const ic=getIconSVG(it.icon||getAutoIcon(it.name,cat));return`<div class="item-card${it.low?' low-stock':''}" id="card-${it.idx}" ontouchstart="startLP(${it.idx})" ontouchend="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="return false"><div class="item-row"><div class="item-ico">${ic}</div><div class="item-info"><div class="item-name">${hl(it.name,filter)}</div><div class="item-cat-lbl">${cat}</div></div><div class="qty-wrap"><div class="qty-btn" ontouchstart="event.stopPropagation()" onclick="changeQty(${it.idx},-1)">−</div><span class="qty-num">${it.qty}</span><div class="qty-btn" ontouchstart="event.stopPropagation()" onclick="changeQty(${it.idx},1)">+</div></div></div></div>`;}).join('')}</div></div>`;}).join('');
 }
 
 function startLP(idx){cancelLP();lpTimer=setTimeout(()=>{if(navigator.vibrate)navigator.vibrate(35);openCtx(idx);},500);}
@@ -762,10 +556,65 @@ function closeMctx(){document.getElementById('mctx-ov').classList.remove('open')
 function confirmDelMedia(){closeMctx();if(!confirm('사진/영상을 삭제할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();}
 function pickPhoto(){closeMediaPicker();const f=document.getElementById('file-in');f.removeAttribute('capture');f.click();}
 
+// ── [4단계] 이미지 자동 압축 ────────────────────────────────────────────────
+// 업로드 전에 Canvas로 리사이즈 → 최대 1280px, JPEG quality 0.75
+// AI 인식에는 충분하면서 스토리지 비용을 5~10배 절감
+// 영상(video/*)은 압축 없이 그대로 반환
+async function compressImage(file){
+  if(file.type.startsWith('video/'))return file;
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=1280;
+      let w=img.width,h=img.height;
+      if(w>MAX||h>MAX){
+        if(w>h){h=Math.round(h*(MAX/w));w=MAX;}
+        else{w=Math.round(w*(MAX/h));h=MAX;}
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      canvas.toBlob(blob=>resolve(new File([blob],file.name,{type:'image/jpeg'})),'image/jpeg',0.75);
+    };
+    img.src=URL.createObjectURL(file);
+  });
+}
+
 function handleFile(e){const f=e.target.files?.[0];if(!f)return;selFile=f;rot=0;const url=URL.createObjectURL(f);const rc=document.getElementById('rot-content');rc.innerHTML=f.type.startsWith('video')?`<video src="${url}" class="rotate0" style="max-width:100%;max-height:100%" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate0" style="max-width:100%;max-height:100%">`;document.getElementById('rot-ov').classList.add('open');e.target.value='';}
 function rotateMedia(d){rot=(rot+d)%360;const el=document.getElementById('rot-content').firstChild;if(el)el.className='rotate'+rot;}
 function cancelUpload(){selFile=null;document.getElementById('rot-ov').classList.remove('open');}
-async function confirmUpload(){if(!selFile)return;document.getElementById('rot-ov').classList.remove('open');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>업로드 중...</div></div>`;try{const ext=selFile.name.split('.').pop()||'jpg';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});const{error:ue}=await _sb.storage.from('user_uploads').upload(path,selFile,{cacheControl:'3600',upsert:false,contentType:selFile.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,rot);localStorage.setItem('mime_'+tag,selFile.type||'image/jpeg');const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;showMedia(sd.signedUrl,rot);await runAnalysis(path,selFile.type);}catch(err){resetMediaBox();alert('오류: '+err.message);}selFile=null;}
+
+// ── [5단계] 기존 목록 삭제 경고 + [4단계] 이미지 압축 적용 ────────────────
+async function confirmUpload(){
+  if(!selFile)return;
+  // 이미 목록이 있는 경우에만 덮어쓰기 경고창 표시
+  if(items.length>0){
+    if(!confirm('기존 목록이 삭제되고 새 목록으로 교체됩니다.\n계속하시겠습니까?'))return;
+  }
+  document.getElementById('rot-ov').classList.remove('open');
+  const box=document.getElementById('media-box');
+  box.className='media-box filled';
+  box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>업로드 중...</div></div>`;
+  try{
+    // 사진이면 압축, 영상이면 그대로
+    const fileToUpload=await compressImage(selFile);
+    const ext=fileToUpload.name.split('.').pop()||'jpg';
+    const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const op=localStorage.getItem('mediaPath_'+tag);
+    if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});
+    const{error:ue}=await _sb.storage.from('user_uploads').upload(path,fileToUpload,{cacheControl:'3600',upsert:false,contentType:fileToUpload.type});
+    if(ue)throw ue;
+    localStorage.setItem('mediaPath_'+tag,path);
+    localStorage.setItem('rot_'+tag,rot);
+    localStorage.setItem('mime_'+tag,fileToUpload.type||'image/jpeg');
+    const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);
+    if(se)throw se;
+    showMedia(sd.signedUrl,rot);
+    await runAnalysis(path,fileToUpload.type);
+  }catch(err){resetMediaBox();alert('오류: '+err.message);}
+  selFile=null;
+}
+
 function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;}
 function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진 또는 영상 등록</div><div class="media-empty-sub">탭하여 추가 · AI가 자동 인식</div></div>`;}
 function openFull(){const el=document.getElementById('media-el');if(!el)return;const fc=document.getElementById('fs-content');fc.innerHTML=el.tagName==='VIDEO'?`<video src="${el.src}" class="${el.className}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`:`<img src="${el.src}" class="${el.className}" style="max-width:100%;max-height:100%;object-fit:contain">`;document.getElementById('fs-ov').classList.add('open');}
@@ -776,13 +625,7 @@ function closeChat(){document.getElementById('chat-ov').classList.remove('open')
 document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
 async function sendMsg(){const inp=document.getElementById('chat-inp');const t=inp.value.trim();if(!t)return;const msgs=document.getElementById('chat-msgs');msgs.innerHTML+=`<div class="msg user">${t}</div>`;inp.value='';msgs.scrollTop=msgs.scrollHeight;try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:t,tag,drawerName:document.getElementById('drawer-title').textContent,inventory:JSON.stringify(items.map(i=>i.n))})});const d=await r.json();msgs.innerHTML+=`<div class="msg bot">${d.reply}</div>`;}catch{msgs.innerHTML+=`<div class="msg bot">오류가 발생했습니다.</div>`;}msgs.scrollTop=msgs.scrollHeight;}
 
-
-function showResultModal(icon, title, sub) {
-  document.getElementById('result-modal-icon').textContent = icon;
-  document.getElementById('result-modal-title').textContent = title;
-  document.getElementById('result-modal-sub').textContent = sub || '';
-  document.getElementById('result-modal-ov').classList.add('open');
-}
+function showResultModal(icon,title,sub){document.getElementById('result-modal-icon').textContent=icon;document.getElementById('result-modal-title').textContent=title;document.getElementById('result-modal-sub').textContent=sub||'';document.getElementById('result-modal-ov').classList.add('open');}
 
 function mpickReanalyze(){
   closeMediaPicker();
@@ -793,23 +636,44 @@ function mpickReanalyze(){
   items=[];localStorage.setItem('gyeol_'+tag,'[]');
   renderItems();runAnalysis(fp,mt);
 }
+
+// ── [3단계] 이용권 확인 및 차감 로직 포함 ────────────────────────────────────
 async function runAnalysis(filePath,mimeType){
   const box=document.getElementById('media-box');
   const el=document.getElementById('media-el');
   if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px;background:linear-gradient(transparent,rgba(0,0,0,.45))"><div class="analyzing-badge"><div class="spinner"></div>물품 분석 중...</div></div>`;
   const rmOv=()=>{const o=document.getElementById('analyze-overlay');if(o)o.remove();};
   try{
-    const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filePath,mimeType:mimeType||'image/jpeg',userCorrections:corrections})});
-    if(!r.ok)throw new Error('분석 오류');
+    // 로그인 세션에서 이메일을 가져와 API에 전달 → 서버에서 이용권 차감에 사용
+    const{data:{session}}=await _sb.auth.getSession();
+    const userEmail=session?.user?.email||'';
+    const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filePath,mimeType:mimeType||'image/jpeg',userCorrections:corrections,userEmail})});
+
+    // 이용권 소진(402) 처리 — 일반 에러와 분리해서 메시지 다르게 표시
+    if(!r.ok){
+      const errData=await r.json().catch(()=>({}));
+      if(r.status===402){
+        rmOv();
+        showResultModal('💳','이용권이 소진되었습니다',errData.message||'마이페이지에서 이용권을 충전해주세요.');
+        return;
+      }
+      throw new Error(errData.error||'분석 오류');
+    }
+
     const d=await r.json();
     items=[];localStorage.setItem('gyeol_'+tag,'[]');
     if(d.items?.length){d.items.forEach(it=>items.push({n:`${it.category}:${it.name}`,q:it.qty||1}));localStorage.setItem('gyeol_'+tag,JSON.stringify(items));}
     rmOv();renderItems();
     if(d.reviewItems?.length)showReview(d.reviewItems);
-    else if(items.length>0)showResultModal('✅',`${items.length}개 물품 등록 완료`,'목록에서 확인하고 수정할 수 있어요');
+    else if(items.length>0){
+      // 남은 이용권 수를 응답에서 받아 모달에 함께 표시
+      const credMsg=d.creditsRemaining!==undefined?` (남은 이용권: ${d.creditsRemaining}건)`:'';
+      showResultModal('✅',`${items.length}개 물품 등록 완료`,`목록에서 확인하고 수정할 수 있어요${credMsg}`);
+    }
     else showResultModal('🔍','물품을 찾지 못했습니다','직접 추가하거나 사진을 바꿔보세요');
   }catch(err){rmOv();showResultModal('⚠️','분석 오류',err.message);renderItems();}
 }
+
 function showReview(rv){pendingReview=rv;reviewSel={};document.getElementById('confirm-list').innerHTML=rv.map((it,i)=>`<div class="confirm-block"><div class="confirm-q">항목 ${i+1}</div>${(it.candidates||[it.name]).map((c,ci)=>`<button class="confirm-cand" id="cand-${i}-${ci}" onclick="selCand(${i},${ci},'${c}',${(it.candidates||[it.name]).length})">${c}</button>`).join('')}<button class="confirm-skip" onclick="skipCand(${i})">건너뛰기</button></div>`).join('');document.getElementById('confirm-ov').classList.add('open');}
 function selCand(ii,ci,name,tot){reviewSel[ii]=name;for(let c=0;c<tot;c++){const b=document.getElementById(`cand-${ii}-${c}`);if(b)b.classList.toggle('selected',c===ci);}}
 function skipCand(i){reviewSel[i]=null;document.getElementById(`cand-${i}-0`)?.closest('.confirm-block')?.style.setProperty('opacity','.4');}
@@ -819,7 +683,7 @@ async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?
 function toggleRec(){if(!isRec){recChunks=[];const mt=['video/webm;codecs=vp9','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';mediaRec=new MediaRecorder(mediaStream,mt?{mimeType:mt}:{});mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};mediaRec.onstop=()=>{const type=(mt||'video/webm').split(';')[0];recBlob=new Blob(recChunks,{type});const pb=document.getElementById('rec-playback');pb.src=URL.createObjectURL(recBlob);pb.style.display='block';document.getElementById('rec-live').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-btn').style.display='none';document.getElementById('rec-confirm').style.display='inline-flex';document.getElementById('rec-retake').style.display='inline-flex';document.getElementById('rec-hint').textContent='영상을 확인하고 등록하거나 다시 촬영하세요.';isRec=false;};mediaRec.start();isRec=true;recSec=0;document.getElementById('rec-btn').className='rec-circle recording';document.getElementById('rec-btn').innerHTML='⏹';document.getElementById('rec-ind').style.display='block';document.getElementById('rec-hint').textContent='촬영 중... (최대 30초)';recTimer=setInterval(()=>{recSec++;document.getElementById('rec-timer').textContent=`00:${String(recSec).padStart(2,'0')} / 00:30`;if(recSec>=25)document.getElementById('rec-timer').className='rec-timer danger';if(recSec>=30)stopRec();},1000);}else{stopRec();}}
 function stopRec(){clearInterval(recTimer);if(mediaRec?.state!=='inactive')mediaRec.stop();}
 function retakeRec(){recBlob=null;recChunks=[];document.getElementById('rec-live').style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='⏺';document.getElementById('rec-timer').textContent='00:00 / 00:30';document.getElementById('rec-timer').className='rec-timer';document.getElementById('rec-hint').textContent='⏺ 버튼을 눌러 촬영을 시작하세요';isRec=false;}
-async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>업로드 중...</div></div>`;try{const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});const{error:ue}=await _sb.storage.from('user_uploads').upload(path,new File([recBlob],`rec.${ext}`,{type:recBlob.type}),{cacheControl:'3600',upsert:false,contentType:recBlob.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,0);const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;showMedia(sd.signedUrl,0);renderItems();alert('✅ 영상이 등록되었습니다.\n(AI 분석은 사진만 지원됩니다.)');}catch(err){resetMediaBox();alert('오류: '+err.message);}}
+async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>업로드 중...</div></div>`;try{const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});const{error:ue}=await _sb.storage.from('user_uploads').upload(path,new File([recBlob],`rec.${ext}`,{type:recBlob.type}),{cacheControl:'3600',upsert:false,contentType:recBlob.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,0);const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;showMedia(sd.signedUrl,0);renderItems();await runAnalysis(path,recBlob.type);}catch(err){resetMediaBox();alert('오류: '+err.message);}}
 function cancelRecording(){clearInterval(recTimer);if(mediaRec?.state!=='inactive')mediaRec?.stop();if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');isRec=false;}
 </script>
 
