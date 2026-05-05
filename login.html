@@ -83,7 +83,8 @@
             if (error) {
                 errEl.textContent = '로그인 실패'; errEl.classList.remove('hidden'); btn.textContent = '이메일로 로그인'; btn.disabled = false;
             } else {
-                const { data: s } = await supabase.from('serial_codes').select('*').eq('used_by', data.user.email).single();
+                // serials 테이블로 확인 (다른 페이지 인증가드와 통일)
+                const { data: s } = await supabase.from('serials').select('id').eq('used_by', data.user.email).maybeSingle();
                 if (s) { window.location.replace('index.html'); } else { window.location.replace('serial.html'); }
             }
         };
