@@ -55,7 +55,7 @@ function deduplicateItems(items) {
 }
 
 // ── 이미지 분석: base64 inline_data 방식 ──────────────────────────────────────
-async function callGeminiImage(b64, mimeType, prompt, temperature = 0.05) {
+async function callGeminiImage(b64, mimeType, prompt, temperature = 0) {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
@@ -86,7 +86,7 @@ async function callGeminiImage(b64, mimeType, prompt, temperature = 0.05) {
 // 1단계: File API에 업로드
 // 2단계: 처리 완료(ACTIVE)까지 폴링
 // 3단계: file_uri 참조로 분석 요청
-async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.05) {
+async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   // 1단계: multipart 업로드 (메타데이터 + 바이너리 한 요청)
