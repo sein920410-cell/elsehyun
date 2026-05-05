@@ -235,11 +235,15 @@ export default async function handler(req, res) {
     // ── 이용권 확인 (분석 시작 전에 크레딧 조회) ──────────────────────────────
     // serials 테이블에서 해당 유저의 ai_credits를 조회
     // 0이면 Gemini API를 호출하지 않고 바로 에러 반환 → 불필요한 비용 차단
-    const { data: serialRow, error: creditErr } = await supa
+    // .maybeSingle() 대신 .limit(1) 사용
+    // serials 테이블에는 세트당 MAIN/DR1/DR2 세 row가 있어서
+    // .maybeSingle()은 "결과가 여러 개" 에러를 냄 → 배열로 받아 첫 번째만 사용
+    const { data: rows, error: creditErr } = await supa
       .from("serials")
       .select("ai_credits")
       .eq("used_by", userEmail)
-      .maybeSingle();
+      .limit(1);
+    const serialRow = rows?.[0];
 
     if (creditErr) {
       console.error("크레딧 조회 오류:", creditErr.message);
