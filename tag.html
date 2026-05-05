@@ -28,7 +28,7 @@
             <p class="text-gray-400 text-sm">태그를 확인하는 중이에요...</p>
         </div>
 
-        <!-- 에러 상태 (코드 없음) -->
+        <!-- 유효하지 않은 태그 (코드 형식 오류) -->
         <div id="state-no-code" class="hidden fade-in text-center">
             <div class="text-5xl mb-5">🏷️</div>
             <h2 class="text-xl font-bold mb-2">유효하지 않은 태그예요</h2>
@@ -38,7 +38,7 @@
             </button>
         </div>
 
-        <!-- 이미 다른 사용자가 등록한 태그 -->
+        <!-- 다른 사용자의 태그 -->
         <div id="state-taken" class="hidden fade-in text-center">
             <div class="text-5xl mb-5">🔒</div>
             <h2 class="text-xl font-bold mb-2">이미 등록된 태그예요</h2>
@@ -48,12 +48,22 @@
             </button>
         </div>
 
-        <!-- DB에 없는 코드 -->
+        <!-- DB에 없는 코드 (정품 아님) -->
         <div id="state-invalid" class="hidden fade-in text-center">
             <div class="text-5xl mb-5">❓</div>
             <h2 class="text-xl font-bold mb-2">등록되지 않은 태그예요</h2>
             <p class="text-gray-400 text-sm mb-4">코드: <span id="invalid-code" class="font-mono text-white text-xs bg-gray-700 px-2 py-1 rounded"></span></p>
             <p class="text-gray-500 text-xs">공식 제품이 아닌 경우 이 메시지가 표시될 수 있어요.</p>
+        </div>
+
+        <!-- 시리얼 미등록 (패키지 구매 후 앱 등록 안 된 상태) -->
+        <div id="state-unregistered" class="hidden fade-in text-center">
+            <div class="text-5xl mb-5">📦</div>
+            <h2 class="text-xl font-bold mb-2">아직 등록되지 않은 태그예요</h2>
+            <p class="text-gray-400 text-sm mb-6">패키지 박스 안의 시리얼 코드를 입력하면<br>바로 사용할 수 있어요.</p>
+            <button id="btn-register" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition text-sm">
+                시리얼 코드 등록하기
+            </button>
         </div>
 
     </div>
@@ -66,15 +76,15 @@
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         function show(id) {
-            ['state-loading','state-no-code','state-taken','state-invalid'].forEach(s => {
+            ['state-loading','state-no-code','state-taken','state-invalid','state-unregistered'].forEach(s => {
                 document.getElementById(s).classList.add('hidden');
             });
             document.getElementById(id).classList.remove('hidden');
         }
 
         // ── 코드 추출 ──────────────────────────────────────────────
-        // 1순위: URL 경로 (/GYEOL-01-MAIN)
-        // 2순위: 쿼리 파라미터 (?code=GYEOL-01-MAIN)
+        // 1순위: URL 경로 (/GYEOL-1-MAIN)
+        // 2순위: 쿼리 파라미터 (?code=GYEOL-1-MAIN)
         function extractCode() {
             const path = window.location.pathname.replace(/^\//, '').replace(/\.html.*$/, '');
             if (path && path.toUpperCase().startsWith('GYEOL-')) return path.toUpperCase();
@@ -84,17 +94,22 @@
             return null;
         }
 
-        // ── 코드 타입 분석 ─────────────────────────────────────────
-        // GYEOL-01-MAIN → 메인 보관함, GYEOL-01-DR1/DR2 → 서랍
-        function getRedirectUrl(code, email) {
-            const upper = code.toUpperCase();
-            if (upper.endsWith('-MAIN')) {
-                // 메인 태그 → 보관함 홈
-                return 'index.html';
-            } else {
-                // 서랍 태그 → drawer.html?tag=GYEOL-01-DR1
-                return `drawer.html?tag=${encodeURIComponent(code)}`;
-            }
+        // ── 코드에서 세트 번호 추출 ────────────────────────────────
+        // "GYEOL-1-MAIN" → 1,  "GYEOL-42-DR1" → 42
+        // serials 테이블의 set_number 컬럼과 대조하기 위한 값
+        function parseSetNumber(code) {
+            const parts = code.split('-'); // ["GYEOL", "1", "MAIN"]
+            if (parts.length < 3) return null;
+            const n = parseInt(parts[1], 10);
+            return isNaN(n) ? null : n;
+        }
+
+        // ── 태그 타입에 따라 이동할 URL 결정 ─────────────────────
+        // MAIN → index.html (보관함 홈)
+        // DR1/DR2 → drawer.html?tag=GYEOL-1-DR1 (서랍 화면)
+        function getRedirectUrl(code) {
+            if (code.endsWith('-MAIN')) return 'index.html';
+            return `drawer.html?tag=${encodeURIComponent(code)}`;
         }
 
         // ── 메인 로직 ──────────────────────────────────────────────
@@ -103,40 +118,51 @@
         if (!code) {
             show('state-no-code');
         } else {
-            // 1. 로그인 먼저 확인 (항상 최우선)
-            const { data: { session } } = await supabase.auth.getSession();
+            const setNumber = parseSetNumber(code);
 
-            if (!session) {
-                // 로그인 안 됐으면 무조건 로그인 먼저
-                // 로그인 후 이 태그 URL로 다시 돌아오도록 현재 주소 저장
-                const redirectBack = encodeURIComponent(window.location.href);
-                window.location.replace(`login.html?redirect=${redirectBack}`);
-
+            if (!setNumber) {
+                // 코드 형식이 맞지 않으면 (세트 번호를 파싱할 수 없음)
+                show('state-no-code');
             } else {
-                // 2. 로그인 된 경우에만 시리얼 코드 조회
-                const { data: serial, error: serialError } = await supabase
-                    .from('serial_codes')
-                    .select('*')
-                    .eq('code', code)
-                    .single();
+                // 1. 로그인 여부 확인
+                const { data: { session } } = await supabase.auth.getSession();
 
-                if (serialError || !serial) {
-                    // DB에 없는 코드 → 유효하지 않은 태그
-                    document.getElementById('invalid-code').textContent = code;
-                    show('state-invalid');
-
-                } else if (!serial.used_by) {
-                    // ── 미등록 태그: 로그인은 됐으니 시리얼 입력으로 ──
-                    // 현재 태그 코드를 serial.html에 넘겨서 자동 입력되게
-                    window.location.replace(`serial.html?qr=${encodeURIComponent(code)}`);
-
-                } else if (serial.used_by === session.user.email) {
-                    // ── 내 태그 → 해당 보관함/서랍으로 이동 ──
-                    window.location.replace(getRedirectUrl(code, session.user.email));
+                if (!session) {
+                    // 로그인 안 된 경우 → 로그인 후 이 태그 URL로 돌아오도록 현재 주소 저장
+                    window.location.replace(`login.html?redirect=${encodeURIComponent(window.location.href)}`);
 
                 } else {
-                    // ── 다른 사람 태그 ──
-                    show('state-taken');
+                    // 2. serials 테이블에서 이 세트 번호(set_number)로 등록된 row 조회
+                    // serial_code(GYEOL-1-DUFA)가 아니라 set_number(1)로 찾는 것이 핵심
+                    // 하나의 세트 번호에 MAIN/DR1/DR2 세 row가 있으므로 maybeSingle 대신 limit(1) 사용
+                    const { data: serial } = await supabase
+                        .from('serials')
+                        .select('used_by, set_number')
+                        .eq('set_number', setNumber)
+                        .limit(1)
+                        .maybeSingle();
+
+                    if (!serial) {
+                        // serials 테이블에 이 세트 번호 자체가 없음 → 정품 아님
+                        document.getElementById('invalid-code').textContent = code;
+                        show('state-invalid');
+
+                    } else if (!serial.used_by) {
+                        // 정품 태그인데 아직 아무도 등록 안 한 상태
+                        // → 로그인은 됐으니 시리얼 코드 입력 화면으로
+                        document.getElementById('btn-register').onclick = () => {
+                            window.location.replace('serial.html');
+                        };
+                        show('state-unregistered');
+
+                    } else if (serial.used_by === session.user.email) {
+                        // 내 태그 → 해당 보관함 또는 서랍으로 바로 이동
+                        window.location.replace(getRedirectUrl(code));
+
+                    } else {
+                        // 다른 사람이 이미 등록한 태그
+                        show('state-taken');
+                    }
                 }
             }
         }
