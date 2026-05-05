@@ -6,24 +6,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>body { visibility: hidden; }</style>
 <script>
-// 인증 체크 - 로그인 안 되어 있으면 login.html로 이동
 (async () => {
     const _authClient = supabase.createClient(
         'https://tqhtggusphhcsygiitrv.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
     );
     const { data: { session } } = await _authClient.auth.getSession();
-    if (!session) {
-        window.location.replace('login.html');
-        return;
-    }
+    if (!session) { window.location.replace('login.html'); return; }
     const { data: serial } = await _authClient
         .from('serials')
         .select('id')
         .eq('used_by', session.user.email)
         .maybeSingle();
-    if (!serial) { window.location.replace('serial.html'); }
+    if (!serial) { window.location.replace('serial.html'); return; }
+    // 인증 통과 → 화면 표시
+    document.body.style.visibility = 'visible';
 })();
 </script>
 <style>
