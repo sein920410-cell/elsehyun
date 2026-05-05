@@ -222,14 +222,44 @@ function buildScanPrompt(isVideo, userCorrections) {
 // ── 메인 핸들러 ────────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
-  const { filePath, mimeType, userCorrections } = req.body || {};
+
+  // userEmail 추가: 프론트에서 현재 로그인 유저 이메일을 함께 보내야 함
+  const { filePath, mimeType, userCorrections, userEmail } = req.body || {};
   if (!filePath) return res.status(400).json({ error: "filePath 누락" });
+  if (!userEmail) return res.status(400).json({ error: "userEmail 누락" });
 
   const isVideo = mimeType?.startsWith("video/");
-  console.log(`분석 시작: ${isVideo ? "영상" : "이미지"} / ${mimeType}`);
+  console.log(`분석 시작: ${isVideo ? "영상" : "이미지"} / ${mimeType} / ${userEmail}`);
 
   try {
-    // Supabase Storage에서 파일 다운로드 (영상은 처리 시간 여유 있게 2분)
+    // ── 이용권 확인 (분석 시작 전에 크레딧 조회) ──────────────────────────────
+    // serials 테이블에서 해당 유저의 ai_credits를 조회
+    // 0이면 Gemini API를 호출하지 않고 바로 에러 반환 → 불필요한 비용 차단
+    const { data: serialRow, error: creditErr } = await supa
+      .from("serials")
+      .select("ai_credits")
+      .eq("used_by", userEmail)
+      .maybeSingle();
+
+    if (creditErr) {
+      console.error("크레딧 조회 오류:", creditErr.message);
+      return res.status(500).json({ error: "이용권 확인 오류" });
+    }
+    if (!serialRow) {
+      return res.status(403).json({ error: "등록된 시리얼이 없습니다." });
+    }
+    if (serialRow.ai_credits <= 0) {
+      // 크레딧이 0이면 충전 안내와 함께 차단
+      return res.status(402).json({
+        error: "이용권이 모두 소진되었습니다.",
+        credits: 0,
+        message: "마이페이지에서 이용권을 충전해주세요."
+      });
+    }
+
+    console.log(`크레딧 확인: ${serialRow.ai_credits}건 남음`);
+
+    // ── 파일 다운로드 및 분석 ─────────────────────────────────────────────────
     const { data: signedData, error: signedErr } = await supa
       .storage.from("user_uploads").createSignedUrl(filePath, 120);
     if (signedErr || !signedData?.signedUrl)
@@ -253,6 +283,7 @@ export default async function handler(req, res) {
     console.log("Gemini 결과:", scanText.slice(0, 800));
 
     if (!scanText || scanText.trim().length < 10) {
+      // 분석 결과가 없으면 크레딧 차감 안 함 (빈 결과는 모델 문제이지 사용자 소비가 아님)
       return res.status(200).json({ items: [], reviewItems: [], lowItems: [] });
     }
 
@@ -276,8 +307,30 @@ export default async function handler(req, res) {
         })
     );
 
+    // ── 이용권 차감 (분석이 유효한 결과를 냈을 때만 차감) ─────────────────────
+    // 분석 실패나 빈 결과일 때는 위에서 이미 return했으므로
+    // 여기까지 왔다면 정상적으로 목록이 생성된 것 → 1건 차감
+    const { error: deductErr } = await supa
+      .from("serials")
+      .update({ ai_credits: serialRow.ai_credits - 1 })
+      .eq("used_by", userEmail);
+
+    if (deductErr) {
+      // 차감 실패는 로그만 남기고 결과는 정상 반환
+      // (유저 경험 우선 — 분석은 됐는데 차감 오류로 에러 내면 혼란)
+      console.error("크레딧 차감 오류:", deductErr.message);
+    } else {
+      console.log(`크레딧 차감 완료: ${serialRow.ai_credits} → ${serialRow.ai_credits - 1}`);
+    }
+
     console.log(`최종: ${items.length}개`);
-    return res.status(200).json({ items, reviewItems: [], lowItems: [] });
+    // 응답에 남은 크레딧도 함께 전달 → 프론트에서 실시간으로 잔여 건수 표시 가능
+    return res.status(200).json({
+      items,
+      reviewItems: [],
+      lowItems: [],
+      creditsRemaining: serialRow.ai_credits - 1
+    });
 
   } catch (err) {
     console.error("분석 오류:", err.message);
