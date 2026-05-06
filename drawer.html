@@ -37,8 +37,7 @@
 }
 [data-theme="navy"]   {--h-bg:#0C1220;--h-txt:#fff;--h-sub:rgba(255,255,255,.42);--h-border:rgba(255,255,255,.08);--h-btn:rgba(255,255,255,.08);--bom-bg:#1A1F2E;--a-color:#52C498;--a-bg:rgba(82,196,152,.12);--a-border:rgba(82,196,152,.28)}
 [data-theme="black"]  {--h-bg:#0B0B0F;--h-txt:#fff;--h-sub:rgba(255,255,255,.38);--h-border:rgba(255,255,255,.07);--h-btn:rgba(255,255,255,.07);--bom-bg:#141416;--a-color:#94A3B8;--a-bg:rgba(148,163,184,.1);--a-border:rgba(148,163,184,.22)}
-[data-theme="ivory"]  {--h-bg:#FAF7F2;--h-txt:#2A2118;--h-sub:rgba(42,33,24,.48);--h-border:rgba(42,33,24,.1);--h-btn:rgba(42,33,24,.06);--bom-bg:#2A2118;--a-color:#B49464;--a-bg:rgba(180,148,100,.12);--a-border:rgba(180,148,100,.28)}
-[data-theme="lavender"]{--h-bg:#bbafdd;--h-txt:#fff;--h-sub:rgba(255,255,255,.58);--h-border:rgba(255,255,255,.15);--h-btn:rgba(255,255,255,.12);--bom-bg:#4A3880;--a-color:#C4B5FD;--a-bg:rgba(196,181,253,.14);--a-border:rgba(196,181,253,.32)}
+[data-theme="terra"]   {--h-bg:#C07055;--h-txt:#fff;--h-sub:rgba(255,255,255,.62);--h-border:rgba(255,255,255,.16);--h-btn:rgba(255,255,255,.12);--bom-bg:#7A3520;--a-color:#FECDBB;--a-bg:rgba(254,205,187,.13);--a-border:rgba(254,205,187,.3)}
 [data-theme="rose"]   {--h-bg:#C4909E;--h-txt:#fff;--h-sub:rgba(255,255,255,.65);--h-border:rgba(255,255,255,.18);--h-btn:rgba(255,255,255,.14);--bom-bg:#8B3A4A;--a-color:#FECDD3;--a-bg:rgba(254,205,211,.14);--a-border:rgba(254,205,211,.35)}
 [data-theme="sage"]   {--h-bg:#5A7A62;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#2E4A36;--a-color:#86EFAC;--a-bg:rgba(134,239,172,.12);--a-border:rgba(134,239,172,.3)}
 [data-theme="stone"]  {--h-bg:#EDEBE5;--h-txt:#1E1C18;--h-sub:rgba(30,28,24,.46);--h-border:rgba(30,28,24,.1);--h-btn:rgba(30,28,24,.06);--bom-bg:#1E1C18;--a-color:#8A7D6A;--a-bg:rgba(138,125,106,.12);--a-border:rgba(138,125,106,.28)}
@@ -165,7 +164,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .dt-input{flex:1;border:none;outline:none;font-size:15px;font-weight:600;color:var(--ink);background:transparent;font-family:var(--font);letter-spacing:-.01em;-webkit-user-select:text;user-select:text}
 .dt-clear{width:20px;height:20px;background:var(--muted2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .dt-clear svg{width:10px;height:10px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
-.theme-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
 .theme-cell{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
 .theme-sw{width:46px;height:46px;border-radius:13px;border:2px solid transparent;transition:transform .12s}
 .theme-sw.active{outline:3px solid var(--ink);outline-offset:2px}
@@ -378,10 +377,9 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     <div class="theme-grid">
       <div class="theme-cell" onclick="selectTheme('navy')"><div class="theme-sw active" id="sw-navy" style="background:#0C1220"></div><span class="theme-lbl">네이비</span></div>
       <div class="theme-cell" onclick="selectTheme('black')"><div class="theme-sw" id="sw-black" style="background:#0B0B0F;border:1px solid #333"></div><span class="theme-lbl">미드나잇블랙</span></div>
-      <div class="theme-cell" onclick="selectTheme('ivory')"><div class="theme-sw" id="sw-ivory" style="background:#FAF7F2;border:1px solid #E0D8CE"></div><span class="theme-lbl">아이보리</span></div>
       <div class="theme-cell" onclick="selectTheme('stone')"><div class="theme-sw" id="sw-stone" style="background:#EDEBE5;border:1px solid #D4D0C8"></div><span class="theme-lbl">스톤</span></div>
-      <div class="theme-cell" onclick="selectTheme('lavender')"><div class="theme-sw" id="sw-lavender" style="background:#7C6FAF"></div><span class="theme-lbl">라벤더</span></div>
       <div class="theme-cell" onclick="selectTheme('mauve')"><div class="theme-sw" id="sw-mauve" style="background:#7B6EA0"></div><span class="theme-lbl">모브</span></div>
+      <div class="theme-cell" onclick="selectTheme('terra')"><div class="theme-sw" id="sw-terra" style="background:#C07055"></div><span class="theme-lbl">테라코타</span></div>
       <div class="theme-cell" onclick="selectTheme('rose')"><div class="theme-sw" id="sw-rose" style="background:#C4909E"></div><span class="theme-lbl">더스티로즈</span></div>
       <div class="theme-cell" onclick="selectTheme('sage')"><div class="theme-sw" id="sw-sage" style="background:#5A7A62"></div><span class="theme-lbl">세이지그린</span></div>
       <div class="theme-cell" onclick="selectTheme('blue')"><div class="theme-sw" id="sw-blue" style="background:#2E7DAF"></div><span class="theme-lbl">시에라블루</span></div>
