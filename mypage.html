@@ -188,20 +188,6 @@ body { font-family: var(--font); background: var(--bg); min-height: 100dvh; colo
             </div>
         </div>
         <div class="usage-divider"></div>
-        <div class="usage-section">
-            <div class="usage-header">
-                <div class="usage-title">AI 분석 이용권</div>
-                <div class="usage-count"><span id="ai-credits-count">–</span>건 남음</div>
-            </div>
-            <div class="usage-bar-wrap">
-                <div class="usage-bar-fill" id="ai-credits-bar" style="width:0%"></div>
-            </div>
-            <div class="usage-meta">
-                <div class="usage-meta-item">기본 제공 <b>20건</b></div>
-                <div class="usage-meta-item" id="ai-credits-meta">확인 중…</div>
-            </div>
-        </div>
-        <div class="usage-divider"></div>
         <div class="drawer-list" id="drawer-list">
             <div style="text-align:center;padding:16px 0;color:var(--muted);font-size:12px">불러오는 중…</div>
         </div>
@@ -251,6 +237,18 @@ body { font-family: var(--font); background: var(--bg); min-height: 100dvh; colo
                 <div class="row-sub">새로 구매한 태그 등록하기</div>
             </div>
             <div class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+    </div>
+
+    <!-- AI 이용권 -->
+    <div class="section-card">
+        <div class="section-label">AI 분석 이용권</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;">
+            <div style="display:flex;align-items:baseline;gap:6px;">
+                <span style="font-size:28px;font-weight:800;color:var(--ink);" id="ai-credits-count">–</span>
+                <span style="font-size:13px;color:var(--muted);font-weight:500;">건 남음</span>
+            </div>
+            <div id="ai-credits-meta" style="font-size:12px;color:var(--muted);text-align:right;line-height:1.5;">확인 중…</div>
         </div>
     </div>
 
