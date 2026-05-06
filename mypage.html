@@ -188,6 +188,20 @@ body { font-family: var(--font); background: var(--bg); min-height: 100dvh; colo
             </div>
         </div>
         <div class="usage-divider"></div>
+        <div class="usage-section">
+            <div class="usage-header">
+                <div class="usage-title">AI 분석 이용권</div>
+                <div class="usage-count"><span id="ai-credits-count">–</span>건 남음</div>
+            </div>
+            <div class="usage-bar-wrap">
+                <div class="usage-bar-fill" id="ai-credits-bar" style="width:0%"></div>
+            </div>
+            <div class="usage-meta">
+                <div class="usage-meta-item">기본 제공 <b>20건</b></div>
+                <div class="usage-meta-item" id="ai-credits-meta">확인 중…</div>
+            </div>
+        </div>
+        <div class="usage-divider"></div>
         <div class="drawer-list" id="drawer-list">
             <div style="text-align:center;padding:16px 0;color:var(--muted);font-size:12px">불러오는 중…</div>
         </div>
@@ -284,6 +298,23 @@ body { font-family: var(--font); background: var(--bg); min-height: 100dvh; colo
         <div style="font-size:10px;color:var(--muted2);margin-top:3px">스마트 보관 태그 서비스</div>
     </div>
 
+</div>
+
+<!-- 초대 코드 모달 -->
+<div class="modal-overlay" id="invite-modal" onclick="handleModalOutsideClick(event,'invite-modal')">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">구성원 초대</div>
+        <div class="modal-sub">아래 링크를 구성원에게 공유하세요. 링크로 접속하면 같은 보관함을 함께 사용할 수 있어요.</div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:12px 14px;margin:16px 0 8px;text-align:center;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:.05em;">초대 코드</div>
+            <div id="invite-code-display" style="font-size:18px;font-weight:800;letter-spacing:.12em;color:var(--ink);font-family:monospace;">–</div>
+        </div>
+        <input id="invite-link-input" type="text" readonly
+            style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:11px 14px;font-size:11px;color:var(--muted);font-family:monospace;box-sizing:border-box;margin-bottom:14px;outline:none;">
+        <button class="modal-btn" onclick="copyInviteLink()">초대 링크 복사</button>
+        <div style="font-size:10px;color:var(--muted2);text-align:center;margin-top:10px;line-height:1.6;">이 코드는 1회용이며 추후 자동 연동될 예정이에요</div>
+    </div>
 </div>
 
 <!-- 닉네임 변경 모달 -->
@@ -385,6 +416,19 @@ sb.auth.getSession().then(function(res) {
             } else {
                 document.getElementById('reg-date').textContent = '';
             }
+        });
+
+    /* AI 이용권 잔여량 로드 */
+    sb.from('serials')
+        .select('ai_credits')
+        .eq('used_by', email)
+        .limit(1)
+        .then(function(r) {
+            var credits = r.data && r.data[0] ? r.data[0].ai_credits : 0;
+            var pct = Math.min(100, Math.round(credits / 20 * 100));
+            document.getElementById('ai-credits-count').textContent = credits;
+            document.getElementById('ai-credits-bar').style.width = pct + '%';
+            document.getElementById('ai-credits-meta').textContent = credits <= 3 ? '⚠ 이용권이 부족해요' : credits + '건 잔여';
         });
 
     /* 사용량 계산 */
@@ -494,7 +538,22 @@ function handleLogout() {
 }
 function showInviteCode() {
     const code = "GYEOL-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-    alert("멤버 구성원에게 전달할 1회 초대 코드 입니다.\n\n[초대 코드: " + code + "]\n\n(추후 구매 수량에 맞춰 자동 생성되도록 안전하게 연동됩니다.)");
+    const link = "https://qr-test-sage.vercel.app/serial.html?invite=" + code;
+    document.getElementById('invite-code-display').textContent = code;
+    document.getElementById('invite-link-input').value = link;
+    document.getElementById('invite-modal').classList.add('open');
+}
+function copyInviteLink() {
+    const val = document.getElementById('invite-link-input').value;
+    navigator.clipboard.writeText(val).then(function() {
+        showToast('초대 링크가 복사됐어요');
+        document.getElementById('invite-modal').classList.remove('open');
+    }).catch(function() {
+        document.getElementById('invite-link-input').select();
+        document.execCommand('copy');
+        showToast('초대 링크가 복사됐어요');
+        document.getElementById('invite-modal').classList.remove('open');
+    });
 }
 
 /* 계정 삭제 — serials 테이블 초기화 후 로그아웃 */
