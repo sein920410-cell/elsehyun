@@ -29,20 +29,20 @@
   --h-bg:#0C1220;--h-txt:#fff;--h-sub:rgba(255,255,255,0.42);
   --h-border:rgba(255,255,255,0.08);--h-btn:rgba(255,255,255,0.08);
   --bom-bg:#1A1F2E;
-  --bg:#F0F2F6;--surface:#fff;--border:#E2E6EF;--border2:#D4D9E6;
-  --ink:#1A1F2E;--ink2:#3A4050;--muted:#7A88A0;--muted2:#A4ADBE;
+  --bg:#FAF7F2;--surface:#fff;--border:#E8E2D8;--border2:#DDD6CB;
+  --ink:#2A2118;--ink2:#4A3830;--muted:#9A8E80;--muted2:#B5A99A;
   --danger:#D93025;
   --a-color:#52C498;--a-bg:rgba(82,196,152,.12);--a-border:rgba(82,196,152,.28);
   --font:"DM Sans","Noto Sans KR",sans-serif;
 }
 [data-theme="navy"]   {--h-bg:#0C1220;--h-txt:#fff;--h-sub:rgba(255,255,255,.42);--h-border:rgba(255,255,255,.08);--h-btn:rgba(255,255,255,.08);--bom-bg:#1A1F2E;--a-color:#52C498;--a-bg:rgba(82,196,152,.12);--a-border:rgba(82,196,152,.28)}
 [data-theme="black"]  {--h-bg:#0B0B0F;--h-txt:#fff;--h-sub:rgba(255,255,255,.38);--h-border:rgba(255,255,255,.07);--h-btn:rgba(255,255,255,.07);--bom-bg:#141416;--a-color:#94A3B8;--a-bg:rgba(148,163,184,.1);--a-border:rgba(148,163,184,.22)}
-[data-theme="white"]  {--h-bg:#F0F2F6;--h-txt:#1A1F2E;--h-sub:rgba(26,31,46,.5);--h-border:rgba(26,31,46,.1);--h-btn:rgba(26,31,46,.06);--bom-bg:#1A1F2E;--a-color:#3B82F6;--a-bg:rgba(59,130,246,.1);--a-border:rgba(59,130,246,.25)}
+[data-theme="ivory"]  {--h-bg:#FAF7F2;--h-txt:#2A2118;--h-sub:rgba(42,33,24,.48);--h-border:rgba(42,33,24,.1);--h-btn:rgba(42,33,24,.06);--bom-bg:#2A2118;--a-color:#B49464;--a-bg:rgba(180,148,100,.12);--a-border:rgba(180,148,100,.28)}
 [data-theme="lavender"]{--h-bg:#bbafdd;--h-txt:#fff;--h-sub:rgba(255,255,255,.58);--h-border:rgba(255,255,255,.15);--h-btn:rgba(255,255,255,.12);--bom-bg:#4A3880;--a-color:#C4B5FD;--a-bg:rgba(196,181,253,.14);--a-border:rgba(196,181,253,.32)}
 [data-theme="rose"]   {--h-bg:#C4909E;--h-txt:#fff;--h-sub:rgba(255,255,255,.65);--h-border:rgba(255,255,255,.18);--h-btn:rgba(255,255,255,.14);--bom-bg:#8B3A4A;--a-color:#FECDD3;--a-bg:rgba(254,205,211,.14);--a-border:rgba(254,205,211,.35)}
-[data-theme="crimson"]{--h-bg:#A93226;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#6B1A12;--a-color:#FCA5A5;--a-bg:rgba(252,165,165,.13);--a-border:rgba(252,165,165,.3)}
 [data-theme="sage"]   {--h-bg:#5A7A62;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#2E4A36;--a-color:#86EFAC;--a-bg:rgba(134,239,172,.12);--a-border:rgba(134,239,172,.3)}
-[data-theme="amber"]  {--h-bg:#efd308;--h-txt:#fff;--h-sub:rgba(255,255,255,.75);--h-border:rgba(255,255,255,.22);--h-btn:rgba(255,255,255,.15);--bom-bg:#B89800;--a-color:#7A5C00;--a-bg:rgba(122,92,0,.12);--a-border:rgba(122,92,0,.28)}
+[data-theme="stone"]  {--h-bg:#EDEBE5;--h-txt:#1E1C18;--h-sub:rgba(30,28,24,.46);--h-border:rgba(30,28,24,.1);--h-btn:rgba(30,28,24,.06);--bom-bg:#1E1C18;--a-color:#8A7D6A;--a-bg:rgba(138,125,106,.12);--a-border:rgba(138,125,106,.28)}
+[data-theme="mauve"]  {--h-bg:#7B6EA0;--h-txt:#fff;--h-sub:rgba(255,255,255,.58);--h-border:rgba(255,255,255,.15);--h-btn:rgba(255,255,255,.12);--bom-bg:#3D3060;--a-color:#D8B4FE;--a-bg:rgba(216,180,254,.13);--a-border:rgba(216,180,254,.3)}
 [data-theme="blue"]   {--h-bg:#6fa8dc;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#0D3B5E;--a-color:#7DD3FC;--a-bg:rgba(125,211,252,.13);--a-border:rgba(125,211,252,.3)}
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -120,8 +120,8 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .item-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:transform .1s,box-shadow .1s}
 .item-card.pressing{transform:scale(.982);box-shadow:0 3px 10px rgba(0,0,0,.1)}
 .item-row{display:flex;align-items:center;padding:13px 14px;gap:12px}
-.item-ico{width:40px;height:40px;border-radius:10px;background:#F1F2F5;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;line-height:1}
-.item-ico svg{width:18px;height:18px;stroke:#3A4050;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.item-ico{width:40px;height:40px;border-radius:10px;background:#EDE8E2;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;line-height:1}
+.item-ico svg{width:18px;height:18px;stroke:#4A3830;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .item-info{flex:1;min-width:0}
 .item-name{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em;line-height:1.3}
 .item-cat-lbl{font-size:9px;font-weight:600;color:var(--muted2);margin-top:2.5px;letter-spacing:.05em;text-transform:uppercase}
@@ -196,7 +196,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .icon-cat-btn.active{background:var(--ink);color:#fff}
 .icon-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .icon-cell{width:42px;height:42px;border-radius:10px;background:var(--bg);border:1.5px solid transparent;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.icon-cell svg{width:20px;height:20px;stroke:#3A4050;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.icon-cell svg{width:20px;height:20px;stroke:#4A3830;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .icon-cell.sel{border-color:var(--ink);background:#EEF3FF;box-shadow:0 0 0 2px rgba(26,31,46,.1)}
 .icon-cell.sel svg{stroke:var(--ink)}
 .icon-done{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:12px;font-size:13.5px;font-weight:700;cursor:pointer;margin-top:14px;font-family:var(--font)}
@@ -378,12 +378,12 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     <div class="theme-grid">
       <div class="theme-cell" onclick="selectTheme('navy')"><div class="theme-sw active" id="sw-navy" style="background:#0C1220"></div><span class="theme-lbl">네이비</span></div>
       <div class="theme-cell" onclick="selectTheme('black')"><div class="theme-sw" id="sw-black" style="background:#0B0B0F;border:1px solid #333"></div><span class="theme-lbl">미드나잇블랙</span></div>
-      <div class="theme-cell" onclick="selectTheme('white')"><div class="theme-sw" id="sw-white" style="background:#F0F2F6;border:1px solid #D4D9E6"></div><span class="theme-lbl">화이트</span></div>
+      <div class="theme-cell" onclick="selectTheme('ivory')"><div class="theme-sw" id="sw-ivory" style="background:#FAF7F2;border:1px solid #E0D8CE"></div><span class="theme-lbl">아이보리</span></div>
+      <div class="theme-cell" onclick="selectTheme('stone')"><div class="theme-sw" id="sw-stone" style="background:#EDEBE5;border:1px solid #D4D0C8"></div><span class="theme-lbl">스톤</span></div>
       <div class="theme-cell" onclick="selectTheme('lavender')"><div class="theme-sw" id="sw-lavender" style="background:#7C6FAF"></div><span class="theme-lbl">라벤더</span></div>
+      <div class="theme-cell" onclick="selectTheme('mauve')"><div class="theme-sw" id="sw-mauve" style="background:#7B6EA0"></div><span class="theme-lbl">모브</span></div>
       <div class="theme-cell" onclick="selectTheme('rose')"><div class="theme-sw" id="sw-rose" style="background:#C4909E"></div><span class="theme-lbl">더스티로즈</span></div>
-      <div class="theme-cell" onclick="selectTheme('crimson')"><div class="theme-sw" id="sw-crimson" style="background:#A93226"></div><span class="theme-lbl">크림슨레드</span></div>
       <div class="theme-cell" onclick="selectTheme('sage')"><div class="theme-sw" id="sw-sage" style="background:#5A7A62"></div><span class="theme-lbl">세이지그린</span></div>
-      <div class="theme-cell" onclick="selectTheme('amber')"><div class="theme-sw" id="sw-amber" style="background:#FFE000;border:1.5px solid rgba(200,170,0,0.3)"></div><span class="theme-lbl">옐로우</span></div>
       <div class="theme-cell" onclick="selectTheme('blue')"><div class="theme-sw" id="sw-blue" style="background:#2E7DAF"></div><span class="theme-lbl">시에라블루</span></div>
     </div>
     <button class="dt-save" onclick="saveDrawerSettings()">저장</button>
@@ -521,7 +521,7 @@ function renderItems(filter=''){
 
 function startLP(idx){cancelLP();lpTimer=setTimeout(()=>{if(navigator.vibrate)navigator.vibrate(35);openCtx(idx);},500);}
 function cancelLP(){clearTimeout(lpTimer);lpTimer=null;}
-function openCtx(idx){ctxIdx=idx;const it=items[idx];let cat='기타',name=it.n;if(it.n.includes(':')){const p=it.n.split(':');cat=p[0];name=p.slice(1).join(':');}const icoEl=document.getElementById('ctx-ico');icoEl.innerHTML=getIconSVG(it.icon||'default');icoEl.style.cssText='width:34px;height:34px;background:var(--bg);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:6px';const svg=icoEl.querySelector('svg');if(svg){svg.style.cssText='width:100%;height:100%;stroke:#3A4050;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round';}document.getElementById('ctx-name').textContent=name;document.getElementById('ctx-cat').textContent=cat;document.getElementById('ctx-ov').classList.add('open');}
+function openCtx(idx){ctxIdx=idx;const it=items[idx];let cat='기타',name=it.n;if(it.n.includes(':')){const p=it.n.split(':');cat=p[0];name=p.slice(1).join(':');}const icoEl=document.getElementById('ctx-ico');icoEl.innerHTML=getIconSVG(it.icon||'default');icoEl.style.cssText='width:34px;height:34px;background:var(--bg);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:6px';const svg=icoEl.querySelector('svg');if(svg){svg.style.cssText='width:100%;height:100%;stroke:#4A3830;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round';}document.getElementById('ctx-name').textContent=name;document.getElementById('ctx-cat').textContent=cat;document.getElementById('ctx-ov').classList.add('open');}
 function closeCtx(){document.getElementById('ctx-ov').classList.remove('open');}
 function ctxEditName(){closeCtx();const it=items[ctxIdx];let cat='기타',name=it.n;if(it.n.includes(':')){const p=it.n.split(':');cat=p[0];name=p.slice(1).join(':');}const n=prompt('물품명 수정:',name);if(n&&n!==name){corrections.push({original:name,corrected:n});if(corrections.length>50)corrections=corrections.slice(-50);localStorage.setItem('corrections_'+tag,JSON.stringify(corrections));items[ctxIdx].n=cat+':'+n;items[ctxIdx].low=false;save();}}
 function ctxDelete(){closeCtx();let name=items[ctxIdx].n;if(name.includes(':'))name=name.split(':').slice(1).join(':');if(confirm(`"${name}" 항목을 삭제할까요?`)){items.splice(ctxIdx,1);save();}}
