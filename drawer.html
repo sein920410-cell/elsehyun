@@ -207,8 +207,8 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .chat-hdr img{width:20px;height:20px;object-fit:contain;flex-shrink:0}
 .chat-hdr-sp svg{width:17px;height:17px;stroke:rgba(255,255,255,.78);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .chat-hdr-name{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.01em;flex:1}
-.chat-close-btn{width:28px;height:28px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.chat-close-btn svg{width:12px;height:12px;stroke:rgba(255,255,255,.5);stroke-width:2.2;fill:none;stroke-linecap:round}
+.chat-close-btn{width:34px;height:34px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.chat-close-btn svg{width:14px;height:14px;stroke:rgba(255,255,255,.85);stroke-width:2.2;fill:none;stroke-linecap:round}
 .chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#F4F6FA}
 .chat-msgs::-webkit-scrollbar{display:none}
 .msg{max-width:78%;padding:10px 13px;border-radius:14px;font-size:12px;line-height:1.6;font-weight:500;-webkit-user-select:text;user-select:text}
@@ -433,8 +433,8 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
   </div>
 </div>
 
-<div class="chat-ov" id="chat-ov">
-  <div class="chat-sheet">
+<div class="chat-ov" id="chat-ov" onclick="closeChat()">
+  <div class="chat-sheet" onclick="event.stopPropagation()">
     <div class="chat-hdr">
       <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAh4AAAIXCAYAAADTzFeCAAAJe0lEQVR4nO3dwWrCQBRA0Unx/395uumiCNa2JHdiPGfjJsJDMblOILPNOecAntn+cOz8Ot5vC+DOx+oBAID3ITxgX/PuFYBvhAcAkBEeAEBGeAAAGeEBAGSEBwCQER6wr7887wPg7QgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgOe21YPAHAVwgMAyAgP+JnVDoAd3YYTKwAQseIBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkbmOMuXoIfsUTZgF4eVY8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgP2t60eAOCsbqsHgIvaxhhz9RAAB/rXnyzhAcex8gFwx60WACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAy9mq5NpuUHe/Zfiy+A+CsluwnJTyuywWv4XMGXtWS85dbLdfkYgjAKQkPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLC43rm6gEA4BHhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeFzPtnoAAHhEeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEe57dF7wGAwwkPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsLj/ObqAQBgL8IDAMgIDwAgIzwAgIzwAAAywgMAyAgPACDzCVwAFjgGLUAsAAAAAElFTkSuQmCC" alt="">
       <div class="chat-hdr-sp"><svg viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg></div>
@@ -620,6 +620,13 @@ function closeFull(){document.getElementById('fs-ov').classList.remove('open');}
 
 function openChat(){document.getElementById('chat-ov').classList.add('open');}
 function closeChat(){document.getElementById('chat-ov').classList.remove('open');}
+(function(){
+  const sheet=()=>document.querySelector('.chat-sheet');
+  let sy=0,sd=0;
+  document.addEventListener('touchstart',e=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;const t=e.touches[0];sy=t.clientY;sd=0;},{passive:true});
+  document.addEventListener('touchmove',e=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;sd=e.touches[0].clientY-sy;if(sd>0&&sd<160){const s=sheet();if(s)s.style.transform='translateY('+sd+'px)';}},{passive:true});
+  document.addEventListener('touchend',()=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;const s=sheet();if(!s)return;if(sd>80){s.style.transform='';closeChat();}else{s.style.transform='';}sd=0;});
+})();
 document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
 async function sendMsg(){const inp=document.getElementById('chat-inp');const t=inp.value.trim();if(!t)return;const msgs=document.getElementById('chat-msgs');msgs.innerHTML+=`<div class="msg user">${t}</div>`;inp.value='';msgs.scrollTop=msgs.scrollHeight;try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:t,tag,drawerName:document.getElementById('drawer-title').textContent,inventory:JSON.stringify(items.map(i=>i.n))})});const d=await r.json();msgs.innerHTML+=`<div class="msg bot">${d.reply}</div>`;}catch{msgs.innerHTML+=`<div class="msg bot">오류가 발생했습니다.</div>`;}msgs.scrollTop=msgs.scrollHeight;}
 
