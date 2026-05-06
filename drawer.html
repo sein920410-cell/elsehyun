@@ -228,6 +228,8 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .mctx-row:active{background:var(--bg)}
 .mctx-row svg{width:16px;height:16px;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .mctx-del svg{stroke:var(--danger)}.mctx-del span{font-size:13px;font-weight:600;color:var(--danger);letter-spacing:-.01em}
+.mctx-reanalyze{border-top:1px solid var(--bg)}
+.mctx-reanalyze svg{stroke:var(--a-color)}.mctx-reanalyze span{font-size:13px;font-weight:600;color:var(--a-color);letter-spacing:-.01em}
 .mctx-cancel{border-top:1px solid var(--bg)}
 .mctx-cancel svg{stroke:var(--muted)}.mctx-cancel span{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:-.01em}
 
@@ -408,6 +410,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 
 <div class="mctx-ov" id="mctx-ov" onclick="closeMctx()">
   <div class="mctx-menu" onclick="event.stopPropagation()">
+    <div class="mctx-row mctx-reanalyze" onclick="closeMctx();mpickReanalyze()"><svg viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg><span>다시 분석</span></div>
     <div class="mctx-row mctx-del" onclick="confirmDelMedia()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg><span>미디어 삭제</span></div>
     <div class="mctx-row mctx-cancel" onclick="closeMctx()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span>취소</span></div>
   </div>
