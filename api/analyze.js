@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 // ── 모델 버전 한 곳에서 관리 ──────────────────────────────────────────────────
-const GEMINI_MODEL = "gemini-2.0-flash"; // lite → flash로 업그레이드
+const GEMINI_MODEL = "gemini-3-flash-preview";
 
 const VALID_CATS = ["의류", "위생", "청소", "케어", "생활", "기타"];
 function normCat(c) {
@@ -55,6 +55,27 @@ function deduplicateItems(items) {
 }
 
 // ── 이미지 분석: base64 inline_data 방식 ──────────────────────────────────────
+// response_schema: 모델이 반드시 이 JSON 구조만 출력하도록 강제
+const RESPONSE_SCHEMA = {
+  type: "ARRAY",
+  items: {
+    type: "OBJECT",
+    properties: {
+      category: { type: "STRING" },
+      name: { type: "STRING" },
+      qty: { type: "INTEGER" }
+    },
+    required: ["category", "name", "qty"]
+  }
+};
+
+const BASE_GEN_CONFIG = {
+  temperature: 0,
+  maxOutputTokens: 6000,
+  response_mime_type: "application/json",
+  response_schema: RESPONSE_SCHEMA
+};
+
 async function callGeminiImage(b64, mimeType, prompt, temperature = 0) {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -68,7 +89,37 @@ async function callGeminiImage(b64, mimeType, prompt, temperature = 0) {
             { text: prompt }
           ]
         }],
-        generationConfig: { temperature, maxOutputTokens: 6000 }
+        generationConfig: { ...BASE_GEN_CONFIG, temperature }
+      })
+    }
+  );
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Gemini API ${response.status}: ${err.slice(0, 200)}`);
+  }
+  const data = await response.json();
+  const parts = data.candidates?.[0]?.content?.parts || [];
+  return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
+}
+
+// 영상 프레임 배열(base64 JPEG)을 이미지 여러 장으로 전송 → File API 불필요
+async function callGeminiVideoFrames(frames, prompt, temperature = 0) {
+  const imageParts = frames.map(b64 => ({
+    inline_data: { mime_type: "image/jpeg", data: b64 }
+  }));
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            ...imageParts,
+            { text: prompt }
+          ]
+        }],
+        generationConfig: { ...BASE_GEN_CONFIG, temperature }
       })
     }
   );
@@ -153,7 +204,7 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0) {
             { text: prompt }
           ]
         }],
-        generationConfig: { temperature, maxOutputTokens: 6000 }
+        generationConfig: { ...BASE_GEN_CONFIG, temperature }
       })
     }
   );
@@ -224,12 +275,14 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
 
   // userEmail 추가: 프론트에서 현재 로그인 유저 이메일을 함께 보내야 함
-  const { filePath, mimeType, userCorrections, userEmail } = req.body || {};
+  const { filePath, mimeType, userCorrections, userEmail, videoFrames } = req.body || {};
   if (!filePath) return res.status(400).json({ error: "filePath 누락" });
   if (!userEmail) return res.status(400).json({ error: "userEmail 누락" });
 
+  // videoFrames가 있으면 영상을 File API로 전송하지 않고 프레임 이미지 배열로 처리
   const isVideo = mimeType?.startsWith("video/");
-  console.log(`분석 시작: ${isVideo ? "영상" : "이미지"} / ${mimeType} / ${userEmail}`);
+  const useFrames = isVideo && Array.isArray(videoFrames) && videoFrames.length > 0;
+  console.log(`분석 시작: ${isVideo ? (useFrames ? `영상프레임(${videoFrames.length}장)` : "영상(FileAPI)") : "이미지"} / ${mimeType} / ${userEmail}`);
 
   try {
     // ── 이용권 확인 (분석 시작 전에 크레딧 조회) ──────────────────────────────
@@ -276,7 +329,11 @@ export default async function handler(req, res) {
     const prompt = buildScanPrompt(isVideo, userCorrections);
     let scanText;
 
-    if (isVideo) {
+    if (useFrames) {
+      // 프레임 배열로 분석 (File API 우회 → 빠르고 저렴)
+      scanText = await callGeminiVideoFrames(videoFrames, prompt);
+    } else if (isVideo) {
+      // 프레임 미전달 시 기존 File API 방식 폴백
       console.log(`영상 크기: ${(fileBuffer.length / 1024 / 1024).toFixed(1)}MB`);
       scanText = await callGeminiVideo(fileBuffer, mimeType, prompt);
     } else {
