@@ -558,7 +558,42 @@ function closeMctx(){document.getElementById('mctx-ov').classList.remove('open')
 function confirmDelMedia(){closeMctx();if(!confirm('사진/영상을 삭제할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();}
 function pickPhoto(){closeMediaPicker();const f=document.getElementById('file-in');f.removeAttribute('capture');f.click();}
 
-// ── [4단계] 이미지 자동 압축 ────────────────────────────────────────────────
+// ── [4단계-1] 영상 프레임 추출 ──────────────────────────────────────────────
+// 영상을 File API로 통째로 보내는 대신 5개 핵심 프레임만 추출
+// → 토큰 ~7,740 → ~3,000으로 절감 + 폴링 대기 없음
+async function extractVideoFrames(blob, numFrames=5){
+  return new Promise(resolve=>{
+    const video=document.createElement('video');
+    video.muted=true;video.playsInline=true;
+    const url=URL.createObjectURL(blob);
+    video.src=url;
+    video.onloadedmetadata=async()=>{
+      const dur=video.duration||0;
+      const times=[];
+      if(dur<1){times.push(0);}
+      else{for(let i=0;i<numFrames;i++)times.push((dur/(numFrames-1))*i);}
+      const canvas=document.createElement('canvas');
+      canvas.width=640;canvas.height=360;
+      const ctx=canvas.getContext('2d');
+      const frames=[];
+      for(const t of times){
+        await new Promise(res=>{
+          video.currentTime=t;
+          video.onseeked=()=>{
+            ctx.drawImage(video,0,0,640,360);
+            frames.push(canvas.toDataURL('image/jpeg',0.7).split(',')[1]);
+            res();
+          };
+        });
+      }
+      URL.revokeObjectURL(url);
+      resolve(frames);
+    };
+    video.onerror=()=>{URL.revokeObjectURL(url);resolve([]);};
+  });
+}
+
+// ── [4단계-2] 이미지 자동 압축 ────────────────────────────────────────────────
 // 업로드 전에 Canvas로 리사이즈 → 최대 1280px, JPEG quality 0.75
 // AI 인식에는 충분하면서 스토리지 비용을 5~10배 절감
 // 영상(video/*)은 압축 없이 그대로 반환
@@ -647,7 +682,7 @@ function mpickReanalyze(){
 }
 
 // ── [3단계] 이용권 확인 및 차감 로직 포함 ────────────────────────────────────
-async function runAnalysis(filePath,mimeType){
+async function runAnalysis(filePath,mimeType,videoFrames=null){
   const box=document.getElementById('media-box');
   const el=document.getElementById('media-el');
   if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px;background:linear-gradient(transparent,rgba(0,0,0,.45))"><div class="analyzing-badge"><div class="spinner"></div>물품 분석 중...</div></div>`;
@@ -656,7 +691,7 @@ async function runAnalysis(filePath,mimeType){
     // 로그인 세션에서 이메일을 가져와 API에 전달 → 서버에서 이용권 차감에 사용
     const{data:{session}}=await _sb.auth.getSession();
     const userEmail=session?.user?.email||'';
-    const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filePath,mimeType:mimeType||'image/jpeg',userCorrections:corrections,userEmail})});
+    const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filePath,mimeType:mimeType||'image/jpeg',userCorrections:corrections,userEmail,...(videoFrames?.length?{videoFrames}:{})})});
 
     // 이용권 소진(402) 처리 — 일반 에러와 분리해서 메시지 다르게 표시
     if(!r.ok){
@@ -692,7 +727,7 @@ async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?
 function toggleRec(){if(!isRec){recChunks=[];const mt=['video/webm;codecs=vp9','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';mediaRec=new MediaRecorder(mediaStream,mt?{mimeType:mt}:{});mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};mediaRec.onstop=()=>{const type=(mt||'video/webm').split(';')[0];recBlob=new Blob(recChunks,{type});const pb=document.getElementById('rec-playback');pb.src=URL.createObjectURL(recBlob);pb.style.display='block';document.getElementById('rec-live').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-btn').style.display='none';document.getElementById('rec-confirm').style.display='inline-flex';document.getElementById('rec-retake').style.display='inline-flex';document.getElementById('rec-hint').textContent='영상을 확인하고 등록하거나 다시 촬영하세요.';isRec=false;};mediaRec.start();isRec=true;recSec=0;document.getElementById('rec-btn').className='rec-circle recording';document.getElementById('rec-btn').innerHTML='⏹';document.getElementById('rec-ind').style.display='block';document.getElementById('rec-hint').textContent='촬영 중... (최대 30초)';recTimer=setInterval(()=>{recSec++;document.getElementById('rec-timer').textContent=`00:${String(recSec).padStart(2,'0')} / 00:30`;if(recSec>=25)document.getElementById('rec-timer').className='rec-timer danger';if(recSec>=30)stopRec();},1000);}else{stopRec();}}
 function stopRec(){clearInterval(recTimer);if(mediaRec?.state!=='inactive')mediaRec.stop();}
 function retakeRec(){recBlob=null;recChunks=[];document.getElementById('rec-live').style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='⏺';document.getElementById('rec-timer').textContent='00:00 / 00:30';document.getElementById('rec-timer').className='rec-timer';document.getElementById('rec-hint').textContent='⏺ 버튼을 눌러 촬영을 시작하세요';isRec=false;}
-async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>업로드 중...</div></div>`;try{const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});const{error:ue}=await _sb.storage.from('user_uploads').upload(path,new File([recBlob],`rec.${ext}`,{type:recBlob.type}),{cacheControl:'3600',upsert:false,contentType:recBlob.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,0);const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;showMedia(sd.signedUrl,0);renderItems();await runAnalysis(path,recBlob.type);}catch(err){resetMediaBox();alert('오류: '+err.message);}}
+async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>프레임 추출 중...</div></div>`;try{const videoFrames=await extractVideoFrames(recBlob,5);const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});const{error:ue}=await _sb.storage.from('user_uploads').upload(path,new File([recBlob],`rec.${ext}`,{type:recBlob.type}),{cacheControl:'3600',upsert:false,contentType:recBlob.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,0);const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;showMedia(sd.signedUrl,0);renderItems();await runAnalysis(path,recBlob.type,videoFrames);}catch(err){resetMediaBox();alert('오류: '+err.message);}}
 function cancelRecording(){clearInterval(recTimer);if(mediaRec?.state!=='inactive')mediaRec?.stop();if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');isRec=false;}
 </script>
 
