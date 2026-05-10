@@ -71,7 +71,9 @@ const RESPONSE_SCHEMA = {
 
 const BASE_GEN_CONFIG = {
   temperature: 0,
-  maxOutputTokens: 2000
+  maxOutputTokens: 2000,
+  response_mime_type: "application/json",
+  response_schema: RESPONSE_SCHEMA
 };
 
 async function callGeminiImage(b64, mimeType, prompt, temperature = 0) {
@@ -230,14 +232,10 @@ function buildScanPrompt(isVideo, userCorrections) {
     ? "영상 전체를 처음부터 끝까지 보고"
     : "사진 전체를 위에서 아래까지 빠짐없이 보고";
 
-  return `${mediaHint} 눈에 보이는 물건을 모두 아래 JSON 배열 형식으로 출력하세요.${corrHint}
-
-출력 형식 (JSON 배열만, 다른 텍스트 없이):
-[{"category":"카테고리","name":"물건이름","qty":개수}, ...]
+  return `${mediaHint} 눈에 보이는 물건을 모두 JSON 배열로 출력하세요.${corrHint}
 
 규칙:
-- 직접 눈에 보이는 것을 최대한 빠짐없이 포함. 수납함 안, 바구니 안, 구석 작은 물건까지 모두.
-- 추측 금지. 보이는 것만.
+- 직접 눈에 보이는 것만 포함. 추측 금지.
 - 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
 - 의류는 반드시 색상+종류 함께 (예: 검은색 롱패딩, 흰색 반팔 티셔츠)
 - 라벨이 보이면 제품명 그대로. 없으면 기능으로 (예: 샴푸, 키보드)
@@ -378,4 +376,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error("분석 오류:", err.message);
-    return res.status(50
+    return res.status(500).json({ error: "분석 오류", details: err.message });
+  }
+}
