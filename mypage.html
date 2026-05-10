@@ -427,7 +427,9 @@ function getDrawers() {
         var items = [];
         try { items = JSON.parse(localStorage.getItem(key)) || []; } catch(e) {}
         if (!Array.isArray(items)) continue;
-        var name = localStorage.getItem('name_' + tag) || formatTag(tag);
+        // MAIN 태그는 사용자가 이름을 바꿔도 '메인'으로 고정 (혼동 방지)
+        var isMain = /GYEOL-\d+-MAIN/i.test(tag);
+        var name = (!isMain && localStorage.getItem('name_' + tag)) || formatTag(tag);
         list.push({ tag: tag, name: name, items: items });
     }
     return list;
@@ -435,8 +437,8 @@ function getDrawers() {
 function formatTag(tag) {
     var mNew = tag.match(/GYEOL-(\d+)-(DR(\d+)|MAIN)/i);
     if (mNew) {
-        if (mNew[2].toUpperCase() === 'MAIN') return '메인 ' + mNew[1];
-        return '서랍 ' + mNew[3];
+        if (mNew[2].toUpperCase() === 'MAIN') return '메인 (세트' + mNew[1] + ')';
+        return '서랍 ' + mNew[3] + ' (세트' + mNew[1] + ')';
     }
     var m = tag.match(/DRAWER0*(\d+)/i);
     return m ? '서랍 ' + parseInt(m[1]) : tag;
