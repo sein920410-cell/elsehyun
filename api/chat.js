@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const { message, inventory, tag, drawerName } = req.body;
 
   try {
-    const model = "gemini-2.0-flash";
+    const model = process.env.GEMINI_MODEL || "gemini-3-flash-preview";
     // 🚀 여기를 'GEMINI_API_KEY_CHAT'으로 바꿔서 분석용 키와 충돌나지 않게 합니다.
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
