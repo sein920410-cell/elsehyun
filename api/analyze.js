@@ -229,7 +229,8 @@ function buildScanPrompt(isVideo, userCorrections) {
 
   const mediaInstruction = isVideo
     ? `영상 전체를 처음부터 끝까지 스캔하여 모든 프레임에 걸쳐 보이는 물건을 하나의 목록으로 통합하세요.${corrHint}`
-    : `사진 속 수납공간에 보관된 물건 목록을 JSON으로 출력하세요.${corrHint}`;
+    : `사진 전체를 위에서 아래까지, 모든 선반·칸·구역을 빠짐없이 스캔하여 화면에 보이는 모든 물건의 목록을 JSON으로 출력하세요.
+특정 선반 한 곳에만 집중하지 말고 위 칸·중간 칸·아래 칸 전체의 물건을 모두 포함하라.${corrHint}`;
 
   return `${mediaInstruction}
 
@@ -254,6 +255,9 @@ function buildScanPrompt(isVideo, userCorrections) {
   ✅ "밀대", "우산", "소화기"   ❌ "긴 손잡이 도구", "플라스틱 용기"
 
 브랜드명 한국어 변환: RYO→려 / ILLIYOON→일리윤 / Bébéen→베베앙 / Febreze→페브리즈
+브랜드 로고/상표명(NOW, RYO, LANEIGE 등)은 영문 그대로 유지하되, 그 뒤에 오는 영문 제품 설명은 한글로 변환:
+  ROOT:GEN FOR WOMEN→루트젠 포 우먼 / Double Strength→더블스트렝스 / Moisture Barrier→모이스처 배리어 / For Women→포 우먼 / Magic Bright→매직브라이트
+  ✅ "NOW 더블스트렝스"  ✅ "려 루트젠 포 우먼"  ❌ "NOW Double Strength"  ❌ "ROOT:GEN FOR WOMEN"
 마케팅 문구 제거: "온 가족", "Premium", "NEW" 등 — 이것만 제거, 나머지는 그대로
 
 하나의 물건은 하나로 (부품 쪼개기 금지) / 묶음은 qty로 표현
