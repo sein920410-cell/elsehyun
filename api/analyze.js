@@ -11,7 +11,6 @@ function normCat(c) {
   return VALID_CATS.includes(String(c).trim()) ? String(c).trim() : "기타";
 }
 
-// 결과물에서 목록만 정확하게 뽑아내는 함수
 function safeParseItems(raw) {
   if (!raw || typeof raw !== "string") return [];
   let text = raw.trim().replace(/`json\s*/gi, "").replace(/`\s*/gi, "").trim();
@@ -54,7 +53,6 @@ function deduplicateItems(items) {
   return Array.from(seen.values());
 }
 
-// AI가 먼저 상황을 꼼꼼하게 묘사하도록 강제하는 구조
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
   properties: {
@@ -78,7 +76,6 @@ const RESPONSE_SCHEMA = {
   required: ["reasoning", "items"]
 };
 
-// [중요 수정] AI의 말이 끊기지 않도록 maxOutputTokens를 8192로 대폭 늘렸습니다.
 const BASE_GEN_CONFIG = {
   temperature: 0.4, 
   maxOutputTokens: 8192, 
@@ -220,7 +217,7 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.4)
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-// 꼼꼼함 강제 및 환각 방지 프롬프트
+// 명칭 지정 규칙(브랜드 로고 인식 및 서류 통일)을 추가했습니다.
 function buildScanPrompt(isVideo, userCorrections) {
   const corrHint = userCorrections?.length > 0
     ? `\n사용자 교정: ${userCorrections.map(c => `"${c.original}"→"${c.corrected}"`).join(", ")}`
@@ -235,12 +232,15 @@ function buildScanPrompt(isVideo, userCorrections) {
 [최종 규칙]
 1. 당신은 완벽한 재물조사(Inventory) 담당자입니다. 사진에 있는 '모든' 물건을 빠짐없이 찾아내야 합니다.
 2. 절대 노트북이나 모니터 같은 눈에 띄는 큰 물건 1~2개만 찾고 탐색을 종료하지 마세요.
-3. 반드시 'reasoning' 필드에 화면을 5개 구역(왼쪽, 오른쪽, 중앙, 앞쪽, 뒤쪽)으로 나누어 무엇이 있는지 먼저 눈으로 훑듯이 아주 상세하게 묘사하세요. (예: "왼쪽 바구니 안에는 민트색 상자가 있고, 그 옆에는 둥근 통이 있다. 책상 오른쪽 연필꽂이에는 빨간 펜과 핸드크림이 꽂혀있다...")
+3. 반드시 'reasoning' 필드에 화면을 5개 구역(왼쪽, 오른쪽, 중앙, 앞쪽, 뒤쪽)으로 나누어 무엇이 있는지 먼저 눈으로 훑듯이 아주 상세하게 묘사하세요. 
 4. 묘사가 끝나면, 묘사했던 모든 물건들을 'items' 배열에 빠짐없이 각각 독립된 항목으로 등록하세요.
 5. 작은 상자, 펜, 화장품, 스마트 기기 등 자잘한 물건들도 전부 개별 물건으로 인식해야 합니다.
-6. 없는 물건을 지어내지 마세요. 눈에 확실히 보이는 것만 정확하게 적으세요.
-7. 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
-8. 수납장 문/선반/벽/바닥은 제외`;
+6. [명칭 지정 규칙]
+   - 책이나 책자 형태의 물건(빨간색, 노란색 표지 등)은 색상을 개별로 적지 말고 모두 묶어서 '서류'로 명칭을 통일하세요.
+   - 키보드, 마우스, 노트북 등 전자기기에 로지텍(Logi, Logitech), HP 등 브랜드 로고가 보이면 반드시 이름 앞에 명시하세요. (예: 로지텍 무선 마우스, 로지텍 무선 키보드, HP 노트북)
+7. 없는 물건을 지어내지 마세요. 눈에 확실히 보이는 것만 정확하게 적으세요.
+8. 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
+9. 수납장 문/선반/벽/바닥은 제외`;
 }
 
 export default async function handler(req, res) {
@@ -310,7 +310,6 @@ export default async function handler(req, res) {
     const rawItems = safeParseItems(scanText);
     console.log("파싱된 물건 수:", rawItems.length);
 
-    // 정답 삭제를 막기 위해 금지어 대폭 축소
     const BAD_KEYWORDS = ["불명 물체", "경첩", "선반 지지", "캐비닛 문", "캐비닛 선반", "서랍틀", "금속 경첩", "원형 범퍼", "걸이 레일"];
     
     const isBadItem = (name) => BAD_KEYWORDS.some(k => name.includes(k));
@@ -329,7 +328,6 @@ export default async function handler(req, res) {
         })
     );
 
-    // 물건이 0개일 때는 크레딧 차감 없이 반환 (오류 방어)
     if (items.length === 0) {
       console.log("인식된 물건 없음 → 크레딧 차감 안 함");
       return res.status(200).json({
@@ -340,7 +338,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // 정상적으로 물건을 도출했을 때만 1건 차감
     const { error: deductErr } = await supa
       .from("serials")
       .update({ ai_credits: serialRow.ai_credits - 1 })
