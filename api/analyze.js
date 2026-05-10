@@ -3,7 +3,6 @@ import fetch from "node-fetch";
 
 const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-// ── 모델 버전 한 곳에서 관리 ──────────────────────────────────────────────────
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3-flash-preview";
 
 const VALID_CATS = ["의류", "위생", "청소", "케어", "생활", "전자", "주방", "공구", "기타"];
@@ -54,8 +53,6 @@ function deduplicateItems(items) {
   return Array.from(seen.values());
 }
 
-// ── 이미지 분석: base64 inline_data 방식 ──────────────────────────────────────
-// response_schema: 모델이 반드시 이 JSON 구조만 출력하도록 강제
 const RESPONSE_SCHEMA = {
   type: "ARRAY",
   items: {
@@ -102,7 +99,6 @@ async function callGeminiImage(b64, mimeType, prompt, temperature = 0) {
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-// 영상 프레임 배열(base64 JPEG)을 이미지 여러 장으로 전송 → File API 불필요
 async function callGeminiVideoFrames(frames, prompt, temperature = 0) {
   const imageParts = frames.map(b64 => ({
     inline_data: { mime_type: "image/jpeg", data: b64 }
@@ -132,15 +128,9 @@ async function callGeminiVideoFrames(frames, prompt, temperature = 0) {
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-// ── 영상 분석: Gemini File API 3단계 방식 ─────────────────────────────────────
-// 영상은 크기 제한 때문에 base64로 바로 못 보내고,
-// 1단계: File API에 업로드
-// 2단계: 처리 완료(ACTIVE)까지 폴링
-// 3단계: file_uri 참조로 분석 요청
 async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0) {
   const apiKey = process.env.GEMINI_API_KEY;
 
-  // 1단계: multipart 업로드 (메타데이터 + 바이너리 한 요청)
   const boundary = "---GeminiUploadBoundary";
   const metaPart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ file: { display_name: "video_upload", mimeType } })}\r\n`;
   const dataPart = `--${boundary}\r\nContent-Type: ${mimeType}\r\n\r\n`;
@@ -171,12 +161,11 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0) {
   }
 
   const uploadData = await uploadResp.json();
-  const fileName = uploadData.file?.name; // e.g. "files/abc123"
+  const fileName = uploadData.file?.name; 
   const fileUri = uploadData.file?.uri;
   if (!fileName || !fileUri) throw new Error("File API 응답에서 파일 정보 없음");
   console.log("영상 업로드 완료:", fileName);
 
-  // 2단계: ACTIVE 될 때까지 폴링 (최대 60초)
   const maxWait = 60;
   for (let i = 0; i < maxWait; i++) {
     await new Promise(r => setTimeout(r, 1000));
@@ -191,7 +180,6 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0) {
     if (i === maxWait - 1) throw new Error("영상 처리 시간 초과 (60초)");
   }
 
-  // 3단계: file_uri 참조로 분석 요청
   const analyzeResp = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
     {
@@ -219,9 +207,7 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0) {
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-// ── 프롬프트 빌더 ─────────────────────────────────────────────────────────────
-// isVideo=true면 "영상 전체를 스캔하여" 지시를 앞에 추가해서
-// Gemini가 특정 프레임만 보지 않고 전체 타임라인을 통합하도록 유도
+// 명령어를 아주 구체적으로 바꾸었습니다. 구역을 나누고 작은 물건도 찾으라고 지시합니다.
 function buildScanPrompt(isVideo, userCorrections) {
   const corrHint = userCorrections?.length > 0
     ? `
@@ -235,34 +221,27 @@ function buildScanPrompt(isVideo, userCorrections) {
   return `${mediaHint} 눈에 보이는 물건을 모두 JSON 배열로 출력하세요.${corrHint}
 
 규칙:
+- 화면을 왼쪽, 가운데, 오른쪽, 앞쪽, 뒤쪽으로 나누어서 꼼꼼하게 살펴보고 작은 물건도 빠짐없이 전부 찾아주세요.
+- 수납 바구니 안쪽이나 필기도구함에 꽂혀있는 물건(펜, 서류, 화장품, 작은 상자), 스마트 기기 거치대(시계, 무선충전기) 등 숨어있는 물건도 놓치지 마세요.
 - 직접 눈에 보이는 것만 포함. 추측 금지.
 - 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
 - 의류는 반드시 색상+종류 함께 (예: 검은색 롱패딩, 흰색 반팔 티셔츠)
-- 라벨이 보이면 제품명 그대로. 없으면 기능으로 (예: 샴푸, 키보드)
+- 라벨이 보이면 제품명 그대로. 없으면 특징을 살려서 정확히 적어주세요 (예: 민트색 상자, 스마트워치, 하얀색 바구니, 다용도 꽂이함)
 - 수납장 문/선반/벽/바닥은 제외`;
 }
 
-// ── 메인 핸들러 ────────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
 
-  // userEmail 추가: 프론트에서 현재 로그인 유저 이메일을 함께 보내야 함
   const { filePath, mimeType, userCorrections, userEmail, videoFrames } = req.body || {};
   if (!filePath) return res.status(400).json({ error: "filePath 누락" });
   if (!userEmail) return res.status(400).json({ error: "userEmail 누락" });
 
-  // videoFrames가 있으면 영상을 File API로 전송하지 않고 프레임 이미지 배열로 처리
   const isVideo = mimeType?.startsWith("video/");
   const useFrames = isVideo && Array.isArray(videoFrames) && videoFrames.length > 0;
   console.log(`분석 시작: ${isVideo ? (useFrames ? `영상프레임(${videoFrames.length}장)` : "영상(FileAPI)") : "이미지"} / ${mimeType} / ${userEmail}`);
 
   try {
-    // ── 이용권 확인 (분석 시작 전에 크레딧 조회) ──────────────────────────────
-    // serials 테이블에서 해당 유저의 ai_credits를 조회
-    // 0이면 Gemini API를 호출하지 않고 바로 에러 반환 → 불필요한 비용 차단
-    // .maybeSingle() 대신 .limit(1) 사용
-    // serials 테이블에는 세트당 MAIN/DR1/DR2 세 row가 있어서
-    // .maybeSingle()은 "결과가 여러 개" 에러를 냄 → 배열로 받아 첫 번째만 사용
     const { data: rows, error: creditErr } = await supa
       .from("serials")
       .select("ai_credits")
@@ -278,7 +257,6 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: "등록된 시리얼이 없습니다." });
     }
     if (serialRow.ai_credits <= 0) {
-      // 크레딧이 0이면 충전 안내와 함께 차단
       return res.status(402).json({
         error: "이용권이 모두 소진되었습니다.",
         credits: 0,
@@ -288,7 +266,6 @@ export default async function handler(req, res) {
 
     console.log(`크레딧 확인: ${serialRow.ai_credits}건 남음`);
 
-    // ── 파일 다운로드 및 분석 ─────────────────────────────────────────────────
     const { data: signedData, error: signedErr } = await supa
       .storage.from("user_uploads").createSignedUrl(filePath, 120);
     if (signedErr || !signedData?.signedUrl)
@@ -302,10 +279,8 @@ export default async function handler(req, res) {
     let scanText;
 
     if (useFrames) {
-      // 프레임 배열로 분석 (File API 우회 → 빠르고 저렴)
       scanText = await callGeminiVideoFrames(videoFrames, prompt);
     } else if (isVideo) {
-      // 프레임 미전달 시 기존 File API 방식 폴백
       console.log(`영상 크기: ${(fileBuffer.length / 1024 / 1024).toFixed(1)}MB`);
       scanText = await callGeminiVideo(fileBuffer, mimeType, prompt);
     } else {
@@ -316,14 +291,15 @@ export default async function handler(req, res) {
     console.log("Gemini 결과:", scanText.slice(0, 800));
 
     if (!scanText || scanText.trim().length < 10) {
-      // 분석 결과가 없으면 크레딧 차감 안 함 (빈 결과는 모델 문제이지 사용자 소비가 아님)
       return res.status(200).json({ items: [], reviewItems: [], lowItems: [] });
     }
 
     const rawItems = safeParseItems(scanText);
     console.log("파싱 수:", rawItems.length);
 
-    const BAD_KEYWORDS = ["손잡이 도구","직사각형 도구","직사각형 물체","플라스틱 용기","검정 물건","긴 막대","직사각형 포장","작은 상자","큰 상자","원형 물체","불명 물체","경첩","선반 지지","캐비닛 문","캐비닛 선반","서랍틀","금속 경첩","원형 범퍼","플라스틱 범퍼","걸이 레일","TV 리모컨","리모컨","에어컨 리모컨","선풍기 리모컨"];
+    // 너무 많은 단어를 막아버리던 금지어 목록을 진짜 필요한 것만 빼고 전부 줄였습니다.
+    const BAD_KEYWORDS = ["불명 물체", "경첩", "선반 지지", "캐비닛 문", "캐비닛 선반", "서랍틀", "금속 경첩", "원형 범퍼", "걸이 레일"];
+    
     const isBadItem = (name) => BAD_KEYWORDS.some(k => name.includes(k));
     const COLOR_RE = /^(흰색?|화이트|검정|검은|블랙|회색?|그레이|아이보리|베이지|갈색|브라운|노란?|파란?|블루|빨간?|레드|초록|녹색|그린|핑크|분홍|보라|퍼플|은색|실버|금색|골드|투명)\s+/u;
     const NO_COLOR_CATS = new Set(["생활","청소","위생","케어","기타"]);
@@ -340,9 +316,7 @@ export default async function handler(req, res) {
         })
     );
 
-    // ── 이용권 차감 (물건이 1개 이상 인식됐을 때만 차감) ─────────────────────
     if (items.length === 0) {
-      // 물건을 하나도 못 찾은 경우 → 크레딧 차감 없이 빈 결과 반환
       console.log("인식된 물건 없음 → 크레딧 차감 안 함");
       return res.status(200).json({
         items: [],
@@ -358,15 +332,12 @@ export default async function handler(req, res) {
       .eq("used_by", userEmail);
 
     if (deductErr) {
-      // 차감 실패는 로그만 남기고 결과는 정상 반환
-      // (유저 경험 우선 — 분석은 됐는데 차감 오류로 에러 내면 혼란)
       console.error("크레딧 차감 오류:", deductErr.message);
     } else {
       console.log(`크레딧 차감 완료: ${serialRow.ai_credits} → ${serialRow.ai_credits - 1}`);
     }
 
     console.log(`최종: ${items.length}개`);
-    // 응답에 남은 크레딧도 함께 전달 → 프론트에서 실시간으로 잔여 건수 표시 가능
     return res.status(200).json({
       items,
       reviewItems: [],
