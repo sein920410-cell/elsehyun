@@ -71,8 +71,7 @@ const RESPONSE_SCHEMA = {
 
 const BASE_GEN_CONFIG = {
   temperature: 0,
-  maxOutputTokens: 2000,
-  response_mime_type: "application/json"
+  maxOutputTokens: 2000
 };
 
 async function callGeminiImage(b64, mimeType, prompt, temperature = 0) {
@@ -378,4 +377,5 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error("분석 오류
+    console.error("분석 오류:", err.message);
+    return res.status(50
