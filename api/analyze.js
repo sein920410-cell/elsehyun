@@ -100,7 +100,8 @@ async function callGeminiImage(b64, mimeType, prompt, temperature = 0.4) {
       })
     }
   );
-  if (!status.ok) {
+  // [수정완료] status.ok 오타를 response.ok로 바로잡았습니다.
+  if (!response.ok) {
     const err = await response.text();
     throw new Error(`Gemini API ${response.status}: ${err.slice(0, 200)}`);
   }
@@ -217,7 +218,6 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.4)
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-// 오인식 방지 및 상표명(라벨) 정확도 강화 프롬프트
 function buildScanPrompt(isVideo, userCorrections) {
   const corrHint = userCorrections?.length > 0
     ? `\n사용자 교정: ${userCorrections.map(c => `"${c.original}"→"${c.corrected}"`).join(", ")}`
@@ -234,8 +234,8 @@ function buildScanPrompt(isVideo, userCorrections) {
 2. [중요] 물티슈 캡(뚜껑)이나 그림자를 스마트폰, 리모컨 등으로 착각하지 마세요. 불분명한 것은 지어내지 말고 형태를 있는 그대로 묘사하세요.
 3. 반드시 'reasoning' 필드에 화면을 5개 구역으로 나누어 훑어보되, 핵심 키워드만 짧고 간결하게 작성하세요.
 4. 묘사가 끝나면, 파악했던 모든 물건들을 'items' 배열에 독립된 항목으로 채워 넣으세요.
-5. [검색 최적화 명칭 규칙] - 사용자가 검색창에서 바로 찾을 수 있는 '고유 이름'을 부여하세요.
-   - 제품 겉면에 영어 상표명이나 한글 라벨(브랜드명)이 보이면 반드시 읽어서 이름 맨 앞에 붙이세요. (예: NOW 영양제, RYO 트리트먼트, 베베앙리 물티슈, 일리윤 로션, 매직브라이트 클리너)
+5. [검색 최적화 명칭 규칙]
+   - 제품 겉면에 영어 상표명이나 한글 라벨(브랜드명)이 보이면 반드시 읽어서 이름 맨 앞에 붙이세요. (예: NOW 영양제, RYO 트리트먼트, 베베앙리 물티슈, 일리윤 로션)
    - 단순히 '파란색 스프레이'라고 적지 말고, 라벨을 읽어 용도를 명시하세요 (예: 살균 스프레이, 유리 세정제).
    - 전자기기에 로고가 보이면 브랜드명을 포함하세요. (예: 로지텍 무선 키보드, HP 노트북)
 6. 서류나 책자는 '서류'로 명칭을 통일하고, 수납 도구는 '연필꽂이', '수납 바구니' 등 쉬운 우리말을 쓰세요.
