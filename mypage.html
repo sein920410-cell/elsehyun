@@ -396,28 +396,24 @@ sb.auth.getSession().then(function(res) {
             }
         });
 
-    /* AI 이용권 잔여량 로드 */
+    /* AI 이용권 사용량 로드 → 물품 인식 사용량 섹션에 반영 */
+    // credits = 남은 이용권, used = 20 - credits (사용한 건수)
     sb.from('serials')
         .select('ai_credits')
         .eq('used_by', email)
         .limit(1)
         .then(function(r) {
-            var credits = r.data && r.data[0] ? r.data[0].ai_credits : 0;
-            var pct = Math.min(100, Math.round(credits / 20 * 100));
-            document.getElementById('ai-credits-count').textContent = credits;
-            document.getElementById('ai-credits-bar').style.width = pct + '%';
-            document.getElementById('ai-credits-meta').textContent = credits <= 3 ? '⚠ 이용권이 부족해요' : credits + '건 잔여';
+            var MAX_CREDITS = 20;
+            var credits = (r.data && r.data[0] != null) ? r.data[0].ai_credits : MAX_CREDITS;
+            var used = MAX_CREDITS - credits;   // 지금까지 사용한 이용권 수
+            var pct = Math.min(100, Math.round(used / MAX_CREDITS * 100));
+            document.getElementById('used-count').textContent = used;
+            document.getElementById('used-count2').textContent = used;
+            document.getElementById('remain-count').textContent = credits;
+            setTimeout(function() { document.getElementById('usage-bar').style.width = pct + '%'; }, 100);
         });
 
-    /* 사용량 계산 */
     allDrawers = getDrawers();
-    var totalItems = allDrawers.reduce(function(s, d) { return s + d.items.length; }, 0);
-    var remain = Math.max(0, MAX_ITEMS - totalItems);
-    var pct = Math.min(100, Math.round(totalItems / MAX_ITEMS * 100));
-    document.getElementById('used-count').textContent = totalItems;
-    document.getElementById('used-count2').textContent = totalItems;
-    document.getElementById('remain-count').textContent = remain;
-    setTimeout(function() { document.getElementById('usage-bar').style.width = pct + '%'; }, 100);
     renderDrawers();
 });
 
