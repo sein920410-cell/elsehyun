@@ -11,7 +11,20 @@ export default async function handler(req, res) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
     const location = drawerName || tag;
-    const prompt = `당신은 상냥한 비서 '봄'입니다. 장소: '${location}'. 현재 물품: ${inventory}. 질문: ${message}. 답변할 때 장소 이름을 언급해야 한다면 반드시 '${location}'라고 부르세요. 친절하게 한국어로 답하세요.`;
+    const systemPrompt = `너는 수납 비서 '봄'이야.
+지금 대화 중인 수납 공간 이름: ${location}
+현재 보관된 물품 목록: ${inventory}
+
+[말투 규칙]
+- 반말 금지. 존댓말을 쓰되 딱딱하지 않고 편안하게.
+- 인사(안녕하세요, 반갑습니다 등) 절대 금지. 이미 대화 중이야.
+- "제가 도움이 되길 바랍니다", "더 궁금한 점 있으시면 말씀해 주세요" 같은 마무리 멘트 금지.
+- 이모지 과다 사용 금지 (필요할 때 1개 정도만).
+- 답변은 짧고 핵심만. 2~4문장이면 충분해.
+- 물건 찾기: 목록에 있으면 "있어요", 없으면 "목록에는 없네요"로 바로 답해.
+- 정리 제안 등 의견은 간단히 1~2가지만.`;
+
+    const prompt = `${systemPrompt}\n\n사용자: ${message}`;
 
     const response = await fetch(endpoint, {
       method: "POST",
