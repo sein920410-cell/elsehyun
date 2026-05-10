@@ -100,7 +100,7 @@ async function callGeminiImage(b64, mimeType, prompt, temperature = 0.4) {
       })
     }
   );
-  if (!response.ok) {
+  if (!status.ok) {
     const err = await response.text();
     throw new Error(`Gemini API ${response.status}: ${err.slice(0, 200)}`);
   }
@@ -217,7 +217,7 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.4)
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-// 상황 묘사는 간결하게 줄이고, 물건 목록 도출에 집중하도록 명령어를 다듬었습니다.
+// 오인식 방지 및 상표명(라벨) 정확도 강화 프롬프트
 function buildScanPrompt(isVideo, userCorrections) {
   const corrHint = userCorrections?.length > 0
     ? `\n사용자 교정: ${userCorrections.map(c => `"${c.original}"→"${c.corrected}"`).join(", ")}`
@@ -230,15 +230,15 @@ function buildScanPrompt(isVideo, userCorrections) {
   return `${mediaHint} 눈에 보이는 모든 물건을 찾아 JSON 형식으로 출력하세요.${corrHint}
 
 [최종 규칙]
-1. 당신은 완벽하고 집요한 재물조사 담당자입니다. 사진에 있는 '모든' 물건을 빠짐없이 찾아내야 합니다.
-2. [매우 중요] 받침대 아래 어두운 빈 공간이나 바구니 안쪽 등 숨어있는 물건을 절대 놓치지 마세요.
-3. 반드시 'reasoning' 필드에 화면을 5개 구역으로 나누어 훑어보되, **말을 너무 길게 쓰지 말고 구역별로 핵심 키워드만 짧고 간결하게 작성하세요.** (논문처럼 길게 쓰면 안 됩니다.)
-4. 묘사가 끝나면, 파악했던 모든 물건들을 'items' 배열에 빠짐없이 각각 독립된 항목으로 꽉꽉 채워 넣는 데 에너지를 100% 집중하세요.
-5. [명칭 지정 규칙]
-   - 책이나 책자 형태의 물건(빨간색, 노란색 표지 등)은 색상을 개별로 적지 말고 모두 묶어서 '서류'로 명칭을 통일하세요.
-   - 전자기기에 로지텍(Logi, Logitech), HP 등 브랜드 로고가 보이면 반드시 이름 앞에 명시하세요. (예: 로지텍 무선 마우스)
-   - '데스크 오거나이저' 같은 어려운 영어 용어는 절대 쓰지 말고, '연필꽂이'나 '다용도 수납함'처럼 누구나 알아듣기 쉬운 직관적인 우리말을 사용하세요.
-6. 없는 물건을 지어내지 마세요. 눈에 확실히 보이는 것만 정확하게 적으세요.
+1. 당신은 완벽하고 집요한 재물조사 담당자입니다. 사진에 있는 '모든' 개별 물건을 빠짐없이 찾아내야 합니다.
+2. [중요] 물티슈 캡(뚜껑)이나 그림자를 스마트폰, 리모컨 등으로 착각하지 마세요. 불분명한 것은 지어내지 말고 형태를 있는 그대로 묘사하세요.
+3. 반드시 'reasoning' 필드에 화면을 5개 구역으로 나누어 훑어보되, 핵심 키워드만 짧고 간결하게 작성하세요.
+4. 묘사가 끝나면, 파악했던 모든 물건들을 'items' 배열에 독립된 항목으로 채워 넣으세요.
+5. [검색 최적화 명칭 규칙] - 사용자가 검색창에서 바로 찾을 수 있는 '고유 이름'을 부여하세요.
+   - 제품 겉면에 영어 상표명이나 한글 라벨(브랜드명)이 보이면 반드시 읽어서 이름 맨 앞에 붙이세요. (예: NOW 영양제, RYO 트리트먼트, 베베앙리 물티슈, 일리윤 로션, 매직브라이트 클리너)
+   - 단순히 '파란색 스프레이'라고 적지 말고, 라벨을 읽어 용도를 명시하세요 (예: 살균 스프레이, 유리 세정제).
+   - 전자기기에 로고가 보이면 브랜드명을 포함하세요. (예: 로지텍 무선 키보드, HP 노트북)
+6. 서류나 책자는 '서류'로 명칭을 통일하고, 수납 도구는 '연필꽂이', '수납 바구니' 등 쉬운 우리말을 쓰세요.
 7. 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
 8. 수납장 문/선반/벽/바닥은 제외`;
 }
@@ -323,7 +323,10 @@ export default async function handler(req, res) {
         .map(it => {
           const category = normCat(it.category);
           let name = String(it.name).trim().slice(0, 20);
-          if (NO_COLOR_CATS.has(category)) name = name.replace(COLOR_RE, "");
+          
+          if (NO_COLOR_CATS.has(category) && !/^[A-Za-z가-힣]+$/.test(name.split(' ')[0])) {
+             name = name.replace(COLOR_RE, "");
+          }
           return { category, name, qty: Math.max(1, Number(it.qty) || 1) };
         })
     );
