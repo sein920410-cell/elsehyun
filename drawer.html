@@ -214,12 +214,12 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .msg{max-width:78%;padding:10px 13px;border-radius:14px;font-size:12px;line-height:1.6;font-weight:500;-webkit-user-select:text;user-select:text}
 .msg.bot{background:var(--surface);border:1px solid var(--border);border-radius:4px 14px 14px 14px;align-self:flex-start;color:var(--ink)}
 .msg.user{background:var(--ink);color:rgba(255,255,255,.9);border-radius:14px 14px 4px 14px;align-self:flex-end}
-.chat-inp-row{height:52px;padding:0 12px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border);flex-shrink:0;background:var(--surface)}
-.chat-inp-inner{flex:1;background:var(--bg);border-radius:10px;padding:0 13px;height:34px;display:flex;align-items:center;border:1px solid var(--border)}
-.chat-inp{flex:1;border:none;outline:none;font-size:12.5px;font-family:var(--font);color:var(--ink);background:transparent;-webkit-user-select:text;user-select:text}
+.chat-inp-row{height:60px;padding:0 12px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border);flex-shrink:0;background:var(--surface)}
+.chat-inp-inner{flex:1;background:var(--bg);border-radius:12px;padding:0 13px;height:40px;display:flex;align-items:center;border:1px solid var(--border)}
+.chat-inp{flex:1;border:none;outline:none;font-size:13px;font-family:var(--font);color:var(--ink);background:transparent;-webkit-user-select:text;user-select:text}
 .chat-inp::placeholder{color:var(--muted2)}
-.chat-send{width:34px;height:34px;background:var(--ink);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-.chat-send svg{width:13px;height:13px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round}
+.chat-send{width:44px;height:44px;background:var(--ink);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.chat-send svg{width:16px;height:16px;stroke:#fff;stroke-width:2.2;fill:none;stroke-linecap:round}
 
 .mctx-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:250;backdrop-filter:blur(6px);align-items:center;justify-content:center}
 .mctx-ov.open{display:flex}
@@ -436,7 +436,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
   </div>
 </div>
 
-<div class="chat-ov" id="chat-ov" onclick="closeChat()">
+<div class="chat-ov" id="chat-ov">
   <div class="chat-sheet" onclick="event.stopPropagation()">
     <div class="chat-hdr">
       <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAh4AAAIXCAYAAADTzFeCAAAJe0lEQVR4nO3dwWrCQBRA0Unx/395uumiCNa2JHdiPGfjJsJDMblOILPNOecAntn+cOz8Ot5vC+DOx+oBAID3ITxgX/PuFYBvhAcAkBEeAEBGeAAAGeEBAGSEBwCQER6wr7887wPg7QgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgOe21YPAHAVwgMAyAgP+JnVDoAd3YYTKwAQseIBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkbmOMuXoIfsUTZgF4eVY8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgP2t60eAOCsbqsHgIvaxhhz9RAAB/rXnyzhAcex8gFwx60WACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAy9mq5NpuUHe/Zfiy+A+CsluwnJTyuywWv4XMGXtWS85dbLdfkYgjAKQkPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLC43rm6gEA4BHhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeFzPtnoAAHhEeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEe57dF7wGAwwkPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsLj/ObqAQBgL8IDAMgIDwAgIzwAgIzwAAAywgMAyAgPACDzCVwAFjgGLUAsAAAAAElFTkSuQmCC" alt="">
@@ -667,17 +667,110 @@ function resetMediaBox(){const box=document.getElementById('media-box');box.clas
 function openFull(){const el=document.getElementById('media-el');if(!el)return;const fc=document.getElementById('fs-content');fc.innerHTML=el.tagName==='VIDEO'?`<video src="${el.src}" class="${el.className}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`:`<img src="${el.src}" class="${el.className}" style="max-width:100%;max-height:100%;object-fit:contain">`;document.getElementById('fs-ov').classList.add('open');}
 function closeFull(){document.getElementById('fs-ov').classList.remove('open');}
 
-function openChat(){document.getElementById('chat-ov').classList.add('open');}
+// ── 채팅 대화 내역 localStorage 저장/불러오기 ──────────────────────────────
+// 서랍마다 독립된 key로 저장 (tag는 GYEOL-1-DR1 형태)
+function chatStorageKey(){return 'gyeol_chat_'+(tag||'default');}
+function loadChatHistory(){
+  try{const raw=localStorage.getItem(chatStorageKey());return raw?JSON.parse(raw):[];}
+  catch{return [];}
+}
+function saveChatHistory(msgs){
+  try{
+    // 최대 40개 메시지만 보존 (용량 관리)
+    const trimmed=msgs.slice(-40);
+    localStorage.setItem(chatStorageKey(),JSON.stringify(trimmed));
+  }catch{}
+}
+// DOM 렌더링용 — role: 'user' | 'bot'
+function renderChatHistory(history){
+  const el=document.getElementById('chat-msgs');
+  el.innerHTML='';
+  history.forEach(m=>{
+    const div=document.createElement('div');
+    div.className='msg '+(m.role==='user'?'user':'bot');
+    div.textContent=m.text;
+    el.appendChild(div);
+  });
+  el.scrollTop=el.scrollHeight;
+}
+
+function openChat(){
+  document.getElementById('chat-ov').classList.add('open');
+  const history=loadChatHistory();
+  if(history.length===0){
+    // 첫 방문: 봄이 먼저 인사
+    const drawerName=document.getElementById('drawer-title')?.textContent||'이 서랍';
+    const greeting=`안녕하세요! 저는 수납 비서 봄이에요.\n「${drawerName}」에 대해 뭐든지 물어보세요. 물건을 찾거나 정리하는 것을 도와드릴게요.`;
+    const first=[{role:'bot',text:greeting}];
+    saveChatHistory(first);
+    renderChatHistory(first);
+  }else{
+    renderChatHistory(history);
+  }
+}
 function closeChat(){document.getElementById('chat-ov').classList.remove('open');}
+
+// ── 스와이프 아래로 닫기 (임계값 120px — 실수 방지) ────────────────────────
 (function(){
   const sheet=()=>document.querySelector('.chat-sheet');
   let sy=0,sd=0;
-  document.addEventListener('touchstart',e=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;const t=e.touches[0];sy=t.clientY;sd=0;},{passive:true});
-  document.addEventListener('touchmove',e=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;sd=e.touches[0].clientY-sy;if(sd>0&&sd<160){const s=sheet();if(s)s.style.transform='translateY('+sd+'px)';}},{passive:true});
-  document.addEventListener('touchend',()=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;const s=sheet();if(!s)return;if(sd>80){s.style.transform='';closeChat();}else{s.style.transform='';}sd=0;});
+  document.addEventListener('touchstart',e=>{
+    if(!document.getElementById('chat-ov').classList.contains('open'))return;
+    // 입력창 위에서 시작한 터치는 스와이프로 인식하지 않음
+    if(e.target.closest('.chat-inp-row'))return;
+    sy=e.touches[0].clientY;sd=0;
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!document.getElementById('chat-ov').classList.contains('open'))return;
+    sd=e.touches[0].clientY-sy;
+    if(sd>0&&sd<160){const s=sheet();if(s)s.style.transform='translateY('+sd+'px)';}
+  },{passive:true});
+  document.addEventListener('touchend',()=>{
+    if(!document.getElementById('chat-ov').classList.contains('open'))return;
+    const s=sheet();if(!s)return;
+    // 120px 이상 내려야 닫힘 (기존 80px → 더 안전하게)
+    if(sd>120){s.style.transform='';closeChat();}
+    else{s.style.transform='';}
+    sd=0;
+  });
 })();
+
 document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
-async function sendMsg(){const inp=document.getElementById('chat-inp');const t=inp.value.trim();if(!t)return;const msgs=document.getElementById('chat-msgs');msgs.innerHTML+=`<div class="msg user">${t}</div>`;inp.value='';msgs.scrollTop=msgs.scrollHeight;try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:t,tag,drawerName:document.getElementById('drawer-title').textContent,inventory:JSON.stringify(items.map(i=>i.n))})});const d=await r.json();msgs.innerHTML+=`<div class="msg bot">${d.reply}</div>`;}catch{msgs.innerHTML+=`<div class="msg bot">오류가 발생했습니다.</div>`;}msgs.scrollTop=msgs.scrollHeight;}
+
+async function sendMsg(){
+  const inp=document.getElementById('chat-inp');
+  const t=inp.value.trim();
+  if(!t)return;
+
+  // 현재 히스토리 불러와서 유저 메시지 추가 후 렌더
+  const history=loadChatHistory();
+  history.push({role:'user',text:t});
+  saveChatHistory(history);
+  renderChatHistory(history);
+  inp.value='';
+
+  try{
+    const r=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        message:t,
+        tag,
+        drawerName:document.getElementById('drawer-title').textContent,
+        inventory:JSON.stringify(items.map(i=>i.n))
+      })
+    });
+    const d=await r.json();
+    const reply=d.reply||'오류가 발생했습니다.';
+    history.push({role:'bot',text:reply});
+    saveChatHistory(history);
+    renderChatHistory(history);
+  }catch{
+    history.push({role:'bot',text:'오류가 발생했습니다.'});
+    saveChatHistory(history);
+    renderChatHistory(history);
+  }
+}
 
 function showResultModal(icon,title,sub){document.getElementById('result-modal-icon').textContent=icon;document.getElementById('result-modal-title').textContent=title;document.getElementById('result-modal-sub').textContent=sub||'';document.getElementById('result-modal-ov').classList.add('open');}
 
