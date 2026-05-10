@@ -11,7 +11,7 @@ function normCat(c) {
   return VALID_CATS.includes(String(c).trim()) ? String(c).trim() : "기타";
 }
 
-// 결과물에서 목록만 정확하게 뽑아내는 함수 (이중 안전장치)
+// 결과물에서 목록만 정확하게 뽑아내는 함수
 function safeParseItems(raw) {
   if (!raw || typeof raw !== "string") return [];
   let text = raw.trim().replace(/`json\s*/gi, "").replace(/`\s*/gi, "").trim();
@@ -54,7 +54,7 @@ function deduplicateItems(items) {
   return Array.from(seen.values());
 }
 
-// 핵심 기술: AI가 결과부터 뱉지 않고, 'reasoning'에서 먼저 꼼꼼하게 상황을 파악하도록 강제합니다.
+// AI가 먼저 상황을 꼼꼼하게 묘사하도록 강제하는 구조
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
   properties: {
@@ -78,9 +78,10 @@ const RESPONSE_SCHEMA = {
   required: ["reasoning", "items"]
 };
 
+// [중요 수정] AI의 말이 끊기지 않도록 maxOutputTokens를 8192로 대폭 늘렸습니다.
 const BASE_GEN_CONFIG = {
   temperature: 0.4, 
-  maxOutputTokens: 2000,
+  maxOutputTokens: 8192, 
   response_mime_type: "application/json",
   response_schema: RESPONSE_SCHEMA
 };
@@ -219,7 +220,7 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.4)
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-// 환각 방지 및 꼼꼼함을 강제하는 최종 프롬프트입니다.
+// 꼼꼼함 강제 및 환각 방지 프롬프트
 function buildScanPrompt(isVideo, userCorrections) {
   const corrHint = userCorrections?.length > 0
     ? `\n사용자 교정: ${userCorrections.map(c => `"${c.original}"→"${c.corrected}"`).join(", ")}`
@@ -309,7 +310,7 @@ export default async function handler(req, res) {
     const rawItems = safeParseItems(scanText);
     console.log("파싱된 물건 수:", rawItems.length);
 
-    // 정답을 날려버리지 않도록 최소한의 금지어만 유지합니다.
+    // 정답 삭제를 막기 위해 금지어 대폭 축소
     const BAD_KEYWORDS = ["불명 물체", "경첩", "선반 지지", "캐비닛 문", "캐비닛 선반", "서랍틀", "금속 경첩", "원형 범퍼", "걸이 레일"];
     
     const isBadItem = (name) => BAD_KEYWORDS.some(k => name.includes(k));
@@ -328,7 +329,7 @@ export default async function handler(req, res) {
         })
     );
 
-    // 물건을 아예 찾지 못했을 때는 크레딧(돈)을 차감하지 않고 보호합니다.
+    // 물건이 0개일 때는 크레딧 차감 없이 반환 (오류 방어)
     if (items.length === 0) {
       console.log("인식된 물건 없음 → 크레딧 차감 안 함");
       return res.status(200).json({
@@ -339,7 +340,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 정상적으로 물건을 찾아냈을 때만 크레딧을 1회 차감합니다.
+    // 정상적으로 물건을 도출했을 때만 1건 차감
     const { error: deductErr } = await supa
       .from("serials")
       .update({ ai_credits: serialRow.ai_credits - 1 })
