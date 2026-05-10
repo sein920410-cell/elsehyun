@@ -11,6 +11,7 @@ function normCat(c) {
   return VALID_CATS.includes(String(c).trim()) ? String(c).trim() : "기타";
 }
 
+// 결과물에서 목록만 정확하게 뽑아내는 함수 (이중 안전장치)
 function safeParseItems(raw) {
   if (!raw || typeof raw !== "string") return [];
   let text = raw.trim().replace(/`json\s*/gi, "").replace(/`\s*/gi, "").trim();
@@ -53,20 +54,30 @@ function deduplicateItems(items) {
   return Array.from(seen.values());
 }
 
+// 핵심 기술: AI가 결과부터 뱉지 않고, 'reasoning'에서 먼저 꼼꼼하게 상황을 파악하도록 강제합니다.
 const RESPONSE_SCHEMA = {
-  type: "ARRAY",
-  items: {
-    type: "OBJECT",
-    properties: {
-      category: { type: "STRING" },
-      name: { type: "STRING" },
-      qty: { type: "INTEGER" }
+  type: "OBJECT",
+  properties: {
+    reasoning: { 
+      type: "STRING",
+      description: "화면을 구역별로 나누어 숨어있는 작은 물건들까지 샅샅이 눈으로 훑듯이 묘사한 내용"
     },
-    required: ["category", "name", "qty"]
-  }
+    items: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          category: { type: "STRING" },
+          name: { type: "STRING" },
+          qty: { type: "INTEGER" }
+        },
+        required: ["category", "name", "qty"]
+      }
+    }
+  },
+  required: ["reasoning", "items"]
 };
 
-// 융통성을 주어 다양하게 찾도록 하되(0.4), 무리한 환각은 막습니다.
 const BASE_GEN_CONFIG = {
   temperature: 0.4, 
   maxOutputTokens: 2000,
@@ -208,7 +219,7 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.4)
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-// 구역 탐색을 강제하여 꼼꼼히 찾게 하되, 환각(없는 물건 지어내기)은 절대 못 하도록 막은 프롬프트
+// 환각 방지 및 꼼꼼함을 강제하는 최종 프롬프트입니다.
 function buildScanPrompt(isVideo, userCorrections) {
   const corrHint = userCorrections?.length > 0
     ? `\n사용자 교정: ${userCorrections.map(c => `"${c.original}"→"${c.corrected}"`).join(", ")}`
@@ -218,16 +229,17 @@ function buildScanPrompt(isVideo, userCorrections) {
     ? "영상 전체를 처음부터 끝까지 보고"
     : "사진 전체를 위에서 아래까지 빠짐없이 보고";
 
-  return `${mediaHint} 눈에 보이는 물건을 꼼꼼하게 찾아서 모두 JSON 배열로 출력하세요.${corrHint}
+  return `${mediaHint} 눈에 보이는 모든 물건을 찾아 JSON 형식으로 출력하세요.${corrHint}
 
-규칙:
-- [중요] 가장 크고 눈에 띄는 메인 물건(예: 노트북, 모니터 등) 딱 하나만 찾고 탐색을 멈추는 것을 절대 금지합니다.
-- 화면을 왼쪽, 가운데, 오른쪽, 앞쪽, 뒤쪽으로 구역을 나누어 샅샅이 살펴보고, 작은 물건(펜, 화장품, 스마트 기기, 바구니 안의 상자 등)도 빠짐없이 각각 독립된 항목으로 찾으세요.
-- [중요] 구석구석 최대한 많이 찾아내되, 절대 사진에 없는 물건을 상상해서 지어내지 마세요. (환각 현상 방지)
-- 직접 눈에 보이는 것만 포함. 보이지 않는 물건 추측 금지.
-- 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
-- 라벨이 보이면 제품명 그대로, 없으면 특징을 살려서 정확히 적어주세요 (예: 민트색 상자, 스마트워치, 하얀색 바구니, 다용도 꽂이함)
-- 수납장 문/선반/벽/바닥은 제외`;
+[최종 규칙]
+1. 당신은 완벽한 재물조사(Inventory) 담당자입니다. 사진에 있는 '모든' 물건을 빠짐없이 찾아내야 합니다.
+2. 절대 노트북이나 모니터 같은 눈에 띄는 큰 물건 1~2개만 찾고 탐색을 종료하지 마세요.
+3. 반드시 'reasoning' 필드에 화면을 5개 구역(왼쪽, 오른쪽, 중앙, 앞쪽, 뒤쪽)으로 나누어 무엇이 있는지 먼저 눈으로 훑듯이 아주 상세하게 묘사하세요. (예: "왼쪽 바구니 안에는 민트색 상자가 있고, 그 옆에는 둥근 통이 있다. 책상 오른쪽 연필꽂이에는 빨간 펜과 핸드크림이 꽂혀있다...")
+4. 묘사가 끝나면, 묘사했던 모든 물건들을 'items' 배열에 빠짐없이 각각 독립된 항목으로 등록하세요.
+5. 작은 상자, 펜, 화장품, 스마트 기기 등 자잘한 물건들도 전부 개별 물건으로 인식해야 합니다.
+6. 없는 물건을 지어내지 마세요. 눈에 확실히 보이는 것만 정확하게 적으세요.
+7. 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
+8. 수납장 문/선반/벽/바닥은 제외`;
 }
 
 export default async function handler(req, res) {
@@ -288,17 +300,16 @@ export default async function handler(req, res) {
       scanText = await callGeminiImage(b64, mimeType || "image/jpeg", prompt);
     }
 
-    console.log("Gemini 결과:", scanText.slice(0, 800));
+    console.log("Gemini 전체 응답:", scanText.slice(0, 800));
 
-    // 결과가 비정상적으로 짧거나 없으면 크레딧을 아낍니다.
     if (!scanText || scanText.trim().length < 10) {
       return res.status(200).json({ items: [], reviewItems: [], lowItems: [] });
     }
 
     const rawItems = safeParseItems(scanText);
-    console.log("파싱 수:", rawItems.length);
+    console.log("파싱된 물건 수:", rawItems.length);
 
-    // 꼭 필요한 금지어만 남겨서 정답이 지워지는 현상 방지
+    // 정답을 날려버리지 않도록 최소한의 금지어만 유지합니다.
     const BAD_KEYWORDS = ["불명 물체", "경첩", "선반 지지", "캐비닛 문", "캐비닛 선반", "서랍틀", "금속 경첩", "원형 범퍼", "걸이 레일"];
     
     const isBadItem = (name) => BAD_KEYWORDS.some(k => name.includes(k));
@@ -317,7 +328,7 @@ export default async function handler(req, res) {
         })
     );
 
-    // 물건을 아예 못 찾았을 때는 크레딧을 차감하지 않고 반환하여 돈 낭비를 막습니다.
+    // 물건을 아예 찾지 못했을 때는 크레딧(돈)을 차감하지 않고 보호합니다.
     if (items.length === 0) {
       console.log("인식된 물건 없음 → 크레딧 차감 안 함");
       return res.status(200).json({
@@ -328,7 +339,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 정상적으로 물건을 1개 이상 찾았을 때만 크레딧 차감
+    // 정상적으로 물건을 찾아냈을 때만 크레딧을 1회 차감합니다.
     const { error: deductErr } = await supa
       .from("serials")
       .update({ ai_credits: serialRow.ai_credits - 1 })
@@ -340,7 +351,7 @@ export default async function handler(req, res) {
       console.log(`크레딧 차감 완료: ${serialRow.ai_credits} → ${serialRow.ai_credits - 1}`);
     }
 
-    console.log(`최종: ${items.length}개`);
+    console.log(`최종 도출된 물건 개수: ${items.length}개`);
     return res.status(200).json({
       items,
       reviewItems: [],
