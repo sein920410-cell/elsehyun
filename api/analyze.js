@@ -71,7 +71,7 @@ const RESPONSE_SCHEMA = {
 
 const BASE_GEN_CONFIG = {
   temperature: 0,
-  maxOutputTokens: 6000,
+  maxOutputTokens: 1000,
   response_mime_type: "application/json",
   response_schema: RESPONSE_SCHEMA
 };
