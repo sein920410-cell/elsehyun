@@ -187,11 +187,19 @@ body { font-family: var(--font); background: var(--bg); min-height: 100dvh; colo
                 <div class="usage-meta-item">잔여 <b id="remain-count">–</b>건</div>
             </div>
         </div>
-        <div class="usage-divider"></div>
-        <div class="drawer-list" id="drawer-list">
-            <div style="text-align:center;padding:16px 0;color:var(--muted);font-size:12px">불러오는 중…</div>
+        <div style="padding:0 18px 18px">
+            <button onclick="openChargeModal()" style="width:100%;padding:12px;background:var(--ink);color:var(--bg);border:none;border-radius:12px;font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;letter-spacing:-.01em">+ 이용권 충전하기</button>
         </div>
-        <div class="more-btn" id="more-btn" style="display:none" onclick="toggleDrawerMore()">▾ 더 보기</div>
+    </div>
+
+    <!-- 이용권 충전 모달 -->
+    <div id="charge-ov" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;align-items:center;justify-content:center;padding:24px">
+        <div style="background:var(--surface);border-radius:20px;width:100%;max-width:340px;padding:28px 24px 20px;text-align:center">
+            <div style="font-size:28px;margin-bottom:12px">⚡</div>
+            <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px">이용권 충전</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px">추가 50건 <b style="color:var(--ink)">4,900원</b><br>결제 기능은 곧 오픈 예정이에요.<br>조금만 기다려주세요!</div>
+            <button onclick="closeChargeModal()" style="width:100%;padding:13px;background:var(--ink);color:var(--bg);border:none;border-radius:12px;font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer">확인</button>
+        </div>
     </div>
 
     <!-- 표시 설정 -->
@@ -320,8 +328,6 @@ var sb = supabase.createClient(
 var FOUNDER_EMAILS = ['gngn5803@nate.com'];
 var MAX_ITEMS = 20;
 var currentSession = null;
-var allDrawers = [];
-var showAll = false;
 
 /* 설정 초기화 */
 (function() {
@@ -413,58 +419,10 @@ sb.auth.getSession().then(function(res) {
             setTimeout(function() { document.getElementById('usage-bar').style.width = pct + '%'; }, 100);
         });
 
-    allDrawers = getDrawers();
-    renderDrawers();
 });
 
-function getDrawers() {
-    var list = [];
-    for (var i = 0; i < localStorage.length; i++) {
-        var key = localStorage.key(i);
-        if (!key || !key.startsWith('gyeol_')) continue;
-        if (key === 'gyeol_theme' || key === 'gyeol_size') continue;
-        var tag = key.replace('gyeol_', '');
-        var items = [];
-        try { items = JSON.parse(localStorage.getItem(key)) || []; } catch(e) {}
-        if (!Array.isArray(items)) continue;
-        // MAIN 태그는 사용자가 이름을 바꿔도 '메인'으로 고정 (혼동 방지)
-        var isMain = /GYEOL-\d+-MAIN/i.test(tag);
-        var name = (!isMain && localStorage.getItem('name_' + tag)) || formatTag(tag);
-        list.push({ tag: tag, name: name, items: items });
-    }
-    return list;
-}
-function formatTag(tag) {
-    var mNew = tag.match(/GYEOL-(\d+)-(DR(\d+)|MAIN)/i);
-    if (mNew) {
-        if (mNew[2].toUpperCase() === 'MAIN') return '메인 (세트' + mNew[1] + ')';
-        return '서랍 ' + mNew[3] + ' (세트' + mNew[1] + ')';
-    }
-    var m = tag.match(/DRAWER0*(\d+)/i);
-    return m ? '서랍 ' + parseInt(m[1]) : tag;
-}
-function renderDrawers() {
-    var list = document.getElementById('drawer-list');
-    var moreBtn = document.getElementById('more-btn');
-    if (!allDrawers.length) {
-        list.innerHTML = '<div style="text-align:center;padding:16px 0;color:var(--muted);font-size:12px">등록된 보관함이 없어요</div>';
-        return;
-    }
-    var visible = showAll ? allDrawers : allDrawers.slice(0, 5);
-    list.innerHTML = visible.map(function(d) {
-        var cnt = d.items.length;
-        return '<div class="drawer-item" onclick="location.href=\'drawer.html?tag=' + d.tag + '\'">' +
-            '<div class="drawer-dot"></div>' +
-            '<div class="drawer-item-name">' + d.name + '</div>' +
-            '<div class="drawer-item-cnt">' + cnt + '개</div>' +
-            '</div>';
-    }).join('');
-    if (allDrawers.length > 5) {
-        moreBtn.style.display = 'block';
-        moreBtn.textContent = showAll ? '▴ 접기' : '▾ ' + (allDrawers.length - 5) + '개 더 보기';
-    }
-}
-function toggleDrawerMore() { showAll = !showAll; renderDrawers(); }
+function openChargeModal(){document.getElementById('charge-ov').style.display='flex';}
+function closeChargeModal(){document.getElementById('charge-ov').style.display='none';}
 
 function toggleDark() {
     var dark = document.getElementById('dark-toggle').checked;
