@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 // ── 모델 버전 한 곳에서 관리 ──────────────────────────────────────────────────
-const GEMINI_MODEL = "gemini-3-flash-preview";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3-flash-preview";
 
 const VALID_CATS = ["의류", "위생", "청소", "케어", "생활", "기타"];
 function normCat(c) {
@@ -264,6 +264,7 @@ function buildScanPrompt(isVideo, userCorrections) {
 
 ━━ 공간 추론 절대 금지 ━━
 눈에 직접 보이는 것만 목록에 넣는다. 공간 유형 보고 "있을 법한 물건" 상상 추가 절대 금지.
+흐릿하거나 가려져서 정확히 식별할 수 없는 물건은 목록에서 제외하라. 추측으로 이름 붙이지 마라.
 
 ━━ 절대 목록에 넣지 말 것 ━━
 수납장 부품(문/선반/경첩/손잡이/레일/범퍼/서랍틀) / 배경(벽/바닥/천장)
