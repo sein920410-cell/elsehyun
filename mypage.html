@@ -433,6 +433,11 @@ function getDrawers() {
     return list;
 }
 function formatTag(tag) {
+    var mNew = tag.match(/GYEOL-(\d+)-(DR(\d+)|MAIN)/i);
+    if (mNew) {
+        if (mNew[2].toUpperCase() === 'MAIN') return '메인 ' + mNew[1];
+        return '서랍 ' + mNew[3];
+    }
     var m = tag.match(/DRAWER0*(\d+)/i);
     return m ? '서랍 ' + parseInt(m[1]) : tag;
 }
@@ -446,12 +451,10 @@ function renderDrawers() {
     var visible = showAll ? allDrawers : allDrawers.slice(0, 5);
     list.innerHTML = visible.map(function(d) {
         var cnt = d.items.length;
-        var warn = cnt >= MAX_ITEMS * 0.8;
         return '<div class="drawer-item" onclick="location.href=\'drawer.html?tag=' + d.tag + '\'">' +
             '<div class="drawer-dot"></div>' +
             '<div class="drawer-item-name">' + d.name + '</div>' +
             '<div class="drawer-item-cnt">' + cnt + '개</div>' +
-            '<div class="drawer-item-badge' + (warn ? ' warn' : '') + '">' + (warn ? '거의 찼어요' : '여유 있음') + '</div>' +
             '</div>';
     }).join('');
     if (allDrawers.length > 5) {
