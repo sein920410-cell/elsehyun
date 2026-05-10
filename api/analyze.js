@@ -66,14 +66,15 @@ const RESPONSE_SCHEMA = {
   }
 };
 
+// 융통성을 주어 다양하게 찾도록 하되(0.4), 무리한 환각은 막습니다.
 const BASE_GEN_CONFIG = {
-  temperature: 0,
+  temperature: 0.4, 
   maxOutputTokens: 2000,
   response_mime_type: "application/json",
   response_schema: RESPONSE_SCHEMA
 };
 
-async function callGeminiImage(b64, mimeType, prompt, temperature = 0) {
+async function callGeminiImage(b64, mimeType, prompt, temperature = 0.4) {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
@@ -99,7 +100,7 @@ async function callGeminiImage(b64, mimeType, prompt, temperature = 0) {
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-async function callGeminiVideoFrames(frames, prompt, temperature = 0) {
+async function callGeminiVideoFrames(frames, prompt, temperature = 0.4) {
   const imageParts = frames.map(b64 => ({
     inline_data: { mime_type: "image/jpeg", data: b64 }
   }));
@@ -128,7 +129,7 @@ async function callGeminiVideoFrames(frames, prompt, temperature = 0) {
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0) {
+async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.4) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   const boundary = "---GeminiUploadBoundary";
@@ -207,26 +208,25 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0) {
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-// 명령어를 아주 구체적으로 바꾸었습니다. 구역을 나누고 작은 물건도 찾으라고 지시합니다.
+// 구역 탐색을 강제하여 꼼꼼히 찾게 하되, 환각(없는 물건 지어내기)은 절대 못 하도록 막은 프롬프트
 function buildScanPrompt(isVideo, userCorrections) {
   const corrHint = userCorrections?.length > 0
-    ? `
-사용자 교정: ${userCorrections.map(c => `"${c.original}"→"${c.corrected}"`).join(", ")}`
+    ? `\n사용자 교정: ${userCorrections.map(c => `"${c.original}"→"${c.corrected}"`).join(", ")}`
     : "";
 
   const mediaHint = isVideo
     ? "영상 전체를 처음부터 끝까지 보고"
     : "사진 전체를 위에서 아래까지 빠짐없이 보고";
 
-  return `${mediaHint} 눈에 보이는 물건을 모두 JSON 배열로 출력하세요.${corrHint}
+  return `${mediaHint} 눈에 보이는 물건을 꼼꼼하게 찾아서 모두 JSON 배열로 출력하세요.${corrHint}
 
 규칙:
-- 화면을 왼쪽, 가운데, 오른쪽, 앞쪽, 뒤쪽으로 나누어서 꼼꼼하게 살펴보고 작은 물건도 빠짐없이 전부 찾아주세요.
-- 수납 바구니 안쪽이나 필기도구함에 꽂혀있는 물건(펜, 서류, 화장품, 작은 상자), 스마트 기기 거치대(시계, 무선충전기) 등 숨어있는 물건도 놓치지 마세요.
-- 직접 눈에 보이는 것만 포함. 추측 금지.
+- [중요] 가장 크고 눈에 띄는 메인 물건(예: 노트북, 모니터 등) 딱 하나만 찾고 탐색을 멈추는 것을 절대 금지합니다.
+- 화면을 왼쪽, 가운데, 오른쪽, 앞쪽, 뒤쪽으로 구역을 나누어 샅샅이 살펴보고, 작은 물건(펜, 화장품, 스마트 기기, 바구니 안의 상자 등)도 빠짐없이 각각 독립된 항목으로 찾으세요.
+- [중요] 구석구석 최대한 많이 찾아내되, 절대 사진에 없는 물건을 상상해서 지어내지 마세요. (환각 현상 방지)
+- 직접 눈에 보이는 것만 포함. 보이지 않는 물건 추측 금지.
 - 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
-- 의류는 반드시 색상+종류 함께 (예: 검은색 롱패딩, 흰색 반팔 티셔츠)
-- 라벨이 보이면 제품명 그대로. 없으면 특징을 살려서 정확히 적어주세요 (예: 민트색 상자, 스마트워치, 하얀색 바구니, 다용도 꽂이함)
+- 라벨이 보이면 제품명 그대로, 없으면 특징을 살려서 정확히 적어주세요 (예: 민트색 상자, 스마트워치, 하얀색 바구니, 다용도 꽂이함)
 - 수납장 문/선반/벽/바닥은 제외`;
 }
 
@@ -290,6 +290,7 @@ export default async function handler(req, res) {
 
     console.log("Gemini 결과:", scanText.slice(0, 800));
 
+    // 결과가 비정상적으로 짧거나 없으면 크레딧을 아낍니다.
     if (!scanText || scanText.trim().length < 10) {
       return res.status(200).json({ items: [], reviewItems: [], lowItems: [] });
     }
@@ -297,7 +298,7 @@ export default async function handler(req, res) {
     const rawItems = safeParseItems(scanText);
     console.log("파싱 수:", rawItems.length);
 
-    // 너무 많은 단어를 막아버리던 금지어 목록을 진짜 필요한 것만 빼고 전부 줄였습니다.
+    // 꼭 필요한 금지어만 남겨서 정답이 지워지는 현상 방지
     const BAD_KEYWORDS = ["불명 물체", "경첩", "선반 지지", "캐비닛 문", "캐비닛 선반", "서랍틀", "금속 경첩", "원형 범퍼", "걸이 레일"];
     
     const isBadItem = (name) => BAD_KEYWORDS.some(k => name.includes(k));
@@ -316,6 +317,7 @@ export default async function handler(req, res) {
         })
     );
 
+    // 물건을 아예 못 찾았을 때는 크레딧을 차감하지 않고 반환하여 돈 낭비를 막습니다.
     if (items.length === 0) {
       console.log("인식된 물건 없음 → 크레딧 차감 안 함");
       return res.status(200).json({
@@ -326,6 +328,7 @@ export default async function handler(req, res) {
       });
     }
 
+    // 정상적으로 물건을 1개 이상 찾았을 때만 크레딧 차감
     const { error: deductErr } = await supa
       .from("serials")
       .update({ ai_credits: serialRow.ai_credits - 1 })
