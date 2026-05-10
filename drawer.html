@@ -50,8 +50,9 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 
 .header{background:var(--h-bg);height:58px;padding:0 16px;display:flex;align-items:center;flex-shrink:0;position:relative;z-index:100;transition:background .4s}
 .header::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--h-border)}
-.brand{display:flex;align-items:center;gap:8px;flex-shrink:0;cursor:pointer;padding:6px 10px;border-radius:10px;transition:background .15s;z-index:1}
+.brand{display:flex;align-items:center;gap:8px;flex-shrink:0;cursor:pointer;padding:6px 10px;border-radius:10px;transition:background .15s;z-index:1;position:relative}
 .brand:active{background:var(--h-btn)}
+.chat-badge{position:absolute;top:4px;right:4px;width:16px;height:16px;background:#e74c3c;border-radius:50%;font-size:10px;font-weight:700;color:#fff;display:none;align-items:center;justify-content:center;line-height:1}
 .brand img{width:22px;height:22px;object-fit:contain;flex-shrink:0}
 .brand-anim{position:relative;height:22px;overflow:hidden;min-width:52px}
 .brand-a,.brand-b{position:absolute;left:0;top:0;white-space:nowrap;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s}
@@ -304,6 +305,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
       <span class="brand-a">공간:결</span>
       <span class="brand-b"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/></svg></span>
     </div>
+    <div class="chat-badge" id="chat-badge">1</div>
   </div>
   <div class="header-title-wrap">
     <button class="drawer-btn" onclick="openDrawerSettings()">
@@ -696,11 +698,41 @@ function renderChatHistory(history){
   el.scrollTop=el.scrollHeight;
 }
 
+// ── 채팅 타임아웃 (30분) ──────────────────────────────────────────────────────
+const CHAT_TIMEOUT_MS = 30 * 60 * 1000; // 30분
+let chatTimeoutId = null;
+
+function showChatBadge(){
+  const b = document.getElementById('chat-badge');
+  if(b){ b.style.display='flex'; }
+}
+function hideChatBadge(){
+  const b = document.getElementById('chat-badge');
+  if(b){ b.style.display='none'; }
+}
+function resetChatTimeout(){
+  if(chatTimeoutId) clearTimeout(chatTimeoutId);
+  chatTimeoutId = setTimeout(()=>{
+    // 채팅창이 열려있으면 종료 메시지 추가 후 닫기
+    const isOpen = document.getElementById('chat-ov').classList.contains('open');
+    const timeoutMsg = '안녕하세요, 답변 대기 시간이 초과되어 상담이 자동 종료되었습니다.\n상담을 원하실 경우 다시 문의 부탁드립니다 😊';
+    const history = loadChatHistory();
+    history.push({role:'bot', text: timeoutMsg});
+    saveChatHistory(history);
+    if(isOpen){
+      renderChatHistory(history);
+      setTimeout(()=>closeChat(), 1500);
+    }
+    showChatBadge();
+    chatTimeoutId = null;
+  }, CHAT_TIMEOUT_MS);
+}
+
 function openChat(){
   document.getElementById('chat-ov').classList.add('open');
+  hideChatBadge();
   const history=loadChatHistory();
   if(history.length===0){
-    // 첫 방문: 봄이 먼저 인사
     const drawerName=document.getElementById('drawer-title')?.textContent||'이 서랍';
     const greeting=`안녕하세요! 저는 수납 비서 봄이에요.\n「${drawerName}」에 대해 뭐든지 물어보세요. 물건을 찾거나 정리하는 것을 도와드릴게요.`;
     const first=[{role:'bot',text:greeting}];
@@ -709,6 +741,7 @@ function openChat(){
   }else{
     renderChatHistory(history);
   }
+  resetChatTimeout();
 }
 function closeChat(){document.getElementById('chat-ov').classList.remove('open');}
 
@@ -743,6 +776,7 @@ async function sendMsg(){
   const inp=document.getElementById('chat-inp');
   const t=inp.value.trim();
   if(!t)return;
+  resetChatTimeout(); // 메시지 보낼 때마다 30분 타이머 리셋
 
   // 현재 히스토리 불러와서 유저 메시지 추가 후 렌더
   const history=loadChatHistory();
@@ -864,4 +898,9 @@ function cancelRecording(){clearInterval(recTimer);if(mediaRec?.state!=='inactiv
       <button class="ai-chip" onclick="selectAddCat(this,'기타')">기타</button>
     </div>
     <div class="ai-cat-lbl">물품명</div>
-    <input type="text" id="add-item-input" class="ai-name-input" placeholder="예: 샴푸, 청바지, 드라이버..." onkeydown="if(event.key==='Enter')addItemConfi
+    <input type="text" id="add-item-input" class="ai-name-input" placeholder="예: 샴푸, 청바지, 드라이버..." onkeydown="if(event.key==='Enter')addItemConfirm()"/>
+    <button class="ai-confirm-btn" onclick="addItemConfirm()">추가</button>
+  </div>
+</div>
+</body>
+</html>
