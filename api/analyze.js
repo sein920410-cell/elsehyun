@@ -76,7 +76,6 @@ const RESPONSE_SCHEMA = {
   required: ["reasoning", "items"]
 };
 
-// [해결 부분] 구글 서버가 무조건 JSON 규칙을 따르도록 카멜케이스로 변경했습니다.
 const BASE_GEN_CONFIG = {
   temperature: 0.4, 
   maxOutputTokens: 8192, 
@@ -218,6 +217,7 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.4)
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
+// 숨겨진 기기 탐색 강조 및 어려운 영어 용어 금지 규칙을 추가했습니다.
 function buildScanPrompt(isVideo, userCorrections) {
   const corrHint = userCorrections?.length > 0
     ? `\n사용자 교정: ${userCorrections.map(c => `"${c.original}"→"${c.corrected}"`).join(", ")}`
@@ -230,17 +230,17 @@ function buildScanPrompt(isVideo, userCorrections) {
   return `${mediaHint} 눈에 보이는 모든 물건을 찾아 JSON 형식으로 출력하세요.${corrHint}
 
 [최종 규칙]
-1. 당신은 완벽한 재물조사(Inventory) 담당자입니다. 사진에 있는 '모든' 물건을 빠짐없이 찾아내야 합니다.
-2. 절대 노트북이나 모니터 같은 눈에 띄는 큰 물건 1~2개만 찾고 탐색을 종료하지 마세요.
+1. 당신은 완벽하고 집요한 재물조사(Inventory) 담당자입니다. 사진에 있는 '모든' 물건을 빠짐없이 찾아내야 합니다.
+2. [매우 중요] 노트북 받침대 아래 어두운 빈 공간에 숨겨진 기기(예: 분홍색 계산기/키패드), 바구니 안쪽 등 보일락 말락 하게 숨어있는 물건을 절대 놓치지 마세요.
 3. 반드시 'reasoning' 필드에 화면을 5개 구역(왼쪽, 오른쪽, 중앙, 앞쪽, 뒤쪽)으로 나누어 무엇이 있는지 먼저 눈으로 훑듯이 아주 상세하게 묘사하세요. 
 4. 묘사가 끝나면, 묘사했던 모든 물건들을 'items' 배열에 빠짐없이 각각 독립된 항목으로 등록하세요.
-5. 작은 상자, 펜, 화장품, 스마트 기기 등 자잘한 물건들도 전부 개별 물건으로 인식해야 합니다.
-6. [명칭 지정 규칙]
+5. [명칭 지정 규칙]
    - 책이나 책자 형태의 물건(빨간색, 노란색 표지 등)은 색상을 개별로 적지 말고 모두 묶어서 '서류'로 명칭을 통일하세요.
    - 키보드, 마우스, 노트북 등 전자기기에 로지텍(Logi, Logitech), HP 등 브랜드 로고가 보이면 반드시 이름 앞에 명시하세요. (예: 로지텍 무선 마우스, 로지텍 무선 키보드, HP 노트북)
-7. 없는 물건을 지어내지 마세요. 눈에 확실히 보이는 것만 정확하게 적으세요.
-8. 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
-9. 수납장 문/선반/벽/바닥은 제외`;
+   - '데스크 오거나이저' 같은 어려운 영어 용어는 절대 쓰지 말고, '연필꽂이'나 '다용도 수납함'처럼 누구나 알아듣기 쉬운 직관적인 우리말을 사용하세요.
+6. 없는 물건을 지어내지 마세요. 눈에 확실히 보이는 것만 정확하게 적으세요.
+7. 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
+8. 수납장 문/선반/벽/바닥은 제외`;
 }
 
 export default async function handler(req, res) {
