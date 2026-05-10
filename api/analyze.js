@@ -76,11 +76,12 @@ const RESPONSE_SCHEMA = {
   required: ["reasoning", "items"]
 };
 
+// [해결 부분] 구글 서버가 무조건 JSON 규칙을 따르도록 카멜케이스로 변경했습니다.
 const BASE_GEN_CONFIG = {
   temperature: 0.4, 
   maxOutputTokens: 8192, 
-  response_mime_type: "application/json",
-  response_schema: RESPONSE_SCHEMA
+  responseMimeType: "application/json",
+  responseSchema: RESPONSE_SCHEMA
 };
 
 async function callGeminiImage(b64, mimeType, prompt, temperature = 0.4) {
@@ -217,7 +218,6 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.4)
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-// 명칭 지정 규칙(브랜드 로고 인식 및 서류 통일)을 추가했습니다.
 function buildScanPrompt(isVideo, userCorrections) {
   const corrHint = userCorrections?.length > 0
     ? `\n사용자 교정: ${userCorrections.map(c => `"${c.original}"→"${c.corrected}"`).join(", ")}`
