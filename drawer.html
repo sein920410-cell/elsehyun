@@ -638,6 +638,8 @@ async function confirmUpload(){
   if(items.length>0){
     if(!confirm('기존 목록이 삭제되고 새 목록으로 교체됩니다.\n계속하시겠습니까?'))return;
   }
+  // ★ 분석 시작 즉시 기존 목록 화면에서 제거 (로딩 중 구 목록 노출 방지)
+  items=[];localStorage.setItem('gyeol_'+tag,'[]');renderItems();
   document.getElementById('rot-ov').classList.remove('open');
   const box=document.getElementById('media-box');
   box.className='media-box filled';
@@ -862,9 +864,4 @@ function cancelRecording(){clearInterval(recTimer);if(mediaRec?.state!=='inactiv
       <button class="ai-chip" onclick="selectAddCat(this,'기타')">기타</button>
     </div>
     <div class="ai-cat-lbl">물품명</div>
-    <input type="text" id="add-item-input" class="ai-name-input" placeholder="예: 샴푸, 청바지, 드라이버..." onkeydown="if(event.key==='Enter')addItemConfirm()"/>
-    <button class="ai-confirm-btn" onclick="addItemConfirm()">추가</button>
-  </div>
-</div>
-</body>
-</html>
+    <input type="text" id="add-item-input" class="ai-name-input" placeholder="예: 샴푸, 청바지, 드라이버..." onkeydown="if(event.key==='Enter')addItemConfi
