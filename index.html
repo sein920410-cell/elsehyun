@@ -238,7 +238,12 @@ function getAllDrawers() {
 }
 
 function formatTag(tag) {
-  // DRAWER001 → 서랍 1, DRAWER002 → 서랍 2
+  // 신규 시리얼: GYEOL-1-DR1 → 서랍 1, GYEOL-1-MAIN → 메인
+  const mNew = tag.match(/GYEOL-(\d+)-(DR(\d+)|MAIN)/i);
+  if (mNew) {
+    if (mNew[2].toUpperCase() === 'MAIN') return '메인';
+    return '서랍 ' + mNew[3];
+  }
   const m = tag.match(/DRAWER0*(\d+)/i);
   if (m) return '서랍 ' + parseInt(m[1]);
   return tag;
