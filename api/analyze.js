@@ -6,7 +6,7 @@ const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE
 // ── 모델 버전 한 곳에서 관리 ──────────────────────────────────────────────────
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3-flash-preview";
 
-const VALID_CATS = ["의류", "위생", "청소", "케어", "생활", "주방", "공구", "기타"];
+const VALID_CATS = ["의류", "위생", "청소", "케어", "생활", "전자", "주방", "공구", "기타"];
 function normCat(c) {
   if (!c) return "기타";
   return VALID_CATS.includes(String(c).trim()) ? String(c).trim() : "기타";
@@ -234,12 +234,10 @@ function buildScanPrompt(isVideo, userCorrections) {
 
   return `${mediaInstruction}
 
-━━ [최우선 원칙] 불확실하면 무조건 제외 ━━
-너는 지금 물건을 "추측"하거나 "유추"하는 것이 절대 아니다.
-사진에서 눈으로 직접 100% 확인되는 물건만 기록한다.
-어둡거나, 가려지거나, 흐릿하거나, 겹쳐 있어 색상·종류를 특정할 수 없으면 절대 목록에 넣지 않는다.
-차라리 목록 수가 5개여도 괜찮다 — 없는 물건을 만들어내는 것이 가장 큰 오류다.
-"이 공간에는 아마 이런 물건이 있겠지"라는 생각을 하는 순간, 그 물건은 제외한다.
+━━ [최우선 원칙] 보이는 것은 반드시 포함, 안 보이는 것은 절대 추가 금지 ━━
+명확히 눈으로 보이는 물건은 빠짐없이 기록한다. 잘 보이는 물건을 누락하는 것도 오류다.
+단, 어둡거나 가려지거나 흐릿해서 종류·이름을 확정할 수 없는 물건은 제외한다.
+"이 공간에 있을 것 같다"는 추론으로 물건을 추가하는 것은 절대 금지다.
 
 ━━ 출력 형식 (JSON 배열만, 다른 텍스트 없이) ━━
 [{"category":"카테고리","name":"물건이름","qty":개수},...]
@@ -250,6 +248,7 @@ function buildScanPrompt(isVideo, userCorrections) {
 "청소" → 세탁세제, 섬유유연제, 청소세제, 밀대, 대걸레, 빗자루, 수세미, 청소솔, 스프레이
 "케어" → 영양제, 의약품, 로션, 크림, 세럼, 마스크팩, 연고
 "생활" → 우산, 소화기, 배터리, 충전기, 가위, 테이프, 노트, 볼펜, 수납함, 바구니
+"전자" → 노트북, 모니터, 키보드, 마우스, 스피커, 이어폰, 헤드폰, 충전기, 태블릿, 카메라, TV, 리모컨
 "주방" → 냄비, 프라이팬, 식기, 컵, 칼, 도마, 주방 도구류
 "공구" → 드라이버, 망치, 렌치, 줄자, 공구류
 "기타" → 위에 해당 없음
@@ -391,9 +390,18 @@ export default async function handler(req, res) {
         })
     );
 
-    // ── 이용권 차감 (분석이 유효한 결과를 냈을 때만 차감) ─────────────────────
-    // 분석 실패나 빈 결과일 때는 위에서 이미 return했으므로
-    // 여기까지 왔다면 정상적으로 목록이 생성된 것 → 1건 차감
+    // ── 이용권 차감 (물건이 1개 이상 인식됐을 때만 차감) ─────────────────────
+    if (items.length === 0) {
+      // 물건을 하나도 못 찾은 경우 → 크레딧 차감 없이 빈 결과 반환
+      console.log("인식된 물건 없음 → 크레딧 차감 안 함");
+      return res.status(200).json({
+        items: [],
+        reviewItems: [],
+        lowItems: [],
+        creditsRemaining: serialRow.ai_credits
+      });
+    }
+
     const { error: deductErr } = await supa
       .from("serials")
       .update({ ai_credits: serialRow.ai_credits - 1 })
@@ -412,12 +420,4 @@ export default async function handler(req, res) {
     return res.status(200).json({
       items,
       reviewItems: [],
-      lowItems: [],
-      creditsRemaining: serialRow.ai_credits - 1
-    });
-
-  } catch (err) {
-    console.error("분석 오류:", err.message);
-    return res.status(500).json({ error: "분석 오류", details: err.message });
-  }
-}
+      l
