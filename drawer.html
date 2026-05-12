@@ -807,7 +807,8 @@ async function sendMsg(){
         message:t,
         tag,
         drawerName:document.getElementById('drawer-title').textContent,
-        inventory:JSON.stringify(items.map(i=>i.n))
+        inventory:JSON.stringify(items.map(i=>i.n)),
+        history:history.slice(0,-1).slice(-10)  // 최근 10개까지만 (방금 추가한 유저 메시지 제외)
       })
     });
     const d=await r.json();
