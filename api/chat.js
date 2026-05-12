@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const { message, inventory, tag, drawerName, history = [] } = req.body;
 
   try {
-    const model = process.env.GEMINI_MODEL || "gemini-3-flash-preview";
+    const model = process.env.GEMINI_MODEL || "gemini-2.0-flash";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
     const location = drawerName || tag;
@@ -34,7 +34,6 @@ export default async function handler(req, res) {
     if (validHistory.length > 0) {
       validHistory.forEach((m, idx) => {
         if (m.role === 'user') {
-          // 첫 번째 user 메시지에만 시스템 프롬프트 붙이기
           const text = idx === 0 ? `${systemPrompt}\n\n사용자: ${m.text}` : m.text;
           contents.push({ role: 'user', parts: [{ text }] });
         } else {
@@ -52,4 +51,22 @@ export default async function handler(req, res) {
       body: JSON.stringify({ contents })
     });
 
-    const data = await
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Gemini API error:", JSON.stringify(data));
+      return res.status(200).json({ reply: "잠시 후 다시 시도해 주세요." });
+    }
+
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    if (!reply) {
+      return res.status(200).json({ reply: "답변을 가져오지 못했어요." });
+    }
+
+    return res.status(200).json({ reply });
+
+  } catch (err) {
+    console.error("chat handler error:", err);
+    return res.status(200).json({ reply: "잠시 후 다시 시도해 주세요." });
+  }
+}
