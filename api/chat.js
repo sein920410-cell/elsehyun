@@ -23,13 +23,18 @@ export default async function handler(req, res) {
 - 물건 찾기: 목록에 있으면 "있어요", 없으면 "목록에는 없네요"로 바로 답해.
 - 정리 제안 등 의견은 간단히 1~2가지만.`;
 
-    // 이전 대화 히스토리를 Gemini 다중턴 형식으로 변환
-    const contents = [];
-    const historyTurns = (history || []).filter(m => m.role === 'user' || m.role === 'bot');
+    // Gemini는 반드시 user 턴으로 시작해야 함
+    // bot 인사말 등 앞쪽 bot 메시지는 제거하고 user 턴부터 시작
+    const filtered = (history || []).filter(m => m.role === 'user' || m.role === 'bot');
+    const firstUserIdx = filtered.findIndex(m => m.role === 'user');
+    const validHistory = firstUserIdx >= 0 ? filtered.slice(firstUserIdx) : [];
 
-    if (historyTurns.length > 0) {
-      historyTurns.forEach((m, idx) => {
+    const contents = [];
+
+    if (validHistory.length > 0) {
+      validHistory.forEach((m, idx) => {
         if (m.role === 'user') {
+          // 첫 번째 user 메시지에만 시스템 프롬프트 붙이기
           const text = idx === 0 ? `${systemPrompt}\n\n사용자: ${m.text}` : m.text;
           contents.push({ role: 'user', parts: [{ text }] });
         } else {
@@ -47,10 +52,4 @@ export default async function handler(req, res) {
       body: JSON.stringify({ contents })
     });
 
-    const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "잠시 후 다시 시도해 주세요.";
-    return res.status(200).json({ reply });
-  } catch (err) {
-    return res.status(500).json({ error: "비서 응답 오류" });
-  }
-}
+    const data = await
