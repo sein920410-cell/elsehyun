@@ -3,11 +3,10 @@ import fetch from "node-fetch";
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
   
-  const { message, inventory, tag, drawerName } = req.body;
+  const { message, inventory, tag, drawerName, history = [] } = req.body;
 
   try {
     const model = process.env.GEMINI_MODEL || "gemini-3-flash-preview";
-    // 🚀 여기를 'GEMINI_API_KEY_CHAT'으로 바꿔서 분석용 키와 충돌나지 않게 합니다.
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
     const location = drawerName || tag;
@@ -24,12 +23,28 @@ export default async function handler(req, res) {
 - 물건 찾기: 목록에 있으면 "있어요", 없으면 "목록에는 없네요"로 바로 답해.
 - 정리 제안 등 의견은 간단히 1~2가지만.`;
 
-    const prompt = `${systemPrompt}\n\n사용자: ${message}`;
+    // 이전 대화 히스토리를 Gemini 다중턴 형식으로 변환
+    const contents = [];
+    const historyTurns = (history || []).filter(m => m.role === 'user' || m.role === 'bot');
+
+    if (historyTurns.length > 0) {
+      historyTurns.forEach((m, idx) => {
+        if (m.role === 'user') {
+          const text = idx === 0 ? `${systemPrompt}\n\n사용자: ${m.text}` : m.text;
+          contents.push({ role: 'user', parts: [{ text }] });
+        } else {
+          contents.push({ role: 'model', parts: [{ text: m.text }] });
+        }
+      });
+      contents.push({ role: 'user', parts: [{ text: message }] });
+    } else {
+      contents.push({ role: 'user', parts: [{ text: `${systemPrompt}\n\n사용자: ${message}` }] });
+    }
 
     const response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      body: JSON.stringify({ contents })
     });
 
     const data = await response.json();
