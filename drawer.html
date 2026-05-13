@@ -20,7 +20,13 @@
         .select('id')
         .eq('used_by', session.user.email)
         .maybeSingle();
-    if (!serial) { window.location.replace('serial.html'); return; }
+    const { data: singleSerial } = await _authClient
+        .from('single_serials')
+        .select('id')
+        .eq('used_by', session.user.email)
+        .limit(1)
+        .maybeSingle();
+    if (!serial && !singleSerial) { window.location.replace('serial.html'); return; }
     document.body.style.visibility = 'visible';
 })();
 </script>
