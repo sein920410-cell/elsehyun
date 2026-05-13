@@ -84,30 +84,41 @@
 
         // ── 코드 추출 ──────────────────────────────────────────────
         // 1순위: URL 경로 (/GYEOL-1-MAIN)
-        // 2순위: 쿼리 파라미터 (?code=GYEOL-1-MAIN)
+        // 2순위: 쿼리 파라미터 (?id=GYEOL-S-1 또는 ?code=GYEOL-1-MAIN)
         function extractCode() {
             const path = window.location.pathname.replace(/^\//, '').replace(/\.html.*$/, '');
             if (path && path.toUpperCase().startsWith('GYEOL-')) return path.toUpperCase();
             const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (id && id.toUpperCase().startsWith('GYEOL-')) return id.toUpperCase();
             const q = params.get('code');
             if (q && q.toUpperCase().startsWith('GYEOL-')) return q.toUpperCase();
             return null;
         }
 
-        // ── 코드에서 세트 번호 추출 ────────────────────────────────
-        // "GYEOL-1-MAIN" → 1,  "GYEOL-42-DR1" → 42
-        // serials 테이블의 set_number 컬럼과 대조하기 위한 값
-        function parseSetNumber(code) {
-            const parts = code.split('-'); // ["GYEOL", "1", "MAIN"]
-            if (parts.length < 3) return null;
-            const n = parseInt(parts[1], 10);
-            return isNaN(n) ? null : n;
+        // ── 코드 타입 판별 ─────────────────────────────────────────
+        // 패키지: GYEOL-1-MAIN / GYEOL-42-DR1
+        // 단품:   GYEOL-S-5
+        function parseCode(code) {
+            const parts = code.split('-');
+            if (parts.length >= 3 && parts[1] === 'S') {
+                // 단품: GYEOL-S-{num}
+                const n = parseInt(parts[2], 10);
+                return isNaN(n) ? null : { type: 'single', num: n };
+            }
+            if (parts.length >= 3) {
+                // 패키지: GYEOL-{num}-MAIN/DR1/DR2
+                const n = parseInt(parts[1], 10);
+                return isNaN(n) ? null : { type: 'package', num: n };
+            }
+            return null;
         }
 
         // ── 태그 타입에 따라 이동할 URL 결정 ─────────────────────
-        // MAIN → index.html (보관함 홈)
-        // DR1/DR2 → drawer.html?tag=GYEOL-1-DR1 (서랍 화면)
+        // 패키지 MAIN → index.html / DR1/DR2 → drawer.html
+        // 단품 → drawer.html?tag=GYEOL-S-{num}
         function getRedirectUrl(code) {
+            if (code.startsWith('GYEOL-S-')) return `drawer.html?tag=${encodeURIComponent(code)}`;
             if (code.endsWith('-MAIN')) return 'index.html';
             return `drawer.html?tag=${encodeURIComponent(code)}`;
         }
@@ -118,49 +129,59 @@
         if (!code) {
             show('state-no-code');
         } else {
-            const setNumber = parseSetNumber(code);
+            const parsed = parseCode(code);
 
-            if (!setNumber) {
-                // 코드 형식이 맞지 않으면 (세트 번호를 파싱할 수 없음)
+            if (!parsed) {
                 show('state-no-code');
             } else {
-                // 1. 로그인 여부 확인
                 const { data: { session } } = await supabase.auth.getSession();
 
                 if (!session) {
-                    // 로그인 안 된 경우 → 로그인 후 이 태그 URL로 돌아오도록 현재 주소 저장
                     window.location.replace(`login.html?redirect=${encodeURIComponent(window.location.href)}`);
 
-                } else {
-                    // 2. serials 테이블에서 이 세트 번호(set_number)로 등록된 row 조회
-                    // serial_code(GYEOL-1-DUFA)가 아니라 set_number(1)로 찾는 것이 핵심
-                    // 하나의 세트 번호에 MAIN/DR1/DR2 세 row가 있으므로 maybeSingle 대신 limit(1) 사용
-                    const { data: serial } = await supabase
-                        .from('serials')
-                        .select('used_by, set_number')
-                        .eq('set_number', setNumber)
+                } else if (parsed.type === 'single') {
+                    // ── 단품 태그 처리 ─────────────────────────────
+                    const { data: single } = await supabase
+                        .from('single_serials')
+                        .select('used_by, item_number')
+                        .eq('item_number', parsed.num)
                         .limit(1)
                         .maybeSingle();
 
-                    if (!serial) {
-                        // serials 테이블에 이 세트 번호 자체가 없음 → 정품 아님
+                    if (!single) {
                         document.getElementById('invalid-code').textContent = code;
                         show('state-invalid');
-
-                    } else if (!serial.used_by) {
-                        // 정품 태그인데 아직 아무도 등록 안 한 상태
-                        // → 로그인은 됐으니 시리얼 코드 입력 화면으로
+                    } else if (!single.used_by) {
                         document.getElementById('btn-register').onclick = () => {
                             window.location.replace('serial.html');
                         };
                         show('state-unregistered');
-
-                    } else if (serial.used_by === session.user.email) {
-                        // 내 태그 → 해당 보관함 또는 서랍으로 바로 이동
+                    } else if (single.used_by === session.user.email) {
                         window.location.replace(getRedirectUrl(code));
-
                     } else {
-                        // 다른 사람이 이미 등록한 태그
+                        show('state-taken');
+                    }
+
+                } else {
+                    // ── 패키지 태그 처리 ───────────────────────────
+                    const { data: serial } = await supabase
+                        .from('serials')
+                        .select('used_by, set_number')
+                        .eq('set_number', parsed.num)
+                        .limit(1)
+                        .maybeSingle();
+
+                    if (!serial) {
+                        document.getElementById('invalid-code').textContent = code;
+                        show('state-invalid');
+                    } else if (!serial.used_by) {
+                        document.getElementById('btn-register').onclick = () => {
+                            window.location.replace('serial.html');
+                        };
+                        show('state-unregistered');
+                    } else if (serial.used_by === session.user.email) {
+                        window.location.replace(getRedirectUrl(code));
+                    } else {
                         show('state-taken');
                     }
                 }
