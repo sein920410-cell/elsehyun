@@ -493,13 +493,15 @@ function copyInviteLink() {
     });
 }
 
-/* 계정 삭제 — serials 테이블 초기화 후 로그아웃 */
+/* 계정 삭제 — 14일 유예 방식 */
 async function deleteAccount() {
-    if (!confirm('정말 계정을 삭제하시겠습니까?\n\n· 태그와 시리얼 코드 연결이 해제됩니다\n· 모든 서랍 목록이 삭제됩니다\n· 같은 시리얼 코드로 재등록은 가능합니다\n\n삭제 후 복구할 수 없습니다.')) return;
+    if (!confirm('정말 계정을 삭제하시겠습니까?\n\n· 삭제 후 14일 이내 같은 이메일로 재등록 시 복구 가능합니다.\n· 14일이 지나면 시리얼 코드가 완전 폐기되어 재등록이 불가합니다.\n· 잔여 이용권은 복구되지 않습니다.\n\n진행하시겠습니까?')) return;
     try {
         if (currentSession && currentSession.user) {
-            // serials 테이블에서 이 이메일 연결 해제 (시리얼 코드 자체는 유지)
-            await sb.from('serials').update({ used_by: null, used_at: null }).eq('used_by', currentSession.user.email);
+            const now = new Date().toISOString();
+            await sb.from('serials')
+                .update({ used_by: null, deleted_at: now, original_owner: currentSession.user.email })
+                .eq('used_by', currentSession.user.email);
         }
         // localStorage 전체 정리
         for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -509,7 +511,7 @@ async function deleteAccount() {
             }
         }
         await sb.auth.signOut();
-        alert('계정이 안전하게 삭제되었습니다. 그동안 공간:결을 이용해주셔서 감사합니다.');
+        alert('계정이 삭제되었습니다.\n14일 이내 같은 이메일로 재등록하면 데이터를 복구할 수 있습니다.');
         window.location.replace('login.html');
     } catch(err) {
         alert('계정 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
