@@ -119,11 +119,40 @@
                 .from('serials')
                 .select('*')
                 .eq('serial_code', code)
-                .is('used_by', null)
                 .maybeSingle();
 
             if (error || !serial) {
                 errEl.textContent = '유효하지 않은 시리얼 번호예요. 다시 확인해주세요.';
+                errEl.classList.remove('hidden');
+                btn.textContent = '등록하기';
+                btn.disabled = false;
+                return;
+            }
+
+            // ── 14일 유예 / 잠금 체크 ───────────────────────────────
+            if (serial.deleted_at) {
+                const deletedAt = new Date(serial.deleted_at);
+                const daysPassed = (new Date() - deletedAt) / (1000 * 60 * 60 * 24);
+                if (daysPassed >= 14) {
+                    // 14일 경과 → 완전 폐기
+                    errEl.textContent = '이미 사용 이력이 있는 시리얼 번호예요. 고객센터로 문의해주세요.';
+                    errEl.classList.remove('hidden');
+                    btn.textContent = '등록하기';
+                    btn.disabled = false;
+                    return;
+                }
+                if (serial.original_owner !== session.user.email) {
+                    // 14일 이내지만 다른 이메일 → 차단
+                    errEl.textContent = '이미 사용 이력이 있는 시리얼 번호예요. 본인 계정으로 로그인 후 다시 시도해주세요.';
+                    errEl.classList.remove('hidden');
+                    btn.textContent = '등록하기';
+                    btn.disabled = false;
+                    return;
+                }
+                // 14일 이내 + 본인 이메일 → 복구 허용 (아래로 계속)
+            } else if (serial.used_by) {
+                // 정상 사용 중인 다른 계정
+                errEl.textContent = '이미 등록된 시리얼 번호예요.';
                 errEl.classList.remove('hidden');
                 btn.textContent = '등록하기';
                 btn.disabled = false;
@@ -151,10 +180,10 @@
                 return;
             }
 
-            // serials 테이블에 사용자 이메일 기록
+            // serials 테이블에 사용자 이메일 기록 + 유예 컬럼 초기화
             await supabase
                 .from('serials')
-                .update({ used_by: session.user.email, used_at: now })
+                .update({ used_by: session.user.email, used_at: now, deleted_at: null, original_owner: null })
                 .eq('serial_code', code);
 
             sucEl.textContent = '등록 완료! 잠시 후 이동합니다.';
