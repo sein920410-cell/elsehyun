@@ -86,13 +86,13 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .media-empty-sub{font-size:12px;color:rgba(255,255,255,.3);text-align:center;line-height:1.5}
 
 /* ─── 툴바 ─── */
-.toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 7px;flex-shrink:0;background:var(--bg)}
+.toolbar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 7px;flex-shrink:0;background:var(--bg)}
 .toolbar-left{display:flex;align-items:center}
-.toolbar-cnt{font-size:13px;font-weight:800;padding:0 14px;border-radius:var(--r);background:var(--h-bg);color:var(--h-txt,#fff);letter-spacing:.04em;display:none;transition:background .4s;height:40px;align-items:center;justify-content:center}
+.toolbar-cnt{font-size:14px;font-weight:800;padding:0 16px;border-radius:var(--r);background:var(--h-bg);color:var(--h-txt,#fff);letter-spacing:.04em;display:none;transition:background .4s;height:40px;align-items:center;justify-content:center;min-width:54px}
 .toolbar-cnt.vis{display:inline-flex}
 .toolbar-right{display:flex;align-items:center;gap:7px}
 .toolbar-search-btn{width:40px;height:40px;border-radius:var(--r);background:var(--h-bg);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .4s;flex-shrink:0}
-.toolbar-search-btn svg{width:17px;height:17px;stroke:var(--h-txt,#fff);stroke-width:2;fill:none;stroke-linecap:round}
+.toolbar-search-btn svg{width:16px;height:16px;stroke:var(--h-txt,#fff);stroke-width:2;fill:none;stroke-linecap:round}
 .toolbar-search-btn:active{opacity:.7}
 
 /* ─── 검색바 ─── */
@@ -110,10 +110,13 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .list-wrap::-webkit-scrollbar{display:none}
 .list-inner{padding:2px 12px 24px}
 .cat-section{margin-bottom:4px}
-.cat-header{display:flex;align-items:center;padding:14px 4px 7px;border-bottom:1px solid rgba(0,0,0,0.05);margin-bottom:5px;cursor:pointer}
-.cat-header:active{opacity:.7}
-.cat-name-lbl{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex:1;transition:opacity .2s}
-.cat-name-lbl.collapsed{opacity:.35}
+.cat-header{display:flex;align-items:center;padding:12px 4px 7px;border-bottom:1px solid rgba(0,0,0,0.06);margin-bottom:5px;cursor:pointer;gap:6px}
+.cat-header:active{opacity:.65}
+.cat-name-lbl{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);flex:1;transition:color .2s}
+.cat-chevron{width:22px;height:22px;border-radius:5px;background:var(--tag-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cat-chevron svg{width:11px;height:11px;stroke:var(--muted);stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .22s cubic-bezier(.4,0,.2,1)}
+.cat-header.collapsed .cat-chevron svg{transform:rotate(-90deg)}
+.cat-header.collapsed .cat-name-lbl{color:var(--muted2)}
 
 /* ─── 아이템 카드 (스와이프 삭제/편집) ─── */
 .item-card{border-radius:var(--r);margin-bottom:6px;position:relative;overflow:hidden}
@@ -124,19 +127,18 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .swipe-del-btn{flex:1;background:var(--danger);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:3px}
 .swipe-del-btn svg{width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .swipe-del-lbl{font-size:10px;font-weight:700;color:#fff;letter-spacing:.03em}
-.item-row{display:flex;align-items:center;padding:13px 14px;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);position:relative;z-index:1;transition:transform .22s cubic-bezier(.32,0,0,1)}
-
-.item-ico{width:42px;height:42px;border-radius:var(--r);background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;line-height:1}
-.item-ico svg{width:20px;height:20px;stroke:var(--muted);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.item-row{display:flex;align-items:center;padding:12px 13px;gap:11px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);position:relative;z-index:1;transition:transform .22s cubic-bezier(.32,0,0,1)}
+.item-ico{width:40px;height:40px;border-radius:calc(var(--r) - 1px);background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;line-height:1}
+.item-ico svg{width:19px;height:19px;stroke:var(--muted);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .item-info{flex:1;min-width:0}
-.item-name{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em;line-height:1.35}
-.item-sub-row{display:flex;align-items:center;gap:6px;margin-top:3px}
-.item-cat-lbl{font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:.06em;text-transform:uppercase}
-.item-memo-badge{display:inline-flex;align-items:center;gap:3px;background:var(--h-bg);color:var(--h-txt);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .4s}
+.item-name{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.02em;line-height:1.3}
+.item-sub-row{display:flex;align-items:center;gap:5px;margin-top:3px}
+.item-cat-lbl{font-size:9px;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase}
+.item-memo-badge{display:inline-flex;align-items:center;gap:3px;background:var(--h-bg);color:var(--h-txt);border-radius:4px;padding:2px 6px;font-size:9px;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .4s}
 .qty-wrap{display:flex;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:5px;overflow:hidden;flex-shrink:0}
-.qty-btn{width:34px;height:34px;font-size:20px;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;font-family:var(--font)}
+.qty-btn{width:32px;height:32px;font-size:18px;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;font-family:var(--font);line-height:1}
 .qty-btn:active{background:var(--border)}
-.qty-num{font-size:13px;font-weight:700;color:var(--ink);width:30px;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);height:34px;line-height:34px}
+.qty-num{font-size:13px;font-weight:700;color:var(--ink);width:28px;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);height:32px;line-height:32px}
 
 /* ─── 하단 액션 ─── */
 .bottom-section{padding:8px 0 8px;display:flex;flex-direction:column;gap:8px}
@@ -236,9 +238,9 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .chat-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;backdrop-filter:blur(6px);align-items:flex-end}
 .chat-ov.open{display:flex}
 .chat-sheet{background:var(--surface);border-radius:14px 14px 0 0;width:100%;height:72dvh;display:flex;flex-direction:column;animation:sheetUp .28s cubic-bezier(.32,0,0,1);overflow:hidden}
-.chat-hdr{height:60px;background:var(--h-bg);padding:0 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;transition:background .4s}
-.chat-hdr img{width:34px;height:34px;object-fit:contain;flex-shrink:0;border-radius:50%}
-.chat-hdr-name{font-size:16px;font-weight:700;color:#fff;letter-spacing:-.01em;flex:1}
+.chat-hdr{height:56px;background:var(--h-bg);padding:0 14px;display:flex;align-items:center;gap:0;flex-shrink:0;transition:background .4s}
+.chat-hdr-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.chat-hdr-name{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.01em;white-space:nowrap}
 .chat-back-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .chat-back-btn svg{width:19px;height:19px;stroke:rgba(255,255,255,.85);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .chat-end-btn{height:38px;padding:0 14px;background:transparent;border:1.5px solid rgba(255,255,255,.3);border-radius:var(--r);display:flex;align-items:center;cursor:pointer;font-size:13px;font-weight:600;color:rgba(255,255,255,.85);font-family:var(--font);white-space:nowrap}
@@ -495,8 +497,11 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 
 <!-- 항목 직접 추가 -->
 <div class="add-item-ov" id="add-item-ov" onclick="if(event.target===this)closeAddItem()">
-  <div class="add-item-sheet">
-    <div class="sh-handle"></div>
+  <div class="add-item-sheet" id="add-item-sheet"
+    ontouchstart="sheetTouchStart(event,'add')"
+    ontouchmove="sheetTouchMove(event,'add')"
+    ontouchend="sheetTouchEnd(event,'add')">
+    <div class="sh-handle" style="cursor:grab"></div>
     <div class="sh-title">항목 직접 추가</div>
     <div class="ai-cat-lbl">분류 선택</div>
     <div class="ai-chips">
@@ -518,12 +523,20 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 
 <!-- 항목 편집 (스와이프 편집) -->
 <div class="edit-item-ov" id="edit-item-ov" onclick="if(event.target===this)closeEditItem()">
-  <div class="edit-item-sheet">
-    <div class="sh-handle"></div>
+  <div class="edit-item-sheet" id="edit-item-sheet"
+    ontouchstart="sheetTouchStart(event,'edit')"
+    ontouchmove="sheetTouchMove(event,'edit')"
+    ontouchend="sheetTouchEnd(event,'edit')">
+    <div class="sh-handle" style="cursor:grab"></div>
     <div class="sh-title">항목 수정</div>
-    <div class="ai-cat-lbl">물품명</div>
-    <input class="ai-name-input" id="edit-name-input" type="text" placeholder="물품명" onkeydown="if(event.key==='Enter')saveEditItem()">
-    <div class="ai-cat-lbl" style="margin-top:14px">메모 <span style="font-weight:400;color:var(--muted2);letter-spacing:0">(선택 · 나만 아는 메모)</span></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div id="edit-ico-preview" onclick="openIconPickerFromEdit()" style="width:52px;height:52px;border-radius:var(--r);background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" title="아이콘 변경"></div>
+      <div style="flex:1">
+        <div class="ai-cat-lbl" style="margin-top:0">물품명</div>
+        <input class="ai-name-input" id="edit-name-input" type="text" placeholder="물품명" onkeydown="if(event.key==='Enter')saveEditItem()">
+      </div>
+    </div>
+    <div class="ai-cat-lbl" style="margin-top:4px">메모 <span style="font-weight:400;color:var(--muted2);letter-spacing:0">(선택 · 나만 아는 메모)</span></div>
     <input class="ai-name-input" id="edit-memo-input" type="text" placeholder="예: 운동복, 잠옷, 겨울용..." onkeydown="if(event.key==='Enter')saveEditItem()">
     <button class="ai-confirm-btn" onclick="saveEditItem()">저장하기</button>
   </div>
@@ -533,9 +546,10 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <div class="chat-ov" id="chat-ov" onclick="if(event.target===this)closeChat()">
   <div class="chat-sheet" onclick="event.stopPropagation()">
     <div class="chat-hdr">
-      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAh4AAAIXCAYAAADTzFeCAAAJe0lEQVR4nO3dwWrCQBRA0Unx/395uumiCNa2JHdiPGfjJsJDMblOILPNOecAntn+cOz8Ot5vC+DOx+oBAID3ITxgX/PuFYBvhAcAkBEeAEBGeAAAGeEBAGSEBwCQER6wr7887wPg7QgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgOe21YPAHAVwgMAyAgP+JnVDoAd3YYTKwAQseIBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkbmOMuXoIfsUTZgF4eVY8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgP2t60eAOCsbqsHgIvaxhhz9RAAB/rXnyzhAcex8gFwx60WACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAy9mq5NpuUHe/Zfiy+A+CsluwnJTyuywWv4XMGXtWS85dbLdfkYgjAKQkPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsIDAMgIDwAgIzwAgIzwAAAywgMAyAgPACAjPACAjPAAADLC43rm6gEA4BHhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeFzPtnoAAHhEeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEeAEBGeAAAGeEBAGSEBwCQER4AQEZ4AAAZ4QEAZIQHAJARHgBARngAABnhAQBkhAcAkBEe57dF7wGAwwkPACAjPACAjPAAADLCAwDICA8AICM8AICM8AAAMsLj/ObqAQBgL8IDAMgIDwAgIzwAgIzwAAAywgMAyAgPACDzCVwAFjgGLUAsAAAAAElFTkSuQmCC" alt="">
-      <div class="chat-back-btn" onclick="closeChat()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <span class="chat-hdr-name">1:1 채팅상담</span>
+      <div class="chat-hdr-left">
+        <div class="chat-back-btn" onclick="closeChat()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <span class="chat-hdr-name">1:1 채팅상담</span>
+      </div>
       <div class="chat-end-btn" onclick="endChat()">상담 종료하기</div>
     </div>
     <div class="chat-msgs" id="chat-msgs"></div>
@@ -692,8 +706,9 @@ function renderItems(filter=''){
     const isOpen=catOpenState[cat]!==false;
     const ic=getIconSVG;
     return`<div class="cat-section">
-      <div class="cat-header" onclick="toggleCat('${cat.replace(/'/g,"\\'")}',this)">
-        <span class="cat-name-lbl${isOpen?'':' collapsed'}">${cat}</span>
+      <div class="cat-header${isOpen?'':' collapsed'}" onclick="toggleCat('${cat.replace(/'/g,"\\'")}',this)">
+        <span class="cat-name-lbl">${cat}</span>
+        <div class="cat-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
       </div>
       <div class="cat-content" style="display:${isOpen?'block':'none'}">
         ${groups[cat].map(it=>{
@@ -743,10 +758,9 @@ function toggleCat(catName,headerEl){
   catOpenState[catName]=catOpenState[catName]===false?true:false;
   const section=headerEl.closest('.cat-section');
   const content=section.querySelector('.cat-content');
-  const lbl=section.querySelector('.cat-name-lbl');
   const open=catOpenState[catName]!==false;
   content.style.display=open?'block':'none';
-  lbl.classList.toggle('collapsed',!open);
+  headerEl.classList.toggle('collapsed',!open);
 }
 function renameCat(oldName,el){const n=prompt('카테고리 이름 수정:',oldName);if(!n||n.trim()===oldName)return;const nn=n.trim();items=items.map(it=>{if(it.n.startsWith(oldName+':')){return{...it,n:nn+':'+it.n.slice(oldName.length+1)};}return it;});save();}
 function changeQty(idx,d){items[idx].q=Math.max(1,(items[idx].q||1)+d);save();}
@@ -762,7 +776,14 @@ function addItemDirectly(){
   });
   setTimeout(()=>document.getElementById('add-item-input').focus(),300);
 }
-function closeAddItem(){document.getElementById('add-item-ov').style.display='none';}
+function closeAddItem(){const el=document.getElementById('add-item-sheet');if(el)el.style.transform='';document.getElementById('add-item-ov').style.display='none';}
+function openIconPickerFromEdit(){if(editIdx>=0){const tmp=editIdx;closeEditItem();openIconPicker(tmp);}}
+
+// ─── 시트 스와이프 다운 닫기 ───
+let _sheetSY={add:0,edit:0},_sheetDragging={add:false,edit:false};
+function sheetTouchStart(e,key){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='BUTTON'||e.target.closest('.ai-chips'))return;_sheetSY[key]=e.touches[0].clientY;_sheetDragging[key]=false;}
+function sheetTouchMove(e,key){const dy=e.touches[0].clientY-_sheetSY[key];if(dy<=0)return;_sheetDragging[key]=true;const el=document.getElementById(key+'-item-sheet');if(el)el.style.transform='translateY('+dy+'px)';}
+function sheetTouchEnd(e,key){const dy=_sheetDragging[key]?e.changedTouches[0].clientY-_sheetSY[key]:0;const el=document.getElementById(key+'-item-sheet');if(dy>100){if(key==='add')closeAddItem();else closeEditItem();}else{if(el)el.style.transform='';}_sheetDragging[key]=false;}
 function selectAddCat(el,cat){_addCat=cat;document.querySelectorAll('.ai-chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
 function addItemConfirm(){const n=document.getElementById('add-item-input').value.trim();if(!n)return;items.push({n:_addCat+':'+n,q:1});save();closeAddItem();}
 
@@ -772,13 +793,22 @@ function openEditItem(idx){
   const it=items[idx];
   let name=it.n;
   if(it.n.includes(':')){const p=it.n.split(':');name=p.slice(1).join(':').trim();}
+  let cat='기타';if(it.n.includes(':')){cat=it.n.split(':')[0].trim();}
   document.getElementById('edit-name-input').value=name;
   document.getElementById('edit-memo-input').value=it.memo||'';
+  // 아이콘 미리보기
+  const prv=document.getElementById('edit-ico-preview');
+  if(prv){
+    const icoKey=it.icon||getAutoIcon(name,cat);
+    prv.innerHTML=getIconSVG(icoKey);
+    const svg=prv.querySelector('svg');
+    if(svg)svg.style.cssText='width:26px;height:26px;stroke:var(--ink);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round';
+  }
   document.getElementById('edit-item-ov').style.display='flex';
   resetSwipe(idx);
   setTimeout(()=>document.getElementById('edit-name-input').focus(),300);
 }
-function closeEditItem(){document.getElementById('edit-item-ov').style.display='none';editIdx=-1;}
+function closeEditItem(){const el=document.getElementById('edit-item-sheet');if(el)el.style.transform='';document.getElementById('edit-item-ov').style.display='none';editIdx=-1;}
 function saveEditItem(){
   if(editIdx<0)return;
   const newName=document.getElementById('edit-name-input').value.trim();
