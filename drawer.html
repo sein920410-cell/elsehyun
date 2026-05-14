@@ -67,6 +67,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .brand-b svg{width:18px;height:18px;stroke:var(--h-sub);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .brand.swap .brand-a{transform:translateY(-110%);opacity:0}
 .brand.swap .brand-b{transform:translateY(0);opacity:1}
+.brand.swap .brand-b .chat-badge{display:block!important}
 .header-title-wrap{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
 .header-title-wrap .drawer-btn{pointer-events:all}
 .drawer-btn{display:flex;align-items:center;padding:6px 14px;border-radius:9px;background:transparent;border:none;cursor:pointer;font-family:var(--font);transition:background .15s}
@@ -929,5 +930,4 @@ function cancelRecording(){clearInterval(recTimer);clearInterval(window._brightT
 <!-- 항목 직접 추가 모달 -->
 <div class="add-item-ov" id="add-item-ov" onclick="if(event.target===this)closeAddItem()">
   <div class="add-item-sheet">
-    <div class="sh-handle"></div>
- 
+    <div class="sh-
