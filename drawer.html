@@ -265,7 +265,22 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .r-btn{flex:1;padding:13px;border:none;border-radius:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:var(--font)}
 .r-btn.sec{background:rgba(255,255,255,.1);color:#fff}
 .r-btn.pri{background:#fff;color:#000}
-.rotate0{transform:rotate(0deg)}.rotate90{transform:rotate(90deg)}.rotate180{transform:rotate(180deg)}.rotate270{transform:rotate(270deg)}
+.rotate0{transform:rotate(0deg)}
+.rotate180{transform:rotate(180deg)}
+/* 90°/270° 회전 시 가로세로가 뒤바뀌어 이미지가 한쪽으로 쏠리는 버그 수정 */
+/* width=박스높이(210px), height=박스너비(100vw-28px)로 바꾼 뒤 회전해서 꽉 채움 */
+.media-box .rotate90,
+.media-box .rotate270 {
+  position:absolute !important;
+  width:210px !important;
+  height:calc(100vw - 28px) !important;
+  top:50% !important;
+  left:50% !important;
+  transform-origin:center center !important;
+  object-fit:cover !important;
+}
+.media-box .rotate90{transform:translate(-50%,-50%) rotate(90deg) !important}
+.media-box .rotate270{transform:translate(-50%,-50%) rotate(270deg) !important}
 
 .rec-ov{display:none;position:fixed;inset:0;background:#000;z-index:600;flex-direction:column}
 .rec-ov.open{display:flex}
