@@ -151,6 +151,20 @@
                     </label>
                     <span class="detail-link mt-0.5" onclick="openModal('privacy')">더보기</span>
                 </div>
+                <!-- 만 14세 이상 -->
+                <div class="flex items-start gap-2">
+                    <input type="checkbox" id="chk-age" class="gyeol-check" onchange="updateBtns()">
+                    <label for="chk-age" class="gyeol-check-label flex-1">
+                        <div class="gyeol-check-box">
+                            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                                <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="gyeol-check-text">
+                            <span class="badge">[필수]</span>만 14세 이상입니다.
+                        </span>
+                    </label>
+                </div>
             </div>
             <div class="h-px bg-gray-700 mb-5"></div>
         </div>
@@ -207,36 +221,52 @@
         </div>
         <div class="modal-body">
             <h3>제1조 목적</h3>
-            <p>본 약관은 엘세현(이하 "회사")이 운영하는 공간:결 서비스(이하 "서비스")의 이용과 관련하여 회사와 이용자 간의 권리, 의무 및 책임사항을 규정합니다.</p>
+            <p>본 약관은 엘세현(이하 "회사")이 운영하는 공간:결 서비스의 이용과 관련하여 회사와 이용자 간의 권리, 의무 및 책임사항을 규정합니다.</p>
 
-            <h3>제2조 서비스 이용</h3>
+            <h3>제2조 이용 자격 및 연령 제한 [필수]</h3>
             <ul>
+                <li><strong>본 서비스는 만 14세 이상만 이용할 수 있습니다.</strong></li>
                 <li>서비스는 유효한 시리얼 코드를 보유하고 소셜 계정(Google, 카카오 등)으로 로그인한 이용자에 한해 제공됩니다.</li>
                 <li>1개의 시리얼 코드는 1개의 계정에만 등록 가능합니다.</li>
+            </ul>
+
+            <h3>제3조 AI 이용권 및 서비스</h3>
+            <ul>
                 <li>기본 AI 이용권은 계정당 무료 20건이 제공됩니다.</li>
                 <li>추가 이용권은 유료이며, 계정 삭제 시 잔여 이용권은 소멸됩니다.</li>
+                <li>AI 분석 결과는 참고 정보로만 활용되며, 오류가 있을 수 있습니다. 회사는 분석 결과의 정확성을 보증하지 않습니다.</li>
+                <li>AI 분석에 사용된 이미지·영상은 외부 AI 분석 서비스 제공업체(Google LLC)로 전송됩니다.</li>
             </ul>
 
-            <h3>제3조 이용자 의무</h3>
+            <h3>제4조 개인정보 보호 (AI 자동 차단)</h3>
+            <ul>
+                <li>신분증·통장·카드·계약서·처방전·등본 등 민감한 개인정보가 포함된 사진·영상은 AI 분석에서 자동 제외됩니다.</li>
+                <li>이 기능은 AI 기반으로 동작하며 완벽한 차단을 보장하지 않습니다. 민감한 문서는 사진에 함께 두지 않을 것을 권장합니다.</li>
+            </ul>
+
+            <h3>제5조 서비스 중단 및 점검</h3>
+            <ul>
+                <li>정기 점검은 최소 24시간 전에 사전 공지합니다.</li>
+                <li>긴급 점검은 불가피한 경우 사전 공지 없이 진행될 수 있습니다.</li>
+            </ul>
+
+            <h3>제6조 이용자 의무</h3>
             <ul>
                 <li>타인의 계정·시리얼 코드를 무단 사용해서는 안 됩니다.</li>
-                <li>서비스를 이용하여 타인의 권리를 침해하거나 불법 행위를 해서는 안 됩니다.</li>
                 <li>업로드한 사진·영상에 대해 적법한 권리를 보유해야 합니다.</li>
+                <li>만 14세 미만 제3자의 개인정보를 서비스에 등록해서는 안 됩니다.</li>
             </ul>
 
-            <h3>제4조 콘텐츠 관련</h3>
+            <h3>제7조 책임 제한</h3>
             <ul>
-                <li>업로드한 사진·영상의 권리는 이용자에게 있습니다.</li>
-                <li>AI 분석에 사용된 이미지는 외부 AI 분석 서비스로 전송될 수 있습니다.</li>
-                <li>계정 삭제 시 업로드된 콘텐츠는 서버에서 삭제됩니다.</li>
+                <li>회사는 무료 서비스 범위 내 오류 및 AI 분석 결과 부정확에 대해 배상 책임을 지지 않습니다.</li>
+                <li>외부 서비스(Supabase, Google LLC, Vercel 등) 장애로 인한 손해에 대해 책임을 지지 않습니다.</li>
+                <li>이용자 귀책 사유로 인한 피해는 회사 책임이 아닙니다.</li>
             </ul>
 
-            <h3>제5조 책임 제한</h3>
-            <p>회사는 무료 기본 이용권 범위 내 서비스 오류에 대해 배상 책임을 지지 않습니다. 이용자 귀책으로 인한 장애는 회사 책임이 아닙니다.</p>
-
-            <h3>제6조 분쟁 해결</h3>
+            <h3>제8조 분쟁 해결</h3>
             <p>본 약관 관련 분쟁은 대한민국 법률에 따릅니다.</p>
-            <p class="em">문의: elsehyun2026@gmail.com, 카카오 고객센터: 엘세현</p>
+            <p class="em">문의: elsehyun2026@gmail.com &nbsp;|&nbsp; 카카오채널: 엘세현</p>
             <p class="em">시행일: 2026년 05월 13일</p>
         </div>
         <button class="modal-agree-btn" onclick="agreeAndClose('terms')">확인 및 동의</button>
@@ -256,10 +286,13 @@
             </div>
         </div>
         <div class="modal-body">
+            <h3>연령 제한</h3>
+            <p><strong>본 서비스는 만 14세 이상만 이용할 수 있습니다.</strong> 만 14세 미만 아동의 개인정보는 수집하지 않습니다.</p>
+
             <h3>제1조 수집하는 개인정보 항목 및 수집 방법</h3>
             <p><span class="em">수집 항목</span></p>
             <ul>
-                <li>Google 계정 이메일 주소 (로그인 시 자동 수집)</li>
+                <li>소셜 계정 이메일 주소 (Google, 카카오 등 소셜 로그인 시 자동 수집)</li>
                 <li>직접 업로드한 사진 및 영상</li>
                 <li>AI 채팅 기록 (서랍 관리 대화 내용)</li>
                 <li>시리얼 코드 등록 정보 및 이용 일시</li>
@@ -267,7 +300,7 @@
             </ul>
             <p><span class="em">수집 방법</span></p>
             <ul>
-                <li>Google OAuth 2.0을 통한 간편 로그인</li>
+                <li>소셜 로그인을 통한 간편 로그인 (Google OAuth 2.0, 카카오 로그인 등)</li>
                 <li>서비스 이용 과정에서 이용자가 직접 입력·업로드</li>
             </ul>
 
@@ -296,7 +329,8 @@
             <ul>
                 <li>Supabase Inc. (미국) — DB, 파일 저장, 인증</li>
                 <li>Vercel Inc. (미국) — 서비스 호스팅</li>
-                <li>Google LLC — 로그인, AI 분석 서비스</li>
+                <li>Google LLC (미국) — Google 소셜 로그인(OAuth 2.0) 및 AI 분석 서비스(Gemini API 포함)</li>
+                <li>Kakao Corp. (대한민국) — 카카오 소셜 로그인 서비스</li>
             </ul>
 
             <h3>제6조 이용자 권리</h3>
@@ -354,7 +388,8 @@
     // ── 체크박스 상태 업데이트 ────────────────────────────────
     window.updateBtns = function() {
         const ok = document.getElementById('chk-terms').checked &&
-                   document.getElementById('chk-privacy').checked;
+                   document.getElementById('chk-privacy').checked &&
+                   document.getElementById('chk-age').checked;
         document.getElementById('google-btn').classList.toggle('btn-disabled', !ok);
         document.getElementById('login-btn').classList.toggle('btn-disabled', !ok);
     };
