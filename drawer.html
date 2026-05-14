@@ -896,7 +896,7 @@ async function extractVideoFrames(blob,numFrames=5){
     const captureFrame=()=>{ctx.drawImage(video,0,0,640,360);const d=canvas.toDataURL('image/jpeg',0.75);if(d&&d.length>2000)frames.push(d.split(',')[1]);};
     video.onloadedmetadata=async()=>{
       const dur=isFinite(video.duration)&&video.duration>0?video.duration:null;
-      if(dur){const step=dur/(numFrames+1);for(let i=1;i<=numFrames;i++){await new Promise(res=>{video.currentTime=Math.min(step*i,dur-0.05);video.onseeked=()=>{requestAnimationFrame(()=>{captureFrame();res();});});}};URL.revokeObjectURL(url);resolve(frames);}
+      if(dur){const step=dur/(numFrames+1);for(let i=1;i<=numFrames;i++){await new Promise(res=>{video.currentTime=Math.min(step*i,dur-0.05);video.onseeked=()=>{requestAnimationFrame(()=>{captureFrame();res();});};}};URL.revokeObjectURL(url);resolve(frames);}
       else{let lastT=-1;video.ontimeupdate=()=>{if(video.currentTime-lastT>=0.8&&frames.length<numFrames){captureFrame();lastT=video.currentTime;}};const finish=()=>{video.pause();if(frames.length===0)captureFrame();URL.revokeObjectURL(url);resolve(frames);};video.onended=finish;const timeout=setTimeout(finish,15000);video.play().catch(()=>{clearTimeout(timeout);URL.revokeObjectURL(url);resolve([]);});const check=setInterval(()=>{if(frames.length>=numFrames){clearInterval(check);clearTimeout(timeout);finish();}},500);}
     };
     video.onerror=()=>{URL.revokeObjectURL(url);resolve([]);};
