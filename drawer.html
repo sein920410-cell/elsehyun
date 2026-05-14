@@ -1018,11 +1018,17 @@ async function runAnalysis(filePath,mimeType,videoFrames=null){
     const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filePath,mimeType:mimeType||'image/jpeg',userCorrections:corrections,userEmail,...(videoFrames?.length?{videoFrames}:{})})});
     if(!r.ok){const errData=await r.json().catch(()=>({}));if(r.status===402){rmOv();showResultModal('💳','이용권이 소진되었습니다',errData.message||'마이페이지에서 이용권을 충전해주세요.');return;}throw new Error(errData.error||'분석 오류');}
     const d=await r.json();items=[];localStorage.setItem('gyeol_'+tag,'[]');
+    // ── 개인정보 감지 처리 ──────────────────────────────────────
+    if(d.privateInfoDetected){
+      rmOv();renderItems();
+      showResultModal('🔒','개인정보가 감지되었습니다','신분증·통장·카드·계약서·처방전·등본 등이 포함된 사진은 AI 분석에서 자동 제외됩니다. 이용권은 차감되지 않았습니다.');
+      return;
+    }
+    // ────────────────────────────────────────────────────────────
     if(d.items?.length){d.items.forEach(it=>items.push({n:`${it.category}:${it.name}`,q:it.qty||1}));localStorage.setItem('gyeol_'+tag,JSON.stringify(items));}
     rmOv();renderItems();
     if(d.reviewItems?.length)showReview(d.reviewItems);
     else if(items.length>0){const credMsg=d.creditsRemaining!==undefined?` (남은 이용권: ${d.creditsRemaining}건)`:'';}
-    else showResultModal('🔍','물품을 찾지 못했습니다','직접 추가하거나 사진을 바꿔보세요');
   }catch(err){rmOv();showResultModal('⚠️','분석 오류',err.message);renderItems();}
 }
 
