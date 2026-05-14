@@ -353,7 +353,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .result-modal-btn:active{background:var(--bg,#f5f5f5)}
 </style>
 </head>
-<body data-theme="charcoal">
+<body data-theme="stone">
 
 <!-- 점검 화면 -->
 <div class="maintenance-ov" id="maintenance-ov">
@@ -462,7 +462,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
       <div class="theme-cell" onclick="selectTheme('charcoal')"><div class="theme-sw" id="sw-charcoal" style="background:#2C2F33"></div><span class="theme-lbl">차콜</span></div>
       <div class="theme-cell" onclick="selectTheme('forest')"><div class="theme-sw" id="sw-forest" style="background:#1E3D2C"></div><span class="theme-lbl">포레스트</span></div>
       <div class="theme-cell" onclick="selectTheme('gray')"><div class="theme-sw" id="sw-gray" style="background:#4B5563"></div><span class="theme-lbl">슬레이트</span></div>
-      <div class="theme-cell" onclick="selectTheme('stone')"><div class="theme-sw" id="sw-stone" style="background:#EDEBE5;border:1px solid #D4D0C8"></div><span class="theme-lbl">스톤</span></div>
+      <div class="theme-cell" onclick="selectTheme('stone')"><div class="theme-sw" id="sw-stone" style="background:#EDEBE5;border:1px solid #D4D0C8" class="active"></div><span class="theme-lbl">스톤</span></div>
       <div class="theme-cell" onclick="selectTheme('butter')"><div class="theme-sw" id="sw-butter" style="background:#FBE8A6"></div><span class="theme-lbl">버터</span></div>
       <div class="theme-cell" onclick="selectTheme('champagne')"><div class="theme-sw" id="sw-champagne" style="background:#E6D5C3"></div><span class="theme-lbl">샴페인</span></div>
       <div class="theme-cell" onclick="selectTheme('mauve')"><div class="theme-sw" id="sw-mauve" style="background:#7B6EA0"></div><span class="theme-lbl">모브</span></div>
@@ -642,11 +642,14 @@ let items=JSON.parse(localStorage.getItem('gyeol_'+tag)||'[]');
 let corrections=JSON.parse(localStorage.getItem('corrections_'+tag)||'[]');
 let rot=0,selFile=null,mediaStream=null,mediaRec=null,recChunks=[],recTimer=null,recSec=0,recBlob=null,isRec=false;
 let ctxIdx=-1,icoIdx=-1,selIco=null,pendingReview=[],reviewSel={};
-let currentTheme=localStorage.getItem('gyeol_color_theme')||'charcoal',pendingTheme=currentTheme;
+// 테마 마이그레이션: 구버전 키(theme_태그) → 신버전 키(gyeol_color_theme)
+const _legacyTheme=localStorage.getItem('theme_'+tag);
+if(_legacyTheme&&!localStorage.getItem('gyeol_color_theme')){localStorage.setItem('gyeol_color_theme',_legacyTheme);}
+let currentTheme=localStorage.getItem('gyeol_color_theme')||'stone',pendingTheme=currentTheme;
 
 // 구형 테마 키 → charcoal으로 교체
 const VALID_THEMES=['scarlet','charcoal','forest','gray','stone','butter','champagne','mauve','terra','rose','sage','blue'];
-if(!VALID_THEMES.includes(currentTheme)) currentTheme='charcoal';
+if(!VALID_THEMES.includes(currentTheme)) currentTheme='stone';
 // 테마 즉시 적용 (페이지 로드 플래시 방지)
 document.body.setAttribute('data-theme',currentTheme);
 let catOpenState={};
