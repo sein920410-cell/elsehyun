@@ -240,7 +240,8 @@ function buildScanPrompt(isVideo, userCorrections) {
    - 전자기기에 로고가 보이면 브랜드명을 포함하세요. (예: 로지텍 무선 키보드, HP 노트북)
 6. 서류나 책자는 '서류'로 명칭을 통일하고, 수납 도구는 '연필꽂이', '수납 바구니' 등 쉬운 우리말을 쓰세요.
 7. 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
-8. 수납장 문/선반/벽/바닥은 제외`;
+8. 수납장 문/선반/벽/바닥은 제외
+9. [개인정보 보호 — 필수] 사진/영상에 신분증(주민등록증·운전면허증·여권), 통장·계좌번호가 보이는 문서, 주민등록등본/초본, 신용카드(카드번호 노출), 처방전, 개인정보가 포함된 계약서 등이 포함된 경우: items를 반드시 빈 배열([])로 반환하고 reasoning 첫 줄에 반드시 "PRIVATE_INFO_DETECTED"라고 기재할 것.`;
 }
 
 export default async function handler(req, res) {
@@ -306,6 +307,25 @@ export default async function handler(req, res) {
     if (!scanText || scanText.trim().length < 10) {
       return res.status(200).json({ items: [], reviewItems: [], lowItems: [] });
     }
+
+    // ── 개인정보 감지 체크 ────────────────────────────────────────────────
+    let parsedFull = null;
+    try {
+      const cleaned = scanText.trim().replace(/`json\s*/gi, "").replace(/`\s*/gi, "").trim();
+      parsedFull = JSON.parse(cleaned);
+    } catch (_) {}
+    const reasoning = parsedFull?.reasoning || "";
+    if (reasoning.includes("PRIVATE_INFO_DETECTED")) {
+      console.log("개인정보 감지 → 크레딧 차감 안 함, 빈 목록 반환");
+      return res.status(200).json({
+        items: [],
+        reviewItems: [],
+        privateInfoDetected: true,
+        message: "개인정보가 포함된 사진으로 AI 분석에서 제외되었습니다.",
+        creditsRemaining: serialRow.ai_credits
+      });
+    }
+    // ─────────────────────────────────────────────────────────────────────
 
     const rawItems = safeParseItems(scanText);
     console.log("파싱된 물건 수:", rawItems.length);
