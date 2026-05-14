@@ -34,10 +34,10 @@
   --r:6px;
 }
 /* ─── 테마 ─── */
-[data-theme="crimson"] {--h-bg:#6B1A1A;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.14);--h-btn:rgba(255,255,255,.1);--bom-bg:#3D0808;--a-color:#FCA5A5;--a-bg:rgba(252,165,165,.13);--a-border:rgba(252,165,165,.3)}
+[data-theme="scarlet"] {--h-bg:#C0362C;--h-txt:#fff;--h-sub:rgba(255,255,255,.62);--h-border:rgba(255,255,255,.18);--h-btn:rgba(255,255,255,.14);--bom-bg:#7A1010;--a-color:#FECACA;--a-bg:rgba(254,202,202,.14);--a-border:rgba(254,202,202,.32)}
 [data-theme="charcoal"]{--h-bg:#2C2F33;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.15);--h-btn:rgba(255,255,255,.1);--bom-bg:#1A1B1E;--a-color:#D1D5DB;--a-bg:rgba(209,213,219,.12);--a-border:rgba(209,213,219,.3)}
 [data-theme="forest"]  {--h-bg:#1E3D2C;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.12);--h-btn:rgba(255,255,255,.1);--bom-bg:#142A1C;--a-color:#86EFAC;--a-bg:rgba(134,239,172,.12);--a-border:rgba(134,239,172,.3)}
-[data-theme="teal"]    {--h-bg:#0F4C4C;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#062E2E;--a-color:#5EEAD4;--a-bg:rgba(94,234,212,.12);--a-border:rgba(94,234,212,.3)}
+[data-theme="violet"]  {--h-bg:#5B2D8A;--h-txt:#fff;--h-sub:rgba(255,255,255,.58);--h-border:rgba(255,255,255,.15);--h-btn:rgba(255,255,255,.12);--bom-bg:#2E1050;--a-color:#C4B5FD;--a-bg:rgba(196,181,253,.13);--a-border:rgba(196,181,253,.3)}
 [data-theme="stone"]   {--h-bg:#EDEBE5;--h-txt:#1E1C18;--h-sub:rgba(30,28,24,.46);--h-border:rgba(30,28,24,.1);--h-btn:rgba(30,28,24,.06);--bom-bg:#1E1C18;--a-color:#8A7D6A;--a-bg:rgba(138,125,106,.12);--a-border:rgba(138,125,106,.28)}
 [data-theme="butter"]  {--h-bg:#FBE8A6;--h-txt:#333;--h-sub:rgba(0,0,0,.55);--h-border:rgba(0,0,0,.15);--h-btn:rgba(0,0,0,.05);--bom-bg:#E0C988;--a-color:#E0C988;--a-bg:rgba(224,201,136,.12);--a-border:rgba(224,201,136,.3)}
 [data-theme="champagne"]{--h-bg:#E6D5C3;--h-txt:#2A2118;--h-sub:rgba(42,33,24,.55);--h-border:rgba(42,33,24,.15);--h-btn:rgba(42,33,24,.08);--bom-bg:#2A2118;--a-color:#B49B7A;--a-bg:rgba(180,155,122,.12);--a-border:rgba(180,155,122,.3)}
@@ -54,7 +54,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 /* ─── 헤더 ─── */
 .header{background:var(--h-bg);height:60px;padding:0 14px 0 0;display:flex;align-items:center;flex-shrink:0;position:relative;z-index:100;transition:background .4s}
 .header::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--h-border)}
-.brand{display:flex;align-items:center;gap:8px;flex-shrink:0;cursor:pointer;padding:6px 14px 6px 14px;border-radius:0 var(--r) var(--r) 0;transition:background .15s;z-index:1;position:relative}
+.brand{display:flex;align-items:center;gap:8px;flex-shrink:0;cursor:pointer;padding:6px 14px 6px 0;border-radius:0 var(--r) var(--r) 0;transition:background .15s;z-index:1;position:relative}
 .brand:active{background:var(--h-btn)}
 .brand-anim{position:relative;height:22px;overflow:hidden;min-width:76px}
 .brand-a,.brand-b{position:absolute;left:0;top:0;white-space:nowrap;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s}
@@ -88,11 +88,11 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 /* ─── 툴바 ─── */
 .toolbar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 7px;flex-shrink:0;background:var(--bg)}
 .toolbar-left{display:flex;align-items:center}
-.toolbar-cnt{font-size:14px;font-weight:800;padding:0 16px;border-radius:var(--r);background:var(--h-bg);color:var(--h-txt,#fff);letter-spacing:.04em;display:none;transition:background .4s;height:40px;align-items:center;justify-content:center;min-width:54px}
+.toolbar-cnt{font-size:13px;font-weight:800;padding:0 13px;border-radius:var(--r);background:var(--h-bg);color:var(--h-txt,#fff);letter-spacing:.04em;display:none;transition:background .4s;height:34px;align-items:center;justify-content:center;min-width:44px}
 .toolbar-cnt.vis{display:inline-flex}
 .toolbar-right{display:flex;align-items:center;gap:7px}
-.toolbar-search-btn{width:40px;height:40px;border-radius:var(--r);background:var(--h-bg);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .4s;flex-shrink:0}
-.toolbar-search-btn svg{width:16px;height:16px;stroke:var(--h-txt,#fff);stroke-width:2;fill:none;stroke-linecap:round}
+.toolbar-search-btn{width:34px;height:34px;border-radius:var(--r);background:var(--h-bg);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .4s;flex-shrink:0}
+.toolbar-search-btn svg{width:15px;height:15px;stroke:var(--h-txt,#fff);stroke-width:2;fill:none;stroke-linecap:round}
 .toolbar-search-btn:active{opacity:.7}
 
 /* ─── 검색바 ─── */
@@ -428,10 +428,10 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     </div>
     <div class="dt-sect">테마 색상</div>
     <div class="theme-grid">
-      <div class="theme-cell" onclick="selectTheme('crimson')"><div class="theme-sw" id="sw-crimson" style="background:#6B1A1A"></div><span class="theme-lbl">크림슨</span></div>
+      <div class="theme-cell" onclick="selectTheme('scarlet')"><div class="theme-sw" id="sw-scarlet" style="background:#C0362C"></div><span class="theme-lbl">스칼렛</span></div>
       <div class="theme-cell" onclick="selectTheme('charcoal')"><div class="theme-sw" id="sw-charcoal" style="background:#2C2F33"></div><span class="theme-lbl">차콜</span></div>
       <div class="theme-cell" onclick="selectTheme('forest')"><div class="theme-sw" id="sw-forest" style="background:#1E3D2C"></div><span class="theme-lbl">포레스트</span></div>
-      <div class="theme-cell" onclick="selectTheme('teal')"><div class="theme-sw" id="sw-teal" style="background:#0F4C4C"></div><span class="theme-lbl">티얼</span></div>
+      <div class="theme-cell" onclick="selectTheme('violet')"><div class="theme-sw" id="sw-violet" style="background:#5B2D8A"></div><span class="theme-lbl">바이올렛</span></div>
       <div class="theme-cell" onclick="selectTheme('stone')"><div class="theme-sw" id="sw-stone" style="background:#EDEBE5;border:1px solid #D4D0C8"></div><span class="theme-lbl">스톤</span></div>
       <div class="theme-cell" onclick="selectTheme('butter')"><div class="theme-sw" id="sw-butter" style="background:#FBE8A6"></div><span class="theme-lbl">버터</span></div>
       <div class="theme-cell" onclick="selectTheme('champagne')"><div class="theme-sw" id="sw-champagne" style="background:#E6D5C3"></div><span class="theme-lbl">샴페인</span></div>
@@ -605,7 +605,7 @@ let ctxIdx=-1,icoIdx=-1,selIco=null,pendingReview=[],reviewSel={};
 let currentTheme=localStorage.getItem('theme_'+tag)||'charcoal',pendingTheme=currentTheme;
 
 // 구형 테마 키 → charcoal으로 교체
-const VALID_THEMES=['crimson','charcoal','forest','teal','stone','butter','champagne','mauve','terra','rose','sage','blue'];
+const VALID_THEMES=['scarlet','charcoal','forest','violet','stone','butter','champagne','mauve','terra','rose','sage','blue'];
 if(!VALID_THEMES.includes(currentTheme)) currentTheme='charcoal';
 // 테마 즉시 적용 (페이지 로드 플래시 방지)
 document.body.setAttribute('data-theme',currentTheme);
