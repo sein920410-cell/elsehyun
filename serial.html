@@ -48,14 +48,20 @@
             window.location.replace('login.html');
         } else {
             currentSession = session;
-            // 이미 패키지 시리얼 등록된 유저는 index.html로 자동이동
-            const { data: rows } = await supabase
-                .from('serials')
-                .select('id')
-                .eq('used_by', session.user.email)
-                .limit(1);
-            if (rows && rows.length > 0) {
-                window.location.replace('index.html');
+            // URL에 단품 코드가 있으면 패키지 redirect 건너뛰고 입력창에 자동 입력
+            const urlCode = new URLSearchParams(window.location.search).get('code');
+            if (urlCode && urlCode.toUpperCase().startsWith('GYEOL-S-')) {
+                document.getElementById('serial').value = urlCode.toUpperCase();
+            } else {
+                // 이미 패키지 시리얼 등록된 유저는 index.html로 자동이동
+                const { data: rows } = await supabase
+                    .from('serials')
+                    .select('id')
+                    .eq('used_by', session.user.email)
+                    .limit(1);
+                if (rows && rows.length > 0) {
+                    window.location.replace('index.html');
+                }
             }
         }
 
