@@ -47,8 +47,16 @@
         if (!session) {
             window.location.replace('login.html');
         } else {
-            // 단품 추가 등록도 허용 — 기존 유저 redirect 제거
             currentSession = session;
+            // 이미 패키지 시리얼 등록된 유저는 index.html로 자동이동
+            const { data: rows } = await supabase
+                .from('serials')
+                .select('id')
+                .eq('used_by', session.user.email)
+                .limit(1);
+            if (rows && rows.length > 0) {
+                window.location.replace('index.html');
+            }
         }
 
         // 2. 등록하기 버튼
