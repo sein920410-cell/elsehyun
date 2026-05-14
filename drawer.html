@@ -119,7 +119,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .cat-header.collapsed .cat-name-lbl{color:var(--muted2)}
 
 /* ─── 아이템 카드 (스와이프 삭제/편집) ─── */
-.item-card{border-radius:var(--r);margin-bottom:6px;position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--border)}
+.item-card{border-radius:var(--r);margin-bottom:6px;position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--border);-webkit-transform:translateZ(0);transform:translateZ(0);-webkit-backface-visibility:hidden}
 .swipe-actions{position:absolute;top:0;right:0;bottom:0;display:flex;width:130px}
 .swipe-edit-btn{flex:1;background:#4A7FA8;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:3px}
 .swipe-edit-btn svg{width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -724,11 +724,11 @@ window.onload=async()=>{
   await checkSystemAnnouncement();
 };
 
-function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem('gyeol_color_theme',t);_sb.auth.updateUser({data:{color_theme:t}}).catch(()=>{});}}
+function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem('gyeol_color_theme',t);}}
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
 function closeDrawerSettings(e){if(e&&e.target!==document.getElementById('drawer-ov'))return;applyTheme(currentTheme,false);document.getElementById('drawer-ov').classList.remove('open');}
-function saveDrawerSettings(){const n=document.getElementById('dt-input').value.trim();if(n){document.getElementById('drawer-title').textContent=n;localStorage.setItem('name_'+tag,n);}applyTheme(pendingTheme);document.getElementById('drawer-ov').classList.remove('open');}
+async function saveDrawerSettings(){const n=document.getElementById('dt-input').value.trim();if(n){document.getElementById('drawer-title').textContent=n;localStorage.setItem('name_'+tag,n);}document.getElementById('drawer-ov').classList.remove('open');applyTheme(pendingTheme);try{await _sb.auth.updateUser({data:{color_theme:pendingTheme}});}catch(e){console.log('테마저장오류',e);}}
 
 function toggleSearch(){const b=document.getElementById('search-bar');if(b.classList.contains('open')){closeSearch();}else{b.classList.add('open');setTimeout(()=>document.getElementById('search-input').focus(),100);}}
 function closeSearch(){document.getElementById('search-bar').classList.remove('open');document.getElementById('search-input').value='';renderItems('');}
