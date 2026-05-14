@@ -374,33 +374,42 @@ sb.auth.getSession().then(function(res) {
 
     // ── 등록 정보 카드 데이터 로드 ──────────────────────────────
     // serials 테이블에서 이 이메일로 등록된 row를 모두 가져옴
-    // 1 row = 1개의 태그 (MAIN or DR1 or DR2) = 1/3 세트
-    // set_number의 고유 개수 = 세트 수, used_at 최솟값 = 최초 등록일
-    sb.from('serials')
-        .select('set_number, used_at')
-        .eq('used_by', email)
-        .then(function(r) {
-            if (!r.data || r.data.length === 0) return;
+    // 패키지 세트 + 단품 태그 합산
+    Promise.all([
+        sb.from('serials').select('set_number, used_at').eq('used_by', email),
+        sb.from('single_serials').select('item_number, used_at').eq('used_by', email)
+    ]).then(function(results) {
+        var pkgData = results[0].data || [];
+        var singleData = results[1].data || [];
 
-            // 고유 set_number 개수 = 등록된 세트 수
-            var setNums = [...new Set(r.data.map(function(row) { return row.set_number; }))];
-            var setCount = setNums.length;
-            var tagCount = setCount * 3;
-            document.getElementById('reg-sets').textContent =
-                setCount + '세트 등록됨 (태그 ' + tagCount + '개)';
+        if (pkgData.length === 0 && singleData.length === 0) return;
 
-            // 가장 오래된 used_at = 최초 등록일
-            var dates = r.data.map(function(row) { return new Date(row.used_at); }).filter(function(d) { return !isNaN(d); });
-            if (dates.length > 0) {
-                var earliest = new Date(Math.min.apply(null, dates));
-                var formatted = earliest.getFullYear() + '.' +
-                    String(earliest.getMonth() + 1).padStart(2, '0') + '.' +
-                    String(earliest.getDate()).padStart(2, '0');
-                document.getElementById('reg-date').textContent = '최초 등록일 ' + formatted;
-            } else {
-                document.getElementById('reg-date').textContent = '';
-            }
-        });
+        // 고유 set_number 개수 = 등록된 세트 수
+        var setNums = [...new Set(pkgData.map(function(row) { return row.set_number; }))];
+        var setCount = setNums.length;
+        var pkgTagCount = setCount * 3;
+        var singleCount = singleData.length;
+        var totalTag = pkgTagCount + singleCount;
+
+        var setText = setCount > 0 ? setCount + '세트' : '';
+        var singleText = singleCount > 0 ? ' · 단품 ' + singleCount + '개' : '';
+        document.getElementById('reg-sets').textContent =
+            setText + singleText + ' 등록됨 (태그 ' + totalTag + '개)';
+
+        // 가장 오래된 used_at = 최초 등록일
+        var allDates = [...pkgData, ...singleData]
+            .map(function(row) { return new Date(row.used_at); })
+            .filter(function(d) { return !isNaN(d); });
+        if (allDates.length > 0) {
+            var earliest = new Date(Math.min.apply(null, allDates));
+            var formatted = earliest.getFullYear() + '.' +
+                String(earliest.getMonth() + 1).padStart(2, '0') + '.' +
+                String(earliest.getDate()).padStart(2, '0');
+            document.getElementById('reg-date').textContent = '최초 등록일 ' + formatted;
+        } else {
+            document.getElementById('reg-date').textContent = '';
+        }
+    });
 
     /* AI 이용권 사용량 로드 → 물품 인식 사용량 섹션에 반영 */
     // credits = 남은 이용권, used = 20 - credits (사용한 건수)
