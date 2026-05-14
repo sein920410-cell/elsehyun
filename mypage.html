@@ -230,7 +230,7 @@ body { font-family: var(--font); background: var(--bg); min-height: 100dvh; colo
     <!-- 보관함 관리 -->
     <div class="section-card">
         <div class="section-label">보관함 관리</div>
-        <div class="row" onclick="location.href='serial.html'">
+        <div class="row" onclick="location.href='serial.html?add=true'">
             <div class="row-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
             <div class="row-info">
                 <div class="row-title">시리얼 번호 추가 등록</div>
@@ -506,24 +506,40 @@ function copyInviteLink() {
 async function deleteAccount() {
     if (!confirm('정말 계정을 삭제하시겠습니까?\n\n· 삭제 후 14일 이내 같은 이메일로 재등록 시 복구 가능합니다.\n· 14일이 지나면 시리얼 코드가 완전 폐기되어 재등록이 불가합니다.\n· 잔여 이용권은 복구되지 않습니다.\n\n진행하시겠습니까?')) return;
     try {
-        if (currentSession && currentSession.user) {
-            const now = new Date().toISOString();
-            await sb.from('serials')
-                .update({ used_by: null, deleted_at: now, original_owner: currentSession.user.email })
-                .eq('used_by', currentSession.user.email);
+        if (!currentSession || !currentSession.user) throw new Error('세션 없음');
+
+        // JWT 토큰으로 서버에 완전 삭제 요청
+        // (Storage 사진 삭제 + serials/single_serials NULL 초기화 + Auth 삭제 모두 서버에서 처리)
+        const token = currentSession.access_token;
+        const res = await fetch('/api/deleteAccount', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+        });
+        if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body.error || '서버 오류');
         }
-        // localStorage 전체 정리
+
+        // localStorage 전체 정리 (모든 관련 키 삭제)
         for (let i = localStorage.length - 1; i >= 0; i--) {
             const k = localStorage.key(i);
-            if (k && (k.startsWith('gyeol_') || k.startsWith('name_') || k.startsWith('theme_') || k.startsWith('mediaPath_'))) {
+            if (k && (
+                k.startsWith('gyeol_') ||
+                k.startsWith('name_') ||
+                k.startsWith('theme_') ||
+                k.startsWith('mediaPath_') ||
+                k.startsWith('corrections_') ||
+                k.startsWith('rot_') ||
+                k.startsWith('mime_')
+            )) {
                 localStorage.removeItem(k);
             }
         }
-        await sb.auth.signOut();
-        alert('계정이 삭제되었습니다.\n14일 이내 같은 이메일로 재등록하면 데이터를 복구할 수 있습니다.');
+
+        alert('계정이 삭제되었습니다.\n14일 이내 같은 이메일로 재등록하면 시리얼 코드를 복구할 수 있습니다.');
         window.location.replace('login.html');
     } catch(err) {
-        alert('계정 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        alert('계정 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.\n(' + err.message + ')');
     }
 }
 
