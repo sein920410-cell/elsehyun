@@ -452,6 +452,36 @@ body {
     </div>
   </div>
 
+  <!-- 관리자 전용 (운영자 계정만 노출) -->
+  <div class="section-card" id="admin-section" style="display:none;border:1.5px solid rgba(134,239,172,.3)">
+    <div class="section-label" style="color:var(--badge-ok)">⚙️ 관리자 도구</div>
+
+    <!-- 점검 모드 토글 -->
+    <div class="row" style="cursor:default">
+      <div class="row-ico" style="background:rgba(220,38,38,.1)">
+        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+      <div class="row-info">
+        <div class="row-title">점검 모드</div>
+        <div class="row-sub" id="maintenance-status-txt">꺼짐 — 고객 정상 이용 중</div>
+      </div>
+      <label class="toggle-wrap" onclick="event.stopPropagation()">
+        <input type="checkbox" class="toggle-input" id="maintenance-toggle" onchange="toggleMaintenance()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <!-- 공지 내용 입력 -->
+    <div style="padding:0 16px 16px">
+      <div class="section-label" style="padding:12px 0 8px;font-size:9px">공지 메시지 (비워두면 공지 없음)</div>
+      <textarea id="announce-input" placeholder="예: 5월 20일 오전 2시~3시 점검 예정입니다." style="width:100%;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 12px;font-size:13px;font-family:var(--font);color:var(--ink);resize:none;height:72px;outline:none;box-sizing:border-box;-webkit-user-select:text;user-select:text"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="postAnnouncement()" style="flex:1;padding:11px;background:var(--badge-ok);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">공지 게시</button>
+        <button onclick="clearAnnouncement()" style="flex:1;padding:11px;background:var(--tag-bg);color:var(--muted);border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">공지 삭제</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 버전 + 계정 링크 (하단) -->
   <div style="text-align:center; padding: 8px 0 2px">
     <div style="font-size:10px; color:var(--muted2); font-weight:600; letter-spacing:0.1em">공간:결 · v1.0.0</div>
@@ -558,6 +588,8 @@ sb.auth.getSession().then(function(res) {
     if (FOUNDER_EMAILS.indexOf(email) !== -1) {
         badge.textContent = '공간:결 운영자';
         badge.className = 'profile-badge founder';
+        document.getElementById('admin-section').style.display = 'block';
+        loadAdminStatus();
     } else {
         badge.textContent = '공간:결 멤버';
         badge.className = 'profile-badge member';
@@ -709,6 +741,50 @@ async function deleteAccount() {
     } catch(err) {
         alert('계정 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.\n(' + err.message + ')');
     }
+}
+
+/* ─── 관리자 함수 ─── */
+async function loadAdminStatus() {
+    const { data } = await sb.from('system_announcements').select('*').eq('active', true).order('created_at', { ascending: false }).limit(1);
+    if (!data || !data.length) {
+        document.getElementById('maintenance-status-txt').textContent = '꺼짐 — 고객 정상 이용 중';
+        return;
+    }
+    const ann = data[0];
+    if (ann.type === 'maintenance') {
+        document.getElementById('maintenance-toggle').checked = true;
+        document.getElementById('maintenance-status-txt').textContent = '켜짐 — 점검 중 (고객 접근 차단됨)';
+        document.getElementById('announce-input').value = ann.message;
+    } else {
+        document.getElementById('announce-input').value = ann.message;
+        document.getElementById('maintenance-status-txt').textContent = '꺼짐 — 공지 게시 중';
+    }
+}
+async function toggleMaintenance() {
+    const on = document.getElementById('maintenance-toggle').checked;
+    const msg = document.getElementById('announce-input').value.trim() || '서비스 점검 중입니다. 잠시 후 다시 이용해주세요.';
+    // 기존 활성 항목 모두 비활성화
+    await sb.from('system_announcements').update({ active: false }).eq('active', true);
+    if (on) {
+        await sb.from('system_announcements').insert({ active: true, type: 'maintenance', message: msg });
+        document.getElementById('maintenance-status-txt').textContent = '켜짐 — 점검 중 (고객 접근 차단됨)';
+        showToast('점검 모드 시작됨');
+    } else {
+        document.getElementById('maintenance-status-txt').textContent = '꺼짐 — 고객 정상 이용 중';
+        showToast('점검 모드 해제됨');
+    }
+}
+async function postAnnouncement() {
+    const msg = document.getElementById('announce-input').value.trim();
+    if (!msg) { showToast('공지 내용을 입력해주세요'); return; }
+    await sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
+    await sb.from('system_announcements').insert({ active: true, type: 'announcement', title: '공지사항', message: msg });
+    showToast('공지가 게시됐어요');
+}
+async function clearAnnouncement() {
+    await sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
+    document.getElementById('announce-input').value = '';
+    showToast('공지가 삭제됐어요');
 }
 
 document.getElementById('name-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') saveName(); });
