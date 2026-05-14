@@ -153,7 +153,7 @@
                         show('state-invalid');
                     } else if (!single.used_by) {
                         document.getElementById('btn-register').onclick = () => {
-                            window.location.replace('serial.html');
+                            window.location.replace(`serial.html?code=${encodeURIComponent(code)}`);
                         };
                         show('state-unregistered');
                     } else if (single.used_by === session.user.email) {
