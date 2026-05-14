@@ -58,7 +58,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .header::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--h-border)}
 .brand{display:flex;align-items:center;gap:8px;flex-shrink:0;cursor:pointer;padding:6px 10px;border-radius:10px;transition:background .15s;z-index:1;position:relative}
 .brand:active{background:var(--h-btn)}
-.chat-badge{position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:#e74c3c;border-radius:50%;display:none;z-index:10;box-shadow:0 0 0 2px var(--h-bg)}
+.chat-badge{position:absolute;top:-3px;right:-6px;width:7px;height:7px;background:#e74c3c;border-radius:50%;display:none;z-index:10;box-shadow:0 0 0 1.5px var(--h-bg)}
 .brand img{width:22px;height:22px;object-fit:contain;flex-shrink:0}
 .brand-anim{position:relative;height:22px;overflow:hidden;min-width:52px}
 .brand-a,.brand-b{position:absolute;left:0;top:0;white-space:nowrap;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s}
@@ -930,4 +930,5 @@ function cancelRecording(){clearInterval(recTimer);clearInterval(window._brightT
 <!-- 항목 직접 추가 모달 -->
 <div class="add-item-ov" id="add-item-ov" onclick="if(event.target===this)closeAddItem()">
   <div class="add-item-sheet">
-    <div class="sh-
+    <div class="sh-handle"></div>
+ 
