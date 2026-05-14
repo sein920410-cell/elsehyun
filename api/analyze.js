@@ -3,7 +3,8 @@ import fetch from "node-fetch";
 
 const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3-flash-preview";
+// GEMINI_MODEL을 환경변수로 관리 (하드코딩 제거)
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
 
 const VALID_CATS = ["의류", "위생", "청소", "케어", "생활", "전자", "주방", "공구", "기타"];
 function normCat(c) {
@@ -56,9 +57,9 @@ function deduplicateItems(items) {
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
   properties: {
-    reasoning: { 
+    reasoning: {
       type: "STRING",
-      description: "화면을 구역별로 나누어 묘사한 내용"
+      description: "화면을 5개 구역으로 나누어 각 구역에 있는 물건을 짧게 나열"
     },
     items: {
       type: "ARRAY",
@@ -77,13 +78,13 @@ const RESPONSE_SCHEMA = {
 };
 
 const BASE_GEN_CONFIG = {
-  temperature: 0.4, 
-  maxOutputTokens: 8192, 
+  temperature: 0,        // 정확도 최우선 (변경 금지)
+  maxOutputTokens: 8192,
   responseMimeType: "application/json",
   responseSchema: RESPONSE_SCHEMA
 };
 
-async function callGeminiImage(b64, mimeType, prompt, temperature = 0.4) {
+async function callGeminiImage(b64, mimeType, prompt) {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
@@ -96,11 +97,10 @@ async function callGeminiImage(b64, mimeType, prompt, temperature = 0.4) {
             { text: prompt }
           ]
         }],
-        generationConfig: { ...BASE_GEN_CONFIG, temperature }
+        generationConfig: BASE_GEN_CONFIG
       })
     }
   );
-  // [수정완료] status.ok 오타를 response.ok로 바로잡았습니다.
   if (!response.ok) {
     const err = await response.text();
     throw new Error(`Gemini API ${response.status}: ${err.slice(0, 200)}`);
@@ -110,7 +110,7 @@ async function callGeminiImage(b64, mimeType, prompt, temperature = 0.4) {
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-async function callGeminiVideoFrames(frames, prompt, temperature = 0.4) {
+async function callGeminiVideoFrames(frames, prompt) {
   const imageParts = frames.map(b64 => ({
     inline_data: { mime_type: "image/jpeg", data: b64 }
   }));
@@ -126,7 +126,7 @@ async function callGeminiVideoFrames(frames, prompt, temperature = 0.4) {
             { text: prompt }
           ]
         }],
-        generationConfig: { ...BASE_GEN_CONFIG, temperature }
+        generationConfig: BASE_GEN_CONFIG
       })
     }
   );
@@ -139,7 +139,7 @@ async function callGeminiVideoFrames(frames, prompt, temperature = 0.4) {
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
-async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.4) {
+async function callGeminiVideo(videoBuffer, mimeType, prompt) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   const boundary = "---GeminiUploadBoundary";
@@ -172,7 +172,7 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.4)
   }
 
   const uploadData = await uploadResp.json();
-  const fileName = uploadData.file?.name; 
+  const fileName = uploadData.file?.name;
   const fileUri = uploadData.file?.uri;
   if (!fileName || !fileUri) throw new Error("File API 응답에서 파일 정보 없음");
   console.log("영상 업로드 완료:", fileName);
@@ -203,7 +203,7 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.4)
             { text: prompt }
           ]
         }],
-        generationConfig: { ...BASE_GEN_CONFIG, temperature }
+        generationConfig: BASE_GEN_CONFIG
       })
     }
   );
@@ -218,30 +218,49 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt, temperature = 0.4)
   return parts.filter(p => p.text && !p.thought).map(p => p.text).join("") || "";
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// 개선된 AI 프롬프트
+// 핵심 변경: ① 위치 묘사 우선, ② 브랜드 먼저 읽기, ③ 구별 불가 항목 묶음 처리
+// ─────────────────────────────────────────────────────────────────────
 function buildScanPrompt(isVideo, userCorrections) {
   const corrHint = userCorrections?.length > 0
-    ? `\n사용자 교정: ${userCorrections.map(c => `"${c.original}"→"${c.corrected}"`).join(", ")}`
+    ? `\n참고 교정 이력 (유사한 물건명 인식 시 활용): ${userCorrections.map(c => `"${c.original}"→"${c.corrected}"`).join(", ")}`
     : "";
 
   const mediaHint = isVideo
-    ? "영상 전체를 처음부터 끝까지 보고"
-    : "사진 전체를 위에서 아래까지 빠짐없이 보고";
+    ? "영상 전체 프레임에 걸쳐"
+    : "사진 전체를 좌상→우상→좌하→우하→중앙 순으로 빠짐없이";
 
-  return `${mediaHint} 눈에 보이는 모든 물건을 찾아 JSON 형식으로 출력하세요.${corrHint}
+  return `${mediaHint} 눈에 보이는 모든 물건을 찾아 JSON으로 출력하세요.${corrHint}
 
-[최종 규칙]
-1. 당신은 완벽하고 집요한 재물조사 담당자입니다. 사진에 있는 '모든' 개별 물건을 빠짐없이 찾아내야 합니다.
-2. [중요] 물티슈 캡(뚜껑)이나 그림자를 스마트폰, 리모컨 등으로 착각하지 마세요. 불분명한 것은 지어내지 말고 형태를 있는 그대로 묘사하세요.
-3. 반드시 'reasoning' 필드에 화면을 5개 구역으로 나누어 훑어보되, 핵심 키워드만 짧고 간결하게 작성하세요.
-4. 묘사가 끝나면, 파악했던 모든 물건들을 'items' 배열에 독립된 항목으로 채워 넣으세요.
-5. [검색 최적화 명칭 규칙]
-   - 제품 겉면에 영어 상표명이나 한글 라벨(브랜드명)이 보이면 반드시 읽어서 이름 맨 앞에 붙이세요. (예: NOW 영양제, RYO 트리트먼트, 베베앙리 물티슈, 일리윤 로션)
-   - 단순히 '파란색 스프레이'라고 적지 말고, 라벨을 읽어 용도를 명시하세요 (예: 살균 스프레이, 유리 세정제).
-   - 전자기기에 로고가 보이면 브랜드명을 포함하세요. (예: 로지텍 무선 키보드, HP 노트북)
-6. 서류나 책자는 '서류'로 명칭을 통일하고, 수납 도구는 '연필꽂이', '수납 바구니' 등 쉬운 우리말을 쓰세요.
-7. 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
-8. 수납장 문/선반/벽/바닥은 제외
-9. [개인정보 보호 — 필수] 사진/영상에 신분증(주민등록증·운전면허증·여권), 통장·계좌번호가 보이는 문서, 주민등록등본/초본, 신용카드(카드번호 노출), 처방전, 개인정보가 포함된 계약서 등이 포함된 경우: items를 반드시 빈 배열([])로 반환하고 reasoning 첫 줄에 반드시 "PRIVATE_INFO_DETECTED"라고 기재할 것.`;
+[물건 이름 작성 3대 규칙]
+
+★ 규칙 A — 위치+소재로 구별 (같은 종류가 여러 개일 때 핵심)
+  단순히 "티셔츠" 대신, 사진 속 위치와 눈에 띄는 특징으로 구별하세요.
+  위치 표현: 왼쪽 앞 / 오른쪽 뒤 / 가운데 / 위쪽 / 아래쪽
+  소재·특징 힌트: 두꺼운 / 얇은 / 니트 / 면 / 후리스 / 줄무늬 / 체크 / 민소매
+  예시: "왼쪽 앞 두꺼운 청바지", "오른쪽 뒤 흰 니트 티", "가운데 체크 셔츠"
+
+★ 규칙 B — 브랜드 이름을 가장 먼저 (로고·라벨이 보이면 무조건)
+  영어 브랜드: NIKE, Adidas, New Balance, Uniqlo, ZARA (최대 10자 그대로)
+  한글 브랜드: 베베앙리, 일리윤, RYO, NOW, 아성다이소 (그대로)
+  전체 이름은 20자 이내 유지.
+  예시: "NIKE 기능성 반팔", "New Balance 두꺼운 패딩", "RYO 트리트먼트", "베베앙리 물티슈"
+
+★ 규칙 C — 구별 불가한 물건은 묶음으로 처리 (억지 구분 금지)
+  흐리거나 접혀 있거나 비슷한 물건이 뭉쳐 있어 개별 구분이 불가능한 경우
+  → qty에 개수 반영하고 하나의 항목으로 묶으세요.
+  예시: qty:3 name:"비슷한 검정 옷 묶음", qty:2 name:"얇은 흰 티 묶음", qty:5 name:"양말 묶음"
+
+[추가 규칙]
+4. 제품 겉면 라벨이 보이면 반드시 용도를 명시하세요. (예: 살균 스프레이, 유리 세정제, 손 세정제)
+5. 전자기기 로고가 보이면 브랜드 포함. (예: 로지텍 무선 키보드, HP 노트북)
+6. 서류·책자 → "서류"로 통일. 수납 도구 → "수납 바구니", "연필꽂이" 등 쉬운 우리말.
+7. reasoning: 화면을 5구역으로 나누어 각 구역 물건을 짧게 나열 (검색 키워드 수준으로 간결하게)
+8. 카테고리: 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
+9. 수납장 문·선반·벽·바닥·옷걸이 자체는 제외
+10. 물티슈 캡(뚜껑)·그림자를 스마트폰·리모컨 등으로 착각하지 마세요. 불분명하면 형태 그대로 묘사.
+11. [개인정보 보호 — 필수] 신분증·통장·카드번호·처방전·개인정보 포함 문서가 보이면: items를 반드시 빈 배열([])로 반환하고 reasoning 첫 줄에 "PRIVATE_INFO_DETECTED" 기재.`;
 }
 
 export default async function handler(req, res) {
@@ -308,7 +327,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ items: [], reviewItems: [], lowItems: [] });
     }
 
-    // ── 개인정보 감지 체크 ────────────────────────────────────────────────
+    // ── 개인정보 감지 체크 ────────────────────────────────────────────
     let parsedFull = null;
     try {
       const cleaned = scanText.trim().replace(/`json\s*/gi, "").replace(/`\s*/gi, "").trim();
@@ -325,16 +344,15 @@ export default async function handler(req, res) {
         creditsRemaining: serialRow.ai_credits
       });
     }
-    // ─────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────
 
     const rawItems = safeParseItems(scanText);
     console.log("파싱된 물건 수:", rawItems.length);
 
     const BAD_KEYWORDS = ["불명 물체", "경첩", "선반 지지", "캐비닛 문", "캐비닛 선반", "서랍틀", "금속 경첩", "원형 범퍼", "걸이 레일"];
-    
     const isBadItem = (name) => BAD_KEYWORDS.some(k => name.includes(k));
     const COLOR_RE = /^(흰색?|화이트|검정|검은|블랙|회색?|그레이|아이보리|베이지|갈색|브라운|노란?|파란?|블루|빨간?|레드|초록|녹색|그린|핑크|분홍|보라|퍼플|은색|실버|금색|골드|투명)\s+/u;
-    const NO_COLOR_CATS = new Set(["생활","청소","위생","케어","기타"]);
+    const NO_COLOR_CATS = new Set(["생활", "청소", "위생", "케어", "기타"]);
 
     const items = deduplicateItems(
       rawItems
@@ -343,9 +361,8 @@ export default async function handler(req, res) {
         .map(it => {
           const category = normCat(it.category);
           let name = String(it.name).trim().slice(0, 20);
-          
-          if (NO_COLOR_CATS.has(category) && !/^[A-Za-z가-힣]+$/.test(name.split(' ')[0])) {
-             name = name.replace(COLOR_RE, "");
+          if (NO_COLOR_CATS.has(category) && !/^[A-Za-z가-힣]+$/.test(name.split(" ")[0])) {
+            name = name.replace(COLOR_RE, "");
           }
           return { category, name, qty: Math.max(1, Number(it.qty) || 1) };
         })
