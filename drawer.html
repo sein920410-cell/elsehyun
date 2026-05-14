@@ -581,7 +581,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <input type="file" id="file-in" accept="image/*" style="display:none" onchange="handleFile(event)">
 
 <script>
-const _sb=supabase.createClient('https://tqhtggusphhcsygiitrv.supabase.co','sb_publishable_lJeKpO0aRv9mTBE1qnbkow_JqTmhnHQ');
+const _sb=supabase.createClient('https://tqhtggusphhcsygiitrv.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc');
 const params=new URLSearchParams(location.search);
 const tag=(params.get('tag')||'DRAWER001').toUpperCase();
 let items=JSON.parse(localStorage.getItem('gyeol_'+tag)||'[]');
