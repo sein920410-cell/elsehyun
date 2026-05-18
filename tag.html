@@ -84,7 +84,7 @@
 
         // ── 코드 추출 ──────────────────────────────────────────────
         // 1순위: URL 경로 (/GYEOL-1-MAIN)
-        // 2순위: 쿼리 파라미터 (?id=GYEOL-S-1 또는 ?code=GYEOL-1-MAIN)
+        // 2순위: 쿼리 파라미터 (?id=GYEOL-1-S 또는 ?code=GYEOL-1-MAIN)
         function extractCode() {
             const path = window.location.pathname.replace(/^\//, '').replace(/\.html.*$/, '');
             if (path && path.toUpperCase().startsWith('GYEOL-')) return path.toUpperCase();
@@ -98,12 +98,12 @@
 
         // ── 코드 타입 판별 ─────────────────────────────────────────
         // 패키지: GYEOL-1-MAIN / GYEOL-42-DR1
-        // 단품:   GYEOL-S-5
+        // 단품:   GYEOL-5-S
         function parseCode(code) {
             const parts = code.split('-');
-            if (parts.length >= 3 && parts[1] === 'S') {
-                // 단품: GYEOL-S-{num}
-                const n = parseInt(parts[2], 10);
+            if (parts.length >= 3 && parts[2] === 'S') {
+                // 단품: GYEOL-{num}-S
+                const n = parseInt(parts[1], 10);
                 return isNaN(n) ? null : { type: 'single', num: n };
             }
             if (parts.length >= 3) {
@@ -116,9 +116,9 @@
 
         // ── 태그 타입에 따라 이동할 URL 결정 ─────────────────────
         // 패키지 MAIN → index.html / DR1/DR2 → drawer.html
-        // 단품 → drawer.html?tag=GYEOL-S-{num}
+        // 단품 → drawer.html?tag=GYEOL-{num}-S
         function getRedirectUrl(code) {
-            if (code.startsWith('GYEOL-S-')) return `drawer.html?tag=${encodeURIComponent(code)}`;
+            if (code.endsWith('-S')) return `drawer.html?tag=${encodeURIComponent(code)}`;
             if (code.endsWith('-MAIN')) return 'index.html';
             return `drawer.html?tag=${encodeURIComponent(code)}`;
         }
