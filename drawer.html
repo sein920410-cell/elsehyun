@@ -628,7 +628,8 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
       <div class="result-modal-title" id="result-modal-title"></div>
       <div class="result-modal-sub" id="result-modal-sub"></div>
     </div>
-    <button class="result-modal-btn" onclick="document.getElementById('result-modal-ov').classList.remove('open')">확인</button>
+    <button class="result-modal-btn" id="result-modal-confirm-btn" onclick="document.getElementById('result-modal-ov').classList.remove('open')">확인</button>
+    <button class="result-modal-btn" id="result-modal-add-btn" style="display:none;border-top:1px solid var(--border,rgba(0,0,0,.08));color:var(--h-bg,#111318);font-weight:700" onclick="document.getElementById('result-modal-ov').classList.remove('open');openAddItem()">직접 추가하기</button>
   </div>
 </div>
 
@@ -1053,7 +1054,7 @@ async function sendMsg(){
   catch{history.push({role:'bot',text:'오류가 발생했습니다.'});saveChatHistory(history);renderChatHistory(history);}
 }
 
-function showResultModal(icon,title,sub){document.getElementById('result-modal-icon').textContent=icon;document.getElementById('result-modal-title').textContent=title;document.getElementById('result-modal-sub').textContent=sub||'';document.getElementById('result-modal-ov').classList.add('open');}
+function showResultModal(icon,title,sub,showAddBtn){document.getElementById('result-modal-icon').textContent=icon;document.getElementById('result-modal-title').textContent=title;document.getElementById('result-modal-sub').textContent=sub||'';document.getElementById('result-modal-add-btn').style.display=showAddBtn?'block':'none';document.getElementById('result-modal-ov').classList.add('open');}
 
 function mpickReanalyze(){
   closeMediaPicker();const fp=localStorage.getItem('mediaPath_'+tag);const mt=localStorage.getItem('mime_'+tag)||'image/jpeg';
@@ -1069,7 +1070,7 @@ async function runAnalysis(filePath,mimeType,videoFrames=null){
   try{
     const{data:{session}}=await _sb.auth.getSession();const userEmail=session?.user?.email||'';
     const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filePath,mimeType:mimeType||'image/jpeg',userCorrections:corrections,userEmail,...(videoFrames?.length?{videoFrames}:{})})});
-    if(!r.ok){const errData=await r.json().catch(()=>({}));if(r.status===402){rmOv();showResultModal('💳','이용권이 소진되었습니다',errData.message||'마이페이지에서 이용권을 충전해주세요.');return;}throw new Error(errData.error||'분석 오류');}
+    if(!r.ok){const errData=await r.json().catch(()=>({}));if(r.status===402){rmOv();showResultModal('💳','이용권이 소진되었습니다','물품명을 직접 입력해서 목록을 관리할 수 있어요.',true);return;}throw new Error(errData.error||'분석 오류');}
     const d=await r.json();items=[];localStorage.setItem('gyeol_'+tag,'[]');
     // ── 개인정보 감지 처리 ──────────────────────────────────────
     if(d.privateInfoDetected){
