@@ -708,18 +708,30 @@ function getIconSVG(icon){const path=SVG_ICONS[icon]||SVG_ICONS.default;return`<
 
 window.onload=async()=>{
   const {data:{session:_sess}}=await _sb.auth.getSession();
-  // 테마: serials DB 우선 → localStorage 폴백
+  // 테마: localStorage 우선 → DB 폴백 (DB 기본값 'stone'이 localStorage를 덮어쓰는 문제 방지)
   try{
     const _email=_sess?.user?.email;
     if(_email){
-      const {data:_sr}=await _sb.from('serials').select('color_theme').eq('used_by',_email).limit(1);
-      const _dbTheme=_sr?.[0]?.color_theme;
-      if(_dbTheme&&VALID_THEMES.includes(_dbTheme)){
-        currentTheme=_dbTheme;
-        localStorage.setItem('gyeol_color_theme',_dbTheme);
+      const {data:_sr,error:_se}=await _sb.from('serials').select('color_theme').eq('used_by',_email).limit(1);
+      if(_se){console.warn('테마로드오류',_se);}
+      else{
+        const _dbTheme=_sr?.[0]?.color_theme;
+        const _lsTheme=localStorage.getItem('gyeol_color_theme');
+        if(_lsTheme&&VALID_THEMES.includes(_lsTheme)){
+          // localStorage에 값이 있으면 무조건 localStorage 우선
+          currentTheme=_lsTheme;
+          // DB 값과 다르면 DB를 localStorage 값으로 동기화 (백그라운드)
+          if(_dbTheme!==_lsTheme){
+            _sb.from('serials').update({color_theme:_lsTheme}).eq('used_by',_email).then(({error:ue})=>{if(ue)console.warn('테마DB동기화오류',ue);});
+          }
+        }else if(_dbTheme&&VALID_THEMES.includes(_dbTheme)){
+          // localStorage가 없을 때만 DB 값 사용
+          currentTheme=_dbTheme;
+          localStorage.setItem('gyeol_color_theme',_dbTheme);
+        }
       }
     }
-  }catch(e){console.log('테마로드오류',e);}
+  }catch(e){console.warn('테마로드오류',e);}
   applyTheme(currentTheme,false);
   const _defaultName=tag.endsWith('DR2')?'수납장 2':tag.endsWith('DR1')?'수납장 1':'보관함';
   document.getElementById('drawer-title').textContent=localStorage.getItem('name_'+tag)||_defaultName;
@@ -734,7 +746,7 @@ function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);curren
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
 function closeDrawerSettings(e){if(e&&e.target!==document.getElementById('drawer-ov'))return;applyTheme(currentTheme,false);document.getElementById('drawer-ov').classList.remove('open');}
-async function saveDrawerSettings(){const n=document.getElementById('dt-input').value.trim();if(n){document.getElementById('drawer-title').textContent=n;localStorage.setItem('name_'+tag,n);}document.getElementById('drawer-ov').classList.remove('open');applyTheme(pendingTheme);try{const{data:{session:_s}}=await _sb.auth.getSession();if(_s?.user?.email){await _sb.from('serials').update({color_theme:pendingTheme}).eq('used_by',_s.user.email);}}catch(e){console.log('테마저장오류',e);}}
+async function saveDrawerSettings(){const n=document.getElementById('dt-input').value.trim();if(n){document.getElementById('drawer-title').textContent=n;localStorage.setItem('name_'+tag,n);}document.getElementById('drawer-ov').classList.remove('open');applyTheme(pendingTheme);try{const{data:{session:_s}}=await _sb.auth.getSession();if(_s?.user?.email){const{data:_ud,error:_ue}=await _sb.from('serials').update({color_theme:pendingTheme}).eq('used_by',_s.user.email).select('color_theme');if(_ue){console.warn('테마DB저장오류',_ue);}else if(!_ud||_ud.length===0){console.warn('테마DB저장:매칭row없음(localStorage에만저장됨)');}}}catch(e){console.warn('테마저장오류',e);}}
 
 function toggleSearch(){const b=document.getElementById('search-bar');if(b.classList.contains('open')){closeSearch();}else{b.classList.add('open');setTimeout(()=>document.getElementById('search-input').focus(),100);}}
 function closeSearch(){document.getElementById('search-bar').classList.remove('open');document.getElementById('search-input').value='';renderItems('');}
