@@ -240,15 +240,15 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .chat-sheet{background:var(--surface);border-radius:14px 14px 0 0;width:100%;height:72dvh;display:flex;flex-direction:column;animation:sheetUp .28s cubic-bezier(.32,0,0,1);overflow:hidden}
 .chat-hdr{height:56px;background:var(--h-bg);padding:0 14px;display:flex;align-items:center;gap:0;flex-shrink:0;transition:background .4s}
 .chat-hdr-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
-.chat-hdr-name{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.01em;white-space:nowrap}
+.chat-hdr-name{font-size:15px;font-weight:700;color:var(--h-txt);letter-spacing:-.01em;white-space:nowrap}
 .chat-back-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-.chat-back-btn svg{width:19px;height:19px;stroke:rgba(255,255,255,.85);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.chat-end-btn{height:38px;padding:0 14px;background:transparent;border:1.5px solid rgba(255,255,255,.3);border-radius:var(--r);display:flex;align-items:center;cursor:pointer;font-size:13px;font-weight:600;color:rgba(255,255,255,.85);font-family:var(--font);white-space:nowrap}
+.chat-back-btn svg{width:19px;height:19px;stroke:var(--h-txt);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.chat-end-btn{height:38px;padding:0 14px;background:transparent;border:1.5px solid var(--h-border);border-radius:var(--r);display:flex;align-items:center;cursor:pointer;font-size:13px;font-weight:600;color:var(--h-txt);font-family:var(--font);white-space:nowrap;opacity:.85}
 .chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#F4F6FA}
 .chat-msgs::-webkit-scrollbar{display:none}
 .msg{max-width:78%;padding:11px 14px;border-radius:10px;font-size:14px;line-height:1.6;font-weight:500;-webkit-user-select:text;user-select:text}
 .msg.bot{background:var(--surface);border:1px solid var(--border);border-radius:4px 10px 10px 10px;align-self:flex-start;color:var(--ink)}
-.msg.user{background:var(--ink);color:rgba(255,255,255,.9);border-radius:10px 10px 4px 10px;align-self:flex-end}
+.msg.user{background:var(--h-bg);color:var(--h-txt);border-radius:10px 10px 4px 10px;align-self:flex-end;border:1px solid var(--h-border)}
 .chat-inp-row{height:72px;padding:0 13px;display:flex;align-items:center;gap:9px;border-top:1px solid var(--border);flex-shrink:0;background:var(--surface)}
 .chat-inp-inner{flex:1;background:var(--bg);border-radius:var(--r);padding:0 14px;height:46px;display:flex;align-items:center;border:1px solid var(--border)}
 .chat-inp{flex:1;border:none;outline:none;font-size:15px;font-family:var(--font);color:var(--ink);background:transparent;-webkit-user-select:text;user-select:text}
@@ -707,14 +707,19 @@ function getIconSVG(icon){const path=SVG_ICONS[icon]||SVG_ICONS.default;return`<
 })();
 
 window.onload=async()=>{
-  // Supabase 저장 테마 우선 적용 (localStorage 초기화 방어)
   const {data:{session:_sess}}=await _sb.auth.getSession();
-  if(_sess?.user?.user_metadata?.color_theme){
-    const _st=_sess.user.user_metadata.color_theme;
-    if(VALID_THEMES.includes(_st)&&_st!==currentTheme){
-      currentTheme=_st;localStorage.setItem('gyeol_color_theme',_st);
+  // 테마: serials DB 우선 → localStorage 폴백
+  try{
+    const _email=_sess?.user?.email;
+    if(_email){
+      const {data:_sr}=await _sb.from('serials').select('color_theme').eq('used_by',_email).limit(1);
+      const _dbTheme=_sr?.[0]?.color_theme;
+      if(_dbTheme&&VALID_THEMES.includes(_dbTheme)){
+        currentTheme=_dbTheme;
+        localStorage.setItem('gyeol_color_theme',_dbTheme);
+      }
     }
-  }
+  }catch(e){console.log('테마로드오류',e);}
   applyTheme(currentTheme,false);
   const _defaultName=tag.endsWith('DR2')?'수납장 2':tag.endsWith('DR1')?'수납장 1':'보관함';
   document.getElementById('drawer-title').textContent=localStorage.getItem('name_'+tag)||_defaultName;
@@ -729,7 +734,7 @@ function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);curren
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
 function closeDrawerSettings(e){if(e&&e.target!==document.getElementById('drawer-ov'))return;applyTheme(currentTheme,false);document.getElementById('drawer-ov').classList.remove('open');}
-async function saveDrawerSettings(){const n=document.getElementById('dt-input').value.trim();if(n){document.getElementById('drawer-title').textContent=n;localStorage.setItem('name_'+tag,n);}document.getElementById('drawer-ov').classList.remove('open');applyTheme(pendingTheme);try{await _sb.auth.updateUser({data:{color_theme:pendingTheme}});}catch(e){console.log('테마저장오류',e);}}
+async function saveDrawerSettings(){const n=document.getElementById('dt-input').value.trim();if(n){document.getElementById('drawer-title').textContent=n;localStorage.setItem('name_'+tag,n);}document.getElementById('drawer-ov').classList.remove('open');applyTheme(pendingTheme);try{const{data:{session:_s}}=await _sb.auth.getSession();if(_s?.user?.email){await _sb.from('serials').update({color_theme:pendingTheme}).eq('used_by',_s.user.email);}}catch(e){console.log('테마저장오류',e);}}
 
 function toggleSearch(){const b=document.getElementById('search-bar');if(b.classList.contains('open')){closeSearch();}else{b.classList.add('open');setTimeout(()=>document.getElementById('search-input').focus(),100);}}
 function closeSearch(){document.getElementById('search-bar').classList.remove('open');document.getElementById('search-input').value='';renderItems('');}
@@ -1045,7 +1050,7 @@ function resetChatTimeout(){if(chatTimeoutId)clearTimeout(chatTimeoutId);chatTim
 function openChat(){document.getElementById('chat-ov').classList.add('open');const history=loadChatHistory();if(history.length===0){const drawerName=document.getElementById('drawer-title')?.textContent||'이 수납장';const greeting=`안녕하세요! 저는 수납 비서 봄이에요.\n「${drawerName}」에 대해 뭐든지 물어보세요. 물건을 찾거나 정리하는 것을 도와드릴게요.`;const first=[{role:'bot',text:greeting}];saveChatHistory(first);renderChatHistory(first);}else{renderChatHistory(history);}resetChatTimeout();}
 function closeChat(){document.getElementById('chat-ov').classList.remove('open');}
 function endChat(){if(chatTimeoutId)clearTimeout(chatTimeoutId);chatTimeoutId=null;const endMsg='상담이 종료되었습니다. 또 필요하실 때 언제든 불러주세요 😊';const history=loadChatHistory();history.push({role:'bot',text:endMsg});saveChatHistory(history);renderChatHistory(history);setTimeout(()=>{closeChat();},800);}
-(function(){const sheet=()=>document.querySelector('.chat-sheet');let sy=0,sd=0;document.addEventListener('touchstart',e=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;if(e.target.closest('.chat-inp-row'))return;sy=e.touches[0].clientY;sd=0;},{passive:true});document.addEventListener('touchmove',e=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;sd=e.touches[0].clientY-sy;if(sd>0&&sd<160){const s=sheet();if(s)s.style.transform='translateY('+sd+'px)';}},{passive:true});document.addEventListener('touchend',()=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;const s=sheet();if(!s)return;if(sd>120){s.style.transform='';closeChat();}else{s.style.transform='';}sd=0;});})();
+(function(){const sheet=()=>document.querySelector('.chat-sheet');let sy=0,sd=0,_scrolling=false;document.addEventListener('touchstart',e=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;if(e.target.closest('.chat-inp-row'))return;_scrolling=!!e.target.closest('.chat-msgs');sy=e.touches[0].clientY;sd=0;},{passive:true});document.addEventListener('touchmove',e=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;if(_scrolling)return;sd=e.touches[0].clientY-sy;if(sd>0&&sd<160){const s=sheet();if(s)s.style.transform='translateY('+sd+'px)';}},{passive:true});document.addEventListener('touchend',()=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;if(_scrolling){_scrolling=false;return;}const s=sheet();if(!s)return;if(sd>120){s.style.transform='';closeChat();}else{s.style.transform='';}sd=0;});})();
 document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
 async function sendMsg(){
   const inp=document.getElementById('chat-inp');const t=inp.value.trim();if(!t)return;resetChatTimeout();
@@ -1131,7 +1136,7 @@ function closeAnnounce(){
   // id를 data attribute에서 가져오기 어려우므로 session 동안만 닫힘
   localStorage.setItem('gyeol_ann_dismissed_session','1');
 }
-const GUIDE_TIPS=['천천히 움직여 주세요','각도를 바꿔가며 찍어주세요','물건을 화면 가득 채워주세요','서랍 내부를 빠짐없이','가까이서 찍어주세요'];
+const GUIDE_TIPS=['천천히 움직여 주세요','각도를 바꿔가며 찍어주세요','물건을 화면 가득 채워주세요','내부 상태가 잘 보이게 촬영','가까이서 찍어주세요'];
 let _guideTimer=null,_guideIdx=0;
 function startGuideTips(){
   const g=document.getElementById('rec-guide');const t=document.getElementById('rec-guide-txt');
