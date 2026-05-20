@@ -441,7 +441,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="sh-handle"></div><div class="sh-title">미디어 추가</div>
     <div class="mpick" onclick="pickPhoto()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div><div><div class="mpick-title">사진 선택</div><div class="mpick-sub">갤러리 또는 카메라로 촬영</div></div></div>
-    <div class="mpick" onclick="startVideoRecord()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div><div class="mpick-title">영상 촬영</div><div class="mpick-sub">최대 30초 · 물건 천천히 훑기</div></div></div>
+    <div class="mpick" onclick="startVideoRecord()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div><div class="mpick-title">영상 촬영</div><div class="mpick-sub">최대 30초 · 제품 상태가 잘 보이게 촬영</div></div></div>
     <div class="mpick" id="mpick-re" style="display:none" onclick="mpickReanalyze()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg></div><div><div class="mpick-title">재분석</div><div class="mpick-sub">등록된 사진으로 다시 분석</div></div></div>
     <button class="sh-cancel" onclick="closeMediaPicker()">취소</button>
   </div>
@@ -1131,7 +1131,7 @@ function closeAnnounce(){
   // id를 data attribute에서 가져오기 어려우므로 session 동안만 닫힘
   localStorage.setItem('gyeol_ann_dismissed_session','1');
 }
-const GUIDE_TIPS=['천천히 움직여 주세요','각도를 바꿔가며 찍어주세요','물건을 화면 가득 채워주세요','서랍 구석구석 빠짐없이!','가까이서 찍어주세요'];
+const GUIDE_TIPS=['천천히 움직여 주세요','각도를 바꿔가며 찍어주세요','물건을 화면 가득 채워주세요','서랍 내부를 빠짐없이','가까이서 찍어주세요'];
 let _guideTimer=null,_guideIdx=0;
 function startGuideTips(){
   const g=document.getElementById('rec-guide');const t=document.getElementById('rec-guide-txt');
