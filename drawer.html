@@ -679,14 +679,17 @@ function sMove(e,idx){
     else{isScrolling=true;return;}
   }
   e.preventDefault();
-  if(diffX<0&&diffX>-135){curX=diffX;document.getElementById(`front-${idx}`).style.transform=`translateX(${curX}px)`;}
+  const baseX=activeSwipeIdx===idx?-130:0;
+  const newX=Math.min(0,Math.max(-130,baseX+diffX));
+  curX=newX;
+  document.getElementById(`front-${idx}`).style.transform=`translateX(${curX}px)`;
 }
 function sEnd(e,idx){
   cancelLP();
   if(!isSwiping)return;
   const el=document.getElementById(`front-${idx}`);
   if(!el)return;
-  if(curX<-50){el.style.transform='translateX(-130px)';activeSwipeIdx=idx;}
+  if(curX<-65){el.style.transform='translateX(-130px)';activeSwipeIdx=idx;}
   else{el.style.transform='translateX(0)';if(activeSwipeIdx===idx)activeSwipeIdx=-1;}
 }
 function resetSwipe(idx){
