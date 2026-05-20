@@ -643,10 +643,11 @@ let items=JSON.parse(localStorage.getItem('gyeol_'+tag)||'[]');
 let corrections=JSON.parse(localStorage.getItem('corrections_'+tag)||'[]');
 let rot=0,selFile=null,mediaStream=null,mediaRec=null,recChunks=[],recTimer=null,recSec=0,recBlob=null,isRec=false;
 let ctxIdx=-1,icoIdx=-1,selIco=null,pendingReview=[],reviewSel={};
-// 테마 마이그레이션: 구버전 키(theme_태그) → 신버전 키(gyeol_color_theme)
-const _legacyTheme=localStorage.getItem('theme_'+tag);
-if(_legacyTheme&&!localStorage.getItem('gyeol_color_theme')){localStorage.setItem('gyeol_color_theme',_legacyTheme);}
-let currentTheme=localStorage.getItem('gyeol_color_theme')||'stone',pendingTheme=currentTheme;
+// 테마: 서랍별 독립 저장 (gyeol_color_theme_태그)
+const _themeKey='gyeol_color_theme_'+tag;
+const _legacyTheme=localStorage.getItem('theme_'+tag)||localStorage.getItem('gyeol_color_theme');
+if(_legacyTheme&&!localStorage.getItem(_themeKey)){localStorage.setItem(_themeKey,_legacyTheme);}
+let currentTheme=localStorage.getItem(_themeKey)||'stone',pendingTheme=currentTheme;
 
 // 구형 테마 키 → charcoal으로 교체
 const VALID_THEMES=['scarlet','charcoal','forest','gray','stone','butter','champagne','mauve','terra','rose','sage','blue'];
@@ -657,9 +658,10 @@ let catOpenState={};
 let editIdx=-1;
 
 // ─── 스와이프 ───
-let sx=0,curX=0,activeSwipeIdx=-1,isSwiping=false;
+let sx=0,sy=0,curX=0,activeSwipeIdx=-1,isSwiping=false,isScrolling=false;
 function sStart(e,idx){
-  isSwiping=false;sx=e.touches[0].clientX;curX=0;
+  isSwiping=false;isScrolling=false;
+  sx=e.touches[0].clientX;sy=e.touches[0].clientY;curX=0;
   if(activeSwipeIdx!==-1&&activeSwipeIdx!==idx){
     const oldEl=document.getElementById(`front-${activeSwipeIdx}`);
     if(oldEl)oldEl.style.transform='translateX(0)';
@@ -668,10 +670,16 @@ function sStart(e,idx){
   startLP(idx);
 }
 function sMove(e,idx){
-  const diff=e.touches[0].clientX-sx;
-  if(Math.abs(diff)>8){isSwiping=true;cancelLP();}
-  if(isSwiping){e.preventDefault();}
-  if(diff<0&&diff>-135){curX=diff;document.getElementById(`front-${idx}`).style.transform=`translateX(${curX}px)`;}
+  if(isScrolling)return;
+  const diffX=e.touches[0].clientX-sx;
+  const diffY=e.touches[0].clientY-sy;
+  if(!isSwiping){
+    if(Math.abs(diffX)<8&&Math.abs(diffY)<8)return;
+    if(Math.abs(diffX)>Math.abs(diffY)){isSwiping=true;cancelLP();}
+    else{isScrolling=true;return;}
+  }
+  e.preventDefault();
+  if(diffX<0&&diffX>-135){curX=diffX;document.getElementById(`front-${idx}`).style.transform=`translateX(${curX}px)`;}
 }
 function sEnd(e,idx){
   cancelLP();
@@ -727,7 +735,7 @@ window.onload=async()=>{
   await checkSystemAnnouncement();
 };
 
-function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem('gyeol_color_theme',t);}}
+function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
 function closeDrawerSettings(e){if(e&&e.target!==document.getElementById('drawer-ov'))return;applyTheme(currentTheme,false);document.getElementById('drawer-ov').classList.remove('open');}
