@@ -128,6 +128,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .swipe-del-btn svg{width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .swipe-del-lbl{font-size:10px;font-weight:700;color:#fff;letter-spacing:.03em}
 .item-row{display:flex;align-items:center;padding:12px 13px;gap:11px;background:var(--surface);border:none;border-radius:0;position:relative;z-index:1;transition:transform .22s cubic-bezier(.32,0,0,1);touch-action:pan-y}
+.item-swipe-l{display:flex;align-items:center;gap:11px;flex:1;min-width:0;touch-action:pan-y}
 .item-ico{width:40px;height:40px;border-radius:calc(var(--r) - 1px);background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;line-height:1}
 .item-ico svg{width:19px;height:19px;stroke:var(--muted);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .item-info{flex:1;min-width:0}
@@ -661,14 +662,12 @@ let editIdx=-1;
 let sx=0,sy=0,curX=0,activeSwipeIdx=-1,isSwiping=false,isScrolling=false;
 function sStart(e,idx){
   isSwiping=false;isScrolling=false;
-  sx=e.touches[0].clientX;sy=e.touches[0].clientY;curX=0;
-  // 드래그 중 transition 제거 (뻑뻑함 방지)
-  const el=document.getElementById(`front-${idx}`);
-  if(el)el.style.transition='none';
+  sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+  curX=activeSwipeIdx===idx?-130:0;
   if(activeSwipeIdx!==-1&&activeSwipeIdx!==idx){
     const oldEl=document.getElementById(`front-${activeSwipeIdx}`);
     if(oldEl){oldEl.style.transition='';oldEl.style.transform='translateX(0)';}
-    activeSwipeIdx=-1;
+    activeSwipeIdx=-1;curX=0;
   }
   startLP(idx);
 }
@@ -677,23 +676,25 @@ function sMove(e,idx){
   const diffX=e.touches[0].clientX-sx;
   const diffY=e.touches[0].clientY-sy;
   if(!isSwiping){
-    if(Math.abs(diffX)<8&&Math.abs(diffY)<8)return;
-    if(Math.abs(diffX)>Math.abs(diffY)){isSwiping=true;cancelLP();}
-    else{isScrolling=true;return;}
+    if(Math.abs(diffX)<10&&Math.abs(diffY)<10)return;
+    if(Math.abs(diffX)>Math.abs(diffY)*1.5){
+      isSwiping=true;cancelLP();
+      const el=document.getElementById(`front-${idx}`);
+      if(el)el.style.transition='none';
+    }else{isScrolling=true;return;}
   }
   e.preventDefault();
-  const baseX=activeSwipeIdx===idx?-130:0;
-  const newX=Math.min(0,Math.max(-130,baseX+diffX));
-  curX=newX;
+  const baseX=activeSwipeIdx===idx&&curX===-130?-130:0;
+  const moved=Math.min(0,Math.max(-130,(activeSwipeIdx===idx?-130:0)+diffX));
+  curX=moved;
   document.getElementById(`front-${idx}`).style.transform=`translateX(${curX}px)`;
 }
 function sEnd(e,idx){
   cancelLP();
-  if(!isSwiping)return;
   const el=document.getElementById(`front-${idx}`);
+  if(el)el.style.transition='';
+  if(!isSwiping)return;
   if(!el)return;
-  // 스냅 시 transition 복원
-  el.style.transition='';
   if(curX<-65){el.style.transform='translateX(-130px)';activeSwipeIdx=idx;}
   else{el.style.transform='translateX(0)';if(activeSwipeIdx===idx)activeSwipeIdx=-1;}
 }
@@ -797,20 +798,21 @@ function renderItems(filter=''){
                 <span class="swipe-del-lbl">삭제</span>
               </div>
             </div>
-            <div class="item-row" id="front-${it.idx}"
-              ontouchstart="sStart(event,${it.idx})"
-              ontouchmove="sMove(event,${it.idx})"
-              ontouchend="sEnd(event,${it.idx})"
-              onmousedown="startLP(${it.idx})"
-              onmouseup="cancelLP()"
-              onmouseleave="cancelLP()"
-              oncontextmenu="return false">
-              <div class="item-ico">${icoSvg}</div>
-              <div class="item-info">
-                <div class="item-name">${hl(it.name,filter)}</div>
-                <div class="item-sub-row">
-                  <span class="item-cat-lbl">${cat}</span>
-                  ${memoHtml}
+            <div class="item-row" id="front-${it.idx}" oncontextmenu="return false">
+              <div class="item-swipe-l"
+                ontouchstart="sStart(event,${it.idx})"
+                ontouchmove="sMove(event,${it.idx})"
+                ontouchend="sEnd(event,${it.idx})"
+                onmousedown="startLP(${it.idx})"
+                onmouseup="cancelLP()"
+                onmouseleave="cancelLP()">
+                <div class="item-ico">${icoSvg}</div>
+                <div class="item-info">
+                  <div class="item-name">${hl(it.name,filter)}</div>
+                  <div class="item-sub-row">
+                    <span class="item-cat-lbl">${cat}</span>
+                    ${memoHtml}
+                  </div>
                 </div>
               </div>
               <div class="qty-wrap">
