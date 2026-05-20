@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     // bot 인사말 등 앞쪽 bot 메시지는 제거하고 user 턴부터 시작
     const filtered = (history || []).filter(m => m.role === 'user' || m.role === 'bot');
     const firstUserIdx = filtered.findIndex(m => m.role === 'user');
-    const validHistory = firstUserIdx >= 0 ? filtered.slice(firstUserIdx) : [];
+    const validHistory = firstUserIdx >= 0 ? filtered.slice(-2) : [];
 
     const contents = [];
 
