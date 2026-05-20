@@ -723,7 +723,6 @@ window.onload=async()=>{
   applyTheme(currentTheme,false);
   const _defaultName=tag.endsWith('DR2')?'수납장 2':tag.endsWith('DR1')?'수납장 1':'보관함';
   document.getElementById('drawer-title').textContent=localStorage.getItem('name_'+tag)||_defaultName;
-  document.documentElement.setAttribute('data-theme', localStorage.getItem('theme_' + tag) || 'stone');
   const mp=localStorage.getItem('mediaPath_'+tag);
   if(mp){const{data}=await _sb.storage.from('user_uploads').createSignedUrl(mp,3600);if(data?.signedUrl){showMedia(data.signedUrl,localStorage.getItem('rot_'+tag)||0);}else{localStorage.removeItem('mediaPath_'+tag);}}
   initMediaEvents();renderItems();
