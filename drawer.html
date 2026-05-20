@@ -670,6 +670,7 @@ function sStart(e,idx){
 function sMove(e,idx){
   const diff=e.touches[0].clientX-sx;
   if(Math.abs(diff)>8){isSwiping=true;cancelLP();}
+  if(isSwiping){e.preventDefault();}
   if(diff<0&&diff>-135){curX=diff;document.getElementById(`front-${idx}`).style.transform=`translateX(${curX}px)`;}
 }
 function sEnd(e,idx){
@@ -708,35 +709,19 @@ function getIconSVG(icon){const path=SVG_ICONS[icon]||SVG_ICONS.default;return`<
 
 window.onload=async()=>{
   const {data:{session:_sess}}=await _sb.auth.getSession();
-  // 테마: localStorage 우선 → DB 폴백 (DB 기본값 'stone'이 localStorage를 덮어쓰는 문제 방지)
+  // 테마: localStorage만 사용 (DB는 백그라운드 저장용)
+  applyTheme(currentTheme,false);
+  // DB 테마 백그라운드 동기화 (로딩에 영향 없음)
   try{
     const _email=_sess?.user?.email;
     if(_email){
-      const {data:_sr,error:_se}=await _sb.from('serials').select('color_theme').eq('used_by',_email).limit(1);
-      if(_se){console.warn('테마로드오류',_se);}
-      else{
-        const _dbTheme=_sr?.[0]?.color_theme;
-        const _lsTheme=localStorage.getItem('gyeol_color_theme');
-        if(_lsTheme&&VALID_THEMES.includes(_lsTheme)){
-          // localStorage에 값이 있으면 무조건 localStorage 우선
-          currentTheme=_lsTheme;
-          // DB 값과 다르면 DB를 localStorage 값으로 동기화 (백그라운드)
-          if(_dbTheme!==_lsTheme){
-            _sb.from('serials').update({color_theme:_lsTheme}).eq('used_by',_email).then(({error:ue})=>{if(ue)console.warn('테마DB동기화오류',ue);});
-          }
-        }else if(_dbTheme&&VALID_THEMES.includes(_dbTheme)){
-          // localStorage가 없을 때만 DB 값 사용
-          currentTheme=_dbTheme;
-          localStorage.setItem('gyeol_color_theme',_dbTheme);
-        }
-      }
+      _sb.from('serials').update({color_theme:currentTheme}).eq('used_by',_email).then(()=>{});
     }
-  }catch(e){console.warn('테마로드오류',e);}
-  applyTheme(currentTheme,false);
+  }catch(e){}
   const _defaultName=tag.endsWith('DR2')?'수납장 2':tag.endsWith('DR1')?'수납장 1':'보관함';
   document.getElementById('drawer-title').textContent=localStorage.getItem('name_'+tag)||_defaultName;
   const mp=localStorage.getItem('mediaPath_'+tag);
-  if(mp){const{data}=await _sb.storage.from('user_uploads').createSignedUrl(mp,3600);if(data?.signedUrl){showMedia(data.signedUrl,localStorage.getItem('rot_'+tag)||0);}else{localStorage.removeItem('mediaPath_'+tag);}}
+  if(mp){try{const{data,error}=await _sb.storage.from('user_uploads').createSignedUrl(mp,3600);if(data?.signedUrl){showMedia(data.signedUrl,localStorage.getItem('rot_'+tag)||0);}else if(error){console.warn('영상로드오류',error);/* 일시적 오류 - 경로 유지 */}}catch(e){console.warn('영상로드예외',e);/* 경로 유지 */}}
   initMediaEvents();renderItems();
   // 공지/점검 체크
   await checkSystemAnnouncement();
