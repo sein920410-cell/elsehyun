@@ -278,9 +278,18 @@ function buildScanPrompt(isVideo, userCorrections) {
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
 
-  const { filePath, mimeType, userCorrections, userEmail, videoFrames } = req.body || {};
+  // JWT 토큰으로 서버에서 직접 사용자 검증 (클라이언트 userEmail 신뢰 안 함)
+  const authHeader = req.headers["authorization"] || "";
+  const token = authHeader.replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "인증 토큰 없음" });
+
+  const { data: { user }, error: authErr } = await supa.auth.getUser(token);
+  if (authErr || !user) return res.status(401).json({ error: "유효하지 않은 토큰" });
+
+  const userEmail = user.email;
+
+  const { filePath, mimeType, userCorrections, videoFrames } = req.body || {};
   if (!filePath) return res.status(400).json({ error: "filePath 누락" });
-  if (!userEmail) return res.status(400).json({ error: "userEmail 누락" });
 
   const isVideo = mimeType?.startsWith("video/");
   const useFrames = isVideo && Array.isArray(videoFrames) && videoFrames.length > 0;
