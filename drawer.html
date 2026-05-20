@@ -662,9 +662,12 @@ let sx=0,sy=0,curX=0,activeSwipeIdx=-1,isSwiping=false,isScrolling=false;
 function sStart(e,idx){
   isSwiping=false;isScrolling=false;
   sx=e.touches[0].clientX;sy=e.touches[0].clientY;curX=0;
+  // 드래그 중 transition 제거 (뻑뻑함 방지)
+  const el=document.getElementById(`front-${idx}`);
+  if(el)el.style.transition='none';
   if(activeSwipeIdx!==-1&&activeSwipeIdx!==idx){
     const oldEl=document.getElementById(`front-${activeSwipeIdx}`);
-    if(oldEl)oldEl.style.transform='translateX(0)';
+    if(oldEl){oldEl.style.transition='';oldEl.style.transform='translateX(0)';}
     activeSwipeIdx=-1;
   }
   startLP(idx);
@@ -689,6 +692,8 @@ function sEnd(e,idx){
   if(!isSwiping)return;
   const el=document.getElementById(`front-${idx}`);
   if(!el)return;
+  // 스냅 시 transition 복원
+  el.style.transition='';
   if(curX<-65){el.style.transform='translateX(-130px)';activeSwipeIdx=idx;}
   else{el.style.transform='translateX(0)';if(activeSwipeIdx===idx)activeSwipeIdx=-1;}
 }
@@ -792,20 +797,18 @@ function renderItems(filter=''){
                 <span class="swipe-del-lbl">삭제</span>
               </div>
             </div>
-            <div class="item-row" id="front-${it.idx}"
-              ontouchstart="sStart(event,${it.idx})"
-              ontouchmove="sMove(event,${it.idx})"
-              ontouchend="sEnd(event,${it.idx})"
-              onmousedown="startLP(${it.idx})"
-              onmouseup="cancelLP()"
-              onmouseleave="cancelLP()"
-              oncontextmenu="return false">
-              <div class="item-ico">${icoSvg}</div>
-              <div class="item-info">
-                <div class="item-name">${hl(it.name,filter)}</div>
-                <div class="item-sub-row">
-                  <span class="item-cat-lbl">${cat}</span>
-                  ${memoHtml}
+            <div class="item-row" id="front-${it.idx}" onmousedown="startLP(${it.idx})" onmouseup="cancelLP()" onmouseleave="cancelLP()" oncontextmenu="return false">
+              <div style="display:flex;align-items:center;gap:11px;flex:1;min-width:0;padding:0"
+                ontouchstart="sStart(event,${it.idx})"
+                ontouchmove="sMove(event,${it.idx})"
+                ontouchend="sEnd(event,${it.idx})">
+                <div class="item-ico">${icoSvg}</div>
+                <div class="item-info">
+                  <div class="item-name">${hl(it.name,filter)}</div>
+                  <div class="item-sub-row">
+                    <span class="item-cat-lbl">${cat}</span>
+                    ${memoHtml}
+                  </div>
                 </div>
               </div>
               <div class="qty-wrap">
