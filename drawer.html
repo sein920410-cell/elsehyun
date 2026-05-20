@@ -1068,7 +1068,22 @@ function saveChatHistory(msgs){try{const trimmed=msgs.slice(-40);localStorage.se
 function renderChatHistory(history){const el=document.getElementById('chat-msgs');el.innerHTML='';history.forEach(m=>{const div=document.createElement('div');div.className='msg '+(m.role==='user'?'user':'bot');div.textContent=m.text;el.appendChild(div);});el.scrollTop=el.scrollHeight;}
 const CHAT_TIMEOUT_MS=30*60*1000;let chatTimeoutId=null;
 function resetChatTimeout(){if(chatTimeoutId)clearTimeout(chatTimeoutId);chatTimeoutId=setTimeout(()=>{const isOpen=document.getElementById('chat-ov').classList.contains('open');const timeoutMsg='안녕하세요, 답변 대기 시간이 초과되어 상담이 자동 종료되었습니다.\n상담을 원하실 경우 다시 문의 부탁드립니다 😊';const history=loadChatHistory();history.push({role:'bot',text:timeoutMsg});saveChatHistory(history);if(isOpen){renderChatHistory(history);setTimeout(()=>closeChat(),1500);}chatTimeoutId=null;},CHAT_TIMEOUT_MS);}
-function openChat(){document.getElementById('chat-ov').classList.add('open');const history=loadChatHistory();if(history.length===0){const drawerName=document.getElementById('drawer-title')?.textContent||'이 수납장';const greeting=`안녕하세요! 저는 수납 비서 봄이에요.\n「${drawerName}」에 대해 뭐든지 물어보세요.`;const el=document.getElementById('chat-msgs');el.innerHTML='';const bubble=document.createElement('div');bubble.className='typing-bubble';bubble.innerHTML='<span></span><span></span><span></span>';el.appendChild(bubble);setTimeout(()=>{bubble.remove();const first=[{role:'bot',text:greeting}];saveChatHistory(first);renderChatHistory(first);},1100);}else{renderChatHistory(history);}resetChatTimeout();}
+function openChat(){
+  document.getElementById('chat-ov').classList.add('open');
+  const history=loadChatHistory();
+  const el=document.getElementById('chat-msgs');
+  el.innerHTML='';
+  const bubble=document.createElement('div');bubble.className='typing-bubble';bubble.innerHTML='<span></span><span></span><span></span>';
+  el.appendChild(bubble);
+  if(history.length===0){
+    const drawerName=document.getElementById('drawer-title')?.textContent||'이 수납장';
+    const greeting='안녕하세요! 저는 수납 비서 봄이에요.\n'+drawerName+'에 대해 뭐든지 물어보세요.';
+    setTimeout(()=>{bubble.remove();const first=[{role:'bot',text:greeting}];saveChatHistory(first);renderChatHistory(first);},1100);
+  }else{
+    setTimeout(()=>{bubble.remove();renderChatHistory(history);},700);
+  }
+  resetChatTimeout();
+}
 function closeChat(){document.getElementById('chat-ov').classList.remove('open');}
 function endChat(){if(chatTimeoutId)clearTimeout(chatTimeoutId);chatTimeoutId=null;const endMsg='상담이 종료되었습니다. 또 필요하실 때 언제든 불러주세요 😊';const history=loadChatHistory();history.push({role:'bot',text:endMsg});saveChatHistory(history);renderChatHistory(history);setTimeout(()=>{closeChat();},800);}
 (function(){const sheet=()=>document.querySelector('.chat-sheet');let sy=0,sd=0,_scrolling=false;document.addEventListener('touchstart',e=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;if(e.target.closest('.chat-inp-row'))return;_scrolling=!!e.target.closest('.chat-msgs');sy=e.touches[0].clientY;sd=0;},{passive:true});document.addEventListener('touchmove',e=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;if(_scrolling)return;sd=e.touches[0].clientY-sy;if(sd>0&&sd<160){const s=sheet();if(s)s.style.transform='translateY('+sd+'px)';}},{passive:true});document.addEventListener('touchend',()=>{if(!document.getElementById('chat-ov').classList.contains('open'))return;if(_scrolling){_scrolling=false;return;}const s=sheet();if(!s)return;if(sd>120){s.style.transform='';closeChat();}else{s.style.transform='';}sd=0;});})();
