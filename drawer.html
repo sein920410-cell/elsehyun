@@ -1077,7 +1077,7 @@ function openChat(){
   el.appendChild(bubble);
   if(history.length===0){
     const drawerName=document.getElementById('drawer-title')?.textContent||'이 수납장';
-    const greeting='안녕하세요! 저는 수납 비서 봄이에요.\n'+drawerName+'에 대해 뭐든지 물어보세요.';
+    const greeting='안녕하세요! 수납 비서 봄이에요⭐\n수납장 관련 질문이나 서비스 이용 문의 편하게 남겨주세요.';
     setTimeout(()=>{bubble.remove();const first=[{role:'bot',text:greeting}];saveChatHistory(first);renderChatHistory(first);},1100);
   }else{
     setTimeout(()=>{bubble.remove();renderChatHistory(history);},700);
