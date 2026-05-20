@@ -1068,8 +1068,8 @@ async function runAnalysis(filePath,mimeType,videoFrames=null){
   if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px;background:linear-gradient(transparent,rgba(0,0,0,.45))"><div class="analyzing-badge"><div class="spinner"></div>물품 분석 중...</div></div>`;
   const rmOv=()=>{const o=document.getElementById('analyze-overlay');if(o)o.remove();};
   try{
-    const{data:{session}}=await _sb.auth.getSession();const userEmail=session?.user?.email||'';
-    const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filePath,mimeType:mimeType||'image/jpeg',userCorrections:corrections,userEmail,...(videoFrames?.length?{videoFrames}:{})})});
+    const{data:{session}}=await _sb.auth.getSession();const accessToken=session?.access_token||'';
+    const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${accessToken}`},body:JSON.stringify({filePath,mimeType:mimeType||'image/jpeg',userCorrections:corrections,...(videoFrames?.length?{videoFrames}:{})})});
     if(!r.ok){const errData=await r.json().catch(()=>({}));if(r.status===402){rmOv();showResultModal('💳','이용권이 소진되었습니다','물품명을 직접 입력해서 목록을 관리할 수 있어요.',true);return;}throw new Error(errData.error||'분석 오류');}
     const d=await r.json();items=[];localStorage.setItem('gyeol_'+tag,'[]');
     // ── 개인정보 감지 처리 ──────────────────────────────────────
