@@ -336,8 +336,8 @@ body {
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--header-bg); color: #fff; padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.22s, transform 0.22s; z-index: 300; white-space: nowrap; border: 1px solid rgba(255,255,255,0.08); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 /* ─── 온보딩 ─── */
-.ob-ov{position:fixed;inset:0;z-index:900;pointer-events:none}
-.ob-ov.active{pointer-events:all}
+.ob-ov{display:none;position:fixed;inset:0;z-index:900;pointer-events:none}
+.ob-ov.active{display:block;pointer-events:all}
 .ob-dim{position:absolute;inset:0;background:rgba(0,0,0,.45)}
 .ob-hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);z-index:1;pointer-events:none;transition:all .3s cubic-bezier(.32,0,0,1);outline:2.5px solid rgba(255,255,255,.7)}
 .ob-card{position:fixed;z-index:910;background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,.22);visibility:hidden;pointer-events:none;bottom:80px;left:12px;right:12px}
@@ -721,26 +721,26 @@ function startOnboarding(){
 function showObStep(i){
   const s=OB_STEPS[i];if(!s){endOnboarding();return;}
   const el=document.querySelector(s.sel);if(!el){_obStep++;showObStep(_obStep);return;}
+  const card=document.getElementById('ob-card');
+  const arr=document.getElementById('ob-arrow');
+  if(arr)arr.className='';
+  document.getElementById('ob-step').textContent=(i+1)+' / '+OB_STEPS.length;
+  document.getElementById('ob-title').textContent=s.title;
+  document.getElementById('ob-desc').textContent=s.desc;
+  const w=document.getElementById('ob-warn');
+  if(w){if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}}
+  document.getElementById('ob-next').textContent=i===OB_STEPS.length-1?'완료 ✓':'다음 →';
+  const prevBtn=document.getElementById('ob-prev');
+  if(prevBtn)prevBtn.style.display=i>0?'block':'none';
+  card.style.visibility='visible';
+  card.style.pointerEvents='all';
   el.scrollIntoView({block:'center',behavior:'smooth'});
   setTimeout(()=>{
-    const r=el.getBoundingClientRect();
-    const pad=6,vw=window.innerWidth;
+    const r=el.getBoundingClientRect();const pad=6;
     const hole=document.getElementById('ob-hole');
     hole.style.left=(r.left-pad)+'px';hole.style.top=(r.top-pad)+'px';
     hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';
-    const card=document.getElementById('ob-card');
-    const arr=document.getElementById('ob-arrow');
-    if(arr)arr.className='';
-    document.getElementById('ob-step').textContent=(i+1)+' / '+OB_STEPS.length;
-    document.getElementById('ob-title').textContent=s.title;
-    document.getElementById('ob-desc').textContent=s.desc;
-    const w=document.getElementById('ob-warn');
-    if(w){if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}}
-    document.getElementById('ob-next').textContent=i===OB_STEPS.length-1?'완료 ✓':'다음 →';
-    const prevBtn=document.getElementById('ob-prev');
-    if(prevBtn)prevBtn.style.display=i>0?'block':'none';
-    card.style.visibility='visible';card.style.pointerEvents='all';
-  },300);
+  },100);
 }
 function nextStep(){_obStep++;showObStep(_obStep);}
 function prevStep(){if(_obStep>0){_obStep--;showObStep(_obStep);}}
