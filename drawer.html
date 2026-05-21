@@ -358,9 +358,43 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .result-modal-sub{font-size:13px;color:var(--muted,#888);line-height:1.5}
 .result-modal-btn{width:100%;padding:15px;border:none;border-top:1px solid var(--border,rgba(0,0,0,.08));background:transparent;font-family:var(--font);font-size:15px;font-weight:600;color:var(--h-bg,#111318);cursor:pointer;letter-spacing:-.01em}
 .result-modal-btn:active{background:var(--bg,#f5f5f5)}
+/* ─── 온보딩 ─── */
+.ob-ov{position:fixed;inset:0;z-index:900;pointer-events:none}
+.ob-ov.active{pointer-events:all}
+.ob-dim{position:absolute;inset:0;background:rgba(0,0,0,.72);transition:opacity .25s}
+.ob-hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.72);z-index:1;transition:all .3s cubic-bezier(.32,0,0,1);pointer-events:none}
+.ob-card{position:absolute;z-index:2;background:#fff;border-radius:14px;padding:14px 16px;width:220px;box-shadow:0 8px 32px rgba(0,0,0,.22)}
+.ob-card-arrow{position:absolute;width:0;height:0}
+.ob-card-arrow.up{border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:9px solid #fff;top:-9px;left:24px}
+.ob-card-arrow.down{border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid #fff;bottom:-9px;left:24px}
+.ob-card-arrow.right{border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:9px solid #fff;right:-9px;top:16px}
+.ob-step{font-size:10px;font-weight:700;color:#aaa;letter-spacing:.08em;margin-bottom:4px}
+.ob-title{font-size:14px;font-weight:800;color:#111;margin-bottom:5px;letter-spacing:-.02em}
+.ob-desc{font-size:12px;line-height:1.6;color:#555;font-weight:500}
+.ob-warn{margin-top:8px;font-size:11px;color:#C0362C;font-weight:600;background:rgba(220,38,38,.07);border-radius:7px;padding:7px 9px;line-height:1.5}
+.ob-btns{display:flex;gap:8px;margin-top:12px}
+.ob-skip{flex:1;padding:9px;background:#f2f2f2;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#888;cursor:pointer;font-family:inherit}
+.ob-next{flex:2;padding:9px;background:#111;border:none;border-radius:8px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
 </style>
 </head>
 <body data-theme="stone">
+<!-- 온보딩 오버레이 -->
+<div class="ob-ov" id="ob-ov">
+  <div class="ob-dim" id="ob-dim"></div>
+  <div class="ob-hole" id="ob-hole"></div>
+  <div class="ob-card" id="ob-card">
+    <div class="ob-card-arrow up" id="ob-arrow"></div>
+    <div class="ob-step" id="ob-step">1 / 7</div>
+    <div class="ob-title" id="ob-title"></div>
+    <div class="ob-desc" id="ob-desc"></div>
+    <div class="ob-warn" id="ob-warn" style="display:none"></div>
+    <div class="ob-btns">
+      <button class="ob-skip" onclick="endOnboarding()">건너뛰기</button>
+      <button class="ob-next" id="ob-next" onclick="nextStep()">다음 →</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- 점검 화면 -->
 <div class="maintenance-ov" id="maintenance-ov">
@@ -643,6 +677,60 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <input type="file" id="file-in" accept="image/*" style="display:none" onchange="handleFile(event)">
 
 <script>
+// ─── 온보딩 ───
+const OB_STEPS=[
+  {sel:'#drawer-title',title:'수납장 이름 · 색상',desc:'이름을 바꾸고 12가지 색상 중 원하는 테마를 골라 꾸밀 수 있어요.',warn:null,arrow:'down'},
+  {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러오거나 카메라로 찍을 수 있어요.\n영상은 앱 내 즉석 촬영만 가능해요. (갤러리 영상 불가)',warn:null,arrow:'down'},
+  {sel:'#media-box',title:'AI 자동 분석',desc:'사진·영상을 등록하면 AI가 물건을 자동으로 인식해서 목록을 만들어줘요.',warn:'AI 분석 시 이용권 1건이 차감돼요.',arrow:'up'},
+  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n오른쪽 돋보기를 눌러 물품 이름으로 검색할 수 있어요.',warn:null,arrow:'up'},
+  {sel:'.item-swipe-l',title:'편집 · 삭제',desc:'목록 항목을 왼쪽으로 밀면 편집과 삭제 버튼이 나타나요.',warn:null,arrow:'up'},
+  {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.\n이용권이 소진돼도 이 방법으로 관리할 수 있어요.',warn:null,arrow:'up'},
+  {sel:'#brand-btn',title:'봄 채팅 상담 😊',desc:'공간:결 로고를 누르면 수납 비서 봄과 채팅할 수 있어요.\n물품 찾기부터 서비스 문의까지 편하게 물어보세요.',warn:null,arrow:'up'}
+];
+let _obStep=0;
+function startOnboarding(){
+  if(localStorage.getItem('ob_drawer_done')==='1')return;
+  _obStep=0;document.getElementById('ob-ov').classList.add('active');
+  showObStep(0);
+}
+function showObStep(i){
+  const s=OB_STEPS[i];if(!s){endOnboarding();return;}
+  const el=document.querySelector(s.sel);
+  if(!el){nextStep();return;}
+  el.scrollIntoView({block:'center',behavior:'smooth'});
+  setTimeout(()=>{
+    const r=el.getBoundingClientRect();
+    const pad=8;
+    const hole=document.getElementById('ob-hole');
+    hole.style.left=(r.left-pad)+'px';
+    hole.style.top=(r.top-pad)+'px';
+    hole.style.width=(r.width+pad*2)+'px';
+    hole.style.height=(r.height+pad*2)+'px';
+    const card=document.getElementById('ob-card');
+    const vw=window.innerWidth,vh=window.innerHeight;
+    const cw=236;
+    let cx=Math.min(r.left,vw-cw-12);
+    let cy,arrowDir;
+    if(r.bottom+160<vh){cy=r.bottom+pad+14;arrowDir='up';}
+    else{cy=r.top-pad-140;arrowDir='down';}
+    card.style.left=cx+'px';card.style.top=cy+'px';card.style.width=cw+'px';
+    const arr=document.getElementById('ob-arrow');
+    arr.className='ob-card-arrow '+arrowDir;
+    document.getElementById('ob-step').textContent=(i+1)+' / '+OB_STEPS.length;
+    document.getElementById('ob-title').textContent=s.title;
+    document.getElementById('ob-desc').textContent=s.desc;
+    const w=document.getElementById('ob-warn');
+    if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}
+    document.getElementById('ob-next').textContent=i===OB_STEPS.length-1?'완료 ✓':'다음 →';
+  },350);
+}
+function nextStep(){_obStep++;showObStep(_obStep);}
+function endOnboarding(){
+  localStorage.setItem('ob_drawer_done','1');
+  const ov=document.getElementById('ob-ov');
+  ov.style.opacity='0';setTimeout(()=>{ov.style.display='none';},250);
+}
+
 const _sb=supabase.createClient('https://tqhtggusphhcsygiitrv.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc');
 const params=new URLSearchParams(location.search);
 const tag=(params.get('tag')||'DRAWER001').toUpperCase();
@@ -748,6 +836,7 @@ window.onload=async()=>{
   initMediaEvents();renderItems();
   // 공지/점검 체크
   await checkSystemAnnouncement();
+  setTimeout(startOnboarding, 600);
 };
 
 function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
