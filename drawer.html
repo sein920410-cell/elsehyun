@@ -362,8 +362,8 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .ob-ov{position:fixed;inset:0;z-index:900;pointer-events:none}
 .ob-ov.active{pointer-events:all}
 .ob-dim{position:absolute;inset:0;background:rgba(0,0,0,.72);transition:opacity .25s}
-.ob-hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.72);z-index:1;transition:all .3s cubic-bezier(.32,0,0,1);pointer-events:none}
-.ob-card{position:absolute;z-index:2;background:#fff;border-radius:14px;padding:14px 16px;width:220px;box-shadow:0 8px 32px rgba(0,0,0,.22)}
+.ob-hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);z-index:1;transition:all .3s cubic-bezier(.32,0,0,1);pointer-events:none;outline:2.5px solid rgba(255,255,255,.7)}
+.ob-card{position:absolute;z-index:2;background:#fff;border-radius:14px;padding:14px 16px;width:220px;box-shadow:0 8px 32px rgba(0,0,0,.22);pointer-events:all}
 .ob-card-arrow{position:absolute;width:0;height:0}
 .ob-card-arrow.up{border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:9px solid #fff;top:-9px;left:24px}
 .ob-card-arrow.down{border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid #fff;bottom:-9px;left:24px}
@@ -372,9 +372,10 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .ob-title{font-size:14px;font-weight:800;color:#111;margin-bottom:5px;letter-spacing:-.02em}
 .ob-desc{font-size:12px;line-height:1.6;color:#555;font-weight:500}
 .ob-warn{margin-top:8px;font-size:11px;color:#C0362C;font-weight:600;background:rgba(220,38,38,.07);border-radius:7px;padding:7px 9px;line-height:1.5}
-.ob-btns{display:flex;gap:8px;margin-top:12px}
-.ob-skip{flex:1;padding:9px;background:#f2f2f2;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#888;cursor:pointer;font-family:inherit}
-.ob-next{flex:2;padding:9px;background:#111;border:none;border-radius:8px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
+.ob-btns{display:flex;gap:6px;margin-top:12px}
+.ob-skip{padding:9px 10px;background:#f2f2f2;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#888;cursor:pointer;font-family:inherit;flex-shrink:0}
+.ob-prev{padding:9px 10px;background:#f2f2f2;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#555;cursor:pointer;font-family:inherit;flex-shrink:0}
+.ob-next{flex:1;padding:9px;background:#111;border:none;border-radius:8px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
 </style>
 </head>
 <body data-theme="stone">
@@ -382,14 +383,15 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <div class="ob-ov" id="ob-ov">
   <div class="ob-dim" id="ob-dim"></div>
   <div class="ob-hole" id="ob-hole"></div>
-  <div class="ob-card" id="ob-card">
+  <div class="ob-card" id="ob-card" onclick="event.stopPropagation()">
     <div class="ob-card-arrow up" id="ob-arrow"></div>
     <div class="ob-step" id="ob-step">1 / 7</div>
     <div class="ob-title" id="ob-title"></div>
     <div class="ob-desc" id="ob-desc"></div>
     <div class="ob-warn" id="ob-warn" style="display:none"></div>
     <div class="ob-btns">
-      <button class="ob-skip" onclick="endOnboarding()">건너뛰기</button>
+      <button class="ob-skip" onclick="endOnboarding()">닫기</button>
+      <button class="ob-prev" id="ob-prev" onclick="prevStep()" style="display:none">← 이전</button>
       <button class="ob-next" id="ob-next" onclick="nextStep()">다음 →</button>
     </div>
   </div>
@@ -722,9 +724,12 @@ function showObStep(i){
     const w=document.getElementById('ob-warn');
     if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}
     document.getElementById('ob-next').textContent=i===OB_STEPS.length-1?'완료 ✓':'다음 →';
+    const prevBtn=document.getElementById('ob-prev');
+    if(prevBtn)prevBtn.style.display=i>0?'block':'none';
   },350);
 }
 function nextStep(){_obStep++;showObStep(_obStep);}
+function prevStep(){if(_obStep>0){_obStep--;showObStep(_obStep);}}
 function endOnboarding(){
   localStorage.setItem('ob_drawer_done','1');
   const ov=document.getElementById('ob-ov');
