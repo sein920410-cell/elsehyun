@@ -21,6 +21,7 @@
     if (!serial) { window.location.replace('serial.html'); return; }
     // 인증 통과 → 화면 표시
     document.body.style.visibility = 'visible';
+    setTimeout(startOnboarding, 900);
     })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
