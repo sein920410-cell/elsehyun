@@ -19,6 +19,7 @@
     const { data: singleSerial } = await _authClient.from('single_serials').select('id').eq('used_by', session.user.email).limit(1).maybeSingle();
     if (!serial && !singleSerial) { window.location.replace('serial.html'); return; }
     document.body.style.visibility = 'visible';
+    setTimeout(startOnboarding, 900);
 })();
 </script>
 <style>
