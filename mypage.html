@@ -16,6 +16,7 @@
     const { data: serial } = await _sb.from('serials').select('id').eq('used_by', session.user.email).maybeSingle();
     if (!serial) { window.location.replace('serial.html'); return; }
     document.body.style.visibility = 'visible';
+    setTimeout(startOnboarding, 1000);
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -749,7 +750,6 @@ function endOnboarding(){
   const ov=document.getElementById('ob-ov');
   ov.classList.remove('active');ov.style.opacity='';
 }
-setTimeout(startOnboarding, 800);
 
 // ─── 자세히 보기 ───
 const DETAIL_DATA={
