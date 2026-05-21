@@ -340,7 +340,7 @@ body {
 .ob-ov.active{pointer-events:all}
 .ob-dim{position:absolute;inset:0;background:rgba(0,0,0,.45)}
 .ob-hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);z-index:1;pointer-events:none;transition:all .3s cubic-bezier(.32,0,0,1);outline:2.5px solid rgba(255,255,255,.7)}
-.ob-card{position:absolute;z-index:2;background:#fff;border-radius:14px;padding:14px 16px;width:220px;box-shadow:0 8px 32px rgba(0,0,0,.22);pointer-events:all}
+.ob-card{position:absolute;z-index:2;background:#fff;border-radius:14px;padding:14px 16px;width:220px;box-shadow:0 8px 32px rgba(0,0,0,.22);pointer-events:all;opacity:0;transition:opacity .15s}
 .ob-card-arrow.up{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:9px solid #fff;top:-9px;left:24px}
 .ob-card-arrow.down{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid #fff;bottom:-9px;left:24px}
 .ob-step{font-size:10px;font-weight:700;color:#aaa;letter-spacing:.08em;margin-bottom:4px}
@@ -697,32 +697,56 @@ sb.auth.getSession().then(function(res) {
         document.getElementById('used-count').textContent = used;
         document.getElementById('used-count2').textContent = used;
         document.getElementById('remain-count').textContent = credits;
-        setTimeout(()=>{
+        setTimeout(function(){ document.getElementById('usage-bar').style.width = pct + '%'; }, 100);
+    });
+}
+const OB_STEPS=[
+  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석할 때마다 이용권이 1건 차감돼요.
+잔여 이용권이 0이 되면 AI 분석을 사용할 수 없어요.',warn:'기본 50건 무료 제공 · 추가 구매 50건 / 4,900원'},
+  {sel:'.charge-btn',title:'이용권 충전하기',desc:'이용권이 부족하면 여기서 추가로 구매할 수 있어요.
+(현재 오픈 준비 중)',warn:null},
+  {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'공간:결 태그를 추가로 구매했다면 여기서 등록해요.
+등록하면 새 수납장이 자동으로 추가돼요.',warn:null},
+  {sel:'.invite-row',title:'구성원 초대',desc:'가족이나 지인에게 초대 링크를 공유하면
+같은 수납장을 함께 사용할 수 있어요. (준비 중)',warn:null},
+  {sel:'.acct-link.del-link',title:'계정 삭제 주의',desc:'계정을 삭제하면 모든 수납장 데이터가 영구 삭제돼요.
+삭제 전 반드시 내용을 확인해 주세요.',warn:'삭제 후 복구가 불가능해요.'}
+];
+let _obStep=0;
+function startOnboarding(){
+  if(localStorage.getItem('ob_mypage_done')==='1')return;
+  _obStep=0;document.getElementById('ob-ov').classList.add('active');
+  showObStep(0);
+}
+function showObStep(i){
+  const s=OB_STEPS[i];if(!s){endOnboarding();return;}
+  const el=document.querySelector(s.sel);if(!el){_obStep++;showObStep(_obStep);return;}
+  el.scrollIntoView({block:'center',behavior:'smooth'});
+  const card=document.getElementById('ob-card');
+  card.style.opacity='0';
+  setTimeout(()=>{
     const r=el.getBoundingClientRect();
     const pad=6,vw=window.innerWidth;
-    // 하이라이트 구멍만 요소 위치로
     const hole=document.getElementById('ob-hole');
     hole.style.left=(r.left-pad)+'px';hole.style.top=(r.top-pad)+'px';
     hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';
-    // 카드는 항상 화면 하단 중앙 고정
-    const card=document.getElementById('ob-card');
     const cw=Math.min(vw-24,320);
     card.style.width=cw+'px';
     card.style.left=((vw-cw)/2)+'px';
     card.style.top='auto';
     card.style.bottom='80px';
     card.style.position='fixed';
-    // 화살표 숨김 (카드가 중앙에 있어서 방향 의미없음)
     const arr=document.getElementById('ob-arrow');
     if(arr)arr.className='';
     document.getElementById('ob-step').textContent=(i+1)+' / '+OB_STEPS.length;
     document.getElementById('ob-title').textContent=s.title;
     document.getElementById('ob-desc').textContent=s.desc;
     const w=document.getElementById('ob-warn');
-    if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}
+    if(w){if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}}
     document.getElementById('ob-next').textContent=i===OB_STEPS.length-1?'완료 ✓':'다음 →';
     const prevBtn=document.getElementById('ob-prev');
     if(prevBtn)prevBtn.style.display=i>0?'block':'none';
+    card.style.opacity='1';
   },300);
 }
 function nextStep(){_obStep++;showObStep(_obStep);}
@@ -732,6 +756,7 @@ function endOnboarding(){
   const ov=document.getElementById('ob-ov');
   ov.style.opacity='0';setTimeout(()=>{ov.classList.remove('active');ov.style.opacity='';},250);
 }
+setTimeout(startOnboarding, 800);
 
 // ─── 자세히 보기 ───
 const DETAIL_DATA={
