@@ -746,6 +746,7 @@ function showObStep(i){
     document.getElementById('ob-next').textContent=i===OB_STEPS.length-1?'완료 ✓':'다음 →';
     const prevBtn=document.getElementById('ob-prev');
     if(prevBtn)prevBtn.style.display=i>0?'block':'none';
+    card.style.zIndex='910';
     card.style.opacity='1';
   },300);
 }
