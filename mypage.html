@@ -697,91 +697,24 @@ sb.auth.getSession().then(function(res) {
         document.getElementById('used-count').textContent = used;
         document.getElementById('used-count2').textContent = used;
         document.getElementById('remain-count').textContent = credits;
-        setTimeout(function() { document.getElementById('usage-bar').style.width = pct + '%'; }, 120);
-        setTimeout(startOnboarding, 800);
-    });
-});
-
-function openChargeModal()  { document.getElementById('charge-ov').style.display = 'flex'; }
-function closeChargeModal() { document.getElementById('charge-ov').style.display = 'none'; }
-
-function toggleDark() {
-    var dark = document.getElementById('dark-toggle').checked;
-    document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
-    localStorage.setItem('gyeol_theme', dark ? 'dark' : 'light');
-}
-function setSize(val) {
-    document.documentElement.setAttribute('data-size', val);
-    localStorage.setItem('gyeol_size', val);
-    document.querySelectorAll('.size-btn').forEach(function(btn) {
-        btn.classList.toggle('active', btn.dataset.val === val);
-    });
-}
-
-function openNameModal() {
-    var current = document.getElementById('profile-name').textContent;
-    var input = document.getElementById('name-input');
-    input.value = current;
-    document.getElementById('char-count').textContent = current.length;
-    clearError('name-error');
-    document.getElementById('name-modal').classList.add('open');
-    setTimeout(function() { input.focus(); input.select(); }, 320);
-}
-function saveName() {
-    var newName = document.getElementById('name-input').value.trim();
-    if (!newName) { document.getElementById('name-error').textContent = '닉네임을 입력해주세요'; return; }
-    if (newName.length > 16) { document.getElementById('name-error').textContent = '16자 이내로 입력해주세요'; return; }
-    var btn = document.getElementById('name-save-btn');
-    btn.textContent = '저장 중…'; btn.disabled = true;
-    sb.auth.updateUser({ data: { display_name: newName } }).then(function(r) {
-        btn.textContent = '저장'; btn.disabled = false;
-        if (r.error) { document.getElementById('name-error').textContent = '저장에 실패했어요. 다시 시도해주세요'; return; }
-        document.getElementById('profile-name').textContent = newName;
-        document.getElementById('name-modal').classList.remove('open');
-        showToast('닉네임이 변경됐어요 ✓');
-    });
-}
-
-function handleModalOutsideClick(e, id) {
-    if (e.target === document.getElementById(id)) document.getElementById(id).classList.remove('open');
-}
-function clearError(id) { document.getElementById(id).textContent = ''; }
-// ─── 온보딩 ───
-const OB_STEPS=[
-  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석해서 목록을 만들 때마다 1건이 차감돼요.\n기본 50건은 무료예요. 단순 조회·수량 변경은 차감 없어요.',warn:null,arrow:'down'},
-  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권이 소진되면 여기서 추가 구매할 수 있어요.\n50건 추가에 4,900원이에요.',warn:'이용권이 0건이 되면 AI 자동 분석을 사용할 수 없어요.',arrow:'up'},
-  {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'공간:결 태그를 추가로 구매했다면 여기서 등록하세요.\n박스 안 카드에 적힌 코드를 입력하면 새 수납장이 추가돼요.',warn:null,arrow:'down'},
-  {sel:'.invite-row',title:'구성원 초대',desc:'가족이나 지인에게 초대 링크를 보내면 같은 수납장을 함께 사용할 수 있어요.',warn:'현재 준비 중인 기능이에요.',arrow:'down'},
-  {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃은 언제든 다시 로그인할 수 있어요.',warn:'계정 삭제 시 등록된 수납장과 모든 데이터가 영구 삭제돼요.\n삭제 후 복구가 불가능해요.',arrow:'up'}
-];
-let _obStep=0;
-function startOnboarding(){
-  if(localStorage.getItem('ob_mypage_done')==='1')return;
-  _obStep=0;document.getElementById('ob-ov').classList.add('active');
-  showObStep(0);
-}
-function showObStep(i){
-  const s=OB_STEPS[i];if(!s){endOnboarding();return;}
-  const el=document.querySelector(s.sel);
-  if(!el){_obStep++;showObStep(_obStep);return;}
-  el.scrollIntoView({block:'center',behavior:'smooth'});
-  setTimeout(()=>{
+        setTimeout(()=>{
     const r=el.getBoundingClientRect();
-    const pad=8,cw=Math.min(window.innerWidth-24,260),vh=window.innerHeight,vw=window.innerWidth;
+    const pad=6,vw=window.innerWidth;
+    // 하이라이트 구멍만 요소 위치로
     const hole=document.getElementById('ob-hole');
-    hole.style.cssText=`left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`;
+    hole.style.left=(r.left-pad)+'px';hole.style.top=(r.top-pad)+'px';
+    hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';
+    // 카드는 항상 화면 하단 중앙 고정
     const card=document.getElementById('ob-card');
-    const cardH=170;
-    let cy,arrowDir;
-    const spaceBelow=vh-(r.bottom+pad);
-    const spaceAbove=r.top-pad;
-    if(spaceBelow>=cardH+20){cy=r.bottom+pad+12;arrowDir='up';}
-    else if(spaceAbove>=cardH+20){cy=r.top-pad-cardH-12;arrowDir='down';}
-    else{cy=Math.max(60,Math.min(r.bottom+pad+12,vh-cardH-20));arrowDir=cy>r.bottom?'up':'down';}
-    const cx=Math.max(12,Math.min(r.left,vw-cw-12));
-    card.style.cssText=`left:${cx}px;top:${cy}px;width:${cw}px`;
+    const cw=Math.min(vw-24,320);
+    card.style.width=cw+'px';
+    card.style.left=((vw-cw)/2)+'px';
+    card.style.top='auto';
+    card.style.bottom='80px';
+    card.style.position='fixed';
+    // 화살표 숨김 (카드가 중앙에 있어서 방향 의미없음)
     const arr=document.getElementById('ob-arrow');
-    arr.className='ob-card-arrow '+arrowDir;
+    if(arr)arr.className='';
     document.getElementById('ob-step').textContent=(i+1)+' / '+OB_STEPS.length;
     document.getElementById('ob-title').textContent=s.title;
     document.getElementById('ob-desc').textContent=s.desc;
@@ -790,7 +723,7 @@ function showObStep(i){
     document.getElementById('ob-next').textContent=i===OB_STEPS.length-1?'완료 ✓':'다음 →';
     const prevBtn=document.getElementById('ob-prev');
     if(prevBtn)prevBtn.style.display=i>0?'block':'none';
-  },350);
+  },300);
 }
 function nextStep(){_obStep++;showObStep(_obStep);}
 function prevStep(){if(_obStep>0){_obStep--;showObStep(_obStep);}}
