@@ -384,6 +384,7 @@ function showObStep(i){
     hole.style.left=(r.left-pad)+'px';hole.style.top=(r.top-pad)+'px';
     hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';
     // 화살표 숨김
+    const card=document.getElementById('ob-card');
     const arr=document.getElementById('ob-arrow');
     if(arr)arr.className='';
     document.getElementById('ob-step').textContent=(i+1)+' / '+INDEX_STEPS.length;
