@@ -702,20 +702,22 @@ function showObStep(i){
   el.scrollIntoView({block:'center',behavior:'smooth'});
   setTimeout(()=>{
     const r=el.getBoundingClientRect();
-    const pad=8;
+    const pad=8,cw=Math.min(window.innerWidth-24,260),vh=window.innerHeight,vw=window.innerWidth;
     const hole=document.getElementById('ob-hole');
-    hole.style.left=(r.left-pad)+'px';
-    hole.style.top=(r.top-pad)+'px';
-    hole.style.width=(r.width+pad*2)+'px';
-    hole.style.height=(r.height+pad*2)+'px';
+    hole.style.left=(r.left-pad)+'px';hole.style.top=(r.top-pad)+'px';
+    hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';
     const card=document.getElementById('ob-card');
-    const vw=window.innerWidth,vh=window.innerHeight;
-    const cw=236;
-    let cx=Math.min(r.left,vw-cw-12);
+    card.style.width=cw+'px';
+    // 카드 높이 예상 (제목+설명+버튼 ~160px)
+    const cardH=170;
     let cy,arrowDir;
-    if(r.bottom+160<vh){cy=r.bottom+pad+14;arrowDir='up';}
-    else{cy=r.top-pad-140;arrowDir='down';}
-    card.style.left=cx+'px';card.style.top=cy+'px';card.style.width=cw+'px';
+    const spaceBelow=vh-(r.bottom+pad);
+    const spaceAbove=r.top-pad;
+    if(spaceBelow>=cardH+20){cy=r.bottom+pad+12;arrowDir='up';}
+    else if(spaceAbove>=cardH+20){cy=r.top-pad-cardH-12;arrowDir='down';}
+    else{cy=Math.max(60,Math.min(r.bottom+pad+12,vh-cardH-20));arrowDir=cy>r.bottom?'up':'down';}
+    const cx=Math.max(12,Math.min(r.left,vw-cw-12));
+    card.style.left=cx+'px';card.style.top=cy+'px';
     const arr=document.getElementById('ob-arrow');
     arr.className='ob-card-arrow '+arrowDir;
     document.getElementById('ob-step').textContent=(i+1)+' / '+OB_STEPS.length;
