@@ -358,34 +358,31 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .result-modal-sub{font-size:13px;color:var(--muted,#888);line-height:1.5}
 .result-modal-btn{width:100%;padding:15px;border:none;border-top:1px solid var(--border,rgba(0,0,0,.08));background:transparent;font-family:var(--font);font-size:15px;font-weight:600;color:var(--h-bg,#111318);cursor:pointer;letter-spacing:-.01em}
 .result-modal-btn:active{background:var(--bg,#f5f5f5)}
+
 /* ─── 온보딩 ─── */
-.ob-ov{position:fixed;inset:0;z-index:900;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(0,0,0,.45)}
+.ob-ov{position:fixed;inset:0;z-index:900;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(0,0,0,.5)}
 .ob-ov.active{opacity:1;pointer-events:all}
-.ob-dim{position:absolute;inset:0;background:rgba(0,0,0,.72);transition:opacity .25s}
-.ob-hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);z-index:1;transition:all .3s cubic-bezier(.32,0,0,1);pointer-events:none;outline:2.5px solid rgba(255,255,255,.7)}
-.ob-card{position:fixed;z-index:910;background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,.22);visibility:hidden;pointer-events:none;bottom:80px;left:12px;right:12px}
-.ob-card-arrow{position:absolute;width:0;height:0}
-.ob-card-arrow.up{border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:9px solid #fff;top:-9px;left:24px}
-.ob-card-arrow.down{border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid #fff;bottom:-9px;left:24px}
-.ob-card-arrow.right{border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:9px solid #fff;right:-9px;top:16px}
+.ob-hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.5);z-index:1;pointer-events:none;transition:all .3s cubic-bezier(.32,0,0,1);outline:2.5px solid rgba(255,255,255,.8)}
+.ob-card{position:fixed;z-index:910;background:#fff;border-radius:16px;padding:16px 18px 14px;box-shadow:0 8px 40px rgba(0,0,0,.25);bottom:90px;left:16px;right:16px}
+.ob-card-arrow.up{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:9px solid #fff;top:-9px;left:24px}
+.ob-card-arrow.down{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid #fff;bottom:-9px;left:24px}
 .ob-step{font-size:10px;font-weight:700;color:#aaa;letter-spacing:.08em;margin-bottom:4px}
-.ob-title{font-size:14px;font-weight:800;color:#111;margin-bottom:5px;letter-spacing:-.02em}
-.ob-desc{font-size:12px;line-height:1.6;color:#555;font-weight:500}
-.ob-warn{margin-top:8px;font-size:11px;color:#C0362C;font-weight:600;background:rgba(220,38,38,.07);border-radius:7px;padding:7px 9px;line-height:1.5}
-.ob-btns{display:flex;gap:6px;margin-top:12px}
-.ob-skip{padding:9px 10px;background:#f2f2f2;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#888;cursor:pointer;font-family:inherit;flex-shrink:0}
-.ob-prev{padding:9px 10px;background:#f2f2f2;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#555;cursor:pointer;font-family:inherit;flex-shrink:0}
-.ob-next{flex:1;padding:9px;background:#111;border:none;border-radius:8px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
+.ob-title{font-size:15px;font-weight:800;color:#111;margin-bottom:6px}
+.ob-desc{font-size:13px;line-height:1.65;color:#555;font-weight:500;white-space:pre-line}
+.ob-warn{margin-top:10px;padding:9px 12px;background:rgba(220,38,38,.07);border-radius:8px;font-size:12px;color:#C0362C;font-weight:600;line-height:1.5}
+.ob-btns{display:flex;gap:6px;margin-top:14px}
+.ob-skip{padding:10px 12px;background:#f2f2f2;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#888;cursor:pointer;font-family:inherit;flex-shrink:0}
+.ob-prev{padding:10px 12px;background:#f2f2f2;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#555;cursor:pointer;font-family:inherit;flex-shrink:0}
+.ob-next{flex:1;padding:10px;background:#111;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
 </style>
 </head>
 <body data-theme="stone">
 <!-- 온보딩 오버레이 -->
 <div class="ob-ov" id="ob-ov">
-  <div class="ob-dim" id="ob-dim"></div>
   <div class="ob-hole" id="ob-hole"></div>
   <div class="ob-card" id="ob-card" onclick="event.stopPropagation()">
-    <div class="ob-card-arrow up" id="ob-arrow"></div>
-    <div class="ob-step" id="ob-step">1 / 7</div>
+    <div id="ob-arrow"></div>
+    <div class="ob-step" id="ob-step"></div>
     <div class="ob-title" id="ob-title"></div>
     <div class="ob-desc" id="ob-desc"></div>
     <div class="ob-warn" id="ob-warn" style="display:none"></div>
@@ -679,160 +676,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <input type="file" id="file-in" accept="image/*" style="display:none" onchange="handleFile(event)">
 
 <script>
-// ─── 온보딩 ───
-const OB_STEPS=[
-  {sel:'#drawer-title',title:'수납장 이름 · 색상',desc:'이름을 바꾸고 12가지 색상 중 원하는 테마를 골라 꾸밀 수 있어요.',warn:null,arrow:'down'},
-  {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러오거나 카메라로 찍을 수 있어요.\n영상은 앱 내 즉석 촬영만 가능해요. (갤러리 영상 불가)',warn:null,arrow:'down'},
-  {sel:'#media-box',title:'AI 자동 분석',desc:'사진·영상을 등록하면 AI가 물건을 자동으로 인식해서 목록을 만들어줘요.',warn:'AI 분석 시 이용권 1건이 차감돼요.',arrow:'up'},
-  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n오른쪽 돋보기를 눌러 물품 이름으로 검색할 수 있어요.',warn:null,arrow:'up'},
-  {sel:'.item-swipe-l',title:'편집 · 삭제',desc:'목록 항목을 왼쪽으로 밀면 편집과 삭제 버튼이 나타나요.',warn:null,arrow:'up'},
-  {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.\n이용권이 소진돼도 이 방법으로 관리할 수 있어요.',warn:null,arrow:'up'},
-  {sel:'#brand-btn',title:'봄 채팅 상담 😊',desc:'공간:결 로고를 누르면 수납 비서 봄과 채팅할 수 있어요.\n물품 찾기부터 서비스 문의까지 편하게 물어보세요.',warn:null,arrow:'up'}
-];
-let _obStep=0;
-function startOnboarding(){
-  if(localStorage.getItem('ob_drawer_done')==='1')return;
-  _obStep=0;document.getElementById('ob-ov').classList.add('active');
-  showObStep(0);
-}
-function showObStep(i){
-  const s=OB_STEPS[i];if(!s){endOnboarding();return;}
-  const el=document.querySelector(s.sel);if(!el){_obStep++;showObStep(_obStep);return;}
-  const card=document.getElementById('ob-card');
-  const arr=document.getElementById('ob-arrow');
-  if(arr)arr.className='';
-  document.getElementById('ob-step').textContent=(i+1)+' / '+OB_STEPS.length;
-  document.getElementById('ob-title').textContent=s.title;
-  document.getElementById('ob-desc').textContent=s.desc;
-  const w=document.getElementById('ob-warn');
-  if(w){if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}}
-  document.getElementById('ob-next').textContent=i===OB_STEPS.length-1?'완료 ✓':'다음 →';
-  const prevBtn=document.getElementById('ob-prev');
-  if(prevBtn)prevBtn.style.display=i>0?'block':'none';
-  card.style.visibility='visible';
-  card.style.pointerEvents='all';
-  el.scrollIntoView({block:'center',behavior:'smooth'});
-  setTimeout(()=>{
-    const r=el.getBoundingClientRect();const pad=6;
-    const hole=document.getElementById('ob-hole');
-    hole.style.left=(r.left-pad)+'px';hole.style.top=(r.top-pad)+'px';
-    hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';
-  },100);
-}
-function nextStep(){_obStep++;showObStep(_obStep);}
-function prevStep(){if(_obStep>0){_obStep--;showObStep(_obStep);}}
-function endOnboarding(){
-  localStorage.setItem('ob_drawer_done','1');
-  const ov=document.getElementById('ob-ov');
-  ov.classList.remove('active');ov.style.opacity='';
-}
-
-const _sb=supabase.createClient('https://tqhtggusphhcsygiitrv.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc');
-const params=new URLSearchParams(location.search);
-const tag=(params.get('tag')||'DRAWER001').toUpperCase();
-let items=JSON.parse(localStorage.getItem('gyeol_'+tag)||'[]');
-let corrections=JSON.parse(localStorage.getItem('corrections_'+tag)||'[]');
-let rot=0,selFile=null,mediaStream=null,mediaRec=null,recChunks=[],recTimer=null,recSec=0,recBlob=null,isRec=false;
-let ctxIdx=-1,icoIdx=-1,selIco=null,pendingReview=[],reviewSel={};
-// 테마: 서랍별 독립 저장 (gyeol_color_theme_태그)
-const _themeKey='gyeol_color_theme_'+tag;
-const _legacyTheme=localStorage.getItem('theme_'+tag)||localStorage.getItem('gyeol_color_theme');
-if(_legacyTheme&&!localStorage.getItem(_themeKey)){localStorage.setItem(_themeKey,_legacyTheme);}
-let currentTheme=localStorage.getItem(_themeKey)||'stone',pendingTheme=currentTheme;
-
-// 구형 테마 키 → charcoal으로 교체
-const VALID_THEMES=['scarlet','charcoal','forest','gray','stone','butter','champagne','mauve','terra','rose','sage','blue'];
-if(!VALID_THEMES.includes(currentTheme)) currentTheme='stone';
-// 테마 즉시 적용 (페이지 로드 플래시 방지)
-document.body.setAttribute('data-theme',currentTheme);
-let catOpenState={};
-let editIdx=-1;
-
-// ─── 스와이프 ───
-let sx=0,sy=0,curX=0,activeSwipeIdx=-1,isSwiping=false,isScrolling=false;
-function sStart(e,idx){
-  isSwiping=false;isScrolling=false;
-  sx=e.touches[0].clientX;sy=e.touches[0].clientY;
-  curX=activeSwipeIdx===idx?-130:0;
-  if(activeSwipeIdx!==-1&&activeSwipeIdx!==idx){
-    const oldEl=document.getElementById(`front-${activeSwipeIdx}`);
-    if(oldEl){oldEl.style.transition='';oldEl.style.transform='translateX(0)';}
-    activeSwipeIdx=-1;curX=0;
-  }
-  startLP(idx);
-}
-function sMove(e,idx){
-  if(isScrolling)return;
-  const diffX=e.touches[0].clientX-sx;
-  const diffY=e.touches[0].clientY-sy;
-  if(!isSwiping){
-    if(Math.abs(diffX)<10&&Math.abs(diffY)<10)return;
-    if(Math.abs(diffX)>Math.abs(diffY)*1.5){
-      isSwiping=true;cancelLP();
-      const el=document.getElementById(`front-${idx}`);
-      if(el)el.style.transition='none';
-    }else{isScrolling=true;return;}
-  }
-  e.preventDefault();
-  const baseX=activeSwipeIdx===idx&&curX===-130?-130:0;
-  const moved=Math.min(0,Math.max(-130,(activeSwipeIdx===idx?-130:0)+diffX));
-  curX=moved;
-  document.getElementById(`front-${idx}`).style.transform=`translateX(${curX}px)`;
-}
-function sEnd(e,idx){
-  cancelLP();
-  const el=document.getElementById(`front-${idx}`);
-  if(el)el.style.transition='';
-  if(!isSwiping)return;
-  if(!el)return;
-  if(curX<-65){el.style.transform='translateX(-130px)';activeSwipeIdx=idx;}
-  else{el.style.transform='translateX(0)';if(activeSwipeIdx===idx)activeSwipeIdx=-1;}
-}
-function resetSwipe(idx){
-  const el=document.getElementById(`front-${idx}`);
-  if(el)el.style.transform='translateX(0)';
-  if(activeSwipeIdx===idx)activeSwipeIdx=-1;
-}
-
-// ─── 아이콘 SVG ───
-const SVG_ICONS={bottle:'<path d="M9 2h6l1 4H8L9 2z"/><rect x="6" y="6" width="12" height="14" rx="3"/><path d="M10 11h4"/>',soap:'<rect x="4" y="7" width="16" height="11" rx="2.5"/><path d="M8 7V5a2 2 0 014 0v2"/>',toothbrush:'<path d="M12 2v12m0 0c-3 0-5 1-5 3s2 3 5 3 5-1 5-3-2-3-5-3z"/><path d="M12 2h4"/>',tissue:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8m-4-4h8"/>',drop:'<path d="M12 2C8 8 6 12 6 15a6 6 0 0012 0c0-3-2-7-6-13z"/>',bubble:'<circle cx="7" cy="7" r="3"/><circle cx="16" cy="9" r="4"/><circle cx="10" cy="17" r="2.5"/>',razor:'<rect x="2" y="3" width="20" height="5" rx="2"/><path d="M6 8v13M18 8v13m-6-13v13"/>',bathtub:'<path d="M3 17h18M3 17V9h2M21 9H3M7 9V5a3 3 0 016 0v4"/>',shower:'<path d="M4 4l6 6M10 10c0 5 3 9 8 11M10 10C5 10 2 13 1 18"/><circle cx="13" cy="7" r="3"/>',flower:'<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"/>',pill:'<rect x="2" y="9" width="20" height="6" rx="3"/><line x1="12" y1="9" x2="12" y2="15"/>',bandage:'<rect x="3" y="9" width="18" height="6" rx="3"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>',stethoscope:'<path d="M4 4a3 3 0 005.3 1.9V9a5 5 0 005 5"/><circle cx="16" cy="16" r="3"/>',leaf:'<path d="M2 22C2 13 8 4 22 4c-2 10-10 18-20 18z"/><path d="M22 4L2 22"/>',broom:'<path d="M4 20L16 8M16 8l2-2a2 2 0 00-3-3l-2 2M4 20c4-1 8-4 10-8"/>',basket:'<path d="M7 3L3 9h18L17 3M2 9v11a2 2 0 002 2h16a2 2 0 002-2V9"/><line x1="12" y1="9" x2="12" y2="22"/>',sponge:'<rect x="3" y="7" width="18" height="10" rx="3"/><path d="M8 7V5m4 2V4m4 3V5"/>',bucket:'<path d="M6 8h12l-1.5 11a2 2 0 01-2 1.5H9.5a2 2 0 01-2-1.5L6 8z"/><path d="M5 8a7 7 0 0114 0"/>',trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M9 6V4h6v2"/>',wrench:'<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',key:'<path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>',lightbulb:'<path d="M9 18h6M10 22h4M12 2a7 7 0 015 11.95V16a2 2 0 01-2 2H9a2 2 0 01-2-2v-2.05A7 7 0 0112 2z"/>',plant:'<path d="M12 22V12m0 0C8 12 4 8 4 4c4 0 8 3 8 7zm0 0c4 0 8-3 8-7-4 0-8 3-8 7z"/>',box:'<path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',cabinet:'<rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 3v18M2 12h6m8 0h6"/><circle cx="6" cy="12" r="1"/><circle cx="18" cy="12" r="1"/>',laptop:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M0 20h24"/>',monitor:'<rect x="2" y="2" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/>',phone:'<rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/>',keyboard:'<rect x="1" y="7" width="22" height="10" rx="2"/><path d="M5 11h2m2 0h2m2 0h2m2 0h2M5 15h14"/>',mouse:'<rect x="8" y="2" width="8" height="14" rx="4"/><line x1="12" y1="2" x2="12" y2="8"/>',headphone:'<path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/>',camera:'<path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/>',video:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',battery:'<rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2"/>',plug:'<path d="M9 9H5v4l3 3v6h8v-6l3-3V9h-4M9 3v6M15 3v6"/>',tv:'<rect x="2" y="7" width="20" height="13" rx="2"/><polyline points="17 2 12 7 7 2"/>',gamepad:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="17" cy="12" r="2"/><path d="M6 10h4M8 8v4"/>',printer:'<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',watch:'<circle cx="12" cy="12" r="7"/><polyline points="12 9 12 12 13.5 13.5"/><path d="M16.51 17.35l-.35 3.83a2 2 0 01-2 1.82H9.83a2 2 0 01-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 019.83 1h4.35a2 2 0 011.99 1.82l.35 3.83"/>',mic:'<path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4m-4 0h8"/>',speaker:'<rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r="1.5"/>',shirt:'<path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10a2 2 0 002 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/>',pants:'<path d="M6 2h12v10l-3 10H9L6 12V2z"/><line x1="12" y1="2" x2="12" y2="12"/>',shoe:'<path d="M3 17l1-7 5-1 5 3 5-1 2 5-4 3H5l-2-3z"/>',hat:'<path d="M12 4a8 8 0 018 8H4a8 8 0 018-8z"/><rect x="2" y="12" width="20" height="3" rx="1.5"/>',bag:'<path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M9 2v3a3 3 0 006 0V2"/>',glasses:'<path d="M2 12h4m12 0h4m-4 0a4 4 0 01-8 0 4 4 0 018 0z"/>',sock:'<path d="M6 2v10l5 10h6l2-4-5-6V2"/><line x1="6" y1="7" x2="11" y2="7"/>',boot:'<path d="M3 20h18M7 20V6a2 2 0 012-2h4a2 2 0 012 2v5l3 5-3 4H7z"/>',backpack:'<path d="M9 2a3 3 0 006 0M4 6h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/><path d="M9 6v4h6V6"/>',hanger:'<path d="M12 3a2 2 0 012 2 2 2 0 01-2 2v2L4 18h16L12 9V7"/>',suitcase:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M12 12v4M8 21v-3M16 21v-3"/>',coffee:'<path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>',cup:'<path d="M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/>',jar:'<path d="M7 4h10v2H7V4z"/><rect x="5" y="6" width="14" height="15" rx="2"/><path d="M9 10h6m-6 4h4"/>',pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>',pencil:'<path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>',ruler:'<path d="M2 2l20 20M8 2L2 8m0 0l2 2m2-6l4 4m0-4l4 4"/>',coin:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10m-3-8h5a2 2 0 010 4H9"/>',gift:'<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/>',book:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/>',music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',star:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',fan:'<circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>',table:'<rect x="2" y="5" width="20" height="8" rx="2"/><path d="M8 13v6M16 13v6"/>',chair:'<path d="M5 22v-7M19 22v-7M3 15h18M7 9v6M17 9v6M5 9V5a2 2 0 014 0v4M15 9V5a2 2 0 014 0v4"/>',lamp:'<path d="M12 2v2m0 14v4M8 22h8M9 6l3 8 3-8H9zm0 0H6L4 12h16l-2-6h-3"/>',bed:'<path d="M2 20v-8a2 2 0 012-2h16a2 2 0 012 2v8M2 14h20M7 14v-4a1 1 0 011-1h8a1 1 0 011 1v4"/>',fridge:'<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/><path d="M8 6v2M8 14v4"/>',washer:'<rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="12" cy="13" r="5"/><path d="M5 5h1m3 0h1"/>',vacuum:'<path d="M4 20l4-4M8 16l8-8m0 0l2-2a3 3 0 014 4l-2 2m-4-6L6 18"/><circle cx="18" cy="6" r="2"/>',apple:'<path d="M12 2c-3.5 0-6 3-6 7s2.5 8 6 8 6-4 6-8-2.5-7-6-7z"/><path d="M12 2c0-2 2-3 3-2"/>',pizza:'<path d="M12 2L2 22h20L12 2z"/><circle cx="9.5" cy="14" r="1.5"/><circle cx="14.5" cy="11" r="1.5"/><circle cx="12" cy="17" r="1"/>',burger:'<path d="M4 12h16M4 16h16M8 20h8M6 8a6 6 0 0112 0"/><path d="M4 12h16v4H4z"/>',vegetable:'<path d="M12 22V10M12 10C8 10 4 7 4 3c4 0 8 3 8 7zm0 0c4 0 8-3 8-7-4 0-8 3-8 7z"/>',glass:'<path d="M5 2h14l-2 14H7L5 2z"/><path d="M9 19h6v3H9z"/><path d="M7 16h10"/>',fish:'<path d="M20 12c-3-2-6-3-10-3-3 0-5 1-7 3 2 2 4 3 7 3M20 12c-3 2-6 3-10 3"/><circle cx="16" cy="12" r="1.5"/><path d="M20 9l3 3-3 3"/>',bread:'<path d="M5 10a7 7 0 0114 0"/><rect x="3" y="10" width="18" height="10" rx="3"/><path d="M7 10v10M12 10v10M17 10v10"/>',egg:'<path d="M12 3c-4 0-7 4-7 9s3 9 7 9 7-4 7-9-3-9-7-9z"/>',knife:'<path d="M20 3L7 16M20 3c0 5-3 9-8 12L7 16c2-4 5-8 13-13z"/>',pot:'<rect x="5" y="8" width="14" height="11" rx="2"/><path d="M2 11h3M19 11h3M9 8V6a3 3 0 016 0v2"/><path d="M8 19v2M16 19v2"/>',carrot:'<path d="M12 3v13M9 6l3 2 3-2M8 10l4 2 4-2"/><path d="M7 16c0 4 2 6 5 6s5-2 5-6"/>',frying_pan:'<circle cx="10" cy="14" r="6"/><path d="M15 9l5-5m0 0h-4m4 0v4"/>',screwdriver:'<path d="M14 6l4 4-9 9-4-4 9-9z"/><path d="M3 21l3-3"/><path d="M18 2l4 4-2 2-4-4 2-2z"/>',hammer:'<path d="M15 12l-8 8a2 2 0 01-3-3l8-8"/><path d="M17.5 7.5l2.5-2.5-2-2L15.5 5.5l2 2z"/><path d="M15 5l4 4-2.5 2.5"/>',scissors:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/>',tape_measure:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8M10 10l4 4"/>',default:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4">'};
-const ICO_CATS={'위생':['bottle','soap','toothbrush','tissue','drop','bubble','razor','bathtub','shower','flower','leaf','pill','bandage','stethoscope'],'청소':['broom','basket','sponge','bucket','trash','wrench','key','lightbulb','plant','box','cabinet','lamp','washer','vacuum'],'주방':['apple','pizza','burger','vegetable','glass','fish','bread','egg','knife','pot','carrot','frying_pan'],'전자':['laptop','monitor','phone','keyboard','mouse','headphone','camera','video','battery','plug','tv','gamepad','printer','watch','mic','speaker'],'의류':['shirt','pants','shoe','hat','bag','glasses','sock','boot','backpack','hanger','suitcase'],'공구':['screwdriver','hammer','scissors','tape_measure','wrench','key','ruler','pencil','box'],'기타':['coffee','cup','jar','pin','coin','gift','book','music','star','fan','table','chair','bed','fridge']};
-
-function getAutoIcon(name,cat){const n=name.toLowerCase();if(/샴푸|헤어워시/.test(n))return'bottle';if(/린스|컨디셔너|트리트먼트/.test(n))return'bottle';if(/바디워시|바디로션|바디크림/.test(n))return'bottle';if(/로션|크림|세럼|에센스|토너|스킨/.test(n))return'bottle';if(/비누|폼클렌징|클렌저/.test(n))return'soap';if(/칫솔|치약/.test(n))return'toothbrush';if(/물티슈|티슈|휴지/.test(n))return'tissue';if(/면도|쉐이빙/.test(n))return'razor';if(/향수|디퓨저/.test(n))return'flower';if(/마스크팩|팩/.test(n))return'leaf';if(/영양제|비타민|오메가|콜라겐|유산균/.test(n))return'pill';if(/연고|밴드|반창고/.test(n))return'bandage';if(/약|캡슐/.test(n))return'pill';if(/세제|세탁|섬유유연제/.test(n))return'bubble';if(/밀대|대걸레|청소포/.test(n))return'broom';if(/수세미|스펀지/.test(n))return'sponge';if(/스프레이|탈취/.test(n))return'bucket';if(/쓰레기|봉투/.test(n))return'trash';if(/티셔츠|반팔|긴팔|니트|스웨터|후드|맨투맨/.test(n))return'shirt';if(/바지|청바지|반바지|레깅스/.test(n))return'pants';if(/운동화|슬리퍼|샌들|구두|신발/.test(n))return'shoe';if(/모자|캡|비니/.test(n))return'hat';if(/가방|백팩|숄더/.test(n))return'bag';if(/양말|스타킹/.test(n))return'sock';if(/배터리/.test(n))return'battery';if(/충전기|케이블/.test(n))return'plug';if(/볼펜|펜|연필/.test(n))return'pencil';if(/노트|메모|다이어리/.test(n))return'book';if(/바구니|수납함/.test(n))return'basket';if(/청소기|진공청소기/.test(n))return'vacuum';if(/프라이팬|팬|냄비/.test(n))return'frying_pan';if(/칼|식칼/.test(n))return'knife';if(/과일|사과/.test(n))return'apple';if(/계란|달걀/.test(n))return'egg';if(/드라이버|스크류/.test(n))return'screwdriver';if(/망치|해머/.test(n))return'hammer';if(cat==='위생')return'bottle';if(cat==='청소')return'broom';if(cat==='케어')return'pill';if(cat==='의류')return'shirt';if(cat==='생활')return'box';if(cat==='주방')return'pot';if(cat==='공구')return'wrench';return'default';}
-function getIconSVG(icon){const path=SVG_ICONS[icon]||SVG_ICONS.default;return`<svg viewBox="0 0 24 24">${path}</svg>`;}
-
-// ─── 브랜드 애니메이션 (공간:결 ↔ 채팅상담) ───
-(()=>{
-  const brand=document.getElementById('brand-btn');
-  let phase=0;
-  brand.onclick=()=>openChat();
-  function tick(){
-    phase=(phase+1)%2;
-    if(phase===1){brand.classList.add('swap');setTimeout(tick,2500);}
-    else{brand.classList.remove('swap');setTimeout(tick,5000);}
-  }
-  setTimeout(tick,5000);
-})();
-
-window.onload=async()=>{
-  const {data:{session:_sess}}=await _sb.auth.getSession();
-  // 테마: localStorage만 사용 (DB는 백그라운드 저장용)
-  applyTheme(currentTheme,false);
-  // DB 테마 백그라운드 동기화 (로딩에 영향 없음)
-  try{
-    const _email=_sess?.user?.email;
-    if(_email){
-      _sb.from('serials').update({color_theme:currentTheme}).eq('used_by',_email).then(()=>{});
-    }
-  }catch(e){}
-  const _defaultName=tag.endsWith('DR2')?'수납장 2':tag.endsWith('DR1')?'수납장 1':'보관함';
-  document.getElementById('drawer-title').textContent=localStorage.getItem('name_'+tag)||_defaultName;
-  const mp=localStorage.getItem('mediaPath_'+tag);
-  if(mp){try{const{data,error}=await _sb.storage.from('user_uploads').createSignedUrl(mp,3600);if(data?.signedUrl){showMedia(data.signedUrl,localStorage.getItem('rot_'+tag)||0);}else if(error){console.warn('영상로드오류',error);/* 일시적 오류 - 경로 유지 */}}catch(e){console.warn('영상로드예외',e);/* 경로 유지 */}}
-  initMediaEvents();renderItems();
-  // 공지/점검 체크
-  await checkSystemAnnouncement();
-  setTimeout(startOnboarding, 600);
 };
 
 function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
@@ -1297,6 +1140,44 @@ function startBrightCheck(){
   },1200);
 }
 function cancelRecording(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';if(mediaRec?.state!=='inactive')mediaRec?.stop();if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');isRec=false;}
+
+function _showObStep(steps,i){
+  const s=steps[i];if(!s){_endOb();return;}
+  const el=document.querySelector(s.sel);if(!el){_obStep++;_showObStep(steps,_obStep);return;}
+  el.scrollIntoView({block:'center',behavior:'smooth'});
+  setTimeout(()=>{
+    const r=el.getBoundingClientRect(),pad=6;
+    const hole=document.getElementById('ob-hole');
+    hole.style.cssText='left:'+(r.left-pad)+'px;top:'+(r.top-pad)+'px;width:'+(r.width+pad*2)+'px;height:'+(r.height+pad*2)+'px';
+    document.getElementById('ob-step').textContent=(i+1)+' / '+steps.length;
+    document.getElementById('ob-title').textContent=s.title;
+    document.getElementById('ob-desc').textContent=s.desc;
+    const w=document.getElementById('ob-warn');
+    if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}
+    document.getElementById('ob-next').textContent=i===steps.length-1?'완료 ✓':'다음 →';
+    const pb=document.getElementById('ob-prev');if(pb)pb.style.display=i>0?'block':'none';
+  },300);
+}
+let _obStep=0,_obSteps=[];
+function nextStep(){_obStep++;_showObStep(_obSteps,_obStep);}
+function prevStep(){if(_obStep>0){_obStep--;_showObStep(_obSteps,_obStep);}}
+function _endOb(){document.getElementById('ob-ov').classList.remove('active');}
+const OB_STEPS=[
+  {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',arrow:'down'},
+  {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 갤러리 불러오기를 지원하지 않아요.\n앱 내 즉석 촬영(최대 30초)만 가능해요.',arrow:'down'},
+  {sel:'#media-box',title:'AI 자동 분석',desc:'사진·영상을 등록하면 AI가 물건을 자동으로 인식해서 목록을 만들어줘요.',warn:'AI 분석 시 이용권 1건이 차감돼요.',arrow:'up'},
+  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n돋보기를 눌러 물품 이름으로 검색할 수 있어요.',arrow:'up'},
+  {sel:'.item-swipe-l',title:'편집 · 삭제',desc:'목록 항목을 왼쪽으로 밀면\n편집과 삭제 버튼이 나타나요.',arrow:'up'},
+  {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.\n이용권이 소진돼도 이 방법으로 관리할 수 있어요.',arrow:'up'},
+  {sel:'#brand-btn',title:'봄 채팅 상담 😊',desc:'공간:결 로고를 누르면 수납 비서 봄과 채팅할 수 있어요.\n물품 찾기, 서비스 문의 모두 편하게 물어보세요.',arrow:'up'}
+];
+function startOnboarding(){
+  if(localStorage.getItem('ob_drawer_done')==='1')return;
+  _obStep=0;_obSteps=OB_STEPS;
+  document.getElementById('ob-ov').classList.add('active');
+  _showObStep(_obSteps,0);
+}
+function endOnboarding(){localStorage.setItem('ob_drawer_done','1');_endOb();}
 </script>
 </body>
 </html>
