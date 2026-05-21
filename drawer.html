@@ -1070,18 +1070,18 @@ const CHAT_TIMEOUT_MS=30*60*1000;let chatTimeoutId=null;
 function resetChatTimeout(){if(chatTimeoutId)clearTimeout(chatTimeoutId);chatTimeoutId=setTimeout(()=>{const isOpen=document.getElementById('chat-ov').classList.contains('open');const timeoutMsg='안녕하세요, 답변 대기 시간이 초과되어 상담이 자동 종료되었습니다.\n상담을 원하실 경우 다시 문의 부탁드립니다 😊';const history=loadChatHistory();history.push({role:'bot',text:timeoutMsg});saveChatHistory(history);if(isOpen){renderChatHistory(history);setTimeout(()=>closeChat(),1500);}chatTimeoutId=null;},CHAT_TIMEOUT_MS);}
 function openChat(){
   document.getElementById('chat-ov').classList.add('open');
-  const history=loadChatHistory();
+  const greeting='안녕하세요! 수납 비서 봄이에요 ⭐\n수납장 관련 질문이나 서비스 이용 문의 편하게 남겨주세요.';
+  let history=loadChatHistory();
+  // 첫 봇 메시지는 항상 최신 인사말로 교체
+  if(history.length>0&&history[0].role==='bot'){history[0].text=greeting;}
+  else if(history.length===0){history=[{role:'bot',text:greeting}];}
+  saveChatHistory(history);
   const el=document.getElementById('chat-msgs');
   el.innerHTML='';
   const bubble=document.createElement('div');bubble.className='typing-bubble';bubble.innerHTML='<span></span><span></span><span></span>';
   el.appendChild(bubble);
-  if(history.length===0){
-    const drawerName=document.getElementById('drawer-title')?.textContent||'이 수납장';
-    const greeting='안녕하세요! 수납 비서 봄이에요⭐\n수납장 관련 질문이나 서비스 이용 문의 편하게 남겨주세요.';
-    setTimeout(()=>{bubble.remove();const first=[{role:'bot',text:greeting}];saveChatHistory(first);renderChatHistory(first);},1100);
-  }else{
-    setTimeout(()=>{bubble.remove();renderChatHistory(history);},700);
-  }
+  const delay=history.length<=1?1600:900;
+  setTimeout(()=>{bubble.remove();renderChatHistory(history);},delay);
   resetChatTimeout();
 }
 function closeChat(){document.getElementById('chat-ov').classList.remove('open');}
