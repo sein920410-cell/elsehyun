@@ -336,22 +336,6 @@ body {
 /* ─── 토스트 ─── */
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--header-bg); color: #fff; padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.22s, transform 0.22s; z-index: 300; white-space: nowrap; border: 1px solid rgba(255,255,255,0.08); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-/* ─── 온보딩 ─── */
-.ob-ov{position:fixed;inset:0;z-index:900;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(0,0,0,.45)}
-.ob-ov.active{opacity:1;pointer-events:all}
-.ob-dim{position:absolute;inset:0;background:rgba(0,0,0,.45)}
-.ob-hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);z-index:1;pointer-events:none;transition:all .3s cubic-bezier(.32,0,0,1);outline:2.5px solid rgba(255,255,255,.7)}
-.ob-card{position:fixed;z-index:910;background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,.22);visibility:hidden;pointer-events:none;bottom:80px;left:12px;right:12px}
-.ob-card-arrow.up{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:9px solid #fff;top:-9px;left:24px}
-.ob-card-arrow.down{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid #fff;bottom:-9px;left:24px}
-.ob-step{font-size:10px;font-weight:700;color:#aaa;letter-spacing:.08em;margin-bottom:4px}
-.ob-title{font-size:14px;font-weight:800;color:#111;margin-bottom:5px;letter-spacing:-.02em}
-.ob-desc{font-size:12px;line-height:1.6;color:#555;font-weight:500;white-space:pre-line}
-.ob-warn{margin-top:8px;font-size:11px;color:#C0362C;font-weight:600;background:rgba(220,38,38,.07);border-radius:7px;padding:7px 9px;line-height:1.5}
-.ob-btns{display:flex;gap:6px;margin-top:12px}
-.ob-skip{padding:9px 10px;background:#f2f2f2;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#888;cursor:pointer;font-family:inherit;flex-shrink:0}
-.ob-prev{padding:9px 10px;background:#f2f2f2;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#555;cursor:pointer;font-family:inherit;flex-shrink:0}
-.ob-next{flex:1;padding:9px;background:#111;border:none;border-radius:8px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
 /* ─── 자세히 보기 ─── */
 .detail-link{font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;margin-top:3px;display:inline-block;font-weight:500}
 .detail-ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .22s}
@@ -363,17 +347,31 @@ body {
 .detail-body{font-size:14px;line-height:1.75;color:var(--muted,#666);font-weight:500;white-space:pre-line}
 .detail-warn{margin-top:12px;padding:11px 13px;background:rgba(220,38,38,.07);border-radius:9px;font-size:13px;color:#C0362C;font-weight:600;line-height:1.5}
 .detail-close{margin-top:18px;width:100%;padding:14px;background:var(--ink,#111);color:var(--bg,#fff);border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font,inherit)}
+
+/* ─── 온보딩 ─── */
+.ob-ov{position:fixed;inset:0;z-index:900;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(0,0,0,.5)}
+.ob-ov.active{opacity:1;pointer-events:all}
+.ob-hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.5);z-index:1;pointer-events:none;transition:all .3s cubic-bezier(.32,0,0,1);outline:2.5px solid rgba(255,255,255,.8)}
+.ob-card{position:fixed;z-index:910;background:#fff;border-radius:16px;padding:16px 18px 14px;box-shadow:0 8px 40px rgba(0,0,0,.25);bottom:90px;left:16px;right:16px}
+.ob-card-arrow.up{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:9px solid #fff;top:-9px;left:24px}
+.ob-card-arrow.down{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid #fff;bottom:-9px;left:24px}
+.ob-step{font-size:10px;font-weight:700;color:#aaa;letter-spacing:.08em;margin-bottom:4px}
+.ob-title{font-size:15px;font-weight:800;color:#111;margin-bottom:6px}
+.ob-desc{font-size:13px;line-height:1.65;color:#555;font-weight:500;white-space:pre-line}
+.ob-warn{margin-top:10px;padding:9px 12px;background:rgba(220,38,38,.07);border-radius:8px;font-size:12px;color:#C0362C;font-weight:600;line-height:1.5}
+.ob-btns{display:flex;gap:6px;margin-top:14px}
+.ob-skip{padding:10px 12px;background:#f2f2f2;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#888;cursor:pointer;font-family:inherit;flex-shrink:0}
+.ob-prev{padding:10px 12px;background:#f2f2f2;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#555;cursor:pointer;font-family:inherit;flex-shrink:0}
+.ob-next{flex:1;padding:10px;background:#111;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
 </style>
 </head>
 <body>
-
 <!-- 온보딩 오버레이 -->
 <div class="ob-ov" id="ob-ov">
-  <div class="ob-dim"></div>
   <div class="ob-hole" id="ob-hole"></div>
   <div class="ob-card" id="ob-card" onclick="event.stopPropagation()">
     <div id="ob-arrow"></div>
-    <div class="ob-step" id="ob-step">1 / 5</div>
+    <div class="ob-step" id="ob-step"></div>
     <div class="ob-title" id="ob-title"></div>
     <div class="ob-desc" id="ob-desc"></div>
     <div class="ob-warn" id="ob-warn" style="display:none"></div>
@@ -384,6 +382,7 @@ body {
     </div>
   </div>
 </div>
+
 
 <!-- 자세히 보기 시트 -->
 <div class="detail-ov" id="detail-ov" onclick="closeDetail()">
@@ -714,42 +713,7 @@ const OB_STEPS=[
 삭제 전 반드시 내용을 확인해 주세요.',warn:'삭제 후 복구가 불가능해요.'}
 ];
 let _obStep=0;
-function startOnboarding(){
-  if(localStorage.getItem('ob_mypage_done')==='1')return;
-  _obStep=0;document.getElementById('ob-ov').classList.add('active');
-  showObStep(0);
-}
-function showObStep(i){
-  const s=OB_STEPS[i];if(!s){endOnboarding();return;}
-  const el=document.querySelector(s.sel);if(!el){_obStep++;showObStep(_obStep);return;}
-  const card=document.getElementById('ob-card');
-  const arr=document.getElementById('ob-arrow');
-  if(arr)arr.className='';
-  document.getElementById('ob-step').textContent=(i+1)+' / '+OB_STEPS.length;
-  document.getElementById('ob-title').textContent=s.title;
-  document.getElementById('ob-desc').textContent=s.desc;
-  const w=document.getElementById('ob-warn');
-  if(w){if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}}
-  document.getElementById('ob-next').textContent=i===OB_STEPS.length-1?'완료 ✓':'다음 →';
-  const prevBtn=document.getElementById('ob-prev');
-  if(prevBtn)prevBtn.style.display=i>0?'block':'none';
-  card.style.visibility='visible';
-  card.style.pointerEvents='all';
-  el.scrollIntoView({block:'center',behavior:'smooth'});
-  setTimeout(()=>{
-    const r=el.getBoundingClientRect();const pad=6;
-    const hole=document.getElementById('ob-hole');
-    hole.style.left=(r.left-pad)+'px';hole.style.top=(r.top-pad)+'px';
-    hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';
-  },100);
-}
-function nextStep(){_obStep++;showObStep(_obStep);}
-function prevStep(){if(_obStep>0){_obStep--;showObStep(_obStep);}}
-function endOnboarding(){
-  localStorage.setItem('ob_mypage_done','1');
-  const ov=document.getElementById('ob-ov');
-  ov.classList.remove('active');ov.style.opacity='';
-}
+
 
 // ─── 자세히 보기 ───
 const DETAIL_DATA={
@@ -869,6 +833,42 @@ async function clearAnnouncement() {
 }
 
 document.getElementById('name-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') saveName(); });
+
+function _showObStep(steps,i){
+  const s=steps[i];if(!s){_endOb();return;}
+  const el=document.querySelector(s.sel);if(!el){_obStep++;_showObStep(steps,_obStep);return;}
+  el.scrollIntoView({block:'center',behavior:'smooth'});
+  setTimeout(()=>{
+    const r=el.getBoundingClientRect(),pad=6;
+    const hole=document.getElementById('ob-hole');
+    hole.style.cssText='left:'+(r.left-pad)+'px;top:'+(r.top-pad)+'px;width:'+(r.width+pad*2)+'px;height:'+(r.height+pad*2)+'px';
+    document.getElementById('ob-step').textContent=(i+1)+' / '+steps.length;
+    document.getElementById('ob-title').textContent=s.title;
+    document.getElementById('ob-desc').textContent=s.desc;
+    const w=document.getElementById('ob-warn');
+    if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}
+    document.getElementById('ob-next').textContent=i===steps.length-1?'완료 ✓':'다음 →';
+    const pb=document.getElementById('ob-prev');if(pb)pb.style.display=i>0?'block':'none';
+  },300);
+}
+let _obStep=0,_obSteps=[];
+function nextStep(){_obStep++;_showObStep(_obSteps,_obStep);}
+function prevStep(){if(_obStep>0){_obStep--;_showObStep(_obSteps,_obStep);}}
+function _endOb(){document.getElementById('ob-ov').classList.remove('active');}
+const OB_STEPS=[
+  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석해서 목록을 만들 때마다 1건이 차감돼요.\n기본 50건은 무료예요.',warn:null,arrow:'down'},
+  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권이 소진되면 여기서 추가 구매할 수 있어요.\n50건 추가에 4,900원이에요.',warn:'이용권이 0건이 되면 AI 자동 분석을 사용할 수 없어요.',arrow:'up'},
+  {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'공간:결 태그를 추가로 구매했다면 여기서 등록하세요.\n박스 안 카드에 적힌 코드를 입력하면 새 수납장이 추가돼요.',arrow:'down'},
+  {sel:'.invite-row',title:'구성원 초대',desc:'가족이나 지인에게 초대 링크를 보내면\n같은 수납장을 함께 사용할 수 있어요.',warn:'현재 준비 중인 기능이에요.',arrow:'down'},
+  {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃은 언제든 다시 로그인할 수 있어요.',warn:'계정 삭제 시 등록된 모든 데이터가 영구 삭제돼요.\n삭제 후 복구가 불가능해요.',arrow:'up'}
+];
+function startOnboarding(){
+  if(localStorage.getItem('ob_mypage_done')==='1')return;
+  _obStep=0;_obSteps=OB_STEPS;
+  document.getElementById('ob-ov').classList.add('active');
+  _showObStep(_obSteps,0);
+}
+function endOnboarding(){localStorage.setItem('ob_mypage_done','1');_endOb();}
 </script>
 </body>
 </html>
