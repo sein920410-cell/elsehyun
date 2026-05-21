@@ -394,12 +394,12 @@ function showObStep(i){
     // 화살표 숨김 (카드가 중앙에 있어서 방향 의미없음)
     const arr=document.getElementById('ob-arrow');
     if(arr)arr.className='';
-    document.getElementById('ob-step').textContent=(i+1)+' / '+OB_STEPS.length;
+    document.getElementById('ob-step').textContent=(i+1)+' / '+INDEX_STEPS.length;
     document.getElementById('ob-title').textContent=s.title;
     document.getElementById('ob-desc').textContent=s.desc;
     const w=document.getElementById('ob-warn');
-    if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}
-    document.getElementById('ob-next').textContent=i===OB_STEPS.length-1?'완료 ✓':'다음 →';
+    if(w){if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}}
+    document.getElementById('ob-next').textContent=i===INDEX_STEPS.length-1?'완료 ✓':'다음 →';
     const prevBtn=document.getElementById('ob-prev');
     if(prevBtn)prevBtn.style.display=i>0?'block':'none';
   },300);
