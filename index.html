@@ -195,7 +195,7 @@ body {
 .ob-ov.active{pointer-events:all}
 .ob-dim{position:absolute;inset:0;background:rgba(0,0,0,.45)}
 .ob-hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);z-index:1;pointer-events:none;transition:all .3s cubic-bezier(.32,0,0,1);outline:2.5px solid rgba(255,255,255,.7)}
-.ob-card{position:fixed;z-index:910;background:#fff;border-radius:14px;padding:14px 16px;width:min(calc(100vw - 24px),320px);box-shadow:0 8px 32px rgba(0,0,0,.22);pointer-events:all;opacity:0;pointer-events:none;transition:opacity .15s;bottom:80px;left:50%;transform:translateX(-50%)}
+.ob-card{position:fixed;z-index:910;background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,.22);visibility:hidden;pointer-events:none;bottom:80px;left:12px;right:12px}
 .ob-card-arrow.up{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:9px solid #fff;top:-9px;left:24px}
 .ob-card-arrow.down{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid #fff;bottom:-9px;left:24px}
 .ob-step{font-size:10px;font-weight:700;color:#aaa;letter-spacing:.08em;margin-bottom:4px}
@@ -395,7 +395,7 @@ function showObStep(i){
     document.getElementById('ob-next').textContent=i===INDEX_STEPS.length-1?'완료 ✓':'다음 →';
     const prevBtn=document.getElementById('ob-prev');
     if(prevBtn)prevBtn.style.display=i>0?'block':'none';
-    card.style.opacity='1';card.style.pointerEvents='all';
+    card.style.visibility='visible';card.style.pointerEvents='all';
   },300);
 }
 function nextStep(){_obStep++;showObStep(_obStep);}
