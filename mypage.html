@@ -335,6 +335,16 @@ body {
 /* ─── 토스트 ─── */
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--header-bg); color: #fff; padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.22s, transform 0.22s; z-index: 300; white-space: nowrap; border: 1px solid rgba(255,255,255,0.08); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* ─── 터치 툴팁 ─── */
+.tip-ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .22s}
+.tip-ov.open{opacity:1;pointer-events:all}
+.tip-sheet{background:var(--surface,#fff);border-radius:18px 18px 0 0;width:100%;padding:20px 20px 40px;transform:translateY(100%);transition:transform .28s cubic-bezier(.32,0,0,1)}
+.tip-ov.open .tip-sheet{transform:translateY(0)}
+.tip-handle{width:36px;height:4px;border-radius:2px;background:var(--border,#e0e0e0);margin:0 auto 16px}
+.tip-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px;letter-spacing:-.02em}
+.tip-body{font-size:14px;line-height:1.7;color:var(--muted);font-weight:500}
+.tip-warn{margin-top:12px;padding:11px 13px;background:rgba(220,38,38,.07);border-radius:9px;font-size:13px;color:#C0362C;font-weight:600;line-height:1.5}
+.tip-close{margin-top:18px;width:100%;padding:14px;background:var(--ink);color:var(--bg);border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font)}
 </style>
 </head>
 <body>
@@ -364,7 +374,7 @@ body {
   </div>
 
   <!-- 보관함 현황 -->
-  <div class="section-card">
+  <div class="section-card" ontouchstart="startTipTimer('usage')" ontouchend="cancelTip()" ontouchmove="cancelTip()">
     <div class="section-label">보관함 현황</div>
     <div class="usage-section">
       <div class="usage-header">
@@ -412,7 +422,7 @@ body {
   <!-- 보관함 관리 -->
   <div class="section-card">
     <div class="section-label">보관함 관리</div>
-    <div class="row" onclick="location.href='serial.html?add=true'">
+    <div class="row" onclick="location.href='serial.html?add=true'" ontouchstart="startTipTimer('serial')" ontouchend="cancelTip()" ontouchmove="cancelTip()">
       <div class="row-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
       <div class="row-info">
         <div class="row-title">시리얼 번호 추가 등록</div>
@@ -425,7 +435,7 @@ body {
   <!-- 구성원 관리 -->
   <div class="section-card">
     <div class="section-label">구성원 관리</div>
-    <div class="invite-row" onclick="showInviteCode()">
+    <div class="invite-row" onclick="showInviteCode()" ontouchstart="startTipTimer('invite')" ontouchend="cancelTip()" ontouchmove="cancelTip()">
       <div class="invite-row-ico">
         <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 2v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
       </div>
@@ -438,7 +448,7 @@ body {
   </div>
 
   <!-- 등록 정보 -->
-  <div class="section-card">
+  <div class="section-card" ontouchstart="startTipTimer('reg')" ontouchend="cancelTip()" ontouchmove="cancelTip()">
     <div class="section-label">등록 정보</div>
     <div class="reg-card">
       <div class="reg-badge">
@@ -495,6 +505,17 @@ body {
     <span class="acct-link del-link" onclick="deleteAccount()">계정 삭제</span>
   </div>
 
+</div>
+
+<!-- 터치 툴팁 오버레이 -->
+<div class="tip-ov" id="tip-ov" onclick="closeTip()">
+  <div class="tip-sheet" onclick="event.stopPropagation()">
+    <div class="tip-handle"></div>
+    <div class="tip-title" id="tip-title"></div>
+    <div class="tip-body" id="tip-body"></div>
+    <div class="tip-warn" id="tip-warn" style="display:none"></div>
+    <button class="tip-close" onclick="closeTip()">확인</button>
+  </div>
 </div>
 
 <!-- 이용권 충전 모달 -->
@@ -686,6 +707,46 @@ function handleModalOutsideClick(e, id) {
     if (e.target === document.getElementById(id)) document.getElementById(id).classList.remove('open');
 }
 function clearError(id) { document.getElementById(id).textContent = ''; }
+// ─── 터치 툴팁 ───
+const TIP_DATA = {
+  usage: {
+    title: '물품 인식 사용량',
+    body: 'AI가 사진을 분석해서 물품 목록을 자동으로 만들 때마다 1건이 차감돼요.\n단순 조회나 수량 변경은 차감되지 않아요.\n기본 50건은 무료로 제공되며, 소진 후엔 추가 이용권을 구매하실 수 있어요.',
+    warn: '잔여 이용권이 0건이 되면 AI 자동 분석 기능을 사용할 수 없어요.\n이용권 충전 버튼으로 50건 추가 가능해요. (4,900원)'
+  },
+  serial: {
+    title: '시리얼 번호 추가 등록',
+    body: '공간:결 태그를 추가로 구매하셨다면 여기서 등록하세요.\n박스 안 카드에 적힌 시리얼 코드를 입력하면 새 수납장이 추가돼요.',
+    warn: null
+  },
+  invite: {
+    title: '구성원 초대',
+    body: '가족이나 함께 사용할 사람에게 초대 링크를 보내면 같은 수납장을 공유할 수 있어요.\n초대받은 사람은 링크를 통해 가입 후 바로 사용 가능해요.',
+    warn: '현재 준비 중인 기능이에요. 곧 이용하실 수 있어요.'
+  },
+  reg: {
+    title: '등록 정보',
+    body: '현재 등록된 세트 수와 최초 등록일을 확인할 수 있어요.\n정품 인증이 완료된 태그만 표시돼요.',
+    warn: null
+  }
+};
+let _tipTimer = null;
+function startTipTimer(key) {
+  cancelTip();
+  _tipTimer = setTimeout(() => showTip(key), 400);
+}
+function cancelTip() { clearTimeout(_tipTimer); _tipTimer = null; }
+function showTip(key) {
+  const d = TIP_DATA[key]; if(!d) return;
+  document.getElementById('tip-title').textContent = d.title;
+  document.getElementById('tip-body').textContent = d.body;
+  const w = document.getElementById('tip-warn');
+  if(d.warn){ w.textContent = d.warn; w.style.display='block'; }
+  else { w.style.display='none'; }
+  document.getElementById('tip-ov').classList.add('open');
+}
+function closeTip() { document.getElementById('tip-ov').classList.remove('open'); }
+
 function showToast(msg) {
     var t = document.getElementById('toast');
     t.textContent = msg; t.classList.add('show');
