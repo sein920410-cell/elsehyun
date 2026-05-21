@@ -10,9 +10,19 @@ export default async function handler(req, res) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
     
     const location = drawerName || tag;
+    // 물품 이름만 추려서 전송 (토큰 절약)
+    let inventorySummary = '';
+    try {
+      const items = typeof inventory === 'string' ? JSON.parse(inventory) : inventory;
+      if(Array.isArray(items) && items.length > 0){
+        inventorySummary = items.map(i => i.name).join(', ');
+      }
+    } catch(e) {
+      inventorySummary = inventory || '';
+    }
     const systemPrompt = `너는 수납 비서 '봄'이야.
 지금 대화 중인 수납 공간 이름: ${location}
-현재 보관된 물품 목록: ${inventory}
+현재 보관된 물품: ${inventorySummary||'(없음)'}
 
 [말투 규칙]
 - 반말 금지. 존댓말을 쓰되 딱딱하지 않고 편안하게.
