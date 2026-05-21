@@ -190,9 +190,41 @@ body {
   stroke-width: 1.8; fill: none;
   stroke-linecap: round; stroke-linejoin: round;
 }
+/* ─── 온보딩 ─── */
+.ob-ov{position:fixed;inset:0;z-index:900;pointer-events:none}
+.ob-ov.active{pointer-events:all}
+.ob-dim{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.ob-hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);z-index:1;pointer-events:none;transition:all .3s cubic-bezier(.32,0,0,1);outline:2.5px solid rgba(255,255,255,.7)}
+.ob-card{position:absolute;z-index:2;background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,.22);pointer-events:all}
+.ob-card-arrow.up{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:9px solid #fff;top:-9px;left:24px}
+.ob-card-arrow.down{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid #fff;bottom:-9px;left:24px}
+.ob-step{font-size:10px;font-weight:700;color:#aaa;letter-spacing:.08em;margin-bottom:4px}
+.ob-title{font-size:14px;font-weight:800;color:#111;margin-bottom:5px;letter-spacing:-.02em}
+.ob-desc{font-size:12px;line-height:1.6;color:#555;font-weight:500;white-space:pre-line}
+.ob-btns{display:flex;gap:6px;margin-top:12px}
+.ob-skip{padding:9px 10px;background:#f2f2f2;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#888;cursor:pointer;font-family:inherit;flex-shrink:0}
+.ob-prev{padding:9px 10px;background:#f2f2f2;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#555;cursor:pointer;font-family:inherit;flex-shrink:0}
+.ob-next{flex:1;padding:9px;background:#111;border:none;border-radius:8px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
 </style>
 </head>
 <body>
+
+<!-- 온보딩 -->
+<div class="ob-ov" id="ob-ov">
+  <div class="ob-dim"></div>
+  <div class="ob-hole" id="ob-hole"></div>
+  <div class="ob-card" id="ob-card" onclick="event.stopPropagation()">
+    <div id="ob-arrow"></div>
+    <div class="ob-step" id="ob-step">1 / 2</div>
+    <div class="ob-title" id="ob-title"></div>
+    <div class="ob-desc" id="ob-desc"></div>
+    <div class="ob-btns">
+      <button class="ob-skip" onclick="endOnboarding()">닫기</button>
+      <button class="ob-prev" id="ob-prev" onclick="prevStep()" style="display:none">← 이전</button>
+      <button class="ob-next" id="ob-next" onclick="nextStep()">다음 →</button>
+    </div>
+  </div>
+</div>
 
 <div class="header">
   <div class="brand">공간:결</div>
@@ -329,6 +361,54 @@ const sb = supabase.createClient(
 await sb.auth.signOut();
 window.location.replace('login.html');
 }
+
+// ─── 온보딩 ───
+const INDEX_STEPS=[
+  {sel:'.mypage-btn',title:'마이페이지',desc:'우측 상단 아이콘을 누르면 마이페이지로 이동해요.\nAI 이용권 확인, 테마 설정, 계정 관리를 할 수 있어요.',arrow:'down'},
+  {sel:'.search-wrap',title:'통합 검색',desc:'수납장 목록을 등록한 후 여기서 물건 이름을 검색하면\n어느 수납장에 있는지 바로 찾아줘요.',arrow:'up'}
+];
+let _obStep=0;
+function startOnboarding(){
+  if(localStorage.getItem('ob_index_done')==='1')return;
+  _obStep=0;document.getElementById('ob-ov').classList.add('active');
+  showObStep(0);
+}
+function showObStep(i){
+  const s=INDEX_STEPS[i];if(!s){endOnboarding();return;}
+  const el=document.querySelector(s.sel);if(!el){_obStep++;showObStep(_obStep);return;}
+  setTimeout(()=>{
+    const r=el.getBoundingClientRect();
+    const pad=8,cw=Math.min(window.innerWidth-24,260),vh=window.innerHeight,vw=window.innerWidth;
+    const hole=document.getElementById('ob-hole');
+    hole.style.left=(r.left-pad)+'px';hole.style.top=(r.top-pad)+'px';
+    hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';
+    const card=document.getElementById('ob-card');
+    card.style.width=cw+'px';
+    const cardH=150;
+    let cy,arrowDir;
+    if(vh-(r.bottom+pad)>=cardH+20){cy=r.bottom+pad+12;arrowDir='up';}
+    else if(r.top-pad>=cardH+20){cy=r.top-pad-cardH-12;arrowDir='down';}
+    else{cy=Math.max(60,Math.min(r.bottom+pad+12,vh-cardH-20));arrowDir=cy>r.bottom?'up':'down';}
+    const cx=Math.max(12,Math.min(r.left,vw-cw-12));
+    card.style.left=cx+'px';card.style.top=cy+'px';
+    const arr=document.getElementById('ob-arrow');
+    arr.className='ob-card-arrow '+arrowDir;
+    document.getElementById('ob-step').textContent=(i+1)+' / '+INDEX_STEPS.length;
+    document.getElementById('ob-title').textContent=s.title;
+    document.getElementById('ob-desc').textContent=s.desc;
+    document.getElementById('ob-next').textContent=i===INDEX_STEPS.length-1?'완료 ✓':'다음 →';
+    const prevBtn=document.getElementById('ob-prev');
+    if(prevBtn)prevBtn.style.display=i>0?'block':'none';
+  },300);
+}
+function nextStep(){_obStep++;showObStep(_obStep);}
+function prevStep(){if(_obStep>0){_obStep--;showObStep(_obStep);}}
+function endOnboarding(){
+  localStorage.setItem('ob_index_done','1');
+  const ov=document.getElementById('ob-ov');
+  ov.style.opacity='0';setTimeout(()=>{ov.classList.remove('active');ov.style.opacity='';},250);
+}
+setTimeout(startOnboarding,800);
 </script>
 </body>
 </html>
