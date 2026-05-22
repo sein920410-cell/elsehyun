@@ -196,10 +196,10 @@ body {
 
 
 /* 온보딩 */
-.ob-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000}
-.ob-bg.on{display:block}
-.ob-box{position:fixed;bottom:100px;left:16px;right:16px;background:#fff;border-radius:16px;padding:18px;z-index:9001;box-shadow:0 8px 40px rgba(0,0,0,.3)}
-.ob-hl{position:fixed;border-radius:10px;outline:3px solid #fff;z-index:9002;pointer-events:none;transition:all .3s}
+.ob-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000}
+.ob-ov.on{display:block}
+.ob-hl{position:fixed;border-radius:10px;outline:3px solid rgba(255,255,255,.9);z-index:9001;pointer-events:none;transition:all .3s}
+.ob-box{position:fixed;bottom:100px;left:16px;right:16px;background:#fff;border-radius:16px;padding:18px;z-index:9002;box-shadow:0 8px 40px rgba(0,0,0,.3)}
 .ob-nn{font-size:11px;color:#aaa;font-weight:700;margin-bottom:6px}
 .ob-tt{font-size:15px;font-weight:800;color:#111;margin-bottom:7px}
 .ob-dd{font-size:13px;line-height:1.65;color:#555;white-space:pre-line}
@@ -212,17 +212,18 @@ body {
 </head>
 <body>
 
-<div class="ob-bg" id="ob-bg"></div>
-<div class="ob-hl" id="ob-hl"></div>
-<div class="ob-box" id="ob-box" onclick="event.stopPropagation()">
-  <div class="ob-nn" id="ob-nn"></div>
-  <div class="ob-tt" id="ob-tt"></div>
-  <div class="ob-dd" id="ob-dd"></div>
-  <div class="ob-ww" id="ob-ww" style="display:none"></div>
-  <div class="ob-row">
-    <button class="ob-close" onclick="obClose()">닫기</button>
-    <button class="ob-prev" id="ob-prev" onclick="obPrev()" style="display:none">← 이전</button>
-    <button class="ob-nxt" id="ob-nxt" onclick="obNext()">다음 →</button>
+<div class="ob-ov" id="ob-ov" onclick="obClose()">
+  <div class="ob-hl" id="ob-hl"></div>
+  <div class="ob-box" onclick="event.stopPropagation()">
+    <div class="ob-nn" id="ob-nn"></div>
+    <div class="ob-tt" id="ob-tt"></div>
+    <div class="ob-dd" id="ob-dd"></div>
+    <div class="ob-ww" id="ob-ww" style="display:none"></div>
+    <div class="ob-row">
+      <button class="ob-close" onclick="obClose()">닫기</button>
+      <button class="ob-prev" id="ob-prev" onclick="obPrev()" style="display:none">← 이전</button>
+      <button class="ob-nxt" id="ob-nxt" onclick="obNext()">다음 →</button>
+    </div>
   </div>
 </div>
 
@@ -410,7 +411,12 @@ var _OB_STEPS=[
 var _OB_KEY='ob_index_done';
 function startOnboarding(){
   obStart([
-  {sel:'.mypage-btn',title:'마이페이지',desc:'우측 상단 아이콘을 누르면 마이페이지로 이동해요.\nAI 이용권 확인, 테마 설정, 계정 관리를 할 수 있어요.',warn:null},
+  {sel:'.mypage-btn',title:'마이페이지',desc:'우측 상단 아이콘을 누르면 마이페이지로 이동해요.
+AI 이용권 확인, 테마 설정, 계정 관리를 할 수 있어요.',warn:null},
+  {sel:'.search-wrap',title:'통합 검색',desc:'수납장 목록을 등록한 후
+물건 이름을 검색하면 어느 수납장에 있는지 알려줘요.',warn:null}
+], 'ob_index_done');
+},
   {sel:'.search-wrap',title:'통합 검색',desc:'수납장 목록을 등록한 후\n물건 이름을 검색하면 어느 수납장에 있는지 알려줘요.',warn:null}
 ], 'ob_index_done');
 }
