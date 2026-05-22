@@ -371,8 +371,8 @@ var _OB_I=0, _OB_S=[], _OB_KEY='';
 function obStart(steps, key){
   if(localStorage.getItem(key)==='1') return;
   _OB_I=0; _OB_S=steps; _OB_KEY=key;
-  document.getElementById('ob-bg').classList.add('on');
-  document.getElementById('ob-bg').onclick=function(){obClose();};
+  document.getElementById('ob-ov').classList.add('on');
+  document.getElementById('ob-ov').onclick=function(){obClose();};
   obShow(0);
 }
 function obShow(i){
@@ -400,25 +400,15 @@ function obNext(){_OB_I++;obShow(_OB_I);}
 function obPrev(){if(_OB_I>0){_OB_I--;obShow(_OB_I);}}
 function obDone(){localStorage.setItem(_OB_KEY,'1');obClose();}
 function obClose(){
-  document.getElementById('ob-bg').classList.remove('on');
+  document.getElementById('ob-ov').classList.remove('on');
   document.getElementById('ob-hl').style.width='0';
   localStorage.setItem(_OB_KEY,'1');
 }
-var _OB_STEPS=[
-  {sel:'.mypage-btn',title:'마이페이지',desc:'우측 상단 아이콘을 누르면 마이페이지로 이동해요.\nAI 이용권 확인, 테마 설정, 계정 관리를 할 수 있어요.',warn:null},
-  {sel:'.search-wrap',title:'통합 검색',desc:'수납장 목록을 등록한 후\n물건 이름을 검색하면 어느 수납장에 있는지 알려줘요.',warn:null}
-];
-var _OB_KEY='ob_index_done';
 function startOnboarding(){
   obStart([
-  {sel:'.mypage-btn',title:'마이페이지',desc:'우측 상단 아이콘을 누르면 마이페이지로 이동해요.
-AI 이용권 확인, 테마 설정, 계정 관리를 할 수 있어요.',warn:null},
-  {sel:'.search-wrap',title:'통합 검색',desc:'수납장 목록을 등록한 후
-물건 이름을 검색하면 어느 수납장에 있는지 알려줘요.',warn:null}
-], 'ob_index_done');
-},
-  {sel:'.search-wrap',title:'통합 검색',desc:'수납장 목록을 등록한 후\n물건 이름을 검색하면 어느 수납장에 있는지 알려줘요.',warn:null}
-], 'ob_index_done');
+    {sel:'.mypage-btn',title:'마이페이지',desc:'우측 상단 아이콘을 누르면 마이페이지로 이동해요.\nAI 이용권 확인, 테마 설정, 계정 관리를 할 수 있어요.',warn:null},
+    {sel:'.search-wrap',title:'통합 검색',desc:'수납장 목록을 등록한 후\n물건 이름을 검색하면 어느 수납장에 있는지 알려줘요.',warn:null}
+  ], 'ob_index_done');
 }
 </script>
 </body>
