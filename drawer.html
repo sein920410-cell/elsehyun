@@ -19,8 +19,8 @@
     const { data: singleSerial } = await _authClient.from('single_serials').select('id').eq('used_by', session.user.email).limit(1).maybeSingle();
     if (!serial && !singleSerial) { window.location.replace('serial.html'); return; }
     document.body.style.visibility = 'visible';
-    setTimeout(startOnboarding, 900);
-})();
+    setTimeout(startOnboarding, 1000);
+    })();
 </script>
 <style>
 :root{
@@ -360,40 +360,39 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .result-modal-btn{width:100%;padding:15px;border:none;border-top:1px solid var(--border,rgba(0,0,0,.08));background:transparent;font-family:var(--font);font-size:15px;font-weight:600;color:var(--h-bg,#111318);cursor:pointer;letter-spacing:-.01em}
 .result-modal-btn:active{background:var(--bg,#f5f5f5)}
 
-/* ─── 온보딩 ─── */
-.ob-ov{position:fixed;inset:0;z-index:900;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(0,0,0,.5)}
-.ob-ov.active{opacity:1;pointer-events:all}
-.ob-hole{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.5);z-index:1;pointer-events:none;transition:all .3s cubic-bezier(.32,0,0,1);outline:2.5px solid rgba(255,255,255,.8)}
-.ob-card{position:fixed;z-index:910;background:#fff;border-radius:16px;padding:16px 18px 14px;box-shadow:0 8px 40px rgba(0,0,0,.25);bottom:90px;left:16px;right:16px}
-.ob-card-arrow.up{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:9px solid #fff;top:-9px;left:24px}
-.ob-card-arrow.down{position:absolute;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid #fff;bottom:-9px;left:24px}
-.ob-step{font-size:10px;font-weight:700;color:#aaa;letter-spacing:.08em;margin-bottom:4px}
-.ob-title{font-size:15px;font-weight:800;color:#111;margin-bottom:6px}
-.ob-desc{font-size:13px;line-height:1.65;color:#555;font-weight:500;white-space:pre-line}
-.ob-warn{margin-top:10px;padding:9px 12px;background:rgba(220,38,38,.07);border-radius:8px;font-size:12px;color:#C0362C;font-weight:600;line-height:1.5}
-.ob-btns{display:flex;gap:6px;margin-top:14px}
-.ob-skip{padding:10px 12px;background:#f2f2f2;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#888;cursor:pointer;font-family:inherit;flex-shrink:0}
-.ob-prev{padding:10px 12px;background:#f2f2f2;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#555;cursor:pointer;font-family:inherit;flex-shrink:0}
-.ob-next{flex:1;padding:10px;background:#111;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
+
+
+/* 온보딩 */
+.ob-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000}
+.ob-bg.on{display:block}
+.ob-box{position:fixed;bottom:100px;left:16px;right:16px;background:#fff;border-radius:16px;padding:18px;z-index:9001;box-shadow:0 8px 40px rgba(0,0,0,.3)}
+.ob-hl{position:fixed;border-radius:10px;outline:3px solid #fff;z-index:9002;pointer-events:none;transition:all .3s}
+.ob-nn{font-size:11px;color:#aaa;font-weight:700;margin-bottom:6px}
+.ob-tt{font-size:15px;font-weight:800;color:#111;margin-bottom:7px}
+.ob-dd{font-size:13px;line-height:1.65;color:#555;white-space:pre-line}
+.ob-ww{margin-top:10px;padding:9px 12px;background:rgba(220,38,38,.07);border-radius:8px;font-size:12px;color:#C0362C;font-weight:600;line-height:1.5}
+.ob-row{display:flex;gap:8px;margin-top:14px}
+.ob-close{padding:10px 14px;background:#eee;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#666;cursor:pointer;font-family:inherit}
+.ob-prev{padding:10px 14px;background:#eee;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#444;cursor:pointer;font-family:inherit}
+.ob-nxt{flex:1;padding:10px;background:#111;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
 </style>
 </head>
 <body data-theme="stone">
-<!-- 온보딩 오버레이 -->
-<div class="ob-ov" id="ob-ov">
-  <div class="ob-hole" id="ob-hole"></div>
-  <div class="ob-card" id="ob-card" onclick="event.stopPropagation()">
-    <div id="ob-arrow"></div>
-    <div class="ob-step" id="ob-step"></div>
-    <div class="ob-title" id="ob-title"></div>
-    <div class="ob-desc" id="ob-desc"></div>
-    <div class="ob-warn" id="ob-warn" style="display:none"></div>
-    <div class="ob-btns">
-      <button class="ob-skip" onclick="endOnboarding()">닫기</button>
-      <button class="ob-prev" id="ob-prev" onclick="prevStep()" style="display:none">← 이전</button>
-      <button class="ob-next" id="ob-next" onclick="nextStep()">다음 →</button>
-    </div>
+
+<div class="ob-bg" id="ob-bg" onclick="obClose()"></div>
+<div class="ob-hl" id="ob-hl"></div>
+<div class="ob-box" id="ob-box" onclick="event.stopPropagation()">
+  <div class="ob-nn" id="ob-nn"></div>
+  <div class="ob-tt" id="ob-tt"></div>
+  <div class="ob-dd" id="ob-dd"></div>
+  <div class="ob-ww" id="ob-ww" style="display:none"></div>
+  <div class="ob-row">
+    <button class="ob-close" onclick="obClose()">닫기</button>
+    <button class="ob-prev" id="ob-prev" onclick="obPrev()" style="display:none">← 이전</button>
+    <button class="ob-nxt" id="ob-nxt" onclick="obNext()">다음 →</button>
   </div>
 </div>
+
 
 
 <!-- 점검 화면 -->
@@ -1142,27 +1141,6 @@ function startBrightCheck(){
 }
 function cancelRecording(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';if(mediaRec?.state!=='inactive')mediaRec?.stop();if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');isRec=false;}
 
-function _showObStep(steps,i){
-  const s=steps[i];if(!s){_endOb();return;}
-  const el=document.querySelector(s.sel);if(!el){_obStep++;_showObStep(steps,_obStep);return;}
-  el.scrollIntoView({block:'center',behavior:'smooth'});
-  setTimeout(()=>{
-    const r=el.getBoundingClientRect(),pad=6;
-    const hole=document.getElementById('ob-hole');
-    hole.style.cssText='left:'+(r.left-pad)+'px;top:'+(r.top-pad)+'px;width:'+(r.width+pad*2)+'px;height:'+(r.height+pad*2)+'px';
-    document.getElementById('ob-step').textContent=(i+1)+' / '+steps.length;
-    document.getElementById('ob-title').textContent=s.title;
-    document.getElementById('ob-desc').textContent=s.desc;
-    const w=document.getElementById('ob-warn');
-    if(s.warn){w.textContent=s.warn;w.style.display='block';}else{w.style.display='none';}
-    document.getElementById('ob-next').textContent=i===steps.length-1?'완료 ✓':'다음 →';
-    const pb=document.getElementById('ob-prev');if(pb)pb.style.display=i>0?'block':'none';
-  },300);
-}
-let _obStep=0,_obSteps=[];
-function nextStep(){_obStep++;_showObStep(_obSteps,_obStep);}
-function prevStep(){if(_obStep>0){_obStep--;_showObStep(_obSteps,_obStep);}}
-function _endOb(){document.getElementById('ob-ov').classList.remove('active');}
 const OB_STEPS=[
   {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',arrow:'down'},
   {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 갤러리 불러오기를 지원하지 않아요.\n앱 내 즉석 촬영(최대 30초)만 가능해요.',arrow:'down'},
@@ -1179,7 +1157,45 @@ function startOnboarding(){
   _showObStep(_obSteps,0);
 }
 function endOnboarding(){localStorage.setItem('ob_drawer_done','1');_endOb();}
-</script>
-</body>
-</html>
- 
+
+var _OB_I=0, _OB_S=[], _OB_KEY='';
+function obStart(steps, key){
+  if(localStorage.getItem(key)==='1') return;
+  _OB_I=0; _OB_S=steps; _OB_KEY=key;
+  document.getElementById('ob-bg').classList.add('on');
+  obShow(0);
+}
+function obShow(i){
+  var s=_OB_S[i]; if(!s){obDone();return;}
+  var el=document.querySelector(s.sel);
+  if(!el){_OB_I++;obShow(_OB_I);return;}
+  document.getElementById('ob-nn').textContent=(i+1)+' / '+_OB_S.length;
+  document.getElementById('ob-tt').textContent=s.title;
+  document.getElementById('ob-dd').textContent=s.desc;
+  var ww=document.getElementById('ob-ww');
+  if(s.warn){ww.textContent=s.warn;ww.style.display='block';}else{ww.style.display='none';}
+  document.getElementById('ob-nxt').textContent=i===_OB_S.length-1?'완료 ✓':'다음 →';
+  document.getElementById('ob-prev').style.display=i>0?'':'none';
+  el.scrollIntoView({block:'center',behavior:'smooth'});
+  setTimeout(function(){
+    var r=el.getBoundingClientRect();
+    var hl=document.getElementById('ob-hl');
+    hl.style.left=(r.left-5)+'px';
+    hl.style.top=(r.top-5)+'px';
+    hl.style.width=(r.width+10)+'px';
+    hl.style.height=(r.height+10)+'px';
+  },350);
+}
+function obNext(){_OB_I++;obShow(_OB_I);}
+function obPrev(){if(_OB_I>0){_OB_I--;obShow(_OB_I);}}
+function obDone(){localStorage.setItem(_OB_KEY,'1');obClose();}
+function obClose(){
+  document.getElementById('ob-bg').classList.remove('on');
+  document.getElementById('ob-hl').style.width='0';
+  localStorage.setItem(_OB_KEY,'1');
+}
+var _OB_STEPS=[
+  {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',warn:null},
+  {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 갤러리 불러오기 지원 안 해요.\n앱 내 즉석 촬영(최대 30초)만 가능해요.',warn:null},
+  {sel:'#media-box',title:'AI 자동 분석',desc:'사진·영상 등록하면 AI가 물건을 자동으로 인식해서 목록을 만들어줘요.',warn:'AI 분석 시 이용권 1건이 차감돼요.'},
+  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n돋보기를 눌러 물품 이름으로 검색할 수 있어요.',war
