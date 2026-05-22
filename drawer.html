@@ -8,6 +8,16 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>body { visibility: hidden; }</style>
 <script>
+(function(){
+  var tag = new URLSearchParams(location.search).get('tag') || '';
+  var t = localStorage.getItem('gyeol_color_theme_' + tag) || 'stone';
+  document.documentElement.setAttribute('data-theme-init', t);
+  document.addEventListener('DOMContentLoaded', function(){
+    document.body.setAttribute('data-theme', t);
+  });
+})();
+</script>
+<script>
 (async () => {
     const _authClient = supabase.createClient(
         'https://tqhtggusphhcsygiitrv.supabase.co',
@@ -441,7 +451,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     <div class="media-empty-inner" id="media-empty">
       <div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
       <div class="media-empty-lbl">사진·영상 탭하여 등록</div>
-      <div class="media-empty-sub">사진·영상 탭하여 등록 · 물품 자동 인식</div>
+      <div class="media-empty-sub">물품 자동 인식</div>
     </div>
   </div>
 </div>
@@ -993,7 +1003,7 @@ async function confirmUpload(){
 }
 
 function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;}
-function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진·영상 탭하여 등록</div><div class="media-empty-sub">사진·영상 탭하여 등록 · 물품 자동 인식</div></div>`;}
+function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진·영상 탭하여 등록</div><div class="media-empty-sub">물품 자동 인식</div></div>`;}
 function openFull(){const el=document.getElementById('media-el');if(!el)return;const fc=document.getElementById('fs-content');fc.innerHTML=el.tagName==='VIDEO'?`<video src="${el.src}" class="${el.className}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`:`<img src="${el.src}" class="${el.className}" style="max-width:100%;max-height:100%;object-fit:contain">`;document.getElementById('fs-ov').classList.add('open');}
 function closeFull(){document.getElementById('fs-ov').classList.remove('open');}
 
@@ -1013,6 +1023,13 @@ function resetChatTimeout(){if(chatTimeoutId)clearTimeout(chatTimeoutId);chatTim
     on = !on;
     el.classList.toggle('swap', on);
   }, 3000);
+})();
+
+(function(){
+  var el = document.getElementById('brand-btn');
+  if(!el) return;
+  var on = false;
+  setInterval(function(){ on=!on; el.classList.toggle('swap',on); }, 3000);
 })();
 
 function openChat(){
