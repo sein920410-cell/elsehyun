@@ -57,11 +57,11 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 /* ─── 헤더 ─── */
 .header{background:var(--h-bg);height:60px;padding:0 14px 0 0;display:flex;align-items:center;flex-shrink:0;position:relative;z-index:100;transition:background .4s}
 .header::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--h-border)}
-.brand{display:flex;align-items:center;gap:8px;flex-shrink:0;cursor:pointer;padding:6px 12px;border-radius:var(--r);transition:background .15s;z-index:1;position:relative}
+.brand{display:flex;align-items:center;gap:8px;flex-shrink:0;cursor:pointer;padding:6px 12px 6px 16px;border-radius:var(--r);transition:background .15s;z-index:1;position:relative}
 .brand:active{background:var(--h-btn)}
 .brand-anim{position:relative;height:22px;overflow:hidden;min-width:76px}
 .brand-a,.brand-b{position:absolute;left:0;top:0;white-space:nowrap;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s}
-.brand-a{font-size:14px;font-weight:700;letter-spacing:.02em;color:var(--h-txt);transform:translateY(0);opacity:1;line-height:22px}
+.brand-a{font-size:14px;font-weight:700;letter-spacing:.02em;color:var(--h-sub);transform:translateY(0);opacity:1;line-height:22px}
 .brand-b{display:flex;align-items:center;height:22px;transform:translateY(110%);opacity:0;gap:5px}
 .brand-b svg{width:15px;height:15px;stroke:var(--h-sub);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .brand-b-txt{font-size:13px;font-weight:600;color:var(--h-sub);letter-spacing:-.01em}
@@ -75,6 +75,8 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .header-right{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-left:auto;z-index:1}
 .hdr-sq{width:38px;height:38px;border-radius:var(--r);background:var(--h-btn);border:1px solid var(--h-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--h-txt);font-size:22px;font-weight:300;flex-shrink:0}
 .hdr-sq:active{opacity:.7}
+.hdr-search-btn{background:var(--h-btn)!important;border:1px solid var(--h-border);width:38px!important;height:38px!important;}
+.hdr-search-btn svg{width:17px!important;height:17px!important;}
 
 /* ─── 미디어 ─── */
 .media-section{background:var(--h-bg);padding:0 14px 12px;flex-shrink:0;transition:background .4s}
@@ -94,8 +96,8 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .toolbar-cnt{font-size:13px;font-weight:800;padding:0 13px;border-radius:var(--r);background:var(--h-bg);color:var(--h-txt,#fff);letter-spacing:.04em;display:none;transition:background .4s;height:34px;align-items:center;justify-content:center;min-width:44px}
 .toolbar-cnt.vis{display:inline-flex}
 .toolbar-right{display:flex;align-items:center;gap:7px}
-.toolbar-search-btn{width:34px;height:34px;border-radius:var(--r);background:var(--h-bg);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .4s;flex-shrink:0}
-.toolbar-search-btn svg{width:14px;height:14px;stroke:var(--h-txt,#fff);stroke-width:2;fill:none;stroke-linecap:round;display:block}
+.toolbar-search-btn{width:40px;height:40px;border-radius:var(--r);background:var(--h-bg);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .4s;flex-shrink:0}
+.toolbar-search-btn svg{width:18px;height:18px;stroke:var(--h-txt,#fff);stroke-width:2;fill:none;stroke-linecap:round;display:block}
 .toolbar-search-btn:active{opacity:.7}
 
 /* ─── 검색바 ─── */
@@ -428,12 +430,14 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     </button>
   </div>
   <div class="header-right">
-    <div class="hdr-sq" onclick="showMediaPicker()">+</div>
+    <button class="toolbar-search-btn hdr-search-btn" onclick="toggleSearch()" title="검색">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
   </div>
 </header>
 
 <div class="media-section">
-  <div class="media-box empty" id="media-box">
+  <div class="media-box empty" id="media-box" onclick="if(this.classList.contains('empty'))showMediaPicker()">
     <div class="media-empty-inner" id="media-empty">
       <div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
       <div class="media-empty-lbl">사진 또는 영상 등록</div>
