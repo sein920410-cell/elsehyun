@@ -351,10 +351,10 @@ body {
 
 
 /* 온보딩 */
-.ob-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000}
-.ob-bg.on{display:block}
-.ob-box{position:fixed;bottom:100px;left:16px;right:16px;background:#fff;border-radius:16px;padding:18px;z-index:9001;box-shadow:0 8px 40px rgba(0,0,0,.3)}
-.ob-hl{position:fixed;border-radius:10px;outline:3px solid #fff;z-index:9002;pointer-events:none;transition:all .3s}
+.ob-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000}
+.ob-ov.on{display:block}
+.ob-hl{position:fixed;border-radius:10px;outline:3px solid rgba(255,255,255,.9);z-index:9001;pointer-events:none;transition:all .3s}
+.ob-box{position:fixed;bottom:100px;left:16px;right:16px;background:#fff;border-radius:16px;padding:18px;z-index:9002;box-shadow:0 8px 40px rgba(0,0,0,.3)}
 .ob-nn{font-size:11px;color:#aaa;font-weight:700;margin-bottom:6px}
 .ob-tt{font-size:15px;font-weight:800;color:#111;margin-bottom:7px}
 .ob-dd{font-size:13px;line-height:1.65;color:#555;white-space:pre-line}
@@ -367,17 +367,18 @@ body {
 </head>
 <body>
 
-<div class="ob-bg" id="ob-bg"></div>
-<div class="ob-hl" id="ob-hl"></div>
-<div class="ob-box" id="ob-box" onclick="event.stopPropagation()">
-  <div class="ob-nn" id="ob-nn"></div>
-  <div class="ob-tt" id="ob-tt"></div>
-  <div class="ob-dd" id="ob-dd"></div>
-  <div class="ob-ww" id="ob-ww" style="display:none"></div>
-  <div class="ob-row">
-    <button class="ob-close" onclick="obClose()">닫기</button>
-    <button class="ob-prev" id="ob-prev" onclick="obPrev()" style="display:none">← 이전</button>
-    <button class="ob-nxt" id="ob-nxt" onclick="obNext()">다음 →</button>
+<div class="ob-ov" id="ob-ov" onclick="obClose()">
+  <div class="ob-hl" id="ob-hl"></div>
+  <div class="ob-box" onclick="event.stopPropagation()">
+    <div class="ob-nn" id="ob-nn"></div>
+    <div class="ob-tt" id="ob-tt"></div>
+    <div class="ob-dd" id="ob-dd"></div>
+    <div class="ob-ww" id="ob-ww" style="display:none"></div>
+    <div class="ob-row">
+      <button class="ob-close" onclick="obClose()">닫기</button>
+      <button class="ob-prev" id="ob-prev" onclick="obPrev()" style="display:none">← 이전</button>
+      <button class="ob-nxt" id="ob-nxt" onclick="obNext()">다음 →</button>
+    </div>
   </div>
 </div>
 
@@ -841,10 +842,15 @@ const OB_STEPS=[
   {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃은 언제든 다시 로그인할 수 있어요.',warn:'계정 삭제 시 등록된 모든 데이터가 영구 삭제돼요.\n삭제 후 복구가 불가능해요.',arrow:'up'}
 ];
 function startOnboarding(){
-  if(localStorage.getItem('ob_mypage_done')==='1')return;
-  _obStep=0;_obSteps=OB_STEPS;
-  document.getElementById('ob-ov').classList.add('active');
-  _showObStep(_obSteps,0);
+  obStart([
+  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석해서 목록을 만들 때마다 1건이 차감돼요.
+기본 50건은 무료예요.',warn:null},
+  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권 소진 후 여기서 추가 구매할 수 있어요.
+50건 추가에 4,900원이에요.',warn:'0건이 되면 AI 자동 분석을 사용할 수 없어요.'},
+  {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'태그를 추가로 구매했다면 여기서 등록하세요.',warn:null},
+  {sel:'.invite-row',title:'구성원 초대',desc:'초대 링크를 보내면 같은 수납장을 함께 사용할 수 있어요.',warn:'현재 준비 중인 기능이에요.'},
+  {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃은 언제든 다시 로그인할 수 있어요.',warn:'계정 삭제 시 모든 데이터가 영구 삭제돼요. 복구 불가.'}
+], 'ob_mypage_done');
 }
 function endOnboarding(){localStorage.setItem('ob_mypage_done','1');_endOb();}
 
@@ -895,7 +901,15 @@ var _OB_STEPS=[
 var _OB_KEY='ob_mypage_done';
 function startOnboarding(){
   obStart([
-  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석해서 목록을 만들 때마다 1건이 차감돼요.\n기본 50건은 무료예요.',warn:null},
+  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석해서 목록을 만들 때마다 1건이 차감돼요.
+기본 50건은 무료예요.',warn:null},
+  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권 소진 후 여기서 추가 구매할 수 있어요.
+50건 추가에 4,900원이에요.',warn:'0건이 되면 AI 자동 분석을 사용할 수 없어요.'},
+  {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'태그를 추가로 구매했다면 여기서 등록하세요.',warn:null},
+  {sel:'.invite-row',title:'구성원 초대',desc:'초대 링크를 보내면 같은 수납장을 함께 사용할 수 있어요.',warn:'현재 준비 중인 기능이에요.'},
+  {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃은 언제든 다시 로그인할 수 있어요.',warn:'계정 삭제 시 모든 데이터가 영구 삭제돼요. 복구 불가.'}
+], 'ob_mypage_done');
+},
   {sel:'.charge-btn',title:'이용권 충전',desc:'이용권 소진 후 여기서 추가 구매할 수 있어요.\n50건 추가에 4,900원이에요.',warn:'0건이 되면 AI 자동 분석을 사용할 수 없어요.'},
   {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'태그를 추가로 구매했다면 여기서 등록하세요.',warn:null},
   {sel:'.invite-row',title:'구성원 초대',desc:'초대 링크를 보내면 같은 수납장을 함께 사용할 수 있어요.',warn:'현재 준비 중인 기능이에요.'},
