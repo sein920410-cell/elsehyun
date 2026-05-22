@@ -441,7 +441,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     <div class="media-empty-inner" id="media-empty">
       <div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
       <div class="media-empty-lbl">사진 또는 영상 등록</div>
-      <div class="media-empty-sub">탭하여 추가 · AI가 자동 인식</div>
+      <div class="media-empty-sub">사진·영상 탭하여 등록 · AI 자동 인식</div>
     </div>
   </div>
 </div>
@@ -452,11 +452,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
       <span id="cnt-num">0</span>
     </div>
   </div>
-  <div class="toolbar-right">
-    <div class="toolbar-search-btn" onclick="toggleSearch()">
-      <svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
-    </div>
-  </div>
+  <div class="toolbar-right"></div>
 </div>
 
 <div class="search-bar" id="search-bar">
@@ -718,7 +714,7 @@ function renderItems(filter=''){
   document.getElementById('bottom-section').style.display=total>0?'flex':'none';
   function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hl">$1</span>');}
   if(!Object.keys(groups).length){
-    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.<br>사진을 등록하거나 + 로 직접 추가하세요.</div></div>`;
+    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.<br>사진·영상을 탭해서 등록하거나<br>하단 직접 추가로 입력하세요.</div></div>`;
     return;
   }
   container.innerHTML=Object.keys(groups).map(cat=>{
@@ -997,7 +993,7 @@ async function confirmUpload(){
 }
 
 function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;}
-function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진 또는 영상 등록</div><div class="media-empty-sub">탭하여 추가 · AI가 자동 인식</div></div>`;}
+function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진 또는 영상 등록</div><div class="media-empty-sub">사진·영상 탭하여 등록 · AI 자동 인식</div></div>`;}
 function openFull(){const el=document.getElementById('media-el');if(!el)return;const fc=document.getElementById('fs-content');fc.innerHTML=el.tagName==='VIDEO'?`<video src="${el.src}" class="${el.className}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`:`<img src="${el.src}" class="${el.className}" style="max-width:100%;max-height:100%;object-fit:contain">`;document.getElementById('fs-ov').classList.add('open');}
 function closeFull(){document.getElementById('fs-ov').classList.remove('open');}
 
@@ -1050,7 +1046,7 @@ function showResultModal(icon,title,sub,showAddBtn){document.getElementById('res
 
 function mpickReanalyze(){
   closeMediaPicker();const fp=localStorage.getItem('mediaPath_'+tag);const mt=localStorage.getItem('mime_'+tag)||'image/jpeg';
-  if(!fp){showResultModal('📷','등록된 사진이 없습니다','+ 버튼으로 사진을 먼저 추가하세요');return;}
+  if(!fp){showResultModal('📷','등록된 사진이 없습니다','상단 미디어 영역을 탭해서 사진을 먼저 추가하세요');return;}
   if(!confirm('사진을 다시 분석할까요?\n기존 목록이 초기화됩니다.'))return;
   items=[];localStorage.setItem('gyeol_'+tag,'[]');renderItems();runAnalysis(fp,mt);
 }
