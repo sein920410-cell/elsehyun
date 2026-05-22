@@ -441,7 +441,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     <div class="media-empty-inner" id="media-empty">
       <div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
       <div class="media-empty-lbl">사진·영상 탭하여 등록</div>
-      <div class="media-empty-sub">사진·영상 탭하여 등록 · AI 자동 인식</div>
+      <div class="media-empty-sub">사진·영상 탭하여 등록 · 물품 자동 인식</div>
     </div>
   </div>
 </div>
@@ -466,7 +466,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <div class="list-wrap" id="list-wrap">
   <div class="list-inner">
     <div id="list-items"></div>
-    <div class="bottom-section" id="bottom-section" style="display:none">
+    <div class="bottom-section" id="bottom-section" style="display:flex">
       <div class="action-row">
         <div class="add-row" onclick="addItemDirectly()">
           <div class="add-sq"><svg viewBox="0 0 12 12"><line x1="6" y1="2" x2="6" y2="10"/><line x1="2" y1="6" x2="10" y2="6"/></svg></div>
@@ -711,10 +711,10 @@ function renderItems(filter=''){
   const cnt=document.getElementById('toolbar-cnt');
   document.getElementById('cnt-num').textContent=total;
   cnt.classList.toggle('vis',total>0);
-  document.getElementById('bottom-section').style.display=total>0?'flex':'none';
+  document.getElementById('bottom-section').style.display='flex';
   function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hl">$1</span>');}
   if(!Object.keys(groups).length){
-    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.<br>사진·영상을 탭해서 등록하거나<br>하단 직접 추가로 입력하세요.</div></div>`;
+    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.</div></div>`;
     return;
   }
   container.innerHTML=Object.keys(groups).map(cat=>{
@@ -993,7 +993,7 @@ async function confirmUpload(){
 }
 
 function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;}
-function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진 또는 영상 등록</div><div class="media-empty-sub">사진·영상 탭하여 등록 · AI 자동 인식</div></div>`;}
+function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진·영상 탭하여 등록</div><div class="media-empty-sub">사진·영상 탭하여 등록 · 물품 자동 인식</div></div>`;}
 function openFull(){const el=document.getElementById('media-el');if(!el)return;const fc=document.getElementById('fs-content');fc.innerHTML=el.tagName==='VIDEO'?`<video src="${el.src}" class="${el.className}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`:`<img src="${el.src}" class="${el.className}" style="max-width:100%;max-height:100%;object-fit:contain">`;document.getElementById('fs-ov').classList.add('open');}
 function closeFull(){document.getElementById('fs-ov').classList.remove('open');}
 
@@ -1163,7 +1163,7 @@ function cancelRecording(){clearInterval(recTimer);clearInterval(window._brightT
 var OB_STEPS=[
   {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',arrow:'down'},
   {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 갤러리 불러오기를 지원하지 않아요.\n앱 내 즉석 촬영(최대 30초)만 가능해요.',arrow:'down'},
-  {sel:'#media-box',title:'물품 자동 분석',desc:'사진 또는 영상을 등록하면 AI가 상품을 자동 인식해 목록을 생성해드립니다.',warn:'※ AI 분석 이용 시 이용권 1건이 차감됩니다.',arrow:'up'},
+  {sel:'#media-box',title:'물품 자동 분석',desc:'사진 또는 영상을 등록하면 물품을 자동 인식해 목록을 생성해드립니다.',warn:'※ AI 분석 이용 시 이용권 1건이 차감됩니다.',arrow:'up'},
   {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n돋보기를 눌러 물품 이름으로 검색할 수 있어요.',arrow:'up'},
   {sel:'.item-swipe-l',title:'편집 · 삭제',desc:'목록 항목을 왼쪽으로 밀면\n편집과 삭제 버튼이 나타나요.',arrow:'up'},
   {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.\n이용권이 소진돼도 이 방법으로 관리할 수 있어요.',arrow:'up'},
@@ -1173,7 +1173,7 @@ function startOnboarding(){
   obStart([
   {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',warn:null},
   {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 앱 내 즉석 촬영(최대 30초)만 가능해요.',warn:null},
-  {sel:'#media-box',title:'물품 자동 분석',desc:'사진 또는 영상을 등록하면 AI가 상품을 자동 인식해 목록을 생성해드립니다.',warn:'※ AI 분석 이용 시 이용권 1건이 차감됩니다.'},
+  {sel:'#media-box',title:'물품 자동 분석',desc:'사진 또는 영상을 등록하면 물품을 자동 인식해 목록을 생성해드립니다.',warn:'※ AI 분석 이용 시 이용권 1건이 차감됩니다.'},
   {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n돋보기를 눌러 물품 이름으로 검색할 수 있어요.',warn:null},
   {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.',warn:null}
 ], 'ob_drawer_done');
