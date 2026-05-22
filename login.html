@@ -426,7 +426,7 @@
         btn.disabled = true;
         await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: 'https://qr-test-sage.vercel.app/serial.html' }
+            options: { redirectTo: 'https://elsehyun.vercel.app/serial.html' }
         });
     };
 
@@ -444,7 +444,9 @@
         } else {
             saveConsent();
             const { data: s } = await supabase.from('serials').select('id').eq('used_by', data.user.email).maybeSingle();
-            if (s) { window.location.replace('index.html'); } else { window.location.replace('serial.html'); }
+            const redir = new URLSearchParams(location.search).get('redirect');
+            if (redir) { window.location.replace(redir); }
+            else if (s) { window.location.replace('index.html'); } else { window.location.replace('serial.html'); }
         }
     };
 
