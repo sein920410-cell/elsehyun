@@ -1198,4 +1198,15 @@ var _OB_STEPS=[
   {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',warn:null},
   {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 갤러리 불러오기 지원 안 해요.\n앱 내 즉석 촬영(최대 30초)만 가능해요.',warn:null},
   {sel:'#media-box',title:'AI 자동 분석',desc:'사진·영상 등록하면 AI가 물건을 자동으로 인식해서 목록을 만들어줘요.',warn:'AI 분석 시 이용권 1건이 차감돼요.'},
-  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n돋보기를 눌러 물품 이름으로 검색할 수 있어요.',war
+  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n돋보기를 눌러 물품 이름으로 검색할 수 있어요.',warn:null},
+  {sel:'.item-swipe-l',title:'편집 · 삭제',desc:'목록 항목을 왼쪽으로 밀면\n편집과 삭제 버튼이 나타나요.',warn:null},
+  {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.',warn:null},
+  {sel:'#brand-btn',title:'봄 채팅 상담 😊',desc:'공간:결 로고를 누르면 수납 비서 봄과 채팅할 수 있어요.',warn:null}
+];
+var _OB_KEY='ob_drawer_done';
+function startOnboarding(){
+  obStart(_OB_STEPS, _OB_KEY);
+}
+</script>
+</body>
+</html>
