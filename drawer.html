@@ -363,10 +363,10 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 
 
 /* 온보딩 */
-.ob-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000}
-.ob-bg.on{display:block}
-.ob-box{position:fixed;bottom:100px;left:16px;right:16px;background:#fff;border-radius:16px;padding:18px;z-index:9001;box-shadow:0 8px 40px rgba(0,0,0,.3)}
-.ob-hl{position:fixed;border-radius:10px;outline:3px solid #fff;z-index:9002;pointer-events:none;transition:all .3s}
+.ob-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000}
+.ob-ov.on{display:block}
+.ob-hl{position:fixed;border-radius:10px;outline:3px solid rgba(255,255,255,.9);z-index:9001;pointer-events:none;transition:all .3s}
+.ob-box{position:fixed;bottom:100px;left:16px;right:16px;background:#fff;border-radius:16px;padding:18px;z-index:9002;box-shadow:0 8px 40px rgba(0,0,0,.3)}
 .ob-nn{font-size:11px;color:#aaa;font-weight:700;margin-bottom:6px}
 .ob-tt{font-size:15px;font-weight:800;color:#111;margin-bottom:7px}
 .ob-dd{font-size:13px;line-height:1.65;color:#555;white-space:pre-line}
@@ -379,17 +379,18 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 </head>
 <body data-theme="stone">
 
-<div class="ob-bg" id="ob-bg"></div>
-<div class="ob-hl" id="ob-hl"></div>
-<div class="ob-box" id="ob-box" onclick="event.stopPropagation()">
-  <div class="ob-nn" id="ob-nn"></div>
-  <div class="ob-tt" id="ob-tt"></div>
-  <div class="ob-dd" id="ob-dd"></div>
-  <div class="ob-ww" id="ob-ww" style="display:none"></div>
-  <div class="ob-row">
-    <button class="ob-close" onclick="obClose()">닫기</button>
-    <button class="ob-prev" id="ob-prev" onclick="obPrev()" style="display:none">← 이전</button>
-    <button class="ob-nxt" id="ob-nxt" onclick="obNext()">다음 →</button>
+<div class="ob-ov" id="ob-ov" onclick="obClose()">
+  <div class="ob-hl" id="ob-hl"></div>
+  <div class="ob-box" onclick="event.stopPropagation()">
+    <div class="ob-nn" id="ob-nn"></div>
+    <div class="ob-tt" id="ob-tt"></div>
+    <div class="ob-dd" id="ob-dd"></div>
+    <div class="ob-ww" id="ob-ww" style="display:none"></div>
+    <div class="ob-row">
+      <button class="ob-close" onclick="obClose()">닫기</button>
+      <button class="ob-prev" id="ob-prev" onclick="obPrev()" style="display:none">← 이전</button>
+      <button class="ob-nxt" id="ob-nxt" onclick="obNext()">다음 →</button>
+    </div>
   </div>
 </div>
 
@@ -1151,10 +1152,17 @@ const OB_STEPS=[
   {sel:'#brand-btn',title:'봄 채팅 상담 😊',desc:'공간:결 로고를 누르면 수납 비서 봄과 채팅할 수 있어요.\n물품 찾기, 서비스 문의 모두 편하게 물어보세요.',arrow:'up'}
 ];
 function startOnboarding(){
-  if(localStorage.getItem('ob_drawer_done')==='1')return;
-  _obStep=0;_obSteps=OB_STEPS;
-  document.getElementById('ob-ov').classList.add('active');
-  _showObStep(_obSteps,0);
+  obStart([
+  {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고
+12가지 색상 중 테마를 골라 꾸밀 수 있어요.',warn:null},
+  {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.
+영상은 갤러리 불러오기 지원 안 해요.
+앱 내 즉석 촬영(최대 30초)만 가능해요.',warn:null},
+  {sel:'#media-box',title:'AI 자동 분석',desc:'사진·영상 등록하면 AI가 물건을 자동 인식해서 목록을 만들어줘요.',warn:'AI 분석 시 이용권 1건이 차감돼요.'},
+  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.
+돋보기를 눌러 물품 이름으로 검색할 수 있어요.',warn:null},
+  {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.',warn:null}
+], 'ob_drawer_done');
 }
 function endOnboarding(){localStorage.setItem('ob_drawer_done','1');_endOb();}
 
@@ -1207,7 +1215,17 @@ var _OB_STEPS=[
 var _OB_KEY='ob_drawer_done';
 function startOnboarding(){
   obStart([
-  {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',warn:null},
+  {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고
+12가지 색상 중 테마를 골라 꾸밀 수 있어요.',warn:null},
+  {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.
+영상은 갤러리 불러오기 지원 안 해요.
+앱 내 즉석 촬영(최대 30초)만 가능해요.',warn:null},
+  {sel:'#media-box',title:'AI 자동 분석',desc:'사진·영상 등록하면 AI가 물건을 자동 인식해서 목록을 만들어줘요.',warn:'AI 분석 시 이용권 1건이 차감돼요.'},
+  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.
+돋보기를 눌러 물품 이름으로 검색할 수 있어요.',warn:null},
+  {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.',warn:null}
+], 'ob_drawer_done');
+},
   {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 갤러리 불러오기 지원 안 해요.\n앱 내 즉석 촬영(최대 30초)만 가능해요.',warn:null},
   {sel:'#media-box',title:'AI 자동 분석',desc:'사진·영상 등록하면 AI가 물건을 자동으로 인식해서 목록을 만들어줘요.',warn:'AI 분석 시 이용권 1건이 차감돼요.'},
   {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n돋보기를 눌러 물품 이름으로 검색할 수 있어요.',warn:null},
