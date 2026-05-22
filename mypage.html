@@ -852,14 +852,12 @@ function startOnboarding(){
   {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃은 언제든 다시 로그인할 수 있어요.',warn:'계정 삭제 시 모든 데이터가 영구 삭제돼요. 복구 불가.'}
 ], 'ob_mypage_done');
 }
-function endOnboarding(){localStorage.setItem('ob_mypage_done','1');_endOb();}
-
 var _OB_I=0, _OB_S=[], _OB_KEY='';
 function obStart(steps, key){
   if(localStorage.getItem(key)==='1') return;
   _OB_I=0; _OB_S=steps; _OB_KEY=key;
-  document.getElementById('ob-bg').classList.add('on');
-  document.getElementById('ob-bg').onclick=function(){obClose();};
+  document.getElementById('ob-ov').classList.add('on');
+  document.getElementById('ob-ov').onclick=function(){obClose();};
   obShow(0);
 }
 function obShow(i){
@@ -887,34 +885,9 @@ function obNext(){_OB_I++;obShow(_OB_I);}
 function obPrev(){if(_OB_I>0){_OB_I--;obShow(_OB_I);}}
 function obDone(){localStorage.setItem(_OB_KEY,'1');obClose();}
 function obClose(){
-  document.getElementById('ob-bg').classList.remove('on');
+  document.getElementById('ob-ov').classList.remove('on');
   document.getElementById('ob-hl').style.width='0';
   localStorage.setItem(_OB_KEY,'1');
-}
-var _OB_STEPS=[
-  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석해서 목록을 만들 때마다 1건이 차감돼요.\n기본 50건은 무료예요.',warn:null},
-  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권 소진 후 여기서 추가 구매할 수 있어요.\n50건 추가에 4,900원이에요.',warn:'0건이 되면 AI 자동 분석을 사용할 수 없어요.'},
-  {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'태그를 추가로 구매했다면 여기서 등록하세요.',warn:null},
-  {sel:'.invite-row',title:'구성원 초대',desc:'초대 링크를 보내면 같은 수납장을 함께 사용할 수 있어요.',warn:'현재 준비 중인 기능이에요.'},
-  {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃은 언제든 다시 로그인할 수 있어요.',warn:'계정 삭제 시 모든 데이터가 영구 삭제돼요. 복구 불가.'}
-];
-var _OB_KEY='ob_mypage_done';
-function startOnboarding(){
-  obStart([
-  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석해서 목록을 만들 때마다 1건이 차감돼요.
-기본 50건은 무료예요.',warn:null},
-  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권 소진 후 여기서 추가 구매할 수 있어요.
-50건 추가에 4,900원이에요.',warn:'0건이 되면 AI 자동 분석을 사용할 수 없어요.'},
-  {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'태그를 추가로 구매했다면 여기서 등록하세요.',warn:null},
-  {sel:'.invite-row',title:'구성원 초대',desc:'초대 링크를 보내면 같은 수납장을 함께 사용할 수 있어요.',warn:'현재 준비 중인 기능이에요.'},
-  {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃은 언제든 다시 로그인할 수 있어요.',warn:'계정 삭제 시 모든 데이터가 영구 삭제돼요. 복구 불가.'}
-], 'ob_mypage_done');
-},
-  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권 소진 후 여기서 추가 구매할 수 있어요.\n50건 추가에 4,900원이에요.',warn:'0건이 되면 AI 자동 분석을 사용할 수 없어요.'},
-  {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'태그를 추가로 구매했다면 여기서 등록하세요.',warn:null},
-  {sel:'.invite-row',title:'구성원 초대',desc:'초대 링크를 보내면 같은 수납장을 함께 사용할 수 있어요.',warn:'현재 준비 중인 기능이에요.'},
-  {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃은 언제든 다시 로그인할 수 있어요.',warn:'계정 삭제 시 모든 데이터가 영구 삭제돼요. 복구 불가.'}
-], 'ob_mypage_done');
 }
 </script>
 </body>
