@@ -677,8 +677,6 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <input type="file" id="file-in" accept="image/*" style="display:none" onchange="handleFile(event)">
 
 <script>
-};
-
 function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
@@ -1142,7 +1140,7 @@ function startBrightCheck(){
 }
 function cancelRecording(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';if(mediaRec?.state!=='inactive')mediaRec?.stop();if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');isRec=false;}
 
-const OB_STEPS=[
+var OB_STEPS=[
   {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',arrow:'down'},
   {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 갤러리 불러오기를 지원하지 않아요.\n앱 내 즉석 촬영(최대 30초)만 가능해요.',arrow:'down'},
   {sel:'#media-box',title:'AI 자동 분석',desc:'사진·영상을 등록하면 AI가 물건을 자동으로 인식해서 목록을 만들어줘요.',warn:'AI 분석 시 이용권 1건이 차감돼요.',arrow:'up'},
@@ -1153,14 +1151,10 @@ const OB_STEPS=[
 ];
 function startOnboarding(){
   obStart([
-  {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고
-12가지 색상 중 테마를 골라 꾸밀 수 있어요.',warn:null},
-  {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.
-영상은 갤러리 불러오기 지원 안 해요.
-앱 내 즉석 촬영(최대 30초)만 가능해요.',warn:null},
+  {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',warn:null},
+  {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 갤러리 불러오기 지원 안 해요.\n앱 내 즉석 촬영(최대 30초)만 가능해요.',warn:null},
   {sel:'#media-box',title:'AI 자동 분석',desc:'사진·영상 등록하면 AI가 물건을 자동 인식해서 목록을 만들어줘요.',warn:'AI 분석 시 이용권 1건이 차감돼요.'},
-  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.
-돋보기를 눌러 물품 이름으로 검색할 수 있어요.',warn:null},
+  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n돋보기를 눌러 물품 이름으로 검색할 수 있어요.',warn:null},
   {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.',warn:null}
 ], 'ob_drawer_done');
 }
