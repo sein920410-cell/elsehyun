@@ -443,7 +443,7 @@ body {
       </div>
       <div class="help-section">
         <div class="help-section-title">💬 봄 채팅 상담</div>
-        <div class="help-section-body">수납장 페이지 하단 공간:결 로고를 탭하면 AI 수납 비서 봄과 채팅할 수 있어요. 수납 관련 질문이나 서비스 이용 문의를 편하게 남겨주세요. 채팅은 이용권 차감 없이 무료예요.</div>
+        <div class="help-section-body">수납장 페이지 왼쪽 상단 공간:결 텍스트를 탭하면 AI 수납 비서 봄과 채팅할 수 있어요. 수납 관련 질문이나 서비스 이용 문의를 편하게 남겨주세요. 채팅은 이용권 차감 없이 무료예요.</div>
       </div>
       <div class="help-section">
         <div class="help-section-title">🎨 테마 색상</div>
@@ -451,11 +451,11 @@ body {
       </div>
       <div class="help-section">
         <div class="help-section-title">✏️ 목록 직접 편집</div>
-        <div class="help-section-body">물품 카드를 왼쪽으로 스와이프하면 편집·삭제 버튼이 나와요. 하단 직접 추가 버튼으로 AI 없이 물품을 수동으로 입력할 수도 있어요.</div>
+        <div class="help-section-body">물품 카드를 왼쪽으로 스와이프하면 편집·삭제 버튼이 나와요. 하단 직접 추가 버튼으로 AI 없이 물품 이름을 직접 입력할 수 있어요.</div>
       </div>
       <div class="help-section">
         <div class="help-section-title">🔖 이용권 충전</div>
-        <div class="help-section-body">기본 50건 무료 제공돼요. 소진 후 추가 구매할 수 있어요. 이용권이 0건이 되면 AI 자동 분석을 사용할 수 없고 직접 추가는 계속 가능해요.</div>
+        <div class="help-section-body">기본 50건 무료 제공돼요. 소진 후 추가 50건을 4,900원에 구매할 수 있어요. 이용권이 0건이 되면 AI 자동 분석을 사용할 수 없고 직접 추가는 계속 가능해요.</div>
       </div>
     </div>
     <button class="detail-close" onclick="closeHelp()">확인</button>
@@ -786,6 +786,26 @@ function openDetail(key){
   document.getElementById('detail-ov').classList.add('open');
 }
 function closeDetail(){document.getElementById('detail-ov').classList.remove('open');}
+function handleModalOutsideClick(e, id){
+  if(e.target === document.getElementById(id)){
+    document.getElementById(id).classList.remove('open');
+  }
+}
+// 모달 열려있을 때 뒤로가기 차단
+window.addEventListener('popstate', function(){
+  var modals = ['invite-modal','name-modal'];
+  for(var i=0; i<modals.length; i++){
+    var m = document.getElementById(modals[i]);
+    if(m && m.classList.contains('open')){
+      m.classList.remove('open');
+      history.pushState(null, '', location.href);
+      return;
+    }
+  }
+});
+document.addEventListener('DOMContentLoaded', function(){
+  history.pushState(null, '', location.href);
+});
 function openHelp(){document.getElementById('help-ov').classList.add('open');}
 function closeHelp(){document.getElementById('help-ov').classList.remove('open');}
 
