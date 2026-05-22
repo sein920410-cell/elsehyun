@@ -381,7 +381,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 
 <div class="ob-ov" id="ob-ov" onclick="obClose()">
   <div class="ob-hl" id="ob-hl"></div>
-  <div class="ob-box" onclick="event.stopPropagation()">
+  <div class="ob-box" id="ob-box" onclick="event.stopPropagation()">
     <div class="ob-nn" id="ob-nn"></div>
     <div class="ob-tt" id="ob-tt"></div>
     <div class="ob-dd" id="ob-dd"></div>
@@ -1142,7 +1142,7 @@ function cancelRecording(){clearInterval(recTimer);clearInterval(window._brightT
 var OB_STEPS=[
   {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',arrow:'down'},
   {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 갤러리 불러오기를 지원하지 않아요.\n앱 내 즉석 촬영(최대 30초)만 가능해요.',arrow:'down'},
-  {sel:'#media-box',title:'AI 자동 분석',desc:'사진·영상을 등록하면 AI가 물건을 자동으로 인식해서 목록을 만들어줘요.',warn:'AI 분석 시 이용권 1건이 차감돼요.',arrow:'up'},
+  {sel:'#media-box',title:'물품 자동 분석',desc:'사진 또는 영상을 등록하면 AI가 상품을 자동 인식해 목록을 생성해드립니다.',warn:'※ AI 분석 이용 시 이용권 1건이 차감됩니다.',arrow:'up'},
   {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n돋보기를 눌러 물품 이름으로 검색할 수 있어요.',arrow:'up'},
   {sel:'.item-swipe-l',title:'편집 · 삭제',desc:'목록 항목을 왼쪽으로 밀면\n편집과 삭제 버튼이 나타나요.',arrow:'up'},
   {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.\n이용권이 소진돼도 이 방법으로 관리할 수 있어요.',arrow:'up'},
@@ -1152,7 +1152,7 @@ function startOnboarding(){
   obStart([
   {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',warn:null},
   {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 앱 내 즉석 촬영(최대 30초)만 가능해요.',warn:null},
-  {sel:'#media-box',title:'AI 자동 분석',desc:'사진·영상 등록하면 AI가 물건을 자동 인식해서 목록을 만들어줘요.',warn:'AI 분석 시 이용권 1건이 차감돼요.'},
+  {sel:'#media-box',title:'물품 자동 분석',desc:'사진 또는 영상을 등록하면 AI가 상품을 자동 인식해 목록을 생성해드립니다.',warn:'※ AI 분석 이용 시 이용권 1건이 차감됩니다.'},
   {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n돋보기를 눌러 물품 이름으로 검색할 수 있어요.',warn:null},
   {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.',warn:null}
 ], 'ob_drawer_done');
@@ -1184,16 +1184,32 @@ function obShow(i){
     hl.style.top=(r.top-5)+'px';
     hl.style.width=(r.width+10)+'px';
     hl.style.height=(r.height+10)+'px';
+    var box=document.getElementById('ob-box');
+    if(box){
+      if(r.top > window.innerHeight * 0.5){
+        box.style.bottom='auto';box.style.top='80px';
+      } else {
+        box.style.top='auto';box.style.bottom='100px';
+      }
+    }
   },350);
 }
 function obNext(){_OB_I++;obShow(_OB_I);}
 function obPrev(){if(_OB_I>0){_OB_I--;obShow(_OB_I);}}
 function obDone(){localStorage.setItem(_OB_KEY,'1');obClose();}
 function obClose(){
-  document.getElementById('ob-ov').classList.remove('on');
-  document.getElementById('ob-hl').style.width='0';
+  var ov=document.getElementById('ob-ov');
+  if(ov){ov.classList.remove('on');ov.style.display='none';}
+  var hl=document.getElementById('ob-hl');
+  if(hl){hl.style.width='0';hl.style.height='0';}
+  var box=document.getElementById('ob-box');
+  if(box){box.style.top='auto';box.style.bottom='100px';}
   localStorage.setItem(_OB_KEY,'1');
 }
+window.addEventListener('load',function(){
+  var ov=document.getElementById('ob-ov');
+  if(ov && !ov.classList.contains('on')){ov.style.display='none';}
+});
 </script>
 </body>
 </html>
