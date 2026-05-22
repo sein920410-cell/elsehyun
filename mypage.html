@@ -16,7 +16,7 @@
     const { data: serial } = await _sb.from('serials').select('id').eq('used_by', session.user.email).maybeSingle();
     if (!serial) { window.location.replace('serial.html'); return; }
     document.body.style.visibility = 'visible';
-    setTimeout(startOnboarding, 1000);
+    setTimeout(function(){ startOnboarding(); }, 1000);
     })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
