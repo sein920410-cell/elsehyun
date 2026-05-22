@@ -676,9 +676,17 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <input type="file" id="file-in" accept="image/*" style="display:none" onchange="handleFile(event)">
 
 <script>
-var currentTheme='stone', pendingTheme='stone';
-var _themeKey='gyeol_color_theme_'+(new URLSearchParams(location.search).get('tag')||'');
-(function(){var t=localStorage.getItem(_themeKey)||'stone';document.body.setAttribute('data-theme',t);currentTheme=t;pendingTheme=t;})();
+var tag = new URLSearchParams(location.search).get('tag') || '';
+var _themeKey = 'gyeol_color_theme_' + tag;
+var currentTheme = localStorage.getItem(_themeKey) || 'stone';
+var pendingTheme = currentTheme;
+var sb = supabase.createClient(
+    'https://tqhtggusphhcsygiitrv.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
+);
+var _sb = sb;
+var items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
+(function(){ document.body.setAttribute('data-theme', currentTheme); })();
 function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
