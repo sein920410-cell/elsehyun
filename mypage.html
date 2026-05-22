@@ -699,19 +699,7 @@ sb.auth.getSession().then(function(res) {
         document.getElementById('remain-count').textContent = credits;
         setTimeout(function(){ document.getElementById('usage-bar').style.width = pct + '%'; }, 100);
     });
-}
-const OB_STEPS=[
-  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석할 때마다 이용권이 1건 차감돼요.
-잔여 이용권이 0이 되면 AI 분석을 사용할 수 없어요.',warn:'기본 50건 무료 제공 · 추가 구매 50건 / 4,900원'},
-  {sel:'.charge-btn',title:'이용권 충전하기',desc:'이용권이 부족하면 여기서 추가로 구매할 수 있어요.
-(현재 오픈 준비 중)',warn:null},
-  {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'공간:결 태그를 추가로 구매했다면 여기서 등록해요.
-등록하면 새 수납장이 자동으로 추가돼요.',warn:null},
-  {sel:'.invite-row',title:'구성원 초대',desc:'가족이나 지인에게 초대 링크를 공유하면
-같은 수납장을 함께 사용할 수 있어요. (준비 중)',warn:null},
-  {sel:'.acct-link.del-link',title:'계정 삭제 주의',desc:'계정을 삭제하면 모든 수납장 데이터가 영구 삭제돼요.
-삭제 전 반드시 내용을 확인해 주세요.',warn:'삭제 후 복구가 불가능해요.'}
-];
+});
 let _obStep=0;
 
 
@@ -834,7 +822,7 @@ async function clearAnnouncement() {
 
 document.getElementById('name-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') saveName(); });
 
-const OB_STEPS=[
+var OB_STEPS=[
   {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석해서 목록을 만들 때마다 1건이 차감돼요.\n기본 50건은 무료예요.',warn:null,arrow:'down'},
   {sel:'.charge-btn',title:'이용권 충전',desc:'이용권이 소진되면 여기서 추가 구매할 수 있어요.\n50건 추가에 4,900원이에요.',warn:'이용권이 0건이 되면 AI 자동 분석을 사용할 수 없어요.',arrow:'up'},
   {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'공간:결 태그를 추가로 구매했다면 여기서 등록하세요.\n박스 안 카드에 적힌 코드를 입력하면 새 수납장이 추가돼요.',arrow:'down'},
@@ -843,10 +831,8 @@ const OB_STEPS=[
 ];
 function startOnboarding(){
   obStart([
-  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석해서 목록을 만들 때마다 1건이 차감돼요.
-기본 50건은 무료예요.',warn:null},
-  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권 소진 후 여기서 추가 구매할 수 있어요.
-50건 추가에 4,900원이에요.',warn:'0건이 되면 AI 자동 분석을 사용할 수 없어요.'},
+  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석해서 목록을 만들 때마다 1건이 차감돼요.\n기본 50건은 무료예요.',warn:null},
+  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권 소진 후 여기서 추가 구매할 수 있어요.\n50건 추가에 4,900원이에요.',warn:'0건이 되면 AI 자동 분석을 사용할 수 없어요.'},
   {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'태그를 추가로 구매했다면 여기서 등록하세요.',warn:null},
   {sel:'.invite-row',title:'구성원 초대',desc:'초대 링크를 보내면 같은 수납장을 함께 사용할 수 있어요.',warn:'현재 준비 중인 기능이에요.'},
   {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃은 언제든 다시 로그인할 수 있어요.',warn:'계정 삭제 시 모든 데이터가 영구 삭제돼요. 복구 불가.'}
