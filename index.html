@@ -220,7 +220,7 @@ body {
     <div class="ob-dd" id="ob-dd"></div>
     <div class="ob-ww" id="ob-ww" style="display:none"></div>
     <div class="ob-row">
-      <button class="ob-close" onclick="obClose()">닫기</button>
+      <button class="ob-close" id="ob-close" onclick="obClose()">닫기</button>
       <button class="ob-prev" id="ob-prev" onclick="obPrev()" style="display:none">← 이전</button>
       <button class="ob-nxt" id="ob-nxt" onclick="obNext()">다음 →</button>
     </div>
@@ -337,18 +337,7 @@ function onSearch() {
     return;
   }
 
-  resultList.innerHTML = results.map(r => `
-    <div class="result-item" onclick="location.href='drawer.html?tag=${r.tag}'">
-      <div class="result-ico">
-        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-      </div>
-      <div class="result-info">
-        <div class="result-name">${highlight(r.name, query)}</div>
-        <div class="result-meta"><b>${r.drawerName}</b> · ${r.cat} · ${r.qty}개</div>
-      </div>
-      <button class="go-btn" onclick="event.stopPropagation();location.href='drawer.html?tag=${r.tag}'">이동</button>
-    </div>
-  `).join('');
+  resultList.innerHTML = results.map(r => `\n    <div class="result-item" onclick="location.href='drawer.html?tag=${r.tag}'">\n      <div class="result-ico">\n        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>\n      </div>\n      <div class="result-info">\n        <div class="result-name">${highlight(r.name, query)}</div>\n        <div class="result-meta"><b>${r.drawerName}</b> · ${r.cat} · ${r.qty}개</div>\n      </div>\n      <button class="go-btn" onclick="event.stopPropagation();location.href='drawer.html?tag=${r.tag}'">이동</button>\n    </div>\n  `).join('');
 }
 
 function clearSearch() {
@@ -386,6 +375,7 @@ function obShow(i){
   if(s.warn){ww.textContent=s.warn;ww.style.display='block';}else{ww.style.display='none';}
   document.getElementById('ob-nxt').textContent=i===_OB_S.length-1?'완료 ✓':'다음 →';
   document.getElementById('ob-prev').style.display=i>0?'':'none';
+  document.getElementById('ob-close').style.display=i===_OB_S.length-1?'none':'';
   el.scrollIntoView({block:'center',behavior:'smooth'});
   setTimeout(function(){
     var r=el.getBoundingClientRect();
