@@ -212,7 +212,7 @@ body {
 </head>
 <body>
 
-<div class="ob-bg" id="ob-bg" onclick="obClose()"></div>
+<div class="ob-bg" id="ob-bg"></div>
 <div class="ob-hl" id="ob-hl"></div>
 <div class="ob-box" id="ob-box" onclick="event.stopPropagation()">
   <div class="ob-nn" id="ob-nn"></div>
@@ -371,6 +371,7 @@ function obStart(steps, key){
   if(localStorage.getItem(key)==='1') return;
   _OB_I=0; _OB_S=steps; _OB_KEY=key;
   document.getElementById('ob-bg').classList.add('on');
+  document.getElementById('ob-bg').onclick=function(){obClose();};
   obShow(0);
 }
 function obShow(i){
@@ -408,7 +409,10 @@ var _OB_STEPS=[
 ];
 var _OB_KEY='ob_index_done';
 function startOnboarding(){
-  obStart(_OB_STEPS, _OB_KEY);
+  obStart([
+  {sel:'.mypage-btn',title:'마이페이지',desc:'우측 상단 아이콘을 누르면 마이페이지로 이동해요.\nAI 이용권 확인, 테마 설정, 계정 관리를 할 수 있어요.',warn:null},
+  {sel:'.search-wrap',title:'통합 검색',desc:'수납장 목록을 등록한 후\n물건 이름을 검색하면 어느 수납장에 있는지 알려줘요.',warn:null}
+], 'ob_index_done');
 }
 </script>
 </body>
