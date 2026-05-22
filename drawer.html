@@ -79,10 +79,10 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .hdr-search-btn svg{width:17px!important;height:17px!important;}
 
 /* ─── 미디어 ─── */
-.media-section{background:var(--h-bg);padding:12px 14px 16px;flex-shrink:0;transition:background .4s}
-.media-box{height:200px;border-radius:14px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;transition:box-shadow .2s}
-.media-box.empty{border:none;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);}
-.media-box.filled{box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);}
+.media-section{background:var(--h-bg);padding:0 14px 12px;flex-shrink:0;transition:background .4s}
+.media-box{height:220px;border-radius:var(--r);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation}
+.media-box.empty{border:1px dashed var(--h-border);background:rgba(255,255,255,.03)}
+.media-box.filled{border:1px solid rgba(255,255,255,.07)}
 .media-box img,.media-box video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 .media-empty-inner{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
 .media-empty-sq{width:42px;height:42px;border-radius:var(--r);border:1px solid var(--h-border);background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center}
@@ -714,7 +714,7 @@ function renderItems(filter=''){
   document.getElementById('bottom-section').style.display='flex';
   function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hl">$1</span>');}
   if(!Object.keys(groups).length){
-    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.</div></div>`;
+    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.<br><span style="font-size:12px;color:var(--muted2)">물품 목록을 추가하여 주세요.</span></div></div>`;
     return;
   }
   container.innerHTML=Object.keys(groups).map(cat=>{
