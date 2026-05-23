@@ -6,8 +6,25 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>body { visibility: hidden; }
-
+<style>body { visibility: hidden; }</style>
+<script>
+(async () => {
+    const _authClient = supabase.createClient(
+        'https://tqhtggusphhcsygiitrv.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
+    );
+    const { data: { session } } = await _authClient.auth.getSession();
+    if (!session) { window.location.replace('login.html'); return; }
+    const { data: serial } = await _authClient.from('serials').select('id').eq('used_by', session.user.email).maybeSingle();
+    const { data: singleSerial } = await _authClient.from('single_serials').select('id').eq('used_by', session.user.email).limit(1).maybeSingle();
+    if (!serial && !singleSerial) { window.location.replace('serial.html'); return; }
+    window.sb = _authClient;
+    window.sb = _authClient; // alias
+    document.body.style.visibility = 'visible';
+    setTimeout(function(){ startOnboarding(); }, 1000);
+    })();
+</script>
+<style>
 :root{
   --h-bg:#111318;--h-txt:#fff;--h-sub:rgba(255,255,255,0.42);
   --h-border:rgba(255,255,255,0.08);--h-btn:rgba(255,255,255,0.08);
@@ -15,22 +32,23 @@
   --bg:#FAF7F2;--surface:#fff;--border:#E8E2D8;--border2:#DDD6CB;
   --ink:#2A2118;--ink2:#4A3830;--muted:#9A8E80;--muted2:#B5A99A;
   --danger:#D93025;
+  --a-color:#C8C8D8;--a-bg:rgba(200,200,216,.12);--a-border:rgba(200,200,216,.3);
   --font:"DM Sans","Noto Sans KR",sans-serif;
   --r:6px;
 }
 /* ─── 테마 ─── */
-[data-pre-theme="scarlet"],[data-theme="scarlet"]{--h-bg:#C0362C;--h-txt:#fff;--h-sub:rgba(255,255,255,.62);--h-border:rgba(255,255,255,.18);--h-btn:rgba(255,255,255,.14);--bom-bg:#7A1010;--a-color:#FECACA;--a-bg:rgba(254,202,202,.14);--a-border:rgba(254,202,202,.32)}
-[data-pre-theme="charcoal"],[data-pre-theme="charcoal"],[data-pre-theme="charcoal"],[data-theme="charcoal"]{--h-bg:#2C2F33;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.15);--h-btn:rgba(255,255,255,.1);--bom-bg:#1A1B1E;--a-color:#D1D5DB;--a-bg:rgba(209,213,219,.12);--a-border:rgba(209,213,219,.3)}
-[data-pre-theme="forest"],[data-theme="forest"]{--h-bg:#1E3D2C;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.12);--h-btn:rgba(255,255,255,.1);--bom-bg:#142A1C;--a-color:#86EFAC;--a-bg:rgba(134,239,172,.12);--a-border:rgba(134,239,172,.3)}
-[data-pre-theme="gray"],[data-theme="gray"]{--h-bg:#4B5563;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.12);--h-btn:rgba(255,255,255,.1);--bom-bg:#1F2937;--a-color:#D1D5DB;--a-bg:rgba(209,213,219,.12);--a-border:rgba(209,213,219,.3)}
-[data-pre-theme="stone"],[data-theme="stone"]{--h-bg:#EDEBE5;--h-txt:#1E1C18;--h-sub:rgba(30,28,24,.46);--h-border:rgba(30,28,24,.1);--h-btn:rgba(30,28,24,.06);--bom-bg:#1E1C18;--a-color:#8A7D6A;--a-bg:rgba(138,125,106,.12);--a-border:rgba(138,125,106,.28)}
-[data-pre-theme="butter"],[data-theme="butter"]{--h-bg:#FBE8A6;--h-txt:#333;--h-sub:rgba(0,0,0,.55);--h-border:rgba(0,0,0,.15);--h-btn:rgba(0,0,0,.05);--bom-bg:#E0C988;--a-color:#E0C988;--a-bg:rgba(224,201,136,.12);--a-border:rgba(224,201,136,.3)}
-[data-pre-theme="champagne"],[data-pre-theme="champagne"],[data-pre-theme="champagne"],[data-theme="champagne"]{--h-bg:#E6D5C3;--h-txt:#2A2118;--h-sub:rgba(42,33,24,.55);--h-border:rgba(42,33,24,.15);--h-btn:rgba(42,33,24,.08);--bom-bg:#2A2118;--a-color:#B49B7A;--a-bg:rgba(180,155,122,.12);--a-border:rgba(180,155,122,.3)}
-[data-pre-theme="mauve"],[data-theme="mauve"]{--h-bg:#7B6EA0;--h-txt:#fff;--h-sub:rgba(255,255,255,.58);--h-border:rgba(255,255,255,.15);--h-btn:rgba(255,255,255,.12);--bom-bg:#3D3060;--a-color:#D8B4FE;--a-bg:rgba(216,180,254,.13);--a-border:rgba(216,180,254,.3)}
-[data-pre-theme="terra"],[data-theme="terra"]{--h-bg:#C07055;--h-txt:#fff;--h-sub:rgba(255,255,255,.62);--h-border:rgba(255,255,255,.16);--h-btn:rgba(255,255,255,.12);--bom-bg:#7A3520;--a-color:#FECDBB;--a-bg:rgba(254,205,187,.13);--a-border:rgba(254,205,187,.3)}
-[data-pre-theme="rose"],[data-theme="rose"]{--h-bg:#C4909E;--h-txt:#fff;--h-sub:rgba(255,255,255,.65);--h-border:rgba(255,255,255,.18);--h-btn:rgba(255,255,255,.14);--bom-bg:#8B3A4A;--a-color:#FECDD3;--a-bg:rgba(254,205,211,.14);--a-border:rgba(254,205,211,.35)}
-[data-pre-theme="sage"],[data-theme="sage"]{--h-bg:#5A7A62;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#2E4A36;--a-color:#86EFAC;--a-bg:rgba(134,239,172,.12);--a-border:rgba(134,239,172,.3)}
-[data-pre-theme="blue"],[data-theme="blue"]{--h-bg:#3E72A8;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#0D3B5E;--a-color:#7DD3FC;--a-bg:rgba(125,211,252,.13);--a-border:rgba(125,211,252,.3)}
+[data-theme="scarlet"] {--h-bg:#C0362C;--h-txt:#fff;--h-sub:rgba(255,255,255,.62);--h-border:rgba(255,255,255,.18);--h-btn:rgba(255,255,255,.14);--bom-bg:#7A1010;--a-color:#FECACA;--a-bg:rgba(254,202,202,.14);--a-border:rgba(254,202,202,.32)}
+[data-theme="charcoal"]{--h-bg:#2C2F33;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.15);--h-btn:rgba(255,255,255,.1);--bom-bg:#1A1B1E;--a-color:#D1D5DB;--a-bg:rgba(209,213,219,.12);--a-border:rgba(209,213,219,.3)}
+[data-theme="forest"]  {--h-bg:#1E3D2C;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.12);--h-btn:rgba(255,255,255,.1);--bom-bg:#142A1C;--a-color:#86EFAC;--a-bg:rgba(134,239,172,.12);--a-border:rgba(134,239,172,.3)}
+[data-theme="gray"]    {--h-bg:#4B5563;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.12);--h-btn:rgba(255,255,255,.1);--bom-bg:#1F2937;--a-color:#D1D5DB;--a-bg:rgba(209,213,219,.12);--a-border:rgba(209,213,219,.3)}
+[data-theme="stone"]   {--h-bg:#EDEBE5;--h-txt:#1E1C18;--h-sub:rgba(30,28,24,.46);--h-border:rgba(30,28,24,.1);--h-btn:rgba(30,28,24,.06);--bom-bg:#1E1C18;--a-color:#8A7D6A;--a-bg:rgba(138,125,106,.12);--a-border:rgba(138,125,106,.28)}
+[data-theme="butter"]  {--h-bg:#FBE8A6;--h-txt:#333;--h-sub:rgba(0,0,0,.55);--h-border:rgba(0,0,0,.15);--h-btn:rgba(0,0,0,.05);--bom-bg:#E0C988;--a-color:#E0C988;--a-bg:rgba(224,201,136,.12);--a-border:rgba(224,201,136,.3)}
+[data-theme="champagne"]{--h-bg:#E6D5C3;--h-txt:#2A2118;--h-sub:rgba(42,33,24,.55);--h-border:rgba(42,33,24,.15);--h-btn:rgba(42,33,24,.08);--bom-bg:#2A2118;--a-color:#B49B7A;--a-bg:rgba(180,155,122,.12);--a-border:rgba(180,155,122,.3)}
+[data-theme="mauve"]   {--h-bg:#7B6EA0;--h-txt:#fff;--h-sub:rgba(255,255,255,.58);--h-border:rgba(255,255,255,.15);--h-btn:rgba(255,255,255,.12);--bom-bg:#3D3060;--a-color:#D8B4FE;--a-bg:rgba(216,180,254,.13);--a-border:rgba(216,180,254,.3)}
+[data-theme="terra"]   {--h-bg:#C07055;--h-txt:#fff;--h-sub:rgba(255,255,255,.62);--h-border:rgba(255,255,255,.16);--h-btn:rgba(255,255,255,.12);--bom-bg:#7A3520;--a-color:#FECDBB;--a-bg:rgba(254,205,187,.13);--a-border:rgba(254,205,187,.3)}
+[data-theme="rose"]    {--h-bg:#C4909E;--h-txt:#fff;--h-sub:rgba(255,255,255,.65);--h-border:rgba(255,255,255,.18);--h-btn:rgba(255,255,255,.14);--bom-bg:#8B3A4A;--a-color:#FECDD3;--a-bg:rgba(254,205,211,.14);--a-border:rgba(254,205,211,.35)}
+[data-theme="sage"]    {--h-bg:#5A7A62;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#2E4A36;--a-color:#86EFAC;--a-bg:rgba(134,239,172,.12);--a-border:rgba(134,239,172,.3)}
+[data-theme="blue"]    {--h-bg:#3E72A8;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#0D3B5E;--a-color:#7DD3FC;--a-bg:rgba(125,211,252,.13);--a-border:rgba(125,211,252,.3)}
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text;user-select:text}
@@ -132,10 +150,10 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .bottom-section{padding:8px 0 8px;display:flex;flex-direction:column;gap:8px}
 .action-row{display:flex;gap:7px}
 .add-row{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 16px;background:transparent;border:none;border-radius:var(--r);cursor:pointer}
-.add-row:active{background:var(--surface)}
-.add-sq{width:24px;height:24px;border-radius:4px;background:#ECEEF4;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.add-sq svg{width:11px;height:11px;stroke:#6E7A8E;stroke-width:2.3;fill:none;stroke-linecap:round}
-.add-lbl{font-size:13px;font-weight:600;color:#6E7A8E;letter-spacing:-.01em}
+.add-row:active{background:var(--border)}
+.add-sq{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--muted2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.add-sq svg{width:10px;height:10px;stroke:var(--muted2);stroke-width:2.3;fill:none;stroke-linecap:round}
+.add-lbl{font-size:13px;font-weight:500;color:var(--muted2);letter-spacing:-.01em}
 .reset-link{text-align:center;font-size:11px;color:var(--muted2);text-decoration:underline;text-underline-offset:3px;padding:3px;cursor:pointer}
 
 /* ─── 빈 상태 ─── */
@@ -361,70 +379,9 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .ob-close{padding:10px 14px;background:#eee;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#666;cursor:pointer;font-family:inherit}
 .ob-prev{padding:10px 14px;background:#eee;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#444;cursor:pointer;font-family:inherit}
 .ob-nxt{flex:1;padding:10px;background:#111;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
-
-/* ─── 다크모드 (data-dark="1") ─── */
-body[data-dark="1"] {
-  --bg: #111318 !important;
-  --surface: #1A1B20 !important;
-  --border: rgba(255,255,255,0.08) !important;
-  --border2: rgba(255,255,255,0.12) !important;
-  --ink: #F0EEE8 !important;
-  --ink2: #C8C4BC !important;
-  --muted: rgba(240,238,232,0.45) !important;
-  --muted2: rgba(240,238,232,0.25) !important;
-}
-body[data-dark="1"] .item-card { background: #1A1B20; border-color: rgba(255,255,255,0.08); }
-body[data-dark="1"] .item-name { color: #F0EEE8; }
-body[data-dark="1"] .item-meta { color: rgba(240,238,232,0.45); }
-body[data-dark="1"] .cat-name-lbl { color: rgba(240,238,232,0.6); }
-body[data-dark="1"] .empty-state svg { stroke: rgba(255,255,255,0.15); }
-body[data-dark="1"] .empty-txt { color: rgba(240,238,232,0.3); }
-body[data-dark="1"] .add-lbl { color: rgba(240,238,232,0.35); }
-body[data-dark="1"] .add-sq { border-color: rgba(240,238,232,0.25); }
-body[data-dark="1"] .add-sq svg { stroke: rgba(240,238,232,0.35); }
-body[data-dark="1"] .reset-link { color: rgba(240,238,232,0.2); }
-body[data-dark="1"] .search-input { background: #1A1B20; color: #F0EEE8; border-color: rgba(255,255,255,0.1); }
-body[data-dark="1"] .qty-wrap { background: #111318; border-color: rgba(255,255,255,0.1); }
-body[data-dark="1"] .qty-num { color: #F0EEE8; border-color: rgba(255,255,255,0.08); }
-body[data-dark="1"] .qty-btn { color: rgba(240,238,232,0.5); }
-
-/* ─── 항목 추가/편집 시트 다크모드 ─── */
-[data-dark="1"].add-item-sheet,
-[data-dark="1"].edit-item-sheet {
-  background: #1A1B20;
-  color: #F0EEE8;
-}
-[data-dark="1"] .sh-title,
-[data-dark="1"] .ai-cat-lbl { color: #F0EEE8; }
-[data-dark="1"] .ai-name-input,
-[data-dark="1"] .edit-name-input,
-[data-dark="1"] .edit-memo-input {
-  background: #111318; color: #F0EEE8;
-  border-color: rgba(255,255,255,0.12);
-}
-[data-dark="1"] .ai-chip {
-  background: rgba(255,255,255,0.06);
-  color: rgba(240,238,232,0.6);
-  border-color: rgba(255,255,255,0.1);
-}
-[data-dark="1"] .ai-chip.sel {
-  background: rgba(200,168,112,0.25);
-  color: #C8A870; border-color: #C8A870;
-}
-
-body[data-dark="1"] .bottom-section { background: transparent; }
-body[data-dark="1"] .action-row { background: transparent; }
 </style>
-<script>
-(function(){
-  var tag = new URLSearchParams(location.search).get('tag') || '';
-  var t = localStorage.getItem('gyeol_color_theme_' + tag) || 'stone';
-  // :root에 테마 변수를 즉시 오버라이드 (body 파싱 전)
-  document.documentElement.setAttribute('data-pre-theme', t);
-})();
-</script>
 </head>
-<body>
+<body data-theme="stone">
 
 <div class="ob-ov" id="ob-ov" onclick="obClose()">
   <div class="ob-hl" id="ob-hl"></div>
@@ -484,7 +441,7 @@ body[data-dark="1"] .action-row { background: transparent; }
     <div class="media-empty-inner" id="media-empty">
       <div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
       <div class="media-empty-lbl">사진·영상 탭하여 등록</div>
-      <div class="media-empty-sub">사진·영상 탭하여 등록 · 물품 자동 인식</div>
+      <div class="media-empty-sub">물품 자동 인식</div>
     </div>
   </div>
 </div>
@@ -721,25 +678,6 @@ body[data-dark="1"] .action-row { background: transparent; }
 <input type="file" id="file-in" accept="image/*" style="display:none" onchange="handleFile(event)">
 
 <script>
-(async () => {
-    const _authClient = supabase.createClient(
-        'https://tqhtggusphhcsygiitrv.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
-    );
-    const { data: { session } } = await _authClient.auth.getSession();
-    if (!session) { window.location.replace('login.html'); return; }
-    const { data: serial } = await _authClient.from('serials').select('id').eq('used_by', session.user.email).maybeSingle();
-    const { data: singleSerial } = await _authClient.from('single_serials').select('id').eq('used_by', session.user.email).limit(1).maybeSingle();
-    if (!serial && !singleSerial) { window.location.replace('serial.html'); return; }
-    window.sb = _authClient;
-    // 다크모드 초기화
-    if(localStorage.getItem('gyeol_theme') === 'dark') document.body.setAttribute('data-dark','1');
-    document.body.style.visibility = 'visible';
-    setTimeout(function(){ startOnboarding(); }, 1000);
-    })();
-</script>
-
-<script>
 var tag = new URLSearchParams(location.search).get('tag') || '';
 var _themeKey = 'gyeol_color_theme_' + tag;
 var currentTheme = localStorage.getItem(_themeKey) || 'stone';
@@ -747,11 +685,8 @@ var pendingTheme = currentTheme;
 var sb = window.sb || supabase.createClient('https://tqhtggusphhcsygiitrv.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc');
 var _sb = sb;
 var items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
-var catOpenState = {};
 (function(){ document.body.setAttribute('data-theme', currentTheme); })();
-// 페이지 로드 시 즉시 렌더 (DOMContentLoaded 이후 실행 보장)
-document.addEventListener('DOMContentLoaded', function(){ renderItems(); });
-function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);document.documentElement.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
+function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
 function closeDrawerSettings(e){if(e&&e.target!==document.getElementById('drawer-ov'))return;applyTheme(currentTheme,false);document.getElementById('drawer-ov').classList.remove('open');}
@@ -779,7 +714,7 @@ function renderItems(filter=''){
   document.getElementById('bottom-section').style.display='flex';
   function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hl">$1</span>');}
   if(!Object.keys(groups).length){
-    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.</div></div>`;
+    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.<br>물품 등록을 추가하여 주세요.</div></div>`;
     return;
   }
   container.innerHTML=Object.keys(groups).map(cat=>{
@@ -849,10 +784,7 @@ function changeQty(idx,d){items[idx].q=Math.max(1,(items[idx].q||1)+d);save();}
 // ─── 항목 직접 추가 ───
 let _addCat='위생';
 function addItemDirectly(){
-  const ov=document.getElementById('add-item-ov');
-  ov.style.display='flex';
-  const _sh=document.getElementById('add-item-sheet');
-  if(_sh) _sh.setAttribute('data-dark', localStorage.getItem('gyeol_theme')==='dark'?'1':'0');
+  document.getElementById('add-item-ov').style.display='flex';
   document.getElementById('add-item-input').value='';
   _addCat='위생';
   document.querySelectorAll('.ai-chip').forEach(c=>{
@@ -869,7 +801,7 @@ function sheetTouchStart(e,key){if(e.target.tagName==='INPUT'||e.target.tagName=
 function sheetTouchMove(e,key){const dy=e.touches[0].clientY-_sheetSY[key];if(dy<=0)return;_sheetDragging[key]=true;const el=document.getElementById(key+'-item-sheet');if(el)el.style.transform='translateY('+dy+'px)';}
 function sheetTouchEnd(e,key){const dy=_sheetDragging[key]?e.changedTouches[0].clientY-_sheetSY[key]:0;const el=document.getElementById(key+'-item-sheet');if(dy>100){if(key==='add')closeAddItem();else closeEditItem();}else{if(el)el.style.transform='';}_sheetDragging[key]=false;}
 function selectAddCat(el,cat){_addCat=cat;document.querySelectorAll('.ai-chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
-function addItemConfirm(){const n=document.getElementById('add-item-input').value.trim();if(!n)return;items.push({n:_addCat+':'+n,q:1});save();closeAddItem();}
+function addItemConfirm(){const n=document.getElementById('add-item-input').value.trim();if(!n)return;items.push({n:_addCat+':'+n,q:1});localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();closeAddItem();}
 
 // ─── 항목 편집 (스와이프) ───
 function openEditItem(idx){
@@ -889,8 +821,6 @@ function openEditItem(idx){
     if(svg)svg.style.cssText='width:26px;height:26px;stroke:var(--ink);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round';
   }
   document.getElementById('edit-item-ov').style.display='flex';
-  const _esh=document.getElementById('edit-item-sheet');
-  if(_esh) _esh.setAttribute('data-dark', localStorage.getItem('gyeol_theme')==='dark'?'1':'0');
   resetSwipe(idx);
   setTimeout(()=>document.getElementById('edit-name-input').focus(),300);
 }
@@ -985,30 +915,6 @@ function closeIconPicker(e){if(e&&e.target!==document.getElementById('icon-ov'))
 function pickIco(ic,el){selIco=ic;document.querySelectorAll('.icon-cell').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
 function saveIcon(){if(icoIdx>=0&&selIco){items[icoIdx].icon=selIco;save();}document.getElementById('icon-ov').classList.remove('open');}
 
-
-// 마이페이지 다크모드 변경 실시간 반영
-window.addEventListener('storage', function(e){
-  if(e.key === 'gyeol_theme'){
-    if(e.newValue === 'dark') document.body.setAttribute('data-dark','1');
-    else document.body.removeAttribute('data-dark');
-  }
-});
-
-// BFCache(뒤로가기 복원) 및 페이지 재포커스 시 다크모드·테마 재동기화
-window.addEventListener('pageshow', function(e){
-  // 다크모드 재적용
-  if(localStorage.getItem('gyeol_theme') === 'dark') document.body.setAttribute('data-dark','1');
-  else document.body.removeAttribute('data-dark');
-  // 테마 재적용
-  var savedTheme = localStorage.getItem(_themeKey) || 'stone';
-  if(savedTheme !== currentTheme){ applyTheme(savedTheme, false); }
-  else { document.body.setAttribute('data-theme', currentTheme); document.documentElement.setAttribute('data-theme', currentTheme); }
-  // BFCache 복원 시 items도 재로드
-  if(e.persisted){
-    items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
-    renderItems();
-  }
-});
 function save(){localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();}
 function clearAll(){if(!confirm('목록과 미디어를 모두 초기화할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);items=[];localStorage.setItem('gyeol_'+tag,'[]');localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();renderItems();}
 
@@ -1087,7 +993,7 @@ async function confirmUpload(){
 }
 
 function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;}
-function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진·영상 탭하여 등록</div><div class="media-empty-sub">사진·영상 탭하여 등록 · 물품 자동 인식</div></div>`;}
+function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진·영상 탭하여 등록</div><div class="media-empty-sub">물품 자동 인식</div></div>`;}
 function openFull(){const el=document.getElementById('media-el');if(!el)return;const fc=document.getElementById('fs-content');fc.innerHTML=el.tagName==='VIDEO'?`<video src="${el.src}" class="${el.className}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`:`<img src="${el.src}" class="${el.className}" style="max-width:100%;max-height:100%;object-fit:contain">`;document.getElementById('fs-ov').classList.add('open');}
 function closeFull(){document.getElementById('fs-ov').classList.remove('open');}
 
