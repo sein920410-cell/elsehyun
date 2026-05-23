@@ -459,11 +459,11 @@ body {
       </div>
       <div class="help-section">
         <div class="help-section-title"><span class="help-ico"><svg viewBox="0 0 24 24"><path d="M11 4H5a2 2 0 00-2 2v13a2 2 0 002 2h13a2 2 0 002-2v-6"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z"/></svg></span>목록 직접 편집</div>
-        <div class="help-section-body">물품 카드를 왼쪽으로 밀면 편집·삭제 버튼이 나타납니다. 하단의 직접 추가 버튼을 이용하시면 AI 없이도 물품 이름을 직접 입력하실 수 있습니다.</div>
+        <div class="help-section-body">물품 카드를 왼쪽으로 밀면 편집·삭제 버튼이 나타납니다. 하단의 직접 추가 버튼을 이용하시면 물품 인식 이용권이 없이도 물품 이름을 직접 입력하실 수 있습니다.</div>
       </div>
       <div class="help-section">
         <div class="help-section-title"><span class="help-ico"><svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 000-4z"/><line x1="13" y1="6" x2="13" y2="18"/></svg></span>이용권 충전</div>
-        <div class="help-section-body">기본 50건이 무료로 제공됩니다. 소진하신 후에는 추가 구매하실 수 있습니다. 이용권이 0건이 되면 AI 자동 분석은 이용하실 수 없으나, 직접 추가는 계속 가능합니다.</div>
+        <div class="help-section-body">기본 50건이 무료로 제공됩니다. 소진하신 후에는 추가 구매하실 수 있습니다. 이용권이 0건이 되면 물품 인식 이용권은 이용하실 수 없으나, 직접 추가는 계속 가능합니다.</div>
       </div>
     </div>
     <button class="detail-close" onclick="closeHelp()">확인</button>
@@ -850,7 +850,7 @@ let _obStep=0;
 
 // ─── 자세히 보기 ───
 const DETAIL_DATA={
-  credit:{title:'AI 이용권이란?',body:'AI가 사진을 분석하여 물품 목록을 자동으로 생성할 때 사용하는 이용권입니다.\n\n• 기본 제공: 50건 (무료)\n• 추가 구매: 50건 / 4,900원\n• 차감 시점: 새 목록 생성 시 1건\n• 단순 조회·검색·수량 변경은 차감되지 않습니다',warn:'이용권이 0건이 되면 AI 자동 분석을 이용하실 수 없습니다.\n이용권 충전 후 계속 이용하실 수 있습니다.'},
+  credit:{title:'물품 인식 이용권이란?',body:'AI가 사진을 분석하여 물품 목록을 자동으로 생성할 때 사용하는 이용권입니다.\n\n• 기본 제공: 50건 (무료)\n• 추가 구매: 50건 / 4,900원\n• 차감 시점: 새 목록 생성 시 1건\n• 단순 조회·검색·수량 변경은 차감되지 않습니다',warn:'이용권이 0건이 되면 물품 인식 자동 분석을 이용하실 수 없습니다.\n이용권 충전 후 계속 이용하실 수 있습니다.'},
   serial:{title:'시리얼 번호 추가 등록',body:'공간:결 태그를 추가로 구매하셨다면 이곳에서 등록해 주시기 바랍니다.\n\n• 박스 안 카드에 적힌 시리얼 코드를 입력합니다\n• 등록하시면 새 수납장이 자동으로 추가됩니다\n• 여러 세트를 하나의 계정으로 관리하실 수 있습니다',warn:null},
   invite:{title:'구성원 초대',body:'가족이나 지인께 초대 링크를 공유하시면\n같은 수납장을 함께 이용하실 수 있습니다.\n\n• 초대받으신 분은 링크로 가입 후 바로 이용하실 수 있습니다\n• 수납장 내용을 실시간으로 함께 관리하실 수 있습니다',warn:'현재 준비 중인 기능입니다. 곧 이용하실 수 있습니다.'}
 };
@@ -991,7 +991,7 @@ document.getElementById('name-input').addEventListener('keydown', function(e) { 
 
 var OB_STEPS=[
   {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석하여 목록을 생성할 때마다 1건이 차감됩니다.\n기본 50건은 무료로 제공됩니다.',warn:null,arrow:'down'},
-  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권이 소진되면 이곳에서 추가 구매하실 수 있습니다.\n50건 추가에 4,900원입니다.',warn:'이용권이 0건이 되면 AI 자동 분석을 이용하실 수 없습니다.',arrow:'up'},
+  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권이 소진되면 이곳에서 추가 구매하실 수 있습니다.\n50건 추가에 4,900원입니다.',warn:'이용권이 0건이 되면 물품 인식 이용권을 이용하실 수 없습니다.',arrow:'up'},
   {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'공간:결 태그를 추가로 구매하셨다면 이곳에서 등록해 주십시오.\n박스 안 카드에 적힌 코드를 입력하시면 새 수납장이 추가됩니다.',arrow:'down'},
   {sel:'.invite-row',title:'구성원 초대',desc:'가족이나 지인께 초대 링크를 보내시면\n같은 수납장을 함께 이용하실 수 있습니다.',warn:'현재 준비 중인 기능입니다.',arrow:'down'},
   {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃하셔도 언제든 다시 로그인하실 수 있습니다.',warn:'계정 삭제 시 등록된 모든 데이터가 영구 삭제되며, 삭제 후에는 복구가 불가능합니다.',arrow:'up'}
@@ -999,7 +999,7 @@ var OB_STEPS=[
 function startOnboarding(){
   obStart([
   {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석하여 목록을 생성할 때마다 1건이 차감됩니다.\n기본 50건은 무료로 제공됩니다.',warn:null},
-  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권 소진 후 이곳에서 추가 구매하실 수 있습니다.\n50건 추가에 4,900원입니다.',warn:'0건이 되면 AI 자동 분석을 이용하실 수 없습니다.'},
+  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권 소진 후 이곳에서 추가 구매하실 수 있습니다.\n50건 추가에 4,900원입니다.',warn:'0건이 되면 물품 인식 이용권을 이용하실 수 없습니다.'},
   {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'태그를 추가로 구매하셨다면 이곳에서 등록해 주십시오.',warn:null},
   {sel:'.invite-row',title:'구성원 초대',desc:'초대 링크를 보내시면 같은 수납장을 함께 이용하실 수 있습니다.',warn:'현재 준비 중인 기능입니다.'},
   {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃하셔도 언제든 다시 로그인하실 수 있습니다.',warn:'계정 삭제 시 모든 데이터가 영구 삭제되며 복구가 불가능합니다.'}
