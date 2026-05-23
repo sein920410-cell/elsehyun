@@ -1425,7 +1425,30 @@ window.addEventListener('load',function(){
   if(savedName){var t=document.getElementById('drawer-title');if(t)t.textContent=savedName;}
   // 미디어 길게누르기 이벤트 바인딩
   try{initMediaEvents();}catch(e){}
-  // 등록된 사진/영상 복원 — localStorage 우선, 없으면 DB에서 복원 (기기 변경 대응)
+  // DB에서 테마·미디어·이름 복원 (기기 변경 대응)
+  try{
+    _sb.auth.getSession().then(function(r){
+      var session=r&&r.data&&r.data.session;
+      if(!session||!session.user||!session.user.email)return;
+      _sb.from('serials').select('color_theme,media_path,name_tag').eq('used_by',session.user.email).maybeSingle().then(function(res){
+        var d=res&&res.data;
+        if(!d)return;
+        // 테마 복원
+        if(d.color_theme&&!localStorage.getItem(_themeKey)){
+          localStorage.setItem(_themeKey,d.color_theme);
+          applyTheme(d.color_theme,false);
+        }
+        // 미디어 복원
+        if(d.media_path&&!localStorage.getItem('mediaPath_'+tag)){
+          localStorage.setItem('mediaPath_'+tag,d.media_path);
+          _sb.storage.from('user_uploads').createSignedUrl(d.media_path,3600).then(function(res3){
+            if(res3&&!res3.error&&res3.data&&res3.data.signedUrl)showMedia(res3.data.signedUrl,0);
+          }).catch(function(){});
+        }
+      });
+    });
+  }catch(e){}
+  // localStorage 경로로 미디어 복원 (같은 기기)
   var mp=localStorage.getItem('mediaPath_'+tag);
   var rot=parseInt(localStorage.getItem('rot_'+tag)||'0',10)||0;
   if(mp){
@@ -1433,22 +1456,6 @@ window.addEventListener('load',function(){
       _sb.storage.from('user_uploads').createSignedUrl(mp,3600).then(function(res){
         if(res&&!res.error&&res.data&&res.data.signedUrl)showMedia(res.data.signedUrl,rot);
       }).catch(function(){});
-    }catch(e){}
-  } else {
-    // localStorage에 경로 없으면 DB에서 조회 (새 기기/브라우저)
-    try{
-      _sb.auth.getSession().then(function(r){
-        var session=r&&r.data&&r.data.session;
-        if(!session||!session.user||!session.user.email)return;
-        _sb.from('serials').select('media_path').eq('used_by',session.user.email).maybeSingle().then(function(res2){
-          var dbPath=res2&&res2.data&&res2.data.media_path;
-          if(!dbPath)return;
-          localStorage.setItem('mediaPath_'+tag,dbPath);
-          _sb.storage.from('user_uploads').createSignedUrl(dbPath,3600).then(function(res3){
-            if(res3&&!res3.error&&res3.data&&res3.data.signedUrl)showMedia(res3.data.signedUrl,0);
-          }).catch(function(){});
-        });
-      });
     }catch(e){}
   }
   // 목록 렌더링
