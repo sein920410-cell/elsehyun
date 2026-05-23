@@ -217,7 +217,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .dt-input{flex:1;border:none;outline:none;font-size:16px;font-weight:600;color:var(--ink);background:transparent;font-family:var(--font);letter-spacing:-.01em;-webkit-user-select:text;user-select:text}
 .dt-clear{width:20px;height:20px;background:var(--muted2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .dt-clear svg{width:10px;height:10px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
-.theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
 .theme-cell{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer}
 .theme-sw{width:44px;height:44px;border-radius:var(--r);border:2px solid transparent;transition:transform .12s}
 .theme-sw.active{outline:3px solid var(--ink);outline-offset:2px}
@@ -471,7 +471,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
   </div>
 </div>
 
-<div id="media-tip-bar" style="display:none;align-items:center;gap:6px;padding:8px 16px 4px;justify-content:center">
+<div id="media-tip-bar" style="display:none;align-items:center;gap:6px;padding:8px 16px 4px;justify-content:center;animation:tipBounce 1.8s ease-in-out infinite">
   <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted2);stroke-width:2;fill:none;flex-shrink:0"><polyline points="18 15 12 9 6 15"/></svg>
   <span style="font-size:11px;color:var(--muted2);font-weight:500;letter-spacing:-.01em">사진·영상을 길게 누르면 교체·수정할 수 있습니다</span>
 </div>
@@ -530,18 +530,15 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     </div>
     <div class="dt-sect">테마 색상</div>
     <div class="theme-grid">
-      <div class="theme-cell" onclick="selectTheme('scarlet')"><div class="theme-sw" id="sw-scarlet" style="background:#C0362C"></div><span class="theme-lbl">스칼렛</span></div>
-      <div class="theme-cell" onclick="selectTheme('charcoal')"><div class="theme-sw" id="sw-charcoal" style="background:#2C2F33"></div><span class="theme-lbl">차콜</span></div>
-      <div class="theme-cell" onclick="selectTheme('forest')"><div class="theme-sw" id="sw-forest" style="background:#1E3D2C"></div><span class="theme-lbl">포레스트</span></div>
-      <div class="theme-cell" onclick="selectTheme('gray')"><div class="theme-sw" id="sw-gray" style="background:#4B5563"></div><span class="theme-lbl">슬레이트</span></div>
-      <div class="theme-cell" onclick="selectTheme('stone')"><div class="theme-sw" id="sw-stone" style="background:#EDEBE5;border:1px solid #D4D0C8" class="active"></div><span class="theme-lbl">스톤</span></div>
-      <div class="theme-cell" onclick="selectTheme('butter')"><div class="theme-sw" id="sw-butter" style="background:#FBE8A6"></div><span class="theme-lbl">버터</span></div>
+      <div class="theme-cell" onclick="selectTheme('stone')"><div class="theme-sw" id="sw-stone" style="background:#EDEBE5;border:1px solid #D4D0C8"></div><span class="theme-lbl">스톤</span></div>
       <div class="theme-cell" onclick="selectTheme('champagne')"><div class="theme-sw" id="sw-champagne" style="background:#E6D5C3"></div><span class="theme-lbl">샴페인</span></div>
-      <div class="theme-cell" onclick="selectTheme('mauve')"><div class="theme-sw" id="sw-mauve" style="background:#7B6EA0"></div><span class="theme-lbl">모브</span></div>
-      <div class="theme-cell" onclick="selectTheme('terra')"><div class="theme-sw" id="sw-terra" style="background:#C07055"></div><span class="theme-lbl">테라코타</span></div>
+      <div class="theme-cell" onclick="selectTheme('scarlet')"><div class="theme-sw" id="sw-scarlet" style="background:#C0362C"></div><span class="theme-lbl">스칼렛</span></div>
       <div class="theme-cell" onclick="selectTheme('rose')"><div class="theme-sw" id="sw-rose" style="background:#C4909E"></div><span class="theme-lbl">로즈</span></div>
+      <div class="theme-cell" onclick="selectTheme('terra')"><div class="theme-sw" id="sw-terra" style="background:#C07055"></div><span class="theme-lbl">테라코타</span></div>
+      <div class="theme-cell" onclick="selectTheme('mauve')"><div class="theme-sw" id="sw-mauve" style="background:#7B6EA0"></div><span class="theme-lbl">모브</span></div>
       <div class="theme-cell" onclick="selectTheme('sage')"><div class="theme-sw" id="sw-sage" style="background:#5A7A62"></div><span class="theme-lbl">세이지</span></div>
       <div class="theme-cell" onclick="selectTheme('blue')"><div class="theme-sw" id="sw-blue" style="background:#3E72A8"></div><span class="theme-lbl">블루</span></div>
+      <div class="theme-cell" onclick="selectTheme('charcoal')"><div class="theme-sw" id="sw-charcoal" style="background:#2C2F33"></div><span class="theme-lbl">차콜</span></div>
     </div>
     <button class="dt-save" onclick="saveDrawerSettings()">저장</button>
   </div>
