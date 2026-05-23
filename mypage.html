@@ -222,8 +222,6 @@ body {
 .usage-meta { display: flex; justify-content: space-between; margin-top: 6px; }
 .usage-meta-item { font-size: 10px; color: var(--muted); }
 .usage-meta-item b { color: var(--ink); font-weight: 700; }
-.charge-area{padding:10px 16px 16px}
-.charge-detail-row{display:flex;justify-content:center;padding-top:8px}
 .charge-btn {
   display: block; width: 100%;
   padding: 12px 16px;
@@ -351,7 +349,7 @@ body {
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--header-bg); color: #fff; padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.22s, transform 0.22s; z-index: 300; white-space: nowrap; border: 1px solid rgba(255,255,255,0.08); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 /* ─── 자세히 보기 ─── */
-.detail-link{font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;margin-top:3px;display:inline-block;font-weight:500}
+.detail-link{font-size:11px;color:var(--muted2);text-decoration:none;border-bottom:1px solid var(--muted2);cursor:pointer;margin-top:3px;display:inline-block;font-weight:400;opacity:0.7}
 .detail-ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .22s}
 .detail-ov.open{opacity:1;pointer-events:all}
 .detail-sheet{background:var(--surface,#fff);border-radius:18px 18px 0 0;width:100%;padding:20px 20px 40px;transform:translateY(100%);transition:transform .28s cubic-bezier(.32,0,0,1)}
@@ -505,9 +503,9 @@ body {
         <div class="usage-meta-item">잔여 <b id="remain-count">–</b>건</div>
       </div>
     </div>
-    <div class="charge-area">
+    <div style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:8px">
       <button class="charge-btn" onclick="openChargeModal()">+ 이용권 충전하기</button>
-      <div class="charge-detail-row"><span class="detail-link" onclick="openDetail('credit')">자세히 보기</span></div>
+      <div style="display:flex;justify-content:center"><span class="detail-link" onclick="openDetail('credit')">자세히 보기</span></div>
     </div>
   </div>
 
@@ -541,10 +539,9 @@ body {
     <div class="section-label">보관함 관리</div>
     <div class="row" onclick="location.href='serial.html?add=true'" id="serial-row">
       <div class="row-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
-      <div class="row-info">
+      <div class="row-info" style="flex-direction:row;align-items:center;justify-content:space-between;flex:1">
         <div class="row-title">시리얼 번호 추가 등록</div>
-        <div class="row-sub">새로 구매한 태그 등록하기</div>
-        <span class="detail-link" onclick="event.stopPropagation();openDetail('serial')">자세히 보기</span>
+        <span class="detail-link" style="margin-top:0;flex-shrink:0" onclick="event.stopPropagation();openDetail('serial')">자세히 보기</span>
       </div>
       <div class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
     </div>
@@ -557,10 +554,9 @@ body {
       <div class="invite-row-ico">
         <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 2v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
       </div>
-      <div class="row-info">
+      <div class="row-info" style="flex-direction:row;align-items:center;justify-content:space-between;flex:1">
         <div class="invite-row-title">구성원 초대 코드 생성</div>
-        <div class="row-sub">링크를 공유하면 함께 사용할 수 있어요</div>
-        <span class="detail-link" onclick="event.stopPropagation();openDetail('invite')">자세히 보기</span>
+        <span class="detail-link" style="margin-top:0;flex-shrink:0" onclick="event.stopPropagation();openDetail('invite')">자세히 보기</span>
       </div>
       <div class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
     </div>
