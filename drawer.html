@@ -1086,7 +1086,7 @@ function pickIco(ic,el){selIco=ic;document.querySelectorAll('.icon-cell').forEac
 function saveIcon(){if(icoIdx>=0&&selIco){items[icoIdx].icon=selIco;save();}document.getElementById('icon-ov').classList.remove('open');}
 
 function save(){localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();}
-function clearAll(){if(!confirm('목록과 미디어를 모두 초기화할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);items=[];localStorage.setItem('gyeol_'+tag,'[]');localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();renderItems();}
+function clearAll(){if(!confirm('목록과 미디어를 모두 초기화할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);try{_sb.auth.getSession().then(({data:{session:_s}})=>{if(_s?.user?.email){_sb.from('serials').select('media_path').eq('used_by',_s.user.email).maybeSingle().then(({data:_sr})=>{if(_sr?.media_path)_sb.storage.from('user_uploads').remove([_sr.media_path]).catch(()=>{});});_sb.from('serials').update({media_path:null}).eq('used_by',_s.user.email).then(()=>{});}});}catch(_){}items=[];localStorage.setItem('gyeol_'+tag,'[]');localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();renderItems();}
 
 // ─── 미디어 ───
 function initMediaEvents(){
@@ -1100,7 +1100,7 @@ function initMediaEvents(){
 function showMediaPicker(){const re=document.getElementById('mpick-re');if(re)re.style.display=localStorage.getItem('mediaPath_'+tag)?'flex':'none';document.getElementById('media-picker-ov').classList.add('open');}
 function closeMediaPicker(e){if(e&&e.target!==document.getElementById('media-picker-ov'))return;document.getElementById('media-picker-ov').classList.remove('open');}
 function closeMctx(){document.getElementById('mctx-ov').classList.remove('open');}
-function confirmDelMedia(){closeMctx();if(!confirm('사진/영상을 삭제할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();}
+function confirmDelMedia(){closeMctx();if(!confirm('사진/영상을 삭제할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);try{_sb.auth.getSession().then(({data:{session:_s}})=>{if(_s?.user?.email){_sb.from('serials').select('media_path').eq('used_by',_s.user.email).maybeSingle().then(({data:_sr})=>{if(_sr?.media_path)_sb.storage.from('user_uploads').remove([_sr.media_path]).catch(()=>{});});_sb.from('serials').update({media_path:null}).eq('used_by',_s.user.email).then(()=>{});}});}catch(_){}localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();}
 function pickPhoto(){closeMediaPicker();const f=document.getElementById('file-in');f.removeAttribute('capture');f.click();}
 
 async function extractVideoFrames(blob,numFrames=5){
@@ -1152,10 +1152,14 @@ async function confirmUpload(){
     const fileToUpload=await compressImage(selFile);
     const ext=fileToUpload.name.split('.').pop()||'jpg';
     const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    // DB에서 이전 경로 읽어 삭제 (기기 무관하게 처리)
+    try{const{data:{session:_s}}=await _sb.auth.getSession();if(_s?.user?.email){const{data:_sr}=await _sb.from('serials').select('media_path').eq('used_by',_s.user.email).maybeSingle();if(_sr?.media_path)_sb.storage.from('user_uploads').remove([_sr.media_path]).catch(()=>{});}}catch(_){}
     const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});
     const{error:ue}=await _sb.storage.from('user_uploads').upload(path,fileToUpload,{cacheControl:'3600',upsert:false,contentType:fileToUpload.type});
     if(ue)throw ue;
     localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,rot);localStorage.setItem('mime_'+tag,fileToUpload.type||'image/jpeg');
+    // 새 경로 DB에 저장
+    try{const{data:{session:_s2}}=await _sb.auth.getSession();if(_s2?.user?.email)_sb.from('serials').update({media_path:path}).eq('used_by',_s2.user.email).then(()=>{});}catch(_){}
     const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;
     showMedia(sd.signedUrl,rot);await runAnalysis(path,fileToUpload.type);
   }catch(err){resetMediaBox();alert('오류: '+err.message);}
@@ -1254,7 +1258,14 @@ async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?
 function toggleRec(){if(!isRec){const dw=document.getElementById('dark-warn');if(dw&&dw.style.display==='flex')return;recChunks=[];const mt=['video/webm;codecs=vp9','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';const recOpts=mt?{mimeType:mt,videoBitsPerSecond:800000}:{videoBitsPerSecond:800000};mediaRec=new MediaRecorder(mediaStream,recOpts);mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};mediaRec.onstop=()=>{stopGuideTips();const type=(mt||'video/webm').split(';')[0];recBlob=new Blob(recChunks,{type});const pb=document.getElementById('rec-playback');pb.src=URL.createObjectURL(recBlob);pb.style.display='block';document.getElementById('rec-live').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-btn').style.display='none';document.getElementById('rec-confirm').style.display='inline-flex';document.getElementById('rec-retake').style.display='inline-flex';document.getElementById('rec-hint').textContent='영상을 확인하고 등록하거나 다시 촬영하세요.';document.getElementById('rec-hint').classList.remove('fade');clearTimeout(window._recHintTimer);isRec=false;};mediaRec.start();isRec=true;recSec=0;document.getElementById('rec-btn').className='rec-circle recording';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-ind').style.display='block';const ht2=document.getElementById('rec-hint');ht2.classList.add('fade');startGuideTips();startBrightCheck();recTimer=setInterval(()=>{if(mediaRec?.state==='paused')return;recSec++;document.getElementById('rec-timer').textContent=`00:${String(recSec).padStart(2,'0')}`;if(recSec>=25)document.getElementById('rec-timer').className='rec-timer danger';if(recSec>=30)stopRec();},1000);}else{stopRec();}}
 function stopRec(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;stopGuideTips();const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';const po=document.getElementById('rec-pause-ov');if(po)po.style.display='none';if(mediaRec?.state==='paused')mediaRec.resume();if(mediaRec?.state!=='inactive')mediaRec.stop();}
 function retakeRec(){recBlob=null;recChunks=[];document.getElementById('rec-live').style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';const ht3=document.getElementById('rec-hint');ht3.textContent='버튼을 눌러 촬영을 시작하세요';ht3.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht3.classList.add('fade'),2800);isRec=false;startBrightCheck();}
-async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>프레임 추출 중...</div></div>`;try{const videoFrames=await extractVideoFrames(recBlob,8);const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});const{error:ue}=await _sb.storage.from('user_uploads').upload(path,new File([recBlob],`rec.${ext}`,{type:recBlob.type}),{cacheControl:'3600',upsert:false,contentType:recBlob.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,0);const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;showMedia(sd.signedUrl,0);renderItems();await runAnalysis(path,recBlob.type,videoFrames);}catch(err){resetMediaBox();alert('오류: '+err.message);}}
+async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>프레임 추출 중...</div></div>`;try{const videoFrames=await extractVideoFrames(recBlob,8);const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    // DB에서 이전 경로 읽어 삭제
+    try{const{data:{session:_s}}=await _sb.auth.getSession();if(_s?.user?.email){const{data:_sr}=await _sb.from('serials').select('media_path').eq('used_by',_s.user.email).maybeSingle();if(_sr?.media_path)_sb.storage.from('user_uploads').remove([_sr.media_path]).catch(()=>{});}}catch(_){}
+    const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});
+    const{error:ue}=await _sb.storage.from('user_uploads').upload(path,new File([recBlob],`rec.${ext}`,{type:recBlob.type}),{cacheControl:'3600',upsert:false,contentType:recBlob.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,0);
+    // 새 경로 DB에 저장
+    try{const{data:{session:_s2}}=await _sb.auth.getSession();if(_s2?.user?.email)_sb.from('serials').update({media_path:path}).eq('used_by',_s2.user.email).then(()=>{});}catch(_){}
+    const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;showMedia(sd.signedUrl,0);renderItems();await runAnalysis(path,recBlob.type,videoFrames);}catch(err){resetMediaBox();alert('오류: '+err.message);}}
 // ─── 점검/공지 시스템 ───
 async function checkSystemAnnouncement(){
   try{
@@ -1409,14 +1420,30 @@ window.addEventListener('load',function(){
   if(savedName){var t=document.getElementById('drawer-title');if(t)t.textContent=savedName;}
   // 미디어 길게누르기 이벤트 바인딩
   try{initMediaEvents();}catch(e){}
-  // 등록된 사진/영상 복원
+  // 등록된 사진/영상 복원 — localStorage 우선, 없으면 DB에서 복원 (기기 변경 대응)
   var mp=localStorage.getItem('mediaPath_'+tag);
+  var rot=parseInt(localStorage.getItem('rot_'+tag)||'0',10)||0;
   if(mp){
-    var rot=parseInt(localStorage.getItem('rot_'+tag)||'0',10)||0;
     try{
       _sb.storage.from('user_uploads').createSignedUrl(mp,3600).then(function(res){
         if(res&&!res.error&&res.data&&res.data.signedUrl)showMedia(res.data.signedUrl,rot);
       }).catch(function(){});
+    }catch(e){}
+  } else {
+    // localStorage에 경로 없으면 DB에서 조회 (새 기기/브라우저)
+    try{
+      _sb.auth.getSession().then(function(r){
+        var session=r&&r.data&&r.data.session;
+        if(!session||!session.user||!session.user.email)return;
+        _sb.from('serials').select('media_path').eq('used_by',session.user.email).maybeSingle().then(function(res2){
+          var dbPath=res2&&res2.data&&res2.data.media_path;
+          if(!dbPath)return;
+          localStorage.setItem('mediaPath_'+tag,dbPath);
+          _sb.storage.from('user_uploads').createSignedUrl(dbPath,3600).then(function(res3){
+            if(res3&&!res3.error&&res3.data&&res3.data.signedUrl)showMedia(res3.data.signedUrl,0);
+          }).catch(function(){});
+        });
+      });
     }catch(e){}
   }
   // 목록 렌더링
