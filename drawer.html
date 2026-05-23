@@ -401,9 +401,22 @@ body[data-dark="1"] .qty-btn { color: rgba(240,238,232,0.5); }
   background: rgba(200,168,112,0.25);
   color: #C8A870; border-color: #C8A870;
 }
+
+body[data-dark="1"] .bottom-section { background: transparent; }
+body[data-dark="1"] .action-row { background: transparent; }
 </style>
+<script>
+(function(){
+  var tag = new URLSearchParams(location.search).get('tag') || '';
+  var t = localStorage.getItem('gyeol_color_theme_' + tag) || 'stone';
+  document.documentElement.setAttribute('data-theme-init', t);
+  document.addEventListener('DOMContentLoaded', function(){
+    document.body.setAttribute('data-theme', t);
+  });
+})();
+</script>
 </head>
-<body data-theme="stone">
+<body>
 
 <div class="ob-ov" id="ob-ov" onclick="obClose()">
   <div class="ob-hl" id="ob-hl"></div>
