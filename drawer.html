@@ -6,7 +6,24 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>body { visibility: hidden; }</style>
+<style>body { visibility: hidden; }
+[data-theme="dark"] .add-item-sheet,
+[data-theme="dark"] .edit-item-sheet {
+  background: var(--surface);
+  color: var(--ink);
+}
+[data-theme="dark"] .ai-name-input,
+[data-theme="dark"] .edit-name-input,
+[data-theme="dark"] .edit-memo-input {
+  background: var(--bg);
+  color: var(--ink);
+  border-color: var(--border);
+}
+[data-theme="dark"] .sh-title { color: var(--ink); }
+[data-theme="dark"] .ai-cat-lbl { color: var(--muted); }
+[data-theme="dark"] .ai-chip { background: var(--bg); color: var(--muted); border-color: var(--border); }
+[data-theme="dark"] .ai-chip.sel { background: var(--accent); color: #fff; border-color: var(--accent); }
+</style>
 <script>
 (async () => {
     const _authClient = supabase.createClient(
@@ -81,7 +98,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 /* ─── 미디어 ─── */
 .media-section{background:var(--h-bg);padding:0 14px 12px;flex-shrink:0;transition:background .4s}
 .media-box{height:220px;border-radius:var(--r);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation}
-.media-box.empty{border:none;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13);}
+.media-box.empty{border:1px dashed var(--h-border);background:rgba(255,255,255,.03)}
 .media-box.filled{border:1px solid rgba(255,255,255,.07)}
 .media-box img,.media-box video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 .media-empty-inner{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
@@ -149,11 +166,11 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 /* ─── 하단 액션 ─── */
 .bottom-section{padding:8px 0 8px;display:flex;flex-direction:column;gap:8px}
 .action-row{display:flex;gap:7px}
-.add-row{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 16px;background:transparent;border:none;border-radius:var(--r);cursor:pointer}
-.add-row:active{background:var(--border)}
-.add-sq{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--muted2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.add-sq svg{width:10px;height:10px;stroke:var(--muted2);stroke-width:2.3;fill:none;stroke-linecap:round}
-.add-lbl{font-size:13px;font-weight:500;color:var(--muted2);letter-spacing:-.01em}
+.add-row{flex:1;display:flex;align-items:center;gap:9px;padding:13px 16px;background:rgba(255,255,255,.7);border:1px solid var(--border);border-radius:var(--r);cursor:pointer}
+.add-row:active{background:var(--surface)}
+.add-sq{width:24px;height:24px;border-radius:4px;background:#ECEEF4;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.add-sq svg{width:11px;height:11px;stroke:#6E7A8E;stroke-width:2.3;fill:none;stroke-linecap:round}
+.add-lbl{font-size:13px;font-weight:600;color:#6E7A8E;letter-spacing:-.01em}
 .reset-link{text-align:center;font-size:11px;color:var(--muted2);text-decoration:underline;text-underline-offset:3px;padding:3px;cursor:pointer}
 
 /* ─── 빈 상태 ─── */
@@ -441,7 +458,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     <div class="media-empty-inner" id="media-empty">
       <div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
       <div class="media-empty-lbl">사진·영상 탭하여 등록</div>
-      <div class="media-empty-sub">물품 자동 인식</div>
+      <div class="media-empty-sub">사진·영상 탭하여 등록 · 물품 자동 인식</div>
     </div>
   </div>
 </div>
@@ -714,7 +731,7 @@ function renderItems(filter=''){
   document.getElementById('bottom-section').style.display='flex';
   function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hl">$1</span>');}
   if(!Object.keys(groups).length){
-    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.<br>물품 등록을 추가하여 주세요.</div></div>`;
+    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.</div></div>`;
     return;
   }
   container.innerHTML=Object.keys(groups).map(cat=>{
@@ -784,7 +801,10 @@ function changeQty(idx,d){items[idx].q=Math.max(1,(items[idx].q||1)+d);save();}
 // ─── 항목 직접 추가 ───
 let _addCat='위생';
 function addItemDirectly(){
-  document.getElementById('add-item-ov').style.display='flex';
+  const ov=document.getElementById('add-item-ov');
+  ov.style.display='flex';
+  const isDark=localStorage.getItem('gyeol_theme')==='dark';
+  document.getElementById('add-item-sheet').setAttribute('data-theme', isDark?'dark':'light');
   document.getElementById('add-item-input').value='';
   _addCat='위생';
   document.querySelectorAll('.ai-chip').forEach(c=>{
@@ -801,7 +821,7 @@ function sheetTouchStart(e,key){if(e.target.tagName==='INPUT'||e.target.tagName=
 function sheetTouchMove(e,key){const dy=e.touches[0].clientY-_sheetSY[key];if(dy<=0)return;_sheetDragging[key]=true;const el=document.getElementById(key+'-item-sheet');if(el)el.style.transform='translateY('+dy+'px)';}
 function sheetTouchEnd(e,key){const dy=_sheetDragging[key]?e.changedTouches[0].clientY-_sheetSY[key]:0;const el=document.getElementById(key+'-item-sheet');if(dy>100){if(key==='add')closeAddItem();else closeEditItem();}else{if(el)el.style.transform='';}_sheetDragging[key]=false;}
 function selectAddCat(el,cat){_addCat=cat;document.querySelectorAll('.ai-chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
-function addItemConfirm(){const n=document.getElementById('add-item-input').value.trim();if(!n)return;items.push({n:_addCat+':'+n,q:1});localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();closeAddItem();}
+function addItemConfirm(){const n=document.getElementById('add-item-input').value.trim();if(!n)return;items.push({n:_addCat+':'+n,q:1});save();closeAddItem();}
 
 // ─── 항목 편집 (스와이프) ───
 function openEditItem(idx){
@@ -821,6 +841,8 @@ function openEditItem(idx){
     if(svg)svg.style.cssText='width:26px;height:26px;stroke:var(--ink);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round';
   }
   document.getElementById('edit-item-ov').style.display='flex';
+  const _isDark=localStorage.getItem('gyeol_theme')==='dark';
+  document.getElementById('edit-item-sheet').setAttribute('data-theme', _isDark?'dark':'light');
   resetSwipe(idx);
   setTimeout(()=>document.getElementById('edit-name-input').focus(),300);
 }
@@ -993,7 +1015,7 @@ async function confirmUpload(){
 }
 
 function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;}
-function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진·영상 탭하여 등록</div><div class="media-empty-sub">물품 자동 인식</div></div>`;}
+function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진·영상 탭하여 등록</div><div class="media-empty-sub">사진·영상 탭하여 등록 · 물품 자동 인식</div></div>`;}
 function openFull(){const el=document.getElementById('media-el');if(!el)return;const fc=document.getElementById('fs-content');fc.innerHTML=el.tagName==='VIDEO'?`<video src="${el.src}" class="${el.className}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`:`<img src="${el.src}" class="${el.className}" style="max-width:100%;max-height:100%;object-fit:contain">`;document.getElementById('fs-ov').classList.add('open');}
 function closeFull(){document.getElementById('fs-ov').classList.remove('open');}
 
@@ -1012,7 +1034,7 @@ function resetChatTimeout(){if(chatTimeoutId)clearTimeout(chatTimeoutId);chatTim
   setInterval(function(){
     on = !on;
     el.classList.toggle('swap', on);
-  }, 5000);
+  }, 3000);
 })();
 
 function openChat(){
