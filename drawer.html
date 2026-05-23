@@ -404,18 +404,13 @@ body[data-dark="1"] .qty-btn { color: rgba(240,238,232,0.5); }
 
 body[data-dark="1"] .bottom-section { background: transparent; }
 body[data-dark="1"] .action-row { background: transparent; }
-
-body[data-dark="1"] .add-row { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--r); }
-body[data-dark="1"] .add-lbl { color: rgba(240,238,232,0.4); }
-body[data-dark="1"] .add-sq { border-color: rgba(240,238,232,0.2); }
-body[data-dark="1"] .add-sq svg { stroke: rgba(240,238,232,0.3); }
-body[data-dark="1"] .reset-link { color: rgba(240,238,232,0.15); }
 </style>
 <script>
 (function(){
   var tag = new URLSearchParams(location.search).get('tag') || '';
   var t = localStorage.getItem('gyeol_color_theme_' + tag) || 'stone';
-  document.documentElement.setAttribute('data-theme', t);
+  // :root에 테마 변수를 즉시 오버라이드 (body 파싱 전)
+  document.documentElement.setAttribute('data-pre-theme', t);
 })();
 </script>
 </head>
@@ -743,7 +738,7 @@ var sb = window.sb || supabase.createClient('https://tqhtggusphhcsygiitrv.supaba
 var _sb = sb;
 var items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
 (function(){ document.body.setAttribute('data-theme', currentTheme); })();
-function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
+function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);document.documentElement.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
 function closeDrawerSettings(e){if(e&&e.target!==document.getElementById('drawer-ov'))return;applyTheme(currentTheme,false);document.getElementById('drawer-ov').classList.remove('open');}
@@ -977,6 +972,14 @@ function closeIconPicker(e){if(e&&e.target!==document.getElementById('icon-ov'))
 function pickIco(ic,el){selIco=ic;document.querySelectorAll('.icon-cell').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
 function saveIcon(){if(icoIdx>=0&&selIco){items[icoIdx].icon=selIco;save();}document.getElementById('icon-ov').classList.remove('open');}
 
+
+// 마이페이지 다크모드 변경 실시간 반영
+window.addEventListener('storage', function(e){
+  if(e.key === 'gyeol_theme'){
+    if(e.newValue === 'dark') document.body.setAttribute('data-dark','1');
+    else document.body.removeAttribute('data-dark');
+  }
+});
 function save(){localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();}
 function clearAll(){if(!confirm('목록과 미디어를 모두 초기화할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);items=[];localStorage.setItem('gyeol_'+tag,'[]');localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();renderItems();}
 
