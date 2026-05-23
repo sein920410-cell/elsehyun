@@ -59,6 +59,10 @@ html[data-mode="dark"]{
   --cat-line:rgba(255,255,255,0.08);
   --field:rgba(255,255,255,0.06);
 }
+/* 다크모드 버튼 색상 보정 — --ink가 베이지색이 되어 흰 글씨와 구분 안 되는 문제 수정 */
+html[data-mode="dark"] .ai-chip.sel{background:#C8A870;border-color:#C8A870;color:#1A1714}
+html[data-mode="dark"] .ai-confirm-btn{background:#C8A870;color:#1A1714}
+html[data-mode="dark"] .icon-done{background:#C8A870;color:#1A1714}
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text;user-select:text}
