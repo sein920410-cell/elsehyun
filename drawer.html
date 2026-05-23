@@ -50,12 +50,6 @@
 [data-theme="sage"]    {--h-bg:#5A7A62;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#2E4A36;--a-color:#86EFAC;--a-bg:rgba(134,239,172,.12);--a-border:rgba(134,239,172,.3)}
 [data-theme="blue"]    {--h-bg:#3E72A8;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#0D3B5E;--a-color:#7DD3FC;--a-bg:rgba(125,211,252,.13);--a-border:rgba(125,211,252,.3)}
 
-/* ─── 다크 모드 (본문/목록/검색창 — 미디어 헤더 테마와 별개) ─── */
-html[data-mode="dark"]{
-  --bg:#111318;--surface:#1A1B20;--border:rgba(255,255,255,.09);--border2:rgba(255,255,255,.14);
-  --ink:#F0EEE8;--ink2:#C8C4BC;--muted:rgba(240,238,232,.5);--muted2:rgba(240,238,232,.3);
-}
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text;user-select:text}
 body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;flex-direction:column;overflow:hidden;color:var(--ink);-webkit-font-smoothing:antialiased}
@@ -107,12 +101,10 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .toolbar-search-btn:active{opacity:.7}
 
 /* ─── 검색바 ─── */
-.search-bar{display:none;align-items:center;gap:10px;padding:11px 14px 12px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.search-bar{display:none;align-items:center;gap:8px;padding:7px 14px 8px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
 .search-bar.open{display:flex}
-.search-inner{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:11px;padding:11px 14px;border:1px solid var(--border);transition:border-color .18s,box-shadow .18s}
-.search-inner:focus-within{border-color:var(--ink2);box-shadow:0 0 0 3px var(--a-bg)}
-.search-inner svg{width:14px;height:14px;stroke:var(--muted2);stroke-width:1.8;fill:none;stroke-linecap:round;flex-shrink:0;transition:stroke .18s}
-.search-inner:focus-within svg{stroke:var(--ink2)}
+.search-inner{flex:1;display:flex;align-items:center;gap:7px;background:var(--bg);border-radius:var(--r);padding:8px 12px;border:1px solid var(--border)}
+.search-inner svg{width:13px;height:13px;stroke:var(--muted2);stroke-width:1.8;fill:none;stroke-linecap:round;flex-shrink:0}
 .search-input{flex:1;border:none;outline:none;font-size:15px;font-family:var(--font);color:var(--ink);background:transparent;-webkit-user-select:text;user-select:text}
 .search-input::placeholder{color:var(--muted2)}
 .search-cancel{font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
@@ -162,7 +154,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .add-sq{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--muted2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .add-sq svg{width:10px;height:10px;stroke:var(--muted2);stroke-width:2.3;fill:none;stroke-linecap:round}
 .add-lbl{font-size:13px;font-weight:500;color:var(--muted2);letter-spacing:-.01em}
-.reset-link{align-self:center;text-align:center;font-size:11px;color:var(--muted2);text-decoration:underline;text-underline-offset:3px;padding:6px 14px;cursor:pointer}
+.reset-link{text-align:center;font-size:11px;color:var(--muted2);text-decoration:underline;text-underline-offset:3px;padding:3px;cursor:pointer}
 
 /* ─── 빈 상태 ─── */
 .empty-state{display:flex;flex-direction:column;align-items:center;gap:10px;padding:36px 16px 16px}
@@ -694,13 +686,6 @@ var sb = window.sb || supabase.createClient('https://tqhtggusphhcsygiitrv.supaba
 var _sb = sb;
 var items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
 var catOpenState = {};
-var corrections = JSON.parse(localStorage.getItem('corrections_'+tag) || '[]');
-// ─── 누락 전역 상태 선언 ───
-var lpTimer=null, mLpTimer=null, ctxIdx=-1, editIdx=-1, icoIdx=-1, selIco=null;
-var selFile=null, rot=0, recBlob=null, recChunks=[], recSec=0;
-var mediaRec=null, mediaStream=null, isRec=false, recTimer=null;
-var pendingReview=[], reviewSel=[], chatTimeoutId=null;
-var isSwiping=false, activeSwipeIdx=-1;
 
 // ─── 아이콘 시스템 ───
 var ICONS={
@@ -803,7 +788,7 @@ function getAutoIcon(name,cat){
   return CAT_DEFAULT[cat]||'default';
 }
 
-(function(){ document.body.setAttribute('data-theme', currentTheme); if(localStorage.getItem('gyeol_theme')==='dark'){document.documentElement.setAttribute('data-mode','dark');}else{document.documentElement.removeAttribute('data-mode');} })();
+(function(){ document.body.setAttribute('data-theme', currentTheme); })();
 function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
@@ -962,49 +947,6 @@ function saveEditItem(){
   if(!newMemo)delete items[editIdx].memo;
   closeEditItem();
   save();
-}
-
-// ─── 스와이프 (편집/삭제) ───
-var _swStartX=0,_swStartY=0,_swDX=0,_swLock=null;
-function sStart(e,idx){
-  if(activeSwipeIdx!==-1&&activeSwipeIdx!==idx)resetSwipe(activeSwipeIdx);
-  var t=e.touches?e.touches[0]:e;
-  _swStartX=t.clientX;_swStartY=t.clientY;_swDX=0;_swLock=null;isSwiping=false;
-  startLP(idx);
-}
-function sMove(e,idx){
-  var t=e.touches?e.touches[0]:e;
-  var dx=t.clientX-_swStartX, dy=t.clientY-_swStartY;
-  if(_swLock===null){
-    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>6)_swLock='x';
-    else if(Math.abs(dy)>6)_swLock='y';
-    else return;
-  }
-  if(_swLock!=='x')return;
-  cancelLP();isSwiping=true;
-  var base=(activeSwipeIdx===idx)?-130:0;
-  var mv=base+dx;
-  if(mv>0)mv=0; if(mv<-130)mv=-130;
-  _swDX=mv;
-  var front=document.getElementById('front-'+idx);
-  if(front){front.style.transition='none';front.style.transform='translateX('+mv+'px)';}
-}
-function sEnd(e,idx){
-  cancelLP();
-  if(_swLock!=='x'){_swLock=null;return;}
-  var front=document.getElementById('front-'+idx);
-  if(front){
-    front.style.transition='';
-    if(_swDX<-50){front.style.transform='translateX(-130px)';activeSwipeIdx=idx;}
-    else{front.style.transform='translateX(0)';if(activeSwipeIdx===idx)activeSwipeIdx=-1;}
-  }
-  _swLock=null;
-  setTimeout(function(){isSwiping=false;},60);
-}
-function resetSwipe(idx){
-  var front=document.getElementById('front-'+idx);
-  if(front){front.style.transition='';front.style.transform='translateX(0)';}
-  if(activeSwipeIdx===idx)activeSwipeIdx=-1;
 }
 
 // ─── 롱프레스 컨텍스트 ───
