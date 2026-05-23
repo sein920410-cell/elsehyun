@@ -31,6 +31,41 @@
   color: #C8A870;
   border-color: #C8A870;
 }
+
+/* ─── 다크모드 목록 영역 ─── */
+body[data-theme="dark"] {
+  --bg: #111318;
+  --surface: #1A1B20;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.12);
+  --ink: #F0EEE8;
+  --ink2: #C8C4BC;
+  --muted: rgba(240,238,232,0.45);
+  --muted2: rgba(240,238,232,0.25);
+}
+body[data-theme="dark"] .list-inner,
+body[data-theme="dark"] .list-wrap {
+  background: #111318;
+}
+body[data-theme="dark"] .cat-header,
+body[data-theme="dark"] .cat-name-lbl { color: rgba(240,238,232,0.7); }
+body[data-theme="dark"] .item-card { background: #1A1B20; border-color: rgba(255,255,255,0.08); }
+body[data-theme="dark"] .item-name { color: #F0EEE8; }
+body[data-theme="dark"] .item-meta { color: rgba(240,238,232,0.45); }
+body[data-theme="dark"] .empty-state svg { stroke: rgba(255,255,255,0.15); }
+body[data-theme="dark"] .empty-txt { color: rgba(240,238,232,0.3); }
+body[data-theme="dark"] .bottom-section { border-top-color: rgba(255,255,255,0.06); }
+body[data-theme="dark"] .add-lbl { color: rgba(240,238,232,0.35); }
+body[data-theme="dark"] .add-sq { border-color: rgba(240,238,232,0.25); }
+body[data-theme="dark"] .add-sq svg { stroke: rgba(240,238,232,0.35); }
+body[data-theme="dark"] .reset-link { color: rgba(240,238,232,0.2); }
+body[data-theme="dark"] .search-bar { background: #111318; border-color: rgba(255,255,255,0.1); }
+body[data-theme="dark"] .search-input { background: #1A1B20; color: #F0EEE8; border-color: rgba(255,255,255,0.1); }
+body[data-theme="dark"] .qty-wrap { background: #111318; border-color: rgba(255,255,255,0.1); }
+body[data-theme="dark"] .qty-num { color: #F0EEE8; border-color: rgba(255,255,255,0.08); }
+body[data-theme="dark"] .qty-btn { color: rgba(240,238,232,0.5); }
+body[data-theme="dark"] .swipe-edit-btn { background: #2A5FA8; }
+body[data-theme="dark"] .swipe-del-btn { background: #8B2020; }
 </style>
 <script>
 (async () => {
