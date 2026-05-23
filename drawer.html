@@ -749,6 +749,8 @@ var _sb = sb;
 var items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
 var catOpenState = {};
 (function(){ document.body.setAttribute('data-theme', currentTheme); })();
+// 페이지 로드 시 즉시 렌더 (DOMContentLoaded 이후 실행 보장)
+document.addEventListener('DOMContentLoaded', function(){ renderItems(); });
 function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);document.documentElement.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
@@ -989,6 +991,22 @@ window.addEventListener('storage', function(e){
   if(e.key === 'gyeol_theme'){
     if(e.newValue === 'dark') document.body.setAttribute('data-dark','1');
     else document.body.removeAttribute('data-dark');
+  }
+});
+
+// BFCache(뒤로가기 복원) 및 페이지 재포커스 시 다크모드·테마 재동기화
+window.addEventListener('pageshow', function(e){
+  // 다크모드 재적용
+  if(localStorage.getItem('gyeol_theme') === 'dark') document.body.setAttribute('data-dark','1');
+  else document.body.removeAttribute('data-dark');
+  // 테마 재적용
+  var savedTheme = localStorage.getItem(_themeKey) || 'stone';
+  if(savedTheme !== currentTheme){ applyTheme(savedTheme, false); }
+  else { document.body.setAttribute('data-theme', currentTheme); document.documentElement.setAttribute('data-theme', currentTheme); }
+  // BFCache 복원 시 items도 재로드
+  if(e.persisted){
+    items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
+    renderItems();
   }
 });
 function save(){localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();}
