@@ -199,8 +199,8 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .typing-bubble span:nth-child(3){animation-delay:.36s}
 .sheet{background:var(--surface);border-radius:14px 14px 0 0;width:100%;max-height:92dvh;overflow-y:auto;padding:0 18px 44px;animation:sheetUp .28s cubic-bezier(.32,0,0,1)}
 .sheet::-webkit-scrollbar{display:none}
-.sh-handle{width:32px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 16px}
-.sh-title{font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.01em;margin-bottom:14px}
+.sh-handle{width:32px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 12px}
+.sh-title{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.01em;margin-bottom:12px}
 
 /* ─── 미디어 픽커 ─── */
 .mpick{display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;cursor:pointer}
@@ -212,18 +212,19 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .sh-cancel{width:100%;padding:14px;background:var(--bg);border:none;border-radius:var(--r);font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font);margin-top:4px}
 
 /* ─── 수납장 설정 ─── */
-.dt-sect{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
-.dt-field{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:0 14px;margin-bottom:18px;display:flex;align-items:center;height:52px}
-.dt-input{flex:1;border:none;outline:none;font-size:16px;font-weight:600;color:var(--ink);background:transparent;font-family:var(--font);letter-spacing:-.01em;-webkit-user-select:text;user-select:text}
-.dt-clear{width:20px;height:20px;background:var(--muted2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-.dt-clear svg{width:10px;height:10px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
-.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
-.theme-cell{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer}
-.theme-sw{width:44px;height:44px;border-radius:var(--r);border:2px solid transparent;transition:transform .12s}
-.theme-sw.active{outline:3px solid var(--ink);outline-offset:2px}
-.theme-cell:active .theme-sw{transform:scale(.9)}
-.theme-lbl{font-size:9px;font-weight:700;color:var(--muted2);letter-spacing:.03em;text-transform:uppercase;text-align:center;line-height:1.3}
-.dt-save{width:100%;padding:14px;background:var(--ink);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font)}
+.dt-sect{font-size:12px;font-weight:700;color:var(--ink2);letter-spacing:-.01em;margin-bottom:8px}
+.dt-field{background:var(--field);border:1.5px solid var(--border);border-radius:10px;padding:0 12px;margin-bottom:16px;display:flex;align-items:center;height:46px;transition:border-color .15s}
+.dt-field:focus-within{border-color:var(--ink2)}
+.dt-input{flex:1;border:none;outline:none;font-size:15px;font-weight:600;color:var(--ink);background:transparent;font-family:var(--font);letter-spacing:-.01em;-webkit-user-select:text;user-select:text}
+.dt-clear{width:18px;height:18px;background:var(--muted2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.dt-clear svg{width:8px;height:8px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.theme-cell{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.theme-sw{width:100%;aspect-ratio:1;border-radius:10px;border:2px solid transparent;transition:transform .12s,box-shadow .12s}
+.theme-sw.active{outline:2.5px solid var(--ink);outline-offset:2px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.theme-cell:active .theme-sw{transform:scale(.93)}
+.theme-lbl{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:-.01em;text-align:center}
+.dt-save{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);margin-top:2px}
 
 /* ─── 아이템 컨텍스트 메뉴 ─── */
 .ctx-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:300;backdrop-filter:blur(7px);align-items:center;justify-content:center}
