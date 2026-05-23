@@ -9,20 +9,28 @@
 <style>body { visibility: hidden; }
 [data-theme="dark"] .add-item-sheet,
 [data-theme="dark"] .edit-item-sheet {
-  background: var(--surface);
-  color: var(--ink);
+  background: #1A1B20;
+  color: #F0EEE8;
 }
+[data-theme="dark"] .sh-title,
+[data-theme="dark"] .ai-cat-lbl,
+[data-theme="dark"] .edit-memo-lbl { color: #F0EEE8; }
 [data-theme="dark"] .ai-name-input,
 [data-theme="dark"] .edit-name-input,
 [data-theme="dark"] .edit-memo-input {
-  background: var(--bg);
-  color: var(--ink);
-  border-color: var(--border);
+  background: #111318; color: #F0EEE8;
+  border-color: rgba(255,255,255,0.12);
 }
-[data-theme="dark"] .sh-title { color: var(--ink); }
-[data-theme="dark"] .ai-cat-lbl { color: var(--muted); }
-[data-theme="dark"] .ai-chip { background: var(--bg); color: var(--muted); border-color: var(--border); }
-[data-theme="dark"] .ai-chip.sel { background: var(--accent); color: #fff; border-color: var(--accent); }
+[data-theme="dark"] .ai-chip {
+  background: rgba(255,255,255,0.06);
+  color: rgba(240,238,232,0.6);
+  border-color: rgba(255,255,255,0.1);
+}
+[data-theme="dark"] .ai-chip.sel {
+  background: rgba(200,168,112,0.25);
+  color: #C8A870;
+  border-color: #C8A870;
+}
 </style>
 <script>
 (async () => {
@@ -37,6 +45,9 @@
     if (!serial && !singleSerial) { window.location.replace('serial.html'); return; }
     window.sb = _authClient;
     window.sb = _authClient; // alias
+    // 다크모드 초기화
+    var _gTheme = localStorage.getItem('gyeol_theme') || 'light';
+    if(_gTheme === 'dark') document.body.setAttribute('data-theme','dark');
     document.body.style.visibility = 'visible';
     setTimeout(function(){ startOnboarding(); }, 1000);
     })();
@@ -98,7 +109,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 /* ─── 미디어 ─── */
 .media-section{background:var(--h-bg);padding:0 14px 12px;flex-shrink:0;transition:background .4s}
 .media-box{height:220px;border-radius:var(--r);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation}
-.media-box.empty{border:1px dashed var(--h-border);background:rgba(255,255,255,.03)}
+.media-box.empty{border:none;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13);}
 .media-box.filled{border:1px solid rgba(255,255,255,.07)}
 .media-box img,.media-box video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 .media-empty-inner{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
@@ -803,8 +814,8 @@ let _addCat='위생';
 function addItemDirectly(){
   const ov=document.getElementById('add-item-ov');
   ov.style.display='flex';
-  const isDark=localStorage.getItem('gyeol_theme')==='dark';
-  document.getElementById('add-item-sheet').setAttribute('data-theme', isDark?'dark':'light');
+  const _sh=document.getElementById('add-item-sheet');
+  if(_sh) _sh.setAttribute('data-theme', localStorage.getItem('gyeol_theme')||'light');
   document.getElementById('add-item-input').value='';
   _addCat='위생';
   document.querySelectorAll('.ai-chip').forEach(c=>{
@@ -841,8 +852,8 @@ function openEditItem(idx){
     if(svg)svg.style.cssText='width:26px;height:26px;stroke:var(--ink);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round';
   }
   document.getElementById('edit-item-ov').style.display='flex';
-  const _isDark=localStorage.getItem('gyeol_theme')==='dark';
-  document.getElementById('edit-item-sheet').setAttribute('data-theme', _isDark?'dark':'light');
+  const _esh=document.getElementById('edit-item-sheet');
+  if(_esh) _esh.setAttribute('data-theme', localStorage.getItem('gyeol_theme')||'light');
   resetSwipe(idx);
   setTimeout(()=>document.getElementById('edit-name-input').focus(),300);
 }
@@ -1034,7 +1045,7 @@ function resetChatTimeout(){if(chatTimeoutId)clearTimeout(chatTimeoutId);chatTim
   setInterval(function(){
     on = !on;
     el.classList.toggle('swap', on);
-  }, 3000);
+  }, 5000);
 })();
 
 function openChat(){
