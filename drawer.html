@@ -132,7 +132,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 /* ─── 하단 액션 ─── */
 .bottom-section{padding:8px 0 8px;display:flex;flex-direction:column;gap:8px}
 .action-row{display:flex;gap:7px}
-.add-row{flex:1;display:flex;align-items:center;gap:9px;padding:13px 16px;background:rgba(255,255,255,.7);border:1px solid var(--border);border-radius:var(--r);cursor:pointer}
+.add-row{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 16px;background:transparent;border:none;border-radius:var(--r);cursor:pointer}
 .add-row:active{background:var(--surface)}
 .add-sq{width:24px;height:24px;border-radius:4px;background:#ECEEF4;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .add-sq svg{width:11px;height:11px;stroke:#6E7A8E;stroke-width:2.3;fill:none;stroke-linecap:round}
@@ -748,6 +748,7 @@ var pendingTheme = currentTheme;
 var sb = window.sb || supabase.createClient('https://tqhtggusphhcsygiitrv.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc');
 var _sb = sb;
 var items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
+var catOpenState = {};
 (function(){ document.body.setAttribute('data-theme', currentTheme); })();
 function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);document.documentElement.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
