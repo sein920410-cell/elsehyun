@@ -181,6 +181,10 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .empty-state{display:flex;flex-direction:column;align-items:center;gap:10px;padding:36px 16px 16px}
 .empty-state svg{width:30px;height:30px;stroke:var(--border2);stroke-width:1.2;fill:none;stroke-linecap:round}
 .empty-txt{font-size:14px;font-weight:500;color:var(--muted2);text-align:center;line-height:1.8}
+.media-tip{display:flex;align-items:center;gap:6px;padding:10px 16px;animation:tipBounce 1.8s ease-in-out infinite}
+.media-tip svg{width:18px;height:18px;stroke:var(--muted);stroke-width:2;fill:none;flex-shrink:0}
+.media-tip-txt{font-size:12px;color:var(--muted);font-weight:500}
+@keyframes tipBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
 /* ─── 공통 오버레이/시트 ─── */
 .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:200;backdrop-filter:blur(6px);align-items:flex-end}
@@ -299,6 +303,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .mctx-del svg{stroke:var(--danger)}.mctx-del span{font-size:14px;font-weight:600;color:var(--danger);letter-spacing:-.01em}
 .mctx-reanalyze{border-top:1px solid var(--bg)}
 .mctx-reanalyze svg{stroke:var(--a-color)}.mctx-reanalyze span{font-size:14px;font-weight:600;color:var(--a-color);letter-spacing:-.01em}
+.mctx-replace svg{stroke:var(--ink2)}.mctx-replace span{font-size:14px;font-weight:600;color:var(--ink2);letter-spacing:-.01em}
 .mctx-cancel{border-top:1px solid var(--bg)}
 .mctx-cancel svg{stroke:var(--muted)}.mctx-cancel span{font-size:14px;font-weight:600;color:var(--muted);letter-spacing:-.01em}
 
@@ -561,6 +566,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <div class="mctx-ov" id="mctx-ov" onclick="closeMctx()">
   <div class="mctx-menu" onclick="event.stopPropagation()">
     <div class="mctx-row mctx-reanalyze" onclick="closeMctx();mpickReanalyze()"><svg viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg><span>다시 분석</span></div>
+    <div class="mctx-row mctx-replace" onclick="closeMctx();showMediaPicker()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>교체</span></div>
     <div class="mctx-row mctx-del" onclick="confirmDelMedia()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg><span>미디어 삭제</span></div>
     <div class="mctx-row mctx-cancel" onclick="closeMctx()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span>취소</span></div>
   </div>
@@ -845,7 +851,11 @@ function renderItems(filter=''){
   document.getElementById('bottom-section').style.display='flex';
   function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hl">$1</span>');}
   if(!Object.keys(groups).length){
-    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.<br>물품 등록을 추가하여 주세요.</div></div>`;
+    const hasTipShown=localStorage.getItem('gyeol_media_tip_'+tag);
+    const hasMedia=!!localStorage.getItem('mediaPath_'+tag);
+    const tipHtml=(hasMedia&&!hasTipShown)?`<div class="media-tip"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg><span class="media-tip-txt">사진·영상을 길게 누르면 교체·수정할 수 있습니다</span></div>`:'';
+    if(!hasTipShown&&hasMedia)localStorage.setItem('gyeol_media_tip_'+tag,'1');
+    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.<br>물품 등록을 추가하여 주세요.</div></div>${tipHtml}`;
     return;
   }
   container.innerHTML=Object.keys(groups).map(cat=>{
@@ -1359,7 +1369,7 @@ function startOnboarding(){
   obStart([
   {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 변경하고\n12가지 색상 중 원하시는 테마를 선택하실 수 있습니다.',warn:null},
   {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러오실 수 있습니다.\n영상은 앱 내 즉석 촬영(최대 30초)만 지원합니다.',warn:null},
-  {sel:'#media-box',title:'물품 자동 분석',desc:'사진 또는 영상을 등록하시면 물품을 자동으로 인식하여 목록을 생성해 드립니다.',warn:'※ AI 분석 이용 시 이용권 1건이 차감됩니다.'},
+  {sel:'#media-box',title:'물품 자동 분석',desc:'사진 또는 영상을 등록하시면 물품을 자동으로 인식하여 목록을 생성해 드립니다.\n등록 후 길게 누르시면 교체·삭제하실 수 있습니다.',warn:'※ AI 분석 이용 시 이용권 1건이 차감됩니다.'},
   {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시됩니다.\n돋보기를 누르시면 물품 이름으로 검색하실 수 있습니다.',warn:null},
   {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력하여 추가하실 수 있습니다.',warn:null}
 ], 'ob_drawer_done');
