@@ -33,6 +33,8 @@
   --ink:#2A2118;--ink2:#4A3830;--muted:#9A8E80;--muted2:#B5A99A;
   --danger:#D93025;
   --a-color:#C8C8D8;--a-bg:rgba(200,200,216,.12);--a-border:rgba(200,200,216,.3);
+  --cat-line:rgba(0,0,0,0.06);
+  --field:#F1ECE4;
   --font:"DM Sans","Noto Sans KR",sans-serif;
   --r:6px;
 }
@@ -49,6 +51,14 @@
 [data-theme="rose"]    {--h-bg:#C4909E;--h-txt:#fff;--h-sub:rgba(255,255,255,.65);--h-border:rgba(255,255,255,.18);--h-btn:rgba(255,255,255,.14);--bom-bg:#8B3A4A;--a-color:#FECDD3;--a-bg:rgba(254,205,211,.14);--a-border:rgba(254,205,211,.35)}
 [data-theme="sage"]    {--h-bg:#5A7A62;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#2E4A36;--a-color:#86EFAC;--a-bg:rgba(134,239,172,.12);--a-border:rgba(134,239,172,.3)}
 [data-theme="blue"]    {--h-bg:#3E72A8;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.13);--h-btn:rgba(255,255,255,.1);--bom-bg:#0D3B5E;--a-color:#7DD3FC;--a-bg:rgba(125,211,252,.13);--a-border:rgba(125,211,252,.3)}
+
+/* ─── 다크 모드 (본문/목록/검색창 — 미디어 헤더 테마와 별개) ─── */
+html[data-mode="dark"]{
+  --bg:#111318;--surface:#1A1B20;--border:rgba(255,255,255,.09);--border2:rgba(255,255,255,.14);
+  --ink:#F0EEE8;--ink2:#C8C4BC;--muted:rgba(240,238,232,.5);--muted2:rgba(240,238,232,.3);
+  --cat-line:rgba(255,255,255,0.08);
+  --field:rgba(255,255,255,0.06);
+}
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text;user-select:text}
@@ -101,10 +111,12 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .toolbar-search-btn:active{opacity:.7}
 
 /* ─── 검색바 ─── */
-.search-bar{display:none;align-items:center;gap:8px;padding:7px 14px 8px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.search-bar{display:none;align-items:center;gap:10px;padding:11px 14px 12px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
 .search-bar.open{display:flex}
-.search-inner{flex:1;display:flex;align-items:center;gap:7px;background:var(--bg);border-radius:var(--r);padding:8px 12px;border:1px solid var(--border)}
-.search-inner svg{width:13px;height:13px;stroke:var(--muted2);stroke-width:1.8;fill:none;stroke-linecap:round;flex-shrink:0}
+.search-inner{flex:1;display:flex;align-items:center;gap:8px;background:var(--field);border-radius:11px;padding:11px 14px;border:1px solid transparent;transition:border-color .18s,box-shadow .18s,background .18s}
+.search-inner:focus-within{border-color:var(--ink2);box-shadow:0 0 0 3px var(--a-bg)}
+.search-inner svg{width:14px;height:14px;stroke:var(--muted2);stroke-width:1.8;fill:none;stroke-linecap:round;flex-shrink:0;transition:stroke .18s}
+.search-inner:focus-within svg{stroke:var(--ink2)}
 .search-input{flex:1;border:none;outline:none;font-size:15px;font-family:var(--font);color:var(--ink);background:transparent;-webkit-user-select:text;user-select:text}
 .search-input::placeholder{color:var(--muted2)}
 .search-cancel{font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
@@ -115,7 +127,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .list-wrap::-webkit-scrollbar{display:none}
 .list-inner{padding:2px 12px 24px}
 .cat-section{margin-bottom:4px}
-.cat-header{display:flex;align-items:center;padding:13px 4px 9px;border-bottom:1px solid rgba(0,0,0,0.06);margin-bottom:5px;cursor:pointer;gap:8px;min-height:44px}
+.cat-header{display:flex;align-items:center;padding:13px 4px 9px;border-bottom:1px solid var(--cat-line);margin-bottom:5px;cursor:pointer;gap:8px;min-height:44px}
 .cat-header:active{opacity:.65}
 .cat-name-lbl{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex:1;transition:color .2s}
 .cat-chevron{width:26px;height:26px;border-radius:6px;background:var(--tag-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -141,20 +153,20 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .item-sub-row{display:flex;align-items:center;gap:5px;margin-top:3px}
 .item-cat-lbl{font-size:9px;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase}
 .item-memo-badge{display:inline-flex;align-items:center;gap:3px;background:var(--h-bg);color:var(--h-txt);border-radius:4px;padding:2px 6px;font-size:9px;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .4s}
-.qty-wrap{display:flex;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:5px;overflow:hidden;flex-shrink:0}
+.qty-wrap{display:flex;align-items:center;background:var(--field);border:1px solid var(--border);border-radius:5px;overflow:hidden;flex-shrink:0}
 .qty-btn{width:32px;height:32px;font-size:18px;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;font-family:var(--font);line-height:1}
 .qty-btn:active{background:var(--border)}
 .qty-num{font-size:13px;font-weight:700;color:var(--ink);width:28px;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);height:32px;line-height:32px}
 
 /* ─── 하단 액션 ─── */
-.bottom-section{padding:8px 0 8px;display:flex;flex-direction:column;gap:8px}
-.action-row{display:flex;gap:7px}
-.add-row{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 16px;background:transparent;border:none;border-radius:var(--r);cursor:pointer}
+.bottom-section{padding:14px 0 10px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.action-row{display:flex;justify-content:center;width:100%}
+.add-row{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 22px;background:var(--surface);border:1px solid var(--border);border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s}
 .add-row:active{background:var(--border)}
 .add-sq{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--muted2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .add-sq svg{width:10px;height:10px;stroke:var(--muted2);stroke-width:2.3;fill:none;stroke-linecap:round}
 .add-lbl{font-size:13px;font-weight:500;color:var(--muted2);letter-spacing:-.01em}
-.reset-link{text-align:center;font-size:11px;color:var(--muted2);text-decoration:underline;text-underline-offset:3px;padding:3px;cursor:pointer}
+.reset-link{display:inline-block;align-self:center;text-align:center;font-size:11px;color:var(--muted2);text-decoration:underline;text-underline-offset:3px;padding:4px 10px;cursor:pointer}
 
 /* ─── 빈 상태 ─── */
 .empty-state{display:flex;flex-direction:column;align-items:center;gap:10px;padding:36px 16px 16px}
@@ -473,7 +485,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
           <span class="add-lbl">항목 직접 추가</span>
         </div>
       </div>
-      <div class="reset-link" onclick="clearAll()">전체 초기화</div>
+      <div class="reset-link" onclick="event.stopPropagation();clearAll()">전체 초기화</div>
     </div>
   </div>
 </div>
@@ -686,6 +698,13 @@ var sb = window.sb || supabase.createClient('https://tqhtggusphhcsygiitrv.supaba
 var _sb = sb;
 var items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
 var catOpenState = {};
+var corrections = JSON.parse(localStorage.getItem('corrections_'+tag) || '[]');
+// ─── 누락 전역 상태 선언 ───
+var lpTimer=null, mLpTimer=null, ctxIdx=-1, editIdx=-1, icoIdx=-1, selIco=null;
+var selFile=null, rot=0, recBlob=null, recChunks=[], recSec=0;
+var mediaRec=null, mediaStream=null, isRec=false, recTimer=null;
+var pendingReview=[], reviewSel=[], chatTimeoutId=null;
+var isSwiping=false, activeSwipeIdx=-1;
 
 // ─── 아이콘 시스템 ───
 var ICONS={
@@ -788,7 +807,7 @@ function getAutoIcon(name,cat){
   return CAT_DEFAULT[cat]||'default';
 }
 
-(function(){ document.body.setAttribute('data-theme', currentTheme); })();
+(function(){ document.body.setAttribute('data-theme', currentTheme); if(localStorage.getItem('gyeol_theme')==='dark'){document.documentElement.setAttribute('data-mode','dark');}else{document.documentElement.removeAttribute('data-mode');} })();
 function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
@@ -949,6 +968,50 @@ function saveEditItem(){
   save();
 }
 
+// ─── 스와이프 (편집/삭제) ───
+var _swStartX=0,_swStartY=0,_swDX=0,_swLock=null;
+function sStart(e,idx){
+  if(activeSwipeIdx!==-1&&activeSwipeIdx!==idx)resetSwipe(activeSwipeIdx);
+  var t=e.touches?e.touches[0]:e;
+  _swStartX=t.clientX;_swStartY=t.clientY;_swDX=0;_swLock=null;isSwiping=false;
+  startLP(idx);
+}
+function sMove(e,idx){
+  var t=e.touches?e.touches[0]:e;
+  var dx=t.clientX-_swStartX, dy=t.clientY-_swStartY;
+  if(_swLock===null){
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>6)_swLock='x';
+    else if(Math.abs(dy)>6)_swLock='y';
+    else return;
+  }
+  if(_swLock!=='x')return;
+  if(e.cancelable)e.preventDefault();
+  cancelLP();isSwiping=true;
+  var base=(activeSwipeIdx===idx)?-130:0;
+  var mv=base+dx;
+  if(mv>0)mv=0; if(mv<-130)mv=-130;
+  _swDX=mv;
+  var front=document.getElementById('front-'+idx);
+  if(front){front.style.transition='none';front.style.transform='translateX('+mv+'px)';}
+}
+function sEnd(e,idx){
+  cancelLP();
+  if(_swLock!=='x'){_swLock=null;return;}
+  var front=document.getElementById('front-'+idx);
+  if(front){
+    front.style.transition='';
+    if(_swDX<-50){front.style.transform='translateX(-130px)';activeSwipeIdx=idx;}
+    else{front.style.transform='translateX(0)';if(activeSwipeIdx===idx)activeSwipeIdx=-1;}
+  }
+  _swLock=null;
+  setTimeout(function(){isSwiping=false;},60);
+}
+function resetSwipe(idx){
+  var front=document.getElementById('front-'+idx);
+  if(front){front.style.transition='';front.style.transform='translateX(0)';}
+  if(activeSwipeIdx===idx)activeSwipeIdx=-1;
+}
+
 // ─── 롱프레스 컨텍스트 ───
 function startLP(idx){cancelLP();lpTimer=setTimeout(()=>{if(navigator.vibrate)navigator.vibrate(30);openCtx(idx);},500);}
 function cancelLP(){clearTimeout(lpTimer);lpTimer=null;}
@@ -1105,7 +1168,7 @@ function chatStorageKey(){return 'gyeol_chat_'+(tag||'default');}
 function loadChatHistory(){try{const raw=localStorage.getItem(chatStorageKey());return raw?JSON.parse(raw):[]}catch{return[];}}
 function saveChatHistory(msgs){try{const trimmed=msgs.slice(-40);localStorage.setItem(chatStorageKey(),JSON.stringify(trimmed));}catch{}}
 function renderChatHistory(history){const el=document.getElementById('chat-msgs');el.innerHTML='';history.forEach(m=>{const div=document.createElement('div');div.className='msg '+(m.role==='user'?'user':'bot');div.textContent=m.text;el.appendChild(div);});el.scrollTop=el.scrollHeight;}
-const CHAT_TIMEOUT_MS=30*60*1000;let chatTimeoutId=null;
+const CHAT_TIMEOUT_MS=30*60*1000;
 function resetChatTimeout(){if(chatTimeoutId)clearTimeout(chatTimeoutId);chatTimeoutId=setTimeout(()=>{const isOpen=document.getElementById('chat-ov').classList.contains('open');const timeoutMsg='안녕하세요, 답변 대기 시간이 초과되어 상담이 자동 종료되었습니다.\n상담을 원하실 경우 다시 문의 부탁드립니다 😊';const history=loadChatHistory();history.push({role:'bot',text:timeoutMsg});saveChatHistory(history);if(isOpen){renderChatHistory(history);setTimeout(()=>closeChat(),1500);}chatTimeoutId=null;},CHAT_TIMEOUT_MS);}
 // brand 헤드셋 애니메이션
 (function(){
@@ -1264,21 +1327,21 @@ function startBrightCheck(){
 function cancelRecording(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';if(mediaRec?.state!=='inactive')mediaRec?.stop();if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');isRec=false;}
 
 var OB_STEPS=[
-  {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',arrow:'down'},
-  {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 갤러리 불러오기를 지원하지 않아요.\n앱 내 즉석 촬영(최대 30초)만 가능해요.',arrow:'down'},
-  {sel:'#media-box',title:'물품 자동 분석',desc:'사진 또는 영상을 등록하면 물품을 자동 인식해 목록을 생성해드립니다.',warn:'※ AI 분석 이용 시 이용권 1건이 차감됩니다.',arrow:'up'},
-  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n돋보기를 눌러 물품 이름으로 검색할 수 있어요.',arrow:'up'},
-  {sel:'.item-swipe-l',title:'편집 · 삭제',desc:'목록 항목을 왼쪽으로 밀면\n편집과 삭제 버튼이 나타나요.',arrow:'up'},
-  {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.\n이용권이 소진돼도 이 방법으로 관리할 수 있어요.',arrow:'up'},
-  {sel:'#brand-btn',title:'봄 채팅 상담 😊',desc:'공간:결 로고를 누르면 수납 비서 봄과 채팅할 수 있어요.\n물품 찾기, 서비스 문의 모두 편하게 물어보세요.',arrow:'up'}
+  {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 변경하고\n12가지 색상 중 원하시는 테마를 선택하실 수 있습니다.',arrow:'down'},
+  {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러오실 수 있습니다.\n영상은 갤러리 불러오기를 지원하지 않으며,\n앱 내 즉석 촬영(최대 30초)만 가능합니다.',arrow:'down'},
+  {sel:'#media-box',title:'물품 자동 분석',desc:'사진 또는 영상을 등록하시면 물품을 자동으로 인식하여 목록을 생성해 드립니다.',warn:'※ AI 분석 이용 시 이용권 1건이 차감됩니다.',arrow:'up'},
+  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시됩니다.\n돋보기를 누르시면 물품 이름으로 검색하실 수 있습니다.',arrow:'up'},
+  {sel:'.item-swipe-l',title:'편집 · 삭제',desc:'목록 항목을 왼쪽으로 미시면\n편집과 삭제 버튼이 나타납니다.',arrow:'up'},
+  {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력하여 추가하실 수 있습니다.\n이용권이 소진되어도 이 방법으로 관리하실 수 있습니다.',arrow:'up'},
+  {sel:'#brand-btn',title:'봄 채팅 상담',desc:'공간:결 로고를 누르시면 수납 비서 봄과 대화하실 수 있습니다.\n물품 찾기와 서비스 문의를 편하게 남겨 주십시오.',arrow:'up'}
 ];
 function startOnboarding(){
   obStart([
-  {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 바꾸고\n12가지 색상 중 테마를 골라 꾸밀 수 있어요.',warn:null},
-  {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러올 수 있어요.\n영상은 앱 내 즉석 촬영(최대 30초)만 가능해요.',warn:null},
-  {sel:'#media-box',title:'물품 자동 분석',desc:'사진 또는 영상을 등록하면 물품을 자동 인식해 목록을 생성해드립니다.',warn:'※ AI 분석 이용 시 이용권 1건이 차감됩니다.'},
-  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시돼요.\n돋보기를 눌러 물품 이름으로 검색할 수 있어요.',warn:null},
-  {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력해서 추가할 수 있어요.',warn:null}
+  {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 변경하고\n12가지 색상 중 원하시는 테마를 선택하실 수 있습니다.',warn:null},
+  {sel:'.hdr-sq',title:'사진 · 영상 등록',desc:'사진은 갤러리에서 불러오실 수 있습니다.\n영상은 앱 내 즉석 촬영(최대 30초)만 지원합니다.',warn:null},
+  {sel:'#media-box',title:'물품 자동 분석',desc:'사진 또는 영상을 등록하시면 물품을 자동으로 인식하여 목록을 생성해 드립니다.',warn:'※ AI 분석 이용 시 이용권 1건이 차감됩니다.'},
+  {sel:'#toolbar-cnt',title:'목록 수 · 검색',desc:'등록된 물품 수가 표시됩니다.\n돋보기를 누르시면 물품 이름으로 검색하실 수 있습니다.',warn:null},
+  {sel:'.add-row',title:'직접 추가',desc:'AI 없이 물품 이름을 직접 입력하여 추가하실 수 있습니다.',warn:null}
 ], 'ob_drawer_done');
 }
 var _OB_I=0, _OB_S=[], _OB_KEY='';
