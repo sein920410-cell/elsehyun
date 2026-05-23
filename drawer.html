@@ -7,98 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>body { visibility: hidden; }
-[data-theme="dark"] .add-item-sheet,
-[data-theme="dark"] .edit-item-sheet {
-  background: #1A1B20;
-  color: #F0EEE8;
-}
-[data-theme="dark"] .sh-title,
-[data-theme="dark"] .ai-cat-lbl,
-[data-theme="dark"] .edit-memo-lbl { color: #F0EEE8; }
-[data-theme="dark"] .ai-name-input,
-[data-theme="dark"] .edit-name-input,
-[data-theme="dark"] .edit-memo-input {
-  background: #111318; color: #F0EEE8;
-  border-color: rgba(255,255,255,0.12);
-}
-[data-theme="dark"] .ai-chip {
-  background: rgba(255,255,255,0.06);
-  color: rgba(240,238,232,0.6);
-  border-color: rgba(255,255,255,0.1);
-}
-[data-theme="dark"] .ai-chip.sel {
-  background: rgba(200,168,112,0.25);
-  color: #C8A870;
-  border-color: #C8A870;
-}
 
-/* ─── 다크모드 목록 영역 ─── */
-body[data-theme="dark"] {
-  --bg: #111318;
-  --surface: #1A1B20;
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.12);
-  --ink: #F0EEE8;
-  --ink2: #C8C4BC;
-  --muted: rgba(240,238,232,0.45);
-  --muted2: rgba(240,238,232,0.25);
-}
-body[data-theme="dark"] .list-inner,
-body[data-theme="dark"] .list-wrap {
-  background: #111318;
-}
-body[data-theme="dark"] .cat-header,
-body[data-theme="dark"] .cat-name-lbl { color: rgba(240,238,232,0.7); }
-body[data-theme="dark"] .item-card { background: #1A1B20; border-color: rgba(255,255,255,0.08); }
-body[data-theme="dark"] .item-name { color: #F0EEE8; }
-body[data-theme="dark"] .item-meta { color: rgba(240,238,232,0.45); }
-body[data-theme="dark"] .empty-state svg { stroke: rgba(255,255,255,0.15); }
-body[data-theme="dark"] .empty-txt { color: rgba(240,238,232,0.3); }
-body[data-theme="dark"] .bottom-section { border-top-color: rgba(255,255,255,0.06); }
-body[data-theme="dark"] .add-lbl { color: rgba(240,238,232,0.35); }
-body[data-theme="dark"] .add-sq { border-color: rgba(240,238,232,0.25); }
-body[data-theme="dark"] .add-sq svg { stroke: rgba(240,238,232,0.35); }
-body[data-theme="dark"] .reset-link { color: rgba(240,238,232,0.2); }
-body[data-theme="dark"] .search-bar { background: #111318; border-color: rgba(255,255,255,0.1); }
-body[data-theme="dark"] .search-input { background: #1A1B20; color: #F0EEE8; border-color: rgba(255,255,255,0.1); }
-body[data-theme="dark"] .qty-wrap { background: #111318; border-color: rgba(255,255,255,0.1); }
-body[data-theme="dark"] .qty-num { color: #F0EEE8; border-color: rgba(255,255,255,0.08); }
-body[data-theme="dark"] .qty-btn { color: rgba(240,238,232,0.5); }
-body[data-theme="dark"] .swipe-edit-btn { background: #2A5FA8; }
-body[data-theme="dark"] .swipe-del-btn { background: #8B2020; }
-</style>
-<script>
-(async () => {
-    const _authClient = supabase.createClient(
-        'https://tqhtggusphhcsygiitrv.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
-    );
-    const { data: { session } } = await _authClient.auth.getSession();
-    if (!session) { window.location.replace('login.html'); return; }
-    const { data: serial } = await _authClient.from('serials').select('id').eq('used_by', session.user.email).maybeSingle();
-    const { data: singleSerial } = await _authClient.from('single_serials').select('id').eq('used_by', session.user.email).limit(1).maybeSingle();
-    if (!serial && !singleSerial) { window.location.replace('serial.html'); return; }
-    window.sb = _authClient;
-    window.sb = _authClient; // alias
-    // 다크모드 초기화
-    var _gTheme = localStorage.getItem('gyeol_theme') || 'light';
-    if(_gTheme === 'dark') document.body.setAttribute('data-theme','dark');
-    document.body.style.visibility = 'visible';
-    setTimeout(function(){ startOnboarding(); }, 1000);
-    })();
-</script>
-<style>
-:root{
-  --h-bg:#111318;--h-txt:#fff;--h-sub:rgba(255,255,255,0.42);
-  --h-border:rgba(255,255,255,0.08);--h-btn:rgba(255,255,255,0.08);
-  --bom-bg:#1A1B1F;
-  --bg:#FAF7F2;--surface:#fff;--border:#E8E2D8;--border2:#DDD6CB;
-  --ink:#2A2118;--ink2:#4A3830;--muted:#9A8E80;--muted2:#B5A99A;
-  --danger:#D93025;
-  --a-color:#C8C8D8;--a-bg:rgba(200,200,216,.12);--a-border:rgba(200,200,216,.3);
-  --font:"DM Sans","Noto Sans KR",sans-serif;
-  --r:6px;
-}
 /* ─── 테마 ─── */
 [data-theme="scarlet"] {--h-bg:#C0362C;--h-txt:#fff;--h-sub:rgba(255,255,255,.62);--h-border:rgba(255,255,255,.18);--h-btn:rgba(255,255,255,.14);--bom-bg:#7A1010;--a-color:#FECACA;--a-bg:rgba(254,202,202,.14);--a-border:rgba(254,202,202,.32)}
 [data-theme="charcoal"]{--h-bg:#2C2F33;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.15);--h-btn:rgba(255,255,255,.1);--bom-bg:#1A1B1E;--a-color:#D1D5DB;--a-bg:rgba(209,213,219,.12);--a-border:rgba(209,213,219,.3)}
@@ -442,6 +351,56 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .ob-close{padding:10px 14px;background:#eee;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#666;cursor:pointer;font-family:inherit}
 .ob-prev{padding:10px 14px;background:#eee;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#444;cursor:pointer;font-family:inherit}
 .ob-nxt{flex:1;padding:10px;background:#111;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
+
+/* ─── 다크모드 (data-dark="1") ─── */
+body[data-dark="1"] {
+  --bg: #111318 !important;
+  --surface: #1A1B20 !important;
+  --border: rgba(255,255,255,0.08) !important;
+  --border2: rgba(255,255,255,0.12) !important;
+  --ink: #F0EEE8 !important;
+  --ink2: #C8C4BC !important;
+  --muted: rgba(240,238,232,0.45) !important;
+  --muted2: rgba(240,238,232,0.25) !important;
+}
+body[data-dark="1"] .item-card { background: #1A1B20; border-color: rgba(255,255,255,0.08); }
+body[data-dark="1"] .item-name { color: #F0EEE8; }
+body[data-dark="1"] .item-meta { color: rgba(240,238,232,0.45); }
+body[data-dark="1"] .cat-name-lbl { color: rgba(240,238,232,0.6); }
+body[data-dark="1"] .empty-state svg { stroke: rgba(255,255,255,0.15); }
+body[data-dark="1"] .empty-txt { color: rgba(240,238,232,0.3); }
+body[data-dark="1"] .add-lbl { color: rgba(240,238,232,0.35); }
+body[data-dark="1"] .add-sq { border-color: rgba(240,238,232,0.25); }
+body[data-dark="1"] .add-sq svg { stroke: rgba(240,238,232,0.35); }
+body[data-dark="1"] .reset-link { color: rgba(240,238,232,0.2); }
+body[data-dark="1"] .search-input { background: #1A1B20; color: #F0EEE8; border-color: rgba(255,255,255,0.1); }
+body[data-dark="1"] .qty-wrap { background: #111318; border-color: rgba(255,255,255,0.1); }
+body[data-dark="1"] .qty-num { color: #F0EEE8; border-color: rgba(255,255,255,0.08); }
+body[data-dark="1"] .qty-btn { color: rgba(240,238,232,0.5); }
+
+/* ─── 항목 추가/편집 시트 다크모드 ─── */
+[data-dark="1"].add-item-sheet,
+[data-dark="1"].edit-item-sheet {
+  background: #1A1B20;
+  color: #F0EEE8;
+}
+[data-dark="1"] .sh-title,
+[data-dark="1"] .ai-cat-lbl { color: #F0EEE8; }
+[data-dark="1"] .ai-name-input,
+[data-dark="1"] .edit-name-input,
+[data-dark="1"] .edit-memo-input {
+  background: #111318; color: #F0EEE8;
+  border-color: rgba(255,255,255,0.12);
+}
+[data-dark="1"] .ai-chip {
+  background: rgba(255,255,255,0.06);
+  color: rgba(240,238,232,0.6);
+  border-color: rgba(255,255,255,0.1);
+}
+[data-dark="1"] .ai-chip.sel {
+  background: rgba(200,168,112,0.25);
+  color: #C8A870; border-color: #C8A870;
+}
 </style>
 </head>
 <body data-theme="stone">
@@ -850,7 +809,7 @@ function addItemDirectly(){
   const ov=document.getElementById('add-item-ov');
   ov.style.display='flex';
   const _sh=document.getElementById('add-item-sheet');
-  if(_sh) _sh.setAttribute('data-theme', localStorage.getItem('gyeol_theme')||'light');
+  if(_sh) _sh.setAttribute('data-dark', localStorage.getItem('gyeol_theme')==='dark'?'1':'0');
   document.getElementById('add-item-input').value='';
   _addCat='위생';
   document.querySelectorAll('.ai-chip').forEach(c=>{
@@ -888,7 +847,7 @@ function openEditItem(idx){
   }
   document.getElementById('edit-item-ov').style.display='flex';
   const _esh=document.getElementById('edit-item-sheet');
-  if(_esh) _esh.setAttribute('data-theme', localStorage.getItem('gyeol_theme')||'light');
+  if(_esh) _esh.setAttribute('data-dark', localStorage.getItem('gyeol_theme')==='dark'?'1':'0');
   resetSwipe(idx);
   setTimeout(()=>document.getElementById('edit-name-input').focus(),300);
 }
