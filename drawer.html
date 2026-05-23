@@ -855,11 +855,6 @@ function renderItems(filter=''){
   document.getElementById('bottom-section').style.display='flex';
   function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hl">$1</span>');}
   if(!Object.keys(groups).length){
-    const hasTipShown=localStorage.getItem('gyeol_media_tip_'+tag);
-    const hasMedia=!!localStorage.getItem('mediaPath_'+tag);
-    const tipBar=document.getElementById('media-tip-bar');
-    if(tipBar){tipBar.style.display=(hasMedia&&!hasTipShown)?'flex':'none';}
-    if(hasMedia&&!hasTipShown)localStorage.setItem('gyeol_media_tip_'+tag,'1');
     container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.<br>물품 등록을 추가하여 주세요.</div></div>`;
     return;
   }
@@ -1473,6 +1468,16 @@ window.addEventListener('load',function(){
       }).catch(function(){});
     }catch(e){}
   }
+  // 미디어 툴팁 — 목록 유무 관계없이 미디어 있고 아직 안 봤으면 표시
+  (function(){
+    var hasMedia=!!localStorage.getItem('mediaPath_'+tag);
+    var hasTipShown=localStorage.getItem('gyeol_mtip2_'+tag);
+    var tipBar=document.getElementById('media-tip-bar');
+    if(tipBar&&hasMedia&&!hasTipShown){
+      tipBar.style.display='flex';
+      localStorage.setItem('gyeol_mtip2_'+tag,'1');
+    }
+  })();
   // 목록 렌더링
   renderItems();
 })();
