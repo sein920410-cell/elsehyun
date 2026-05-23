@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <title>공간:결 - 마이페이지</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>body { visibility: hidden; }</style>
+<style>body { visibility: hidden; }
+.app-footer{text-align:center;padding:20px 16px 8px;border-top:1px solid var(--divider);margin-top:4px}
+.app-footer-brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em;margin-bottom:6px}
+.app-footer-info{font-size:11px;color:var(--muted);margin-bottom:4px}
+.app-footer-link{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--divider)}
+.app-footer-copy{font-size:10px;color:var(--muted2)}
+</style>
 <script>
 (async () => {
     const _sb = supabase.createClient(
@@ -54,7 +60,7 @@ input { -webkit-user-select: text; user-select: text; }
   --header-bg: #0C0D10; --card-bg: #1A1B20; --card-border: rgba(255,255,255,0.08);
   --tag-bg: rgba(255,255,255,0.06); --divider: rgba(255,255,255,0.06);
   --danger: #E05555; --accent: #C8A870; --bar-fill: #C8A870; --bar-track: rgba(200,168,112,0.15);
-  --badge-ok: #52c496; --badge-ok-bg: rgba(82,196,150,0.15);
+  --badge-ok: #C8A870; --badge-ok-bg: rgba(200,168,112,0.15);
 }
 [data-size="sm"] { --fs-base: 12px; }
 [data-size="md"] { --fs-base: 14px; }
@@ -609,17 +615,20 @@ body {
     </div>
   </div>
 
-  <!-- 버전 + 계정 링크 (하단) -->
-  <div style="text-align:center; padding: 8px 0 2px">
-    <div style="font-size:10px; color:var(--muted2); font-weight:600; letter-spacing:0.1em">공간:결 · v1.0.0</div>
-    <div style="font-size:10px; color:var(--muted2); margin-top:2px">스마트 보관 태그 서비스</div>
+  <!-- 푸터 -->
+  <div class="app-footer">
+    <div class="app-footer-brand">공간:결</div>
+    <div class="app-footer-info">
+      문의 · <a href="mailto:elsehyun2026@gmail.com" class="app-footer-link">elsehyun2026@gmail.com</a>
+    </div>
+    <div class="app-footer-copy">© 2026 공간:결 · All rights reserved.</div>
   </div>
 
   <!-- 로그아웃 / 계정 삭제 텍스트 링크 -->
   <div class="account-links">
     <span class="acct-link" onclick="handleLogout()">로그아웃</span>
     <div class="acct-divider"></div>
-    <span class="acct-link del-link" onclick="deleteAccount()">계정 삭제</span>
+    <span class="acct-link del-link" onclick="openDeleteModal()">계정 삭제</span>
   </div>
 
 </div>
@@ -635,6 +644,36 @@ body {
 </div>
 
 <!-- 초대 코드 모달 -->
+<!-- 계정 삭제 확인 모달 -->
+<div class="modal-overlay" id="delete-modal" onclick="handleModalOutsideClick(event,'delete-modal')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div style="width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 18px"></div>
+    <div style="text-align:center;margin-bottom:6px">
+      <svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:#C0362C;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;margin:0 auto 10px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="#C0362C"/></svg>
+      <div style="font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-.02em">계정을 삭제하시겠습니까?</div>
+    </div>
+    <div style="margin:12px 0;padding:12px 14px;background:rgba(192,54,44,.07);border-radius:9px;font-size:12px;color:#C0362C;font-weight:600;line-height:1.6">
+      ⚠️ 삭제 후 14일 이내 같은 이메일로 재등록 시 복구 가능<br>
+      · 14일이 지나면 시리얼 코드가 완전 폐기됩니다<br>
+      · 잔여 이용권은 복구되지 않습니다
+    </div>
+    <div style="margin-bottom:8px;font-size:12px;color:var(--muted);font-weight:500">
+      확인을 위해 아래에 <b style="color:var(--ink)">내 계정 삭제</b> 를 입력해 주세요.
+    </div>
+    <input id="delete-confirm-input" type="text" placeholder="내 계정 삭제"
+      style="width:100%;box-sizing:border-box;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:var(--font);color:var(--ink);background:var(--bg);outline:none;margin-bottom:12px"
+      oninput="onDeleteInput(this.value)">
+    <button id="delete-confirm-btn" onclick="confirmDeleteAccount()"
+      style="width:100%;padding:13px;background:#C0362C;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;opacity:0.35;pointer-events:none;transition:opacity .15s">
+      계정 영구 삭제
+    </button>
+    <button onclick="closeDeleteModal()"
+      style="width:100%;padding:11px;background:transparent;border:none;font-size:13px;color:var(--muted);font-family:var(--font);cursor:pointer;margin-top:6px">
+      취소
+    </button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="invite-modal" onclick="handleModalOutsideClick(event,'invite-modal')">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -690,6 +729,28 @@ function setSize(val){
   document.querySelectorAll('.size-btn').forEach(function(btn){
     btn.classList.toggle('active', btn.dataset.val === val);
   });
+}
+
+/* 계정 삭제 모달 */
+function openDeleteModal(){
+  document.getElementById('delete-confirm-input').value='';
+  onDeleteInput('');
+  document.getElementById('delete-modal').classList.add('open');
+  history.pushState(null,'',location.href);
+}
+function closeDeleteModal(){
+  document.getElementById('delete-modal').classList.remove('open');
+}
+function onDeleteInput(val){
+  const btn=document.getElementById('delete-confirm-btn');
+  const match = val === '내 계정 삭제';
+  btn.style.opacity = match ? '1' : '0.35';
+  btn.style.pointerEvents = match ? 'auto' : 'none';
+}
+async function confirmDeleteAccount(){
+  if(document.getElementById('delete-confirm-input').value !== '내 계정 삭제') return;
+  closeDeleteModal();
+  await deleteAccount();
 }
 
 /* 설정 초기화 */
@@ -809,7 +870,7 @@ function handleModalOutsideClick(e, id){
 }
 // 모달 열려있을 때 뒤로가기 차단
 window.addEventListener('popstate', function(){
-  var modals = ['invite-modal','name-modal'];
+  var modals = ['invite-modal','name-modal','delete-modal'];
   for(var i=0; i<modals.length; i++){
     var m = document.getElementById(modals[i]);
     if(m && m.classList.contains('open')){
