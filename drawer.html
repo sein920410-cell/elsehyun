@@ -1482,7 +1482,7 @@ window.addEventListener('load',function(){
     _sb.auth.getSession().then(function(r){
       var session=r&&r.data&&r.data.session;
       if(!session||!session.user||!session.user.email)return;
-      _sb.from('serials').select('color_theme,media_path,name_tag').eq('used_by',session.user.email).maybeSingle().then(function(res){
+      _sb.from('serials').select('color_theme,media_path').eq('used_by',session.user.email).maybeSingle().then(function(res){
         var d=res&&res.data;
         if(!d)return;
         // 테마 복원
