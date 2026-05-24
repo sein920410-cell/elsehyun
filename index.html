@@ -24,8 +24,8 @@
     if (!serial) { window.location.replace('serial.html'); return; }
     // 인증 통과 → 화면 표시
     document.body.style.visibility = 'visible';
-    // 온보딩 자동 실행 비활성화 (검색 화면은 직관적이라 불필요)
-    // setTimeout(function(){ startOnboarding(); }, 1000);
+    // 온보딩 자동 실행
+    setTimeout(function(){ startOnboarding(); }, 1000);
         })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -301,7 +301,6 @@ body {
     <input id="search-input" class="search-input" type="text" placeholder="물건 이름으로 검색" autocomplete="off" autocorrect="off" spellcheck="false" oninput="onSearch()">
     <button class="clear-btn" id="clear-btn" onclick="clearSearch()">✕</button>
   </div>
-  <div class="search-hint" id="search-hint">찾으시는 물건을 검색해 보세요</div>
 </div>
 
 <div id="result-area" style="display:none" class="result-area">
