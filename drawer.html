@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="i18n.js"></script>
 <style>body { visibility: hidden; }</style>
 <script>
 (async () => {
@@ -19,7 +20,6 @@
     const { data: singleSerial } = await _authClient.from('single_serials').select('id').eq('used_by', session.user.email).limit(1).maybeSingle();
     if (!serial && !singleSerial) { window.location.replace('serial.html'); return; }
     window.sb = _authClient;
-    window.sb = _authClient; // alias
     document.body.style.visibility = 'visible';
     setTimeout(function(){ startOnboarding(); }, 1000);
     })();
@@ -153,19 +153,19 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .swipe-del-btn{flex:1;background:var(--danger);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:3px}
 .swipe-del-btn svg{width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .swipe-del-lbl{font-size:10px;font-weight:700;color:#fff;letter-spacing:.03em}
-.item-row{display:flex;align-items:center;padding:12px 13px;gap:11px;background:var(--surface);border:none;border-radius:0;position:relative;z-index:1;transition:transform .18s cubic-bezier(.25,0,.25,1);touch-action:pan-y}
-.item-swipe-l{display:flex;align-items:center;gap:11px;flex:1;min-width:0;touch-action:pan-y}
+.item-row{display:flex;align-items:center;padding:13px 14px;gap:12px;background:var(--surface);border:none;border-radius:0;position:relative;z-index:1;transition:transform .18s cubic-bezier(.25,0,.25,1);touch-action:pan-y}
+.item-swipe-l{display:flex;align-items:center;gap:12px;flex:1;min-width:0;touch-action:pan-y}
 .item-ico{width:40px;height:40px;border-radius:calc(var(--r) - 1px);background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;line-height:1}
 .item-ico svg{width:19px;height:19px;stroke:var(--muted);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .item-info{flex:1;min-width:0}
-.item-name{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.02em;line-height:1.3}
-.item-sub-row{display:flex;align-items:center;gap:5px;margin-top:3px}
+.item-name{font-size:15px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.02em;line-height:1.3}
+.item-sub-row{display:flex;align-items:center;gap:5px;margin-top:4px}
 .item-cat-lbl{font-size:9px;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase}
 .item-memo-badge{display:inline-flex;align-items:center;gap:3px;background:var(--h-bg);color:var(--h-txt);border-radius:4px;padding:2px 6px;font-size:9px;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .4s}
 .qty-wrap{display:flex;align-items:center;background:var(--field);border:1px solid var(--border);border-radius:5px;overflow:hidden;flex-shrink:0}
-.qty-btn{width:32px;height:32px;font-size:18px;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;font-family:var(--font);line-height:1}
+.qty-btn{width:32px;height:32px;font-size:18px;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;font-family:var(--font);line-height:1;transition:background .12s ease}
 .qty-btn:active{background:var(--border)}
-.qty-num{font-size:13px;font-weight:700;color:var(--ink);width:28px;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);height:32px;line-height:32px}
+.qty-num{font-size:13px;font-weight:600;color:var(--ink);width:28px;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);height:32px;line-height:32px;font-variant-numeric:tabular-nums}
 
 /* ─── 하단 액션 ─── */
 .bottom-section{padding:14px 0 10px;display:flex;flex-direction:column;align-items:center;gap:10px}
@@ -178,9 +178,33 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .reset-link{display:inline-block;align-self:center;text-align:center;font-size:11px;color:var(--muted2);text-decoration:underline;text-underline-offset:3px;padding:4px 10px;cursor:pointer}
 
 /* ─── 빈 상태 ─── */
-.empty-state{display:flex;flex-direction:column;align-items:center;gap:10px;padding:36px 16px 16px}
-.empty-state svg{width:30px;height:30px;stroke:var(--border2);stroke-width:1.2;fill:none;stroke-linecap:round}
-.empty-txt{font-size:14px;font-weight:500;color:var(--muted2);text-align:center;line-height:1.8}
+.empty-state{display:flex;flex-direction:column;align-items:center;gap:14px;padding:48px 24px 24px;animation:emptyFade .5s ease both}
+.empty-state .empty-ico{width:64px;height:64px;border-radius:18px;background:var(--field);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px var(--cat-line)}
+.empty-state .empty-ico svg{width:30px;height:30px;stroke:var(--muted2);stroke-width:1.3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.empty-txt{font-size:14.5px;font-weight:600;color:var(--ink2);text-align:center;line-height:1.65}
+.empty-txt .empty-sub{display:block;margin-top:5px;font-size:12.5px;font-weight:400;color:var(--muted)}
+.empty-cta{margin-top:4px;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--field);border:1px solid var(--border2);padding:9px 18px;border-radius:var(--r);cursor:pointer;transition:transform .12s ease,background .15s ease}
+.empty-cta:active{transform:scale(.96)}
+@keyframes emptyFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── 목록 카드 진입 애니메이션 (stagger) ─── */
+.item-card.enter{animation:cardEnter .34s cubic-bezier(.22,.61,.36,1) both}
+@keyframes cardEnter{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+.cat-group.enter{animation:emptyFade .3s ease both}
+@media (prefers-reduced-motion: reduce){.item-card.enter,.cat-group.enter{animation:none}}
+
+/* ─── 스켈레톤 로딩 ─── */
+.sk-wrap{padding:8px 0;animation:emptyFade .35s ease both}
+.sk-cat{display:flex;align-items:center;gap:10px;padding:14px 16px 10px}
+.sk-line{border-radius:5px;background:linear-gradient(100deg,var(--field) 30%,var(--cat-line) 50%,var(--field) 70%);background-size:200% 100%;animation:skShimmer 1.3s ease-in-out infinite}
+.sk-cat-label{width:64px;height:13px}
+.sk-row{display:flex;align-items:center;gap:13px;padding:12px 16px;border-bottom:1px solid var(--cat-line)}
+.sk-ico{width:38px;height:38px;border-radius:var(--r);flex-shrink:0}
+.sk-body{flex:1;display:flex;flex-direction:column;gap:7px}
+.sk-name{height:13px}
+.sk-meta{height:10px;opacity:.6}
+.sk-qty{width:78px;height:30px;border-radius:var(--r);flex-shrink:0}
+@keyframes skShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .media-tip{display:flex;align-items:center;gap:6px;padding:10px 16px;animation:tipBounce 1.8s ease-in-out infinite}
 .media-tip svg{width:18px;height:18px;stroke:var(--muted);stroke-width:2;fill:none;flex-shrink:0}
 .media-tip-txt{font-size:12px;color:var(--muted);font-weight:500}
@@ -447,7 +471,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     
     <div class="brand-anim">
       <span class="brand-a">공간:결</span>
-      <span class="brand-b"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/></svg><span class="brand-b-txt">채팅상담</span></span>
+      <span class="brand-b"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/></svg><span class="brand-b-txt" data-i18n="chat_consult">채팅상담</span></span>
     </div>
   </div>
   <div class="header-title-wrap">
@@ -466,8 +490,8 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
   <div class="media-box empty" id="media-box" onclick="if(this.classList.contains('empty'))showMediaPicker()">
     <div class="media-empty-inner" id="media-empty">
       <div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
-      <div class="media-empty-lbl">사진·영상 탭하여 등록</div>
-      <div class="media-empty-sub">물품 자동 인식</div>
+      <div class="media-empty-lbl" data-i18n="media_add">사진·영상 탭하여 등록</div>
+      <div class="media-empty-sub" data-i18n="media_add_sub">물품 자동 인식</div>
     </div>
   </div>
 </div>
@@ -489,7 +513,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <div class="search-bar" id="search-bar">
   <div class="search-inner">
     <svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
-    <input class="search-input" id="search-input" placeholder="물품 검색..." oninput="renderItems(this.value)">
+    <input class="search-input" id="search-input" data-i18n-ph="search_ph" placeholder="물품 검색..." oninput="renderItems(this.value)">
   </div>
   <span class="search-cancel" onclick="closeSearch()">취소</span>
 </div>
@@ -835,7 +859,18 @@ function toggleSearch(){const b=document.getElementById('search-bar');if(b.class
 function closeSearch(){document.getElementById('search-bar').classList.remove('open');document.getElementById('search-input').value='';renderItems('');}
 
 // ─── 렌더링 ───
-function renderItems(filter=''){
+function showSkeleton(rows=4){
+  const container=document.getElementById('list-items');
+  if(!container)return;
+  let html='<div class="sk-wrap"><div class="sk-cat"><span class="sk-line sk-cat-label"></span></div>';
+  for(let i=0;i<rows;i++){
+    const w=55+Math.floor(Math.random()*30);
+    html+=`<div class="sk-row"><span class="sk-line sk-ico"></span><div class="sk-body"><span class="sk-line sk-name" style="width:${w}%"></span><span class="sk-line sk-meta" style="width:${w-25}%"></span></div><span class="sk-line sk-qty"></span></div>`;
+  }
+  html+='</div>';
+  container.innerHTML=html;
+}
+function renderItems(filter='',animate=false){
   const container=document.getElementById('list-items');
   const groups={};
   items.forEach((it,idx)=>{
@@ -853,7 +888,11 @@ function renderItems(filter=''){
   document.getElementById('bottom-section').style.display='flex';
   function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hl">$1</span>');}
   if(!Object.keys(groups).length){
-    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><div class="empty-txt">등록된 물품이 없습니다.<br>물품 등록을 추가하여 주세요.</div></div>`;
+    if(filter){
+      container.innerHTML=`<div class="empty-state"><div class="empty-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg></div><div class="empty-txt">'${filter}' ${window.t?t('search_no_result'):'검색 결과가 없어요'}<span class="empty-sub">${window.t?t('search_empty_sub'):'다른 이름으로 찾아보시거나 직접 추가해 보세요'}</span></div></div>`;
+    }else{
+      container.innerHTML=`<div class="empty-state"><div class="empty-ico"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.3 7 12 12 20.7 7"/><line x1="12" y1="12" x2="12" y2="21"/></svg></div><div class="empty-txt">${window.t?t('empty_title'):'아직 등록된 물품이 없어요'}<span class="empty-sub">${window.t?t('empty_sub'):'사진을 올리면 AI가 자동으로 목록을 채워드려요'}</span></div><button class="empty-cta" onclick="showMediaPicker()" data-i18n="empty_cta">${window.t?t('empty_cta'):'사진으로 시작하기'}</button></div>`;
+    }
     return;
   }
   container.innerHTML=Object.keys(groups).map(cat=>{
@@ -907,6 +946,13 @@ function renderItems(filter=''){
       </div>
     </div>`;
   }).join('');
+  if(animate){
+    const cards=container.querySelectorAll('.item-card');
+    cards.forEach((c,i)=>{
+      c.classList.add('enter');
+      c.style.animationDelay=(Math.min(i,12)*45)+'ms';
+    });
+  }
 }
 
 function toggleCat(catName,headerEl){
@@ -1160,7 +1206,7 @@ async function confirmUpload(){
   items=[];localStorage.setItem('gyeol_'+tag,'[]');renderItems();
   document.getElementById('rot-ov').classList.remove('open');
   const box=document.getElementById('media-box');box.className='media-box filled';
-  box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>업로드 중...</div></div>`;
+  box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>${window.t?t('uploading'):'업로드 중...'}</div></div>`;
   try{
     const fileToUpload=await compressImage(selFile);
     const ext=fileToUpload.name.split('.').pop()||'jpg';
@@ -1180,7 +1226,7 @@ async function confirmUpload(){
 }
 
 function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;}
-function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl">사진·영상 탭하여 등록</div><div class="media-empty-sub">물품 자동 인식</div></div>`;}
+function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl" data-i18n="media_add">${window.t?t('media_add'):'사진·영상 탭하여 등록'}</div><div class="media-empty-sub" data-i18n="media_add_sub">${window.t?t('media_add_sub'):'물품 자동 인식'}</div></div>`;}
 function openFull(){const el=document.getElementById('media-el');if(!el)return;const fc=document.getElementById('fs-content');fc.innerHTML=el.tagName==='VIDEO'?`<video src="${el.src}" class="${el.className}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`:`<img src="${el.src}" class="${el.className}" style="max-width:100%;max-height:100%;object-fit:contain">`;document.getElementById('fs-ov').classList.add('open');}
 function closeFull(){document.getElementById('fs-ov').classList.remove('open');}
 
@@ -1225,7 +1271,7 @@ document.getElementById('chat-inp').addEventListener('keydown',e=>{if(e.key==='E
 async function sendMsg(){
   const inp=document.getElementById('chat-inp');const t=inp.value.trim();if(!t)return;resetChatTimeout();
   const history=loadChatHistory();history.push({role:'user',text:t});saveChatHistory(history);renderChatHistory(history);inp.value='';
-  try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:t,tag,drawerName:document.getElementById('drawer-title').textContent,inventory:JSON.stringify(items.map(i=>i.n)),history:history.slice(0,-1).slice(-10)})});const d=await r.json();const reply=d.reply||'오류가 발생했습니다.';history.push({role:'bot',text:reply});saveChatHistory(history);renderChatHistory(history);}
+  try{const{data:{session:_cs}}=await _sb.auth.getSession();const _ct=_cs?.access_token||'';const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_ct}`},body:JSON.stringify({message:t,tag,drawerName:document.getElementById('drawer-title').textContent,inventory:JSON.stringify(items.map(i=>i.n)),history:history.slice(0,-1).slice(-10)})});const d=await r.json();const reply=d.reply||'오류가 발생했습니다.';history.push({role:'bot',text:reply});saveChatHistory(history);renderChatHistory(history);}
   catch{history.push({role:'bot',text:'오류가 발생했습니다.'});saveChatHistory(history);renderChatHistory(history);}
 }
 
@@ -1240,7 +1286,8 @@ function mpickReanalyze(){
 
 async function runAnalysis(filePath,mimeType,videoFrames=null){
   const box=document.getElementById('media-box');const el=document.getElementById('media-el');
-  if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px;background:linear-gradient(transparent,rgba(0,0,0,.45))"><div class="analyzing-badge"><div class="spinner"></div>물품 분석 중...</div></div>`;
+  if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px;background:linear-gradient(transparent,rgba(0,0,0,.45))"><div class="analyzing-badge"><div class="spinner"></div>${window.t?t('analyzing'):'물품 분석 중...'}</div></div>`;
+  showSkeleton(5);
   const rmOv=()=>{const o=document.getElementById('analyze-overlay');if(o)o.remove();};
   try{
     const{data:{session}}=await _sb.auth.getSession();const accessToken=session?.access_token||'';
@@ -1255,7 +1302,7 @@ async function runAnalysis(filePath,mimeType,videoFrames=null){
     }
     // ────────────────────────────────────────────────────────────
     if(d.items?.length){d.items.forEach(it=>items.push({n:`${it.category}:${it.name}`,q:it.qty||1}));localStorage.setItem('gyeol_'+tag,JSON.stringify(items));}
-    rmOv();renderItems();
+    rmOv();renderItems('',true);
     if(d.reviewItems?.length)showReview(d.reviewItems);
     else if(items.length>0){const credMsg=d.creditsRemaining!==undefined?` (남은 이용권: ${d.creditsRemaining}건)`:'';}
   }catch(err){rmOv();showResultModal('⚠️','분석 오류',err.message);renderItems();}
@@ -1271,7 +1318,7 @@ async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?
 function toggleRec(){if(!isRec){const dw=document.getElementById('dark-warn');if(dw&&dw.style.display==='flex')return;recChunks=[];const mt=['video/webm;codecs=vp9','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';const recOpts=mt?{mimeType:mt,videoBitsPerSecond:800000}:{videoBitsPerSecond:800000};mediaRec=new MediaRecorder(mediaStream,recOpts);mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};mediaRec.onstop=()=>{stopGuideTips();const type=(mt||'video/webm').split(';')[0];recBlob=new Blob(recChunks,{type});const pb=document.getElementById('rec-playback');pb.src=URL.createObjectURL(recBlob);pb.style.display='block';document.getElementById('rec-live').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-btn').style.display='none';document.getElementById('rec-confirm').style.display='inline-flex';document.getElementById('rec-retake').style.display='inline-flex';document.getElementById('rec-hint').textContent='영상을 확인하고 등록하거나 다시 촬영하세요.';document.getElementById('rec-hint').classList.remove('fade');clearTimeout(window._recHintTimer);isRec=false;};mediaRec.start();isRec=true;recSec=0;document.getElementById('rec-btn').className='rec-circle recording';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-ind').style.display='block';const ht2=document.getElementById('rec-hint');ht2.classList.add('fade');startGuideTips();startBrightCheck();recTimer=setInterval(()=>{if(mediaRec?.state==='paused')return;recSec++;document.getElementById('rec-timer').textContent=`00:${String(recSec).padStart(2,'0')}`;if(recSec>=25)document.getElementById('rec-timer').className='rec-timer danger';if(recSec>=30)stopRec();},1000);}else{stopRec();}}
 function stopRec(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;stopGuideTips();const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';const po=document.getElementById('rec-pause-ov');if(po)po.style.display='none';if(mediaRec?.state==='paused')mediaRec.resume();if(mediaRec?.state!=='inactive')mediaRec.stop();}
 function retakeRec(){recBlob=null;recChunks=[];document.getElementById('rec-live').style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';const ht3=document.getElementById('rec-hint');ht3.textContent='버튼을 눌러 촬영을 시작하세요';ht3.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht3.classList.add('fade'),2800);isRec=false;startBrightCheck();}
-async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>프레임 추출 중...</div></div>`;try{const videoFrames=await extractVideoFrames(recBlob,8);const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>${window.t?t('frame_extract'):'프레임 추출 중...'}</div></div>`;try{const videoFrames=await extractVideoFrames(recBlob,8);const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
     // DB에서 이전 경로 읽어 삭제
     try{const{data:{session:_s}}=await _sb.auth.getSession();if(_s?.user?.email){const{data:_sr}=await _sb.from('serials').select('media_path').eq('used_by',_s.user.email).maybeSingle();if(_sr?.media_path)_sb.storage.from('user_uploads').remove([_sr.media_path]).catch(()=>{});}}catch(_){}
     const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});
