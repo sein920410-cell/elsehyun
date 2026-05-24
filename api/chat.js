@@ -1,9 +1,25 @@
 import fetch from "node-fetch";
+import { createClient } from "@supabase/supabase-js";
+
+const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
-  
+
+  // JWT 인증 — 토큰 없는 외부 요청이 Gemini 비용을 태우지 못하게 차단
+  const authHeader = req.headers["authorization"] || "";
+  const token = authHeader.replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "인증 토큰 없음" });
+
+  const { data: { user }, error: authErr } = await supa.auth.getUser(token);
+  if (authErr || !user) return res.status(401).json({ error: "유효하지 않은 토큰" });
+
   const { message, inventory, tag, drawerName, history = [] } = req.body;
+
+  // 빈 메시지 방어
+  if (!message || typeof message !== "string" || message.trim().length === 0) {
+    return res.status(400).json({ error: "메시지가 비어 있습니다." });
+  }
 
   try {
     const model = process.env.GEMINI_MODEL || "gemini-2.0-flash";
@@ -65,18 +81,18 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       console.error("Gemini API error:", JSON.stringify(data));
-      return res.status(200).json({ reply: "잠시 후 다시 시도해 주세요." });
+      return res.status(502).json({ reply: "잠시 후 다시 시도해 주세요." });
     }
 
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
     if (!reply) {
-      return res.status(200).json({ reply: "답변을 가져오지 못했어요." });
+      return res.status(200).json({ reply: "답변을 가져오지 못했어요. 다시 한번 말씀해 주세요." });
     }
 
     return res.status(200).json({ reply });
 
   } catch (err) {
     console.error("chat handler error:", err);
-    return res.status(200).json({ reply: "잠시 후 다시 시도해 주세요." });
+    return res.status(500).json({ reply: "잠시 후 다시 시도해 주세요." });
   }
 }
