@@ -6,6 +6,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>body { visibility: hidden; }</style>
 <script>
+  (function(){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); } }catch(e){} })();
+</script>
+<script>
 (async () => {
     const _authClient = supabase.createClient(
         'https://tqhtggusphhcsygiitrv.supabase.co',
@@ -21,67 +24,93 @@
     if (!serial) { window.location.replace('serial.html'); return; }
     // 인증 통과 → 화면 표시
     document.body.style.visibility = 'visible';
-    setTimeout(function(){ try { if (typeof renderDrawers === 'function') renderDrawers(); } catch(e) {} }, 0);
     setTimeout(function(){ startOnboarding(); }, 1000);
         })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 input { -webkit-user-select: text; user-select: text; }
 
+:root {
+  --bg: #FBFAF8;
+  --surface: #ffffff;
+  --ink: #2B2722;
+  --ink-soft: #3A352E;
+  --muted: #A39A8C;
+  --muted2: #BDB4A6;
+  --line: #ECE7DE;
+  --field-border: #EAE3D8;
+  --accent: #B49464;
+  --divider: #ECE7DE;
+}
+html[data-theme="dark"] {
+  --bg: #14130F;
+  --surface: #1E1C18;
+  --ink: #F0EBE2;
+  --ink-soft: #D8D1C5;
+  --muted: #8E867A;
+  --muted2: #6B645A;
+  --line: rgba(255,255,255,0.08);
+  --field-border: rgba(255,255,255,0.12);
+  --accent: #C8A870;
+  --divider: rgba(255,255,255,0.08);
+}
+
 body {
   font-family: 'DM Sans','Noto Sans KR',sans-serif;
-  background: #FAF7F2; /* 은은한 로즈빛 흰색 */
+  background: var(--bg);
   min-height: 100dvh;
-  color: #2C2C2C; /* 전체 기본 글씨: 차콜 블랙 */
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  transition: background 0.3s, color 0.3s;
+}
+
+.logo-en {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  letter-spacing: 0.06em;
 }
 
 .header {
-  padding: 18px 20px 14px;
+  padding: 20px 20px 0;
   display: flex;
   align-items: center;
   gap: 10px;
   position: sticky;
   top: 0;
   z-index: 100;
-  background: #FAF7F2;
+  background: var(--bg);
+  transition: background 0.3s;
 }
 .brand { 
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.03em;
   flex: 1;
-  color: #B5A99A;
+  font-size: 18px;
+  color: var(--ink-soft);
 }
-.header-sub {
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #9A8E80; /* 서브 글씨: 따뜻한 회갈색 */
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
+.brand .sp { letter-spacing: 0.12em; }
+.brand .gy { letter-spacing: 0.04em; margin-left: 2px; }
+.header-divider {
+  height: 0.5px; background: var(--divider);
+  margin: 16px 20px 0; transition: background 0.3s;
 }
 
-.search-area { padding: 40px 20px 0; }
+.search-area { padding: 36px 20px 0; }
 
-.hero-text {
-  margin-bottom: 18px;
-}
+.hero-text { margin-bottom: 22px; }
 .hero-title {
-  font-size: 19px;
+  font-size: 25px;
   font-weight: 600;
-  letter-spacing: -0.01em;
-  margin-bottom: 5px;
-  color: #3A322A;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--ink);
 }
 .hero-sub {
   font-size: 12.5px;
-  color: #A89C8C;
+  color: var(--muted);
   line-height: 1.5;
+  margin-top: 10px;
 }
 
 .search-wrap { position: relative; }
@@ -89,100 +118,107 @@ body {
   position: absolute; left: 16px; top: 50%;
   transform: translateY(-50%);
   width: 16px; height: 16px;
-  stroke: #B5A99A;
+  stroke: var(--muted2);
   stroke-width: 2; fill: none;
   stroke-linecap: round; stroke-linejoin: round;
   pointer-events: none;
 }
 .search-input {
   width: 100%;
-  background: #fff;
-  border: 0.5px solid #EAE3D8;
+  background: var(--surface);
+  border: 1px solid var(--field-border);
   border-radius: 13px;
-  padding: 14px 44px 14px 44px;
+  padding: 15px 44px 15px 44px;
   font-size: 14px;
   font-family: inherit;
-  color: #2C2C2C;
+  color: var(--ink);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.3s;
   -webkit-appearance: none;
 }
 .search-input:focus {
-  border-color: #D8C4A8;
-  box-shadow: 0 0 0 3px rgba(180,148,100,0.08);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(180,148,100,0.10);
 }
-.search-input::placeholder { color: #B5A99A; }
+.search-input::placeholder { color: var(--muted2); }
 .clear-btn {
   position: absolute; right: 12px; top: 50%;
   transform: translateY(-50%);
   width: 26px; height: 26px; border-radius: 50%;
-  background: rgba(0,0,0,0.06); border: none;
-  color: #9A8E80; /* X 버튼: 따뜻한 회갈색 */
+  background: var(--line); border: none;
+  color: var(--muted);
   cursor: pointer;
   font-size: 12px; display: none;
   align-items: center; justify-content: center;
 }
 .clear-btn.vis { display: flex; }
 
-.result-area { padding: 20px 20px 0; }
+.search-hint {
+  text-align: center;
+  padding: 48px 20px;
+  font-size: 12.5px;
+  color: var(--muted2);
+  line-height: 1.7;
+}
+
+.result-area { padding: 22px 20px 0; }
 .result-label {
   font-size: 10px; font-weight: 700;
   letter-spacing: 0.14em; text-transform: uppercase;
-  color: #9A8E80; /* 결과 텍스트: 따뜻한 회갈색 */
+  color: var(--muted);
   margin-bottom: 12px;
 }
 
 .result-item {
-  background: #fff;
-  border-radius: 16px;
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: 14px;
   padding: 14px 16px;
   display: flex; align-items: center; gap: 12px;
   margin-bottom: 8px; cursor: pointer;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-  transition: transform 0.1s;
+  transition: transform 0.1s, border-color 0.15s;
 }
-.result-item:active { transform: scale(0.98); }
+.result-item:active { transform: scale(0.985); border-color: var(--field-border); }
 
 .result-ico {
-  width: 38px; height: 38px; border-radius: 11px;
-  background: rgba(180, 148, 100, 0.12); /* 아이콘 배경: 딥 로즈 골드를 아주 연하게 */
+  width: 40px; height: 40px; border-radius: 12px;
+  background: rgba(180, 148, 100, 0.10);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
 .result-ico svg {
   width: 18px; height: 18px;
-  stroke: #B49464; /* 아이콘 선: 딥 로즈 골드 */
-  stroke-width: 1.8; fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.7; fill: none;
   stroke-linecap: round; stroke-linejoin: round;
 }
 .result-info { flex: 1; min-width: 0; }
 .result-name {
-  font-size: 14px; font-weight: 700;
-  color: #2C2C2C; /* 결과 물건 이름: 차콜 블랙 */
+  font-size: 14.5px; font-weight: 600;
+  color: var(--ink);
   letter-spacing: -0.01em;
 }
 .result-name mark { 
   background: none; 
-  color: #B49464; /* 검색된 단어 강조: 딥 로즈 골드 */
-  font-weight: 900; 
-  text-decoration: underline; 
+  color: var(--accent);
+  font-weight: 700; 
 }
-.result-meta { font-size: 11px; color: #9A8E80; margin-top: 3px; } /* 위치 설명: 따뜻한 회갈색 */
-.result-meta b { color: #2C2C2C; font-weight: 600; } /* 서랍 이름: 차콜 블랙 */
+.result-meta { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+.result-meta b { color: var(--ink-soft); font-weight: 600; }
 
 .go-btn {
-  padding: 7px 14px; border-radius: 10px;
-  background: #B49464; /* 이동 버튼 배경: 딥 로즈 골드 */
+  padding: 8px 15px; border-radius: 10px;
+  background: var(--accent);
   border: none;
-  color: #fff; font-size: 12px; font-weight: 700;
+  color: #fff; font-size: 12px; font-weight: 600;
   font-family: inherit; cursor: pointer; white-space: nowrap;
   flex-shrink: 0;
 }
 
 .empty-state {
-  text-align: center; padding: 60px 20px;
-  color: #9A8E80; /* 빈 상태 안내: 따뜻한 회갈색 */ 
-  font-size: 14px;
+  text-align: center; padding: 56px 20px;
+  color: var(--muted);
+  font-size: 13.5px;
 }
 .bottom-safe { height: 40px; }
 
@@ -191,59 +227,17 @@ body {
 .drawers-head {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 12px;
-}
-.drawers-title {
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: #B5A99A;
-}
-.drawers-count { font-size: 12px; color: #A89C8C; }
-.drawer-card {
-  display: flex; align-items: center; gap: 13px;
-  background: #fff;
-  border: 0.5px solid #EFE9E0;
-  border-radius: 14px;
-  padding: 13px 15px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: transform 0.1s, border-color 0.15s;
-}
-.drawer-card:active { transform: scale(0.985); border-color: #E0D5C5; }
-.drawer-card-ico {
-  width: 42px; height: 42px; border-radius: 12px;
-  background: rgba(180,148,100,0.10);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.drawer-card-ico svg {
-  width: 19px; height: 19px;
-  stroke: #B49464; stroke-width: 1.7; fill: none;
-  stroke-linecap: round; stroke-linejoin: round;
-}
-.drawer-card-info { flex: 1; min-width: 0; }
-.drawer-card-name {
-  font-size: 14.5px; font-weight: 600;
-  color: #2C2C2C; letter-spacing: -0.01em;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.drawer-card-sub { font-size: 11.5px; color: #A89C8C; margin-top: 2px; }
-.drawer-card-arrow {
-  width: 18px; height: 18px; flex-shrink: 0;
-  stroke: #D5CCBE; stroke-width: 2; fill: none;
-  stroke-linecap: round; stroke-linejoin: round;
-}
-
 .mypage-btn {
   width: 34px; height: 34px; border-radius: 50%;
   background: transparent;
-  border: 0.5px solid #E0D9CD; cursor: pointer;
+  border: 0.5px solid var(--field-border); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: background 0.15s;
 }
 .mypage-btn:active { background: rgba(180, 148, 100, 0.10); }
 .mypage-btn svg {
   width: 17px; height: 17px;
-  stroke: #B5A99A;
+  stroke: var(--muted);
   stroke-width: 1.8; fill: none;
   stroke-linecap: round; stroke-linejoin: round;
 }
@@ -286,22 +280,24 @@ body {
 
 
 <div class="header">
-  <div class="brand">공간:결</div>
+  <div class="brand"><span class="logo-en"><span class="sp">SPACE :</span><span class="gy">GYEOL</span></span></div>
   <button class="mypage-btn" onclick="location.href='mypage.html'" title="마이페이지">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
   </button>
 </div>
+<div class="header-divider"></div>
 
 <div class="search-area">
   <div class="hero-text" id="hero-text">
-    <div class="hero-title" data-i18n="search_title">무엇을 찾으시나요?</div>
-    <div class="hero-sub" data-i18n="search_desc">물건 이름을 입력하면 위치를 알려드려요</div>
+    <div class="hero-title">무엇을<br>찾으시나요?</div>
+    <div class="hero-sub">물건 이름을 입력하면 위치를 알려드려요</div>
   </div>
   <div class="search-wrap">
     <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input id="search-input" class="search-input" type="text" data-i18n-ph="search_main_ph" placeholder="물건 이름으로 검색" autocomplete="off" autocorrect="off" spellcheck="false" oninput="onSearch()">
+    <input id="search-input" class="search-input" type="text" placeholder="물건 이름으로 검색" autocomplete="off" autocorrect="off" spellcheck="false" oninput="onSearch()">
     <button class="clear-btn" id="clear-btn" onclick="clearSearch()">✕</button>
   </div>
+  <div class="search-hint" id="search-hint">찾으시는 물건을 검색해 보세요</div>
 </div>
 
 <div id="result-area" style="display:none" class="result-area">
@@ -309,23 +305,18 @@ body {
   <div id="result-list"></div>
 </div>
 
-<div id="drawers-area" class="drawers-area" style="display:none">
-  <div class="drawers-head">
-    <div class="drawers-title">내 수납장</div>
-    <div class="drawers-count" id="drawers-count"></div>
-  </div>
-  <div id="drawers-list"></div>
-</div>
-
 <div class="bottom-safe"></div>
 
 <script>
 function getAllDrawers() {
   const drawers = [];
+  const SETTING_KEYS = ['gyeol_theme','gyeol_size','gyeol_lang'];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (!key || !key.startsWith('gyeol_')) continue;
+    if (SETTING_KEYS.indexOf(key) !== -1) continue;
     const tag = key.replace('gyeol_', '');
+    if (!/^GYEOL-/i.test(tag)) continue;
     const raw = localStorage.getItem(key);
     let items = [];
     try { items = JSON.parse(raw) || []; } catch(e) {}
@@ -357,38 +348,11 @@ function highlight(text, query) {
     + text.slice(idx + query.length);
 }
 
-function drawerIcon(tag){
-  if(/GYEOL-S-/i.test(tag)) return '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>';
-  return '<svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.3 7 12 12 20.7 7"/><line x1="12" y1="12" x2="12" y2="21"/></svg>';
-}
-function renderDrawers(){
-  const area=document.getElementById('drawers-area');
-  const list=document.getElementById('drawers-list');
-  const cntEl=document.getElementById('drawers-count');
-  if(!area||!list)return;
-  const drawers=getAllDrawers();
-  if(!drawers.length){ area.style.display='none'; return; }
-  cntEl.textContent=drawers.length+'곳';
-  list.innerHTML=drawers.map(d=>{
-    const n=d.items.length;
-    const isSingle=/GYEOL-S-/i.test(d.tag);
-    const sub=isSingle?('단품 · '+n+'개'):(n+'개 보관 중');
-    return `<div class="drawer-card" onclick="location.href='drawer.html?tag=${d.tag}'">
-      <div class="drawer-card-ico">${drawerIcon(d.tag)}</div>
-      <div class="drawer-card-info">
-        <div class="drawer-card-name">${d.name}</div>
-        <div class="drawer-card-sub">${sub}</div>
-      </div>
-      <svg class="drawer-card-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>`;
-  }).join('');
-  area.style.display='block';
-}
-
 function onSearch() {
   const query = document.getElementById('search-input').value.trim();
   const clearBtn = document.getElementById('clear-btn');
   const heroText = document.getElementById('hero-text');
+  const searchHint = document.getElementById('search-hint');
   const resultArea = document.getElementById('result-area');
   const resultLabel = document.getElementById('result-label');
   const resultList = document.getElementById('result-list');
@@ -397,15 +361,15 @@ function onSearch() {
 
   if (!query) {
     heroText.style.display = '';
+    if (searchHint) searchHint.style.display = '';
     resultArea.style.display = 'none';
     resultList.innerHTML = '';
-    renderDrawers();
     return;
   }
 
   heroText.style.display = 'none';
+  if (searchHint) searchHint.style.display = 'none';
   resultArea.style.display = 'block';
-  document.getElementById('drawers-area').style.display = 'none';
 
   const drawers = getAllDrawers();
   const results = [];
