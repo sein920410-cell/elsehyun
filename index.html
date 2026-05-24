@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>공간:결 - 검색</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="i18n.js"></script>
 <style>body { visibility: hidden; }</style>
 <script>
 (async () => {
@@ -242,12 +243,12 @@ body {
 
 <div class="search-area">
   <div class="hero-text" id="hero-text">
-    <div class="hero-title">무엇을 찾으시나요?</div>
-    <div class="hero-sub">물건 이름을 입력하면 위치를 알려드려요</div>
+    <div class="hero-title" data-i18n="search_title">무엇을 찾으시나요?</div>
+    <div class="hero-sub" data-i18n="search_desc">물건 이름을 입력하면 위치를 알려드려요</div>
   </div>
   <div class="search-wrap">
     <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input id="search-input" class="search-input" type="text" placeholder="물건 이름으로 검색" autocomplete="off" autocorrect="off" spellcheck="false" oninput="onSearch()">
+    <input id="search-input" class="search-input" type="text" data-i18n-ph="search_main_ph" placeholder="물건 이름으로 검색" autocomplete="off" autocorrect="off" spellcheck="false" oninput="onSearch()">
     <button class="clear-btn" id="clear-btn" onclick="clearSearch()">✕</button>
   </div>
 </div>
@@ -341,7 +342,7 @@ function onSearch() {
     return;
   }
 
-  resultList.innerHTML = results.map(r => `\n    <div class="result-item" onclick="location.href='drawer.html?tag=${r.tag}'">\n      <div class="result-ico">\n        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>\n      </div>\n      <div class="result-info">\n        <div class="result-name">${highlight(r.name, query)}</div>\n        <div class="result-meta"><b>${r.drawerName}</b> · ${r.cat} · ${r.qty}개</div>\n      </div>\n      <button class="go-btn" onclick="event.stopPropagation();location.href='drawer.html?tag=${r.tag}'">이동</button>\n    </div>\n  `).join('');
+  resultList.innerHTML = results.map(r => `\n    <div class="result-item" onclick="location.href='drawer.html?tag=${r.tag}'">\n      <div class="result-ico">\n        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>\n      </div>\n      <div class="result-info">\n        <div class="result-name">${highlight(r.name, query)}</div>\n        <div class="result-meta"><b>${r.drawerName}</b> · ${r.cat} · ${r.qty}개</div>\n      </div>\n      <button class="go-btn" onclick="event.stopPropagation();location.href='drawer.html?tag=${r.tag}'">${window.t?t('go'):'이동'}</button>\n    </div>\n  `).join('');
 }
 
 function clearSearch() {
