@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>공간:결 - 마이페이지</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="i18n.js"></script>
 <style>body { visibility: hidden; }
 .app-footer{text-align:center;padding:20px 16px 8px;border-top:1px solid var(--divider);margin-top:4px}
 .app-footer-brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em;margin-bottom:6px}
@@ -498,7 +497,7 @@ body {
     <div class="profile-info">
       <div class="profile-name-row">
         <div class="profile-name" id="profile-name">불러오는 중…</div>
-        <div class="edit-name-btn" onclick="openNameModal()" title="닉네임 변경">
+        <div class="edit-name-btn" onclick="openNameModal()" title="닉네임 변경" data-i18n-title="edit_nickname">
           <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </div>
       </div>
@@ -545,16 +544,11 @@ body {
     </div>
     <div class="row" style="cursor:default">
       <div class="row-ico"><svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></div>
-      <div class="row-info"><div class="row-title" data-i18n="font_size">글씨 크기</div></div>
-    <div class="row" style="cursor:default">
-      <div class="row-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
-      <div class="row-info">
-        <div class="row-title" data-i18n="language">언어</div>
-        <div class="row-sub" data-i18n="language_sub">메뉴·버튼 표시 언어를 선택하세요</div>
-      </div>
+      <div class="row-info"><div class="row-title">글씨 크기</div></div>
       <div class="size-picker">
-        <button class="size-btn lang-btn" data-lang="ko" onclick="setLangPref('ko')" style="width:auto;padding:0 12px;font-size:13px">한국어</button>
-        <button class="size-btn lang-btn" data-lang="en" onclick="setLangPref('en')" style="width:auto;padding:0 12px;font-size:13px">EN</button>
+        <button class="size-btn" data-val="sm" onclick="setSize('sm')">가</button>
+        <button class="size-btn active" data-val="md" onclick="setSize('md')">가</button>
+        <button class="size-btn" data-val="lg" onclick="setSize('lg')">가</button>
       </div>
     </div>
   </div>
@@ -634,7 +628,7 @@ body {
 
   <!-- 푸터 -->
   <div class="app-footer">
-    <div class="app-footer-brand">공간:결</div>
+    <div class="app-footer-brand" data-i18n="brand">공간:결</div>
     <div class="app-footer-info">
       문의 · <a href="mailto:elsehyun2026@gmail.com" class="app-footer-link">elsehyun2026@gmail.com</a>
     </div>
@@ -725,7 +719,7 @@ body {
 <div class="modal-overlay" id="name-modal" onclick="handleModalOutsideClick(event,'name-modal')">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title-sh">닉네임 변경</div>
+    <div class="modal-title-sh" data-i18n="edit_nickname">닉네임 변경</div>
     <div class="modal-sub">보관함에 표시될 이름을 설정할 수 있어요 (최대 16자)</div>
     <input class="modal-input" type="text" id="name-input" placeholder="닉네임 입력" maxlength="16"
            oninput="document.getElementById('char-count').textContent=this.value.length; clearError('name-error')">
@@ -752,14 +746,6 @@ function toggleDark(){
   const isDark = document.getElementById('dark-toggle').checked;
   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   localStorage.setItem('gyeol_theme', isDark ? 'dark' : 'light');
-}
-
-/* 언어 설정 */
-function setLangPref(lang){
-  if(window.I18N) I18N.setLang(lang);
-  document.querySelectorAll('.lang-btn').forEach(function(btn){
-    btn.classList.toggle('active', btn.dataset.lang === lang);
-  });
 }
 
 /* 글씨 크기 */
@@ -804,10 +790,6 @@ async function confirmDeleteAccount(){
     document.documentElement.setAttribute('data-size', size);
     document.querySelectorAll('.size-btn[data-val]').forEach(function(btn) {
         btn.classList.toggle('active', btn.dataset.val === size);
-    });
-    var lang = (window.I18N ? I18N.getLang() : 'ko');
-    document.querySelectorAll('.lang-btn').forEach(function(btn) {
-        btn.classList.toggle('active', btn.dataset.lang === lang);
     });
 })();
 
