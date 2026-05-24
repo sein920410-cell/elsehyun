@@ -399,23 +399,31 @@ export default async function handler(req, res) {
       });
     }
 
-    const { error: deductErr } = await supa
+    // 조건부 차감: 읽은 시점의 크레딧 값과 동일할 때만 차감 (동시 요청 이중차감 방지)
+    const { data: deducted, error: deductErr } = await supa
       .from("serials")
       .update({ ai_credits: serialRow.ai_credits - 1 })
-      .eq("used_by", userEmail);
+      .eq("used_by", userEmail)
+      .eq("ai_credits", serialRow.ai_credits)
+      .select("ai_credits");
 
     if (deductErr) {
       console.error("크레딧 차감 오류:", deductErr.message);
+    } else if (!deducted || deducted.length === 0) {
+      // 그 사이 다른 요청이 먼저 차감함 → 안전하게 거절
+      console.warn("동시 요청 감지: 차감 실패(이미 변경됨)");
+      return res.status(409).json({ error: "이용권 처리가 겹쳤습니다. 다시 시도해 주세요." });
     } else {
-      console.log(`크레딧 차감 완료: ${serialRow.ai_credits} → ${serialRow.ai_credits - 1}`);
+      console.log(`크레딧 차감 완료: ${serialRow.ai_credits} → ${deducted[0].ai_credits}`);
     }
 
+    const creditsRemaining = deducted?.[0]?.ai_credits ?? (serialRow.ai_credits - 1);
     console.log(`최종 도출된 물건 개수: ${items.length}개`);
     return res.status(200).json({
       items,
       reviewItems: [],
       lowItems: [],
-      creditsRemaining: serialRow.ai_credits - 1
+      creditsRemaining
     });
 
   } catch (err) {
