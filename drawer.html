@@ -396,8 +396,35 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .maintenance-title{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em;margin-bottom:10px;text-align:center}
 .maintenance-msg{font-size:15px;color:rgba(255,255,255,.6);text-align:center;line-height:1.7;max-width:280px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.spinner{width:15px;height:15px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+/* ─── 분석 오버레이 (미디어 중앙) ─── */
+.analyze-overlay-inner{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  background:rgba(12,12,12,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-radius:24px;padding:32px 36px;min-width:200px;
+  border:1px solid rgba(255,255,255,.10);
+  animation:ovFadeIn .35s cubic-bezier(.22,.61,.36,1) both;
+}
+@keyframes ovFadeIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+/* 링 스피너 */
+.arc-ring{width:44px;height:44px;position:relative;flex-shrink:0}
+.arc-ring svg{animation:spin 1s linear infinite}
+/* 문구 교차 영역 */
+.analyze-txt-wrap{position:relative;height:24px;display:flex;align-items:center;justify-content:center}
+.analyze-txt{
+  font-size:15px;font-weight:700;letter-spacing:-.01em;color:#fff;white-space:nowrap;
+  position:absolute;text-align:center;
+  transition:opacity .45s ease,transform .45s ease;
+}
+.analyze-txt.hidden{opacity:0;transform:translateY(6px)}
+.analyze-txt.visible{opacity:1;transform:translateY(0)}
+/* 점 세 개 애니메이션 */
+.dot{display:inline-block;animation:dotBlink 1.4s ease-in-out infinite}
+.dot:nth-child(2){animation-delay:.2s}
+.dot:nth-child(3){animation-delay:.4s}
+@keyframes dotBlink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+/* 기존 뱃지 — 하위 호환용 */
 .analyzing-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.8);color:#fff;padding:9px 18px;border-radius:22px;font-size:13px;font-weight:600;backdrop-filter:blur(4px)}
+.spinner{width:15px;height:15px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 #fs-ov{display:none;position:fixed;inset:0;background:#000;z-index:700;align-items:center;justify-content:center}
 #fs-ov.open{display:flex}
 .fs-close{position:absolute;top:12px;right:12px;width:34px;height:34px;background:rgba(255,255,255,.12);border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1}
@@ -1317,11 +1344,20 @@ function mpickReanalyze(){
 
 async function runAnalysis(filePath,mimeType,videoFrames=null){
   const box=document.getElementById('media-box');const el=document.getElementById('media-el');
-  if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px;background:linear-gradient(transparent,rgba(0,0,0,.45))"><div class="analyzing-badge"><div class="spinner"></div><span id="analyze-txt">${window.t?t('analyzing'):'물품 분석 중...'}</span></div></div>`;
-  // 5초 후 "목록 생성 중..." 으로 문구 전환
-  const _txtTimer=setTimeout(()=>{const tx=document.getElementById('analyze-txt');if(tx){tx.style.transition='opacity .4s';tx.style.opacity='0';setTimeout(()=>{if(tx){tx.textContent='목록 생성 중...';tx.style.opacity='1';}},400);}},5000);
+  // ── 미디어 중앙에 분석 오버레이 표시 ──
+  if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="3.5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible" id="analyze-txt-a">물품 분석 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span><span class="analyze-txt hidden" id="analyze-txt-b">목록 생성 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;
+  // ── 5초 후 문구 교차 (A→B), 이후 10초마다 반복 ──
+  let _phase=0;
+  function _switchTxt(){
+    const a=document.getElementById('analyze-txt-a');const b=document.getElementById('analyze-txt-b');
+    if(!a||!b)return;
+    if(_phase%2===0){a.classList.replace('visible','hidden');b.classList.replace('hidden','visible');}
+    else{b.classList.replace('visible','hidden');a.classList.replace('hidden','visible');}
+    _phase++;
+  }
+  const _txtTimer=setTimeout(()=>{_switchTxt();window._analyzeCycle=setInterval(_switchTxt,5000);},5000);
   showSkeleton(5);
-  const rmOv=()=>{clearTimeout(_txtTimer);const o=document.getElementById('analyze-overlay');if(o)o.remove();};
+  const rmOv=()=>{clearTimeout(_txtTimer);clearInterval(window._analyzeCycle);const o=document.getElementById('analyze-overlay');if(o)o.remove()};
   try{
     const{data:{session}}=await _sb.auth.getSession();const accessToken=session?.access_token||'';
     const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${accessToken}`},body:JSON.stringify({filePath,mimeType:mimeType||'image/jpeg',userCorrections:corrections,...(videoFrames?.length?{videoFrames}:{})})});
