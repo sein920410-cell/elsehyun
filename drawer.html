@@ -737,6 +737,38 @@ var _sb = sb;
 var items = JSON.parse(localStorage.getItem('gyeol_' + tag) || '[]');
 var catOpenState = {};
 var corrections = JSON.parse(localStorage.getItem('corrections_'+tag) || '[]');
+
+// ═══ Supabase 영구 저장 동기화 레이어 (수납장별) ═══
+var _gyeolRestoring=false, _gyeolSyncTimer=null;
+function _gyeolSyncToDB(){
+  if(!tag)return;
+  try{
+    _sb.auth.getSession().then(function(r){
+      var s=r&&r.data&&r.data.session;
+      if(!s||!s.user||!s.user.email)return;
+      var row={
+        user_email:s.user.email, tag:tag,
+        name:localStorage.getItem('name_'+tag),
+        items:JSON.parse(localStorage.getItem('gyeol_'+tag)||'[]'),
+        media_path:localStorage.getItem('mediaPath_'+tag),
+        media_rot:parseInt(localStorage.getItem('rot_'+tag)||'0',10)||0,
+        color_theme:localStorage.getItem(_themeKey),
+        corrections:JSON.parse(localStorage.getItem('corrections_'+tag)||'[]')
+      };
+      _sb.from('drawers').upsert(row,{onConflict:'user_email,tag'}).then(function(res){
+        if(res&&res.error)console.warn('수납장 DB저장 오류',res.error);
+      });
+    });
+  }catch(e){console.warn('동기화 오류',e);}
+}
+function _gyeolScheduleSync(){ if(_gyeolRestoring)return; clearTimeout(_gyeolSyncTimer); _gyeolSyncTimer=setTimeout(_gyeolSyncToDB,600); }
+try{
+  var _origSet=localStorage.setItem.bind(localStorage);
+  var _origRem=localStorage.removeItem.bind(localStorage);
+  var _relKeys=function(k){ return k===('gyeol_'+tag)||k===('name_'+tag)||k===('mediaPath_'+tag)||k===('rot_'+tag)||k===('corrections_'+tag)||k===_themeKey; };
+  localStorage.setItem=function(k,v){ _origSet(k,v); if(_relKeys(k))_gyeolScheduleSync(); };
+  localStorage.removeItem=function(k){ _origRem(k); if(_relKeys(k))_gyeolScheduleSync(); };
+}catch(e){console.warn('localStorage 래핑 실패',e);}
 // ─── 누락 전역 상태 선언 ───
 var lpTimer=null, mLpTimer=null, ctxIdx=-1, editIdx=-1, icoIdx=-1, selIco=null;
 var selFile=null, rot=0, recBlob=null, recChunks=[], recSec=0;
@@ -846,6 +878,7 @@ function getAutoIcon(name,cat){
 }
 
 (function(){ document.body.setAttribute('data-theme', currentTheme); if(localStorage.getItem('gyeol_theme')==='dark'){document.documentElement.setAttribute('data-mode','dark');}else{document.documentElement.removeAttribute('data-mode');} })();
+window.addEventListener('pageshow', function(){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){document.documentElement.setAttribute('data-mode','dark');}else{document.documentElement.removeAttribute('data-mode');} }catch(e){} });
 function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
@@ -1472,45 +1505,52 @@ window.addEventListener('load',function(){
 
 // ─── 페이지 초기화 (목록·미디어·제목 복원) ───
 (function initPage(){
-  // 수납장 이름 복원
+  // 수납장 이름 복원 (localStorage 우선 표시)
   var savedName=localStorage.getItem('name_'+tag);
   if(savedName){var t=document.getElementById('drawer-title');if(t)t.textContent=savedName;}
   // 미디어 길게누르기 이벤트 바인딩
   try{initMediaEvents();}catch(e){}
-  // DB에서 테마·미디어·이름 복원 (기기 변경 대응)
+
+  // ═══ drawers 테이블에서 이 수납장 데이터 복원 (수납장별·기기무관·영구) ═══
   try{
     _sb.auth.getSession().then(function(r){
       var session=r&&r.data&&r.data.session;
-      if(!session||!session.user||!session.user.email)return;
-      _sb.from('serials').select('color_theme,media_path').eq('used_by',session.user.email).maybeSingle().then(function(res){
+      if(!session||!session.user||!session.user.email){ _renderLocalMedia(); renderItems(); return; }
+      _sb.from('drawers').select('name,items,media_path,media_rot,color_theme,corrections')
+        .eq('user_email',session.user.email).eq('tag',tag).maybeSingle().then(function(res){
         var d=res&&res.data;
-        if(!d)return;
-        // 테마 복원
-        if(d.color_theme&&!localStorage.getItem(_themeKey)){
-          localStorage.setItem(_themeKey,d.color_theme);
-          applyTheme(d.color_theme,false);
-        }
-        // 미디어 복원
-        if(d.media_path&&!localStorage.getItem('mediaPath_'+tag)){
-          localStorage.setItem('mediaPath_'+tag,d.media_path);
-          _sb.storage.from('user_uploads').createSignedUrl(d.media_path,3600).then(function(res3){
-            if(res3&&!res3.error&&res3.data&&res3.data.signedUrl)showMedia(res3.data.signedUrl,0);
-          }).catch(function(){});
+        if(d){
+          // DB에 이 수납장 데이터 있음 → DB값으로 복원
+          _gyeolRestoring=true;
+          try{
+            if(d.name){ localStorage.setItem('name_'+tag,d.name); var t2=document.getElementById('drawer-title'); if(t2)t2.textContent=d.name; }
+            if(Array.isArray(d.items)){ items=d.items; localStorage.setItem('gyeol_'+tag,JSON.stringify(d.items)); }
+            if(Array.isArray(d.corrections)){ corrections=d.corrections; localStorage.setItem('corrections_'+tag,JSON.stringify(d.corrections)); }
+            if(d.color_theme){ localStorage.setItem(_themeKey,d.color_theme); applyTheme(d.color_theme,false); }
+            if(d.media_path){
+              localStorage.setItem('mediaPath_'+tag,d.media_path);
+              localStorage.setItem('rot_'+tag,d.media_rot||0);
+            }else{
+              localStorage.removeItem('mediaPath_'+tag);
+              localStorage.removeItem('rot_'+tag);
+            }
+          }catch(e){}
+          _gyeolRestoring=false;
+          _renderLocalMedia();
+          renderItems();
+        }else{
+          // DB에 없음(기존 사용자) → localStorage 데이터를 DB로 1회 이전(마이그레이션)
+          _renderLocalMedia();
+          renderItems();
+          if(localStorage.getItem('gyeol_'+tag)||localStorage.getItem('name_'+tag)||localStorage.getItem('mediaPath_'+tag)){
+            _gyeolSyncToDB();
+          }
         }
       });
     });
-  }catch(e){}
-  // localStorage 경로로 미디어 복원 (같은 기기)
-  var mp=localStorage.getItem('mediaPath_'+tag);
-  var rot=parseInt(localStorage.getItem('rot_'+tag)||'0',10)||0;
-  if(mp){
-    try{
-      _sb.storage.from('user_uploads').createSignedUrl(mp,3600).then(function(res){
-        if(res&&!res.error&&res.data&&res.data.signedUrl)showMedia(res.data.signedUrl,rot);
-      }).catch(function(){});
-    }catch(e){}
-  }
-  // 미디어 툴팁 — 목록 유무 관계없이 미디어 있고 아직 안 봤으면 표시
+  }catch(e){ _renderLocalMedia(); renderItems(); }
+
+  // 미디어 툴팁 — 미디어 있고 아직 안 봤으면 표시
   (function(){
     var hasMedia=!!localStorage.getItem('mediaPath_'+tag);
     var hasTipShown=localStorage.getItem('gyeol_mtip2_'+tag);
@@ -1520,9 +1560,20 @@ window.addEventListener('load',function(){
       localStorage.setItem('gyeol_mtip2_'+tag,'1');
     }
   })();
-  // 목록 렌더링
-  renderItems();
 })();
+
+// localStorage 경로로 미디어 화면 표시
+function _renderLocalMedia(){
+  var mp=localStorage.getItem('mediaPath_'+tag);
+  var rot=parseInt(localStorage.getItem('rot_'+tag)||'0',10)||0;
+  if(mp){
+    try{
+      _sb.storage.from('user_uploads').createSignedUrl(mp,3600).then(function(res){
+        if(res&&!res.error&&res.data&&res.data.signedUrl)showMedia(res.data.signedUrl,rot);
+      }).catch(function(){});
+    }catch(e){}
+  }
+}
 </script>
 </body>
 </html>
