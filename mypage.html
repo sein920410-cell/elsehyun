@@ -793,6 +793,7 @@ async function confirmDeleteAccount(){
     });
 })();
 window.addEventListener('pageshow', function(){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); } else { document.documentElement.removeAttribute('data-theme'); } }catch(e){} });
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible'){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); } else { document.documentElement.removeAttribute('data-theme'); } }catch(e){} } });
 
 /* 페이지 초기화 */
 sb.auth.getSession().then(function(res) {
