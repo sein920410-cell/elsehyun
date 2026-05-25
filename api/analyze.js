@@ -4,10 +4,11 @@ import fetch from "node-fetch";
 const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 // 분석(비전) 전용 모델 — 채팅/검색용 GEMINI_MODEL과 분리하여 비용 격리
-// 작은 물건까지 정밀 인식이 필요하므로 고성능 모델 사용
 const GEMINI_MODEL = process.env.GEMINI_VISION_MODEL || process.env.GEMINI_MODEL || "gemini-3-flash-preview";
-// 비전 해상도: high(작은 물건·글자까지 인식). 비용 절감 필요시 환경변수로 medium 전환 가능
-const MEDIA_RESOLUTION = process.env.GEMINI_MEDIA_RESOLUTION || "media_resolution_high";
+// 비전 해상도: medium(작은 물건 인식 + 비용 절감 균형). 환경변수로 조절 가능
+const MEDIA_RESOLUTION = process.env.GEMINI_MEDIA_RESOLUTION || "media_resolution_medium";
+// thinking 레벨: low(목록화는 복잡한 추론 불필요 → 토큰·비용 절감, 출력 공간 확보)
+const THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || "low";
 
 const VALID_CATS = ["의류", "위생", "청소", "케어", "생활", "전자", "주방", "공구", "기타"];
 function normCat(c) {
@@ -82,8 +83,9 @@ const RESPONSE_SCHEMA = {
 
 const BASE_GEN_CONFIG = {
   temperature: 0,        // 정확도 최우선 (변경 금지)
-  maxOutputTokens: 8192,
-  mediaResolution: MEDIA_RESOLUTION.toUpperCase(),  // 비전 해상도 (전역)
+  maxOutputTokens: 6144, // thinking을 low로 줄였으므로 출력 공간 충분히 확보
+  thinkingConfig: { thinkingLevel: THINKING_LEVEL },  // 핵심: thinking이 출력 토큰을 잠식하지 않게 제어
+  mediaResolution: MEDIA_RESOLUTION.toUpperCase(),    // 비전 해상도 (전역)
   responseMimeType: "application/json",
   responseSchema: RESPONSE_SCHEMA
 };
@@ -239,7 +241,8 @@ function buildScanPrompt(isVideo, userCorrections) {
 
 [가장 중요한 원칙]
 ★ 최대한 많이, 개별로 잡으세요. 작은 물건·뒤쪽 물건·일부만 보이는 물건도 모두 포함합니다.
-★ 흔한 실수: 큰 물건 몇 개만 잡고 끝내는 것. 화면에 10개가 있으면 10개를 다 찾아야 합니다.
+★ 흔한 실수: 큰 물건·앞쪽 물건 몇 개만 잡고 끝내는 것. 화면에 10개가 있으면 10개를 다 찾아야 합니다.
+★ 수납장이 여러 칸(선반)으로 나뉘어 있으면 맨 위 칸부터 맨 아래 칸까지 칸마다 따로 훑으세요. 특히 어둡거나 깊숙한 아래 칸을 빠뜨리지 마세요. (예: 소화기, 우산, 밀대걸레, 청소도구 등 바닥 쪽 물건)
 ★ 억지로 묶지 마세요. 서로 다른 물건은 각각 별도 항목으로 출력합니다.
 
 [물건 이름 작성 규칙]
@@ -267,7 +270,7 @@ function buildScanPrompt(isVideo, userCorrections) {
 
 [카테고리] 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
 
-[reasoning] 화면을 좌·우·중앙·앞·뒤로 나누어 각 구역에서 찾은 물건을 짧게 나열 (빠진 구역 없는지 스스로 점검용).
+[reasoning] 화면을 칸(선반)별로 또는 좌·우·중앙·앞·뒤로 나누어, 각 구역에서 찾은 물건을 짧게 나열하세요. 특히 맨 아래 칸·구석을 점검해 빠진 물건이 없는지 스스로 확인하세요. (간결하게)
 
 [개인정보 보호 — 절대 필수] 아래 목록 중 하나라도 사진·영상에 보이면 items를 반드시 빈 배열([])로 반환하고 reasoning 첫 줄 첫 단어로 "PRIVATE_INFO_DETECTED" 기재할 것.
     차단 대상 문서·정보:
