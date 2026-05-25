@@ -7,6 +7,7 @@
 <style>body { visibility: hidden; }</style>
 <script>
   (function(){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); } }catch(e){} })();
+  window.addEventListener('pageshow', function(){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); } else { document.documentElement.removeAttribute('data-theme'); } }catch(e){} });
 </script>
 <script>
 (async () => {
@@ -24,6 +25,25 @@
     if (!serial) { window.location.replace('serial.html'); return; }
     // 인증 통과 → 화면 표시
     document.body.style.visibility = 'visible';
+    // drawers 테이블에서 이 사용자의 모든 수납장을 localStorage로 복원 (방문기록 지워도 유지)
+    try {
+        const { data: rows } = await _authClient
+            .from('drawers')
+            .select('tag,name,items,media_path,media_rot,color_theme,corrections')
+            .eq('user_email', session.user.email);
+        if (rows && rows.length) {
+            rows.forEach(function(d){
+                if(!d.tag)return;
+                try{
+                    localStorage.setItem('gyeol_'+d.tag, JSON.stringify(Array.isArray(d.items)?d.items:[]));
+                    if(d.name) localStorage.setItem('name_'+d.tag, d.name);
+                    if(d.media_path){ localStorage.setItem('mediaPath_'+d.tag, d.media_path); localStorage.setItem('rot_'+d.tag, d.media_rot||0); }
+                    if(d.color_theme) localStorage.setItem('gyeol_color_theme_'+d.tag, d.color_theme);
+                    if(Array.isArray(d.corrections)) localStorage.setItem('corrections_'+d.tag, JSON.stringify(d.corrections));
+                }catch(e){}
+            });
+        }
+    } catch(e) { console.warn('수납장 복원 오류', e); }
     // 온보딩 자동 실행
     setTimeout(function(){ startOnboarding(); }, 1000);
         })();
@@ -92,6 +112,7 @@ body {
 }
 .brand .sp { letter-spacing: 0.12em; }
 .brand .gy { letter-spacing: 0.04em; margin-left: 2px; }
+html[data-theme="dark"] .brand { color: #C2B5A0; }
 .header-divider {
   height: 0.5px; background: var(--divider);
   margin: 16px 20px 0; transition: background 0.3s;
