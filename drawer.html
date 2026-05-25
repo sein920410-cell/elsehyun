@@ -93,7 +93,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .header-right{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-left:auto;z-index:1}
 .hdr-sq{width:38px;height:38px;border-radius:var(--r);background:var(--h-btn);border:1px solid var(--h-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--h-txt);font-size:22px;font-weight:300;flex-shrink:0}
 .hdr-sq:active{opacity:.7}
-.hdr-search-btn{background:var(--h-btn)!important;border:1px solid var(--h-border);width:38px!important;height:38px!important;}
+.hdr-search-btn{background:transparent!important;border:none!important;width:38px!important;height:38px!important;}
 .hdr-search-btn svg{width:17px!important;height:17px!important;}
 
 /* ─── 미디어 ─── */
@@ -879,6 +879,7 @@ function getAutoIcon(name,cat){
 
 (function(){ document.body.setAttribute('data-theme', currentTheme); if(localStorage.getItem('gyeol_theme')==='dark'){document.documentElement.setAttribute('data-mode','dark');}else{document.documentElement.removeAttribute('data-mode');} })();
 window.addEventListener('pageshow', function(){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){document.documentElement.setAttribute('data-mode','dark');}else{document.documentElement.removeAttribute('data-mode');} }catch(e){} });
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible'){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){document.documentElement.setAttribute('data-mode','dark');}else{document.documentElement.removeAttribute('data-mode');} }catch(e){} } });
 function applyTheme(t,sv=true){document.body.setAttribute('data-theme',t);currentTheme=t;if(sv){localStorage.setItem(_themeKey,t);}}
 function selectTheme(t){pendingTheme=t;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+t)?.classList.add('active');applyTheme(t,false);}
 function openDrawerSettings(){document.getElementById('dt-input').value=document.getElementById('drawer-title').textContent;pendingTheme=currentTheme;document.querySelectorAll('.theme-sw').forEach(e=>e.classList.remove('active'));document.getElementById('sw-'+currentTheme)?.classList.add('active');document.getElementById('drawer-ov').classList.add('open');}
@@ -1175,7 +1176,7 @@ function pickIco(ic,el){selIco=ic;document.querySelectorAll('.icon-cell').forEac
 function saveIcon(){if(icoIdx>=0&&selIco){items[icoIdx].icon=selIco;save();}document.getElementById('icon-ov').classList.remove('open');}
 
 function save(){localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();}
-function clearAll(){if(!confirm('목록과 미디어를 모두 초기화할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);try{_sb.auth.getSession().then(({data:{session:_s}})=>{if(_s?.user?.email){_sb.from('serials').select('media_path').eq('used_by',_s.user.email).maybeSingle().then(({data:_sr})=>{if(_sr?.media_path)_sb.storage.from('user_uploads').remove([_sr.media_path]).catch(()=>{});});_sb.from('serials').update({media_path:null}).eq('used_by',_s.user.email).then(()=>{});}});}catch(_){}items=[];localStorage.setItem('gyeol_'+tag,'[]');localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();renderItems();}
+function clearAll(){if(!confirm('목록과 미디어를 모두 초기화할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]).catch(()=>{});items=[];localStorage.setItem('gyeol_'+tag,'[]');localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();renderItems();}
 
 // ─── 미디어 ───
 function initMediaEvents(){
@@ -1189,7 +1190,7 @@ function initMediaEvents(){
 function showMediaPicker(){const re=document.getElementById('mpick-re');if(re)re.style.display=localStorage.getItem('mediaPath_'+tag)?'flex':'none';document.getElementById('media-picker-ov').classList.add('open');}
 function closeMediaPicker(e){if(e&&e.target!==document.getElementById('media-picker-ov'))return;document.getElementById('media-picker-ov').classList.remove('open');}
 function closeMctx(){document.getElementById('mctx-ov').classList.remove('open');}
-function confirmDelMedia(){closeMctx();if(!confirm('사진/영상을 삭제할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]);try{_sb.auth.getSession().then(({data:{session:_s}})=>{if(_s?.user?.email){_sb.from('serials').select('media_path').eq('used_by',_s.user.email).maybeSingle().then(({data:_sr})=>{if(_sr?.media_path)_sb.storage.from('user_uploads').remove([_sr.media_path]).catch(()=>{});});_sb.from('serials').update({media_path:null}).eq('used_by',_s.user.email).then(()=>{});}});}catch(_){}localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();}
+function confirmDelMedia(){closeMctx();if(!confirm('사진/영상을 삭제할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]).catch(()=>{});localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();}
 function pickPhoto(){closeMediaPicker();const f=document.getElementById('file-in');f.removeAttribute('capture');f.click();}
 
 async function extractVideoFrames(blob,numFrames=5){
@@ -1241,14 +1242,12 @@ async function confirmUpload(){
     const fileToUpload=await compressImage(selFile);
     const ext=fileToUpload.name.split('.').pop()||'jpg';
     const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
-    // DB에서 이전 경로 읽어 삭제 (기기 무관하게 처리)
-    try{const{data:{session:_s}}=await _sb.auth.getSession();if(_s?.user?.email){const{data:_sr}=await _sb.from('serials').select('media_path').eq('used_by',_s.user.email).maybeSingle();if(_sr?.media_path)_sb.storage.from('user_uploads').remove([_sr.media_path]).catch(()=>{});}}catch(_){}
+    // 같은 수납장의 이전 사진만 삭제 (다른 수납장 사진 건드리지 않음)
     const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});
     const{error:ue}=await _sb.storage.from('user_uploads').upload(path,fileToUpload,{cacheControl:'3600',upsert:false,contentType:fileToUpload.type});
     if(ue)throw ue;
     localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,rot);localStorage.setItem('mime_'+tag,fileToUpload.type||'image/jpeg');
-    // 새 경로 DB에 저장
-    try{const{data:{session:_s2}}=await _sb.auth.getSession();if(_s2?.user?.email)_sb.from('serials').update({media_path:path}).eq('used_by',_s2.user.email).then(()=>{});}catch(_){}
+    // (media_path는 동기화 레이어가 drawers 테이블에 수납장별로 자동 저장)
     const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;
     showMedia(sd.signedUrl,rot);await runAnalysis(path,fileToUpload.type);
   }catch(err){resetMediaBox();alert('오류: '+err.message);}
@@ -1349,12 +1348,10 @@ function toggleRec(){if(!isRec){const dw=document.getElementById('dark-warn');if
 function stopRec(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;stopGuideTips();const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';const po=document.getElementById('rec-pause-ov');if(po)po.style.display='none';if(mediaRec?.state==='paused')mediaRec.resume();if(mediaRec?.state!=='inactive')mediaRec.stop();}
 function retakeRec(){recBlob=null;recChunks=[];document.getElementById('rec-live').style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';const ht3=document.getElementById('rec-hint');ht3.textContent='버튼을 눌러 촬영을 시작하세요';ht3.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht3.classList.add('fade'),2800);isRec=false;startBrightCheck();}
 async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';box.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><div class="analyzing-badge"><div class="spinner"></div>${window.t?t('frame_extract'):'프레임 추출 중...'}</div></div>`;try{const videoFrames=await extractVideoFrames(recBlob,8);const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
-    // DB에서 이전 경로 읽어 삭제
-    try{const{data:{session:_s}}=await _sb.auth.getSession();if(_s?.user?.email){const{data:_sr}=await _sb.from('serials').select('media_path').eq('used_by',_s.user.email).maybeSingle();if(_sr?.media_path)_sb.storage.from('user_uploads').remove([_sr.media_path]).catch(()=>{});}}catch(_){}
+    // 같은 수납장의 이전 사진만 삭제 (다른 수납장 사진 건드리지 않음)
     const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});
     const{error:ue}=await _sb.storage.from('user_uploads').upload(path,new File([recBlob],`rec.${ext}`,{type:recBlob.type}),{cacheControl:'3600',upsert:false,contentType:recBlob.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,0);
-    // 새 경로 DB에 저장
-    try{const{data:{session:_s2}}=await _sb.auth.getSession();if(_s2?.user?.email)_sb.from('serials').update({media_path:path}).eq('used_by',_s2.user.email).then(()=>{});}catch(_){}
+    // (media_path는 동기화 레이어가 drawers 테이블에 수납장별로 자동 저장)
     const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;showMedia(sd.signedUrl,0);renderItems();await runAnalysis(path,recBlob.type,videoFrames);}catch(err){resetMediaBox();alert('오류: '+err.message);}}
 // ─── 점검/공지 시스템 ───
 async function checkSystemAnnouncement(){
