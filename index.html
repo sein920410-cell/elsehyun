@@ -8,6 +8,7 @@
 <script>
   (function(){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); } }catch(e){} })();
   window.addEventListener('pageshow', function(){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); } else { document.documentElement.removeAttribute('data-theme'); } }catch(e){} });
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible'){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); } else { document.documentElement.removeAttribute('data-theme'); } }catch(e){} } });
 </script>
 <script>
 (async () => {
@@ -107,7 +108,8 @@ body {
 }
 .brand { 
   flex: 1;
-  font-size: 22px;
+  font-size: 28px;
+  line-height: 1.25;
   color: var(--muted);
 }
 .brand .sp { letter-spacing: 0.12em; }
