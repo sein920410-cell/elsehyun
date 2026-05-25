@@ -367,10 +367,13 @@ export default async function handler(req, res) {
     const reasoning = parsedFull?.reasoning || "";
     if (reasoning.includes("PRIVATE_INFO_DETECTED")) {
       console.log("개인정보 감지 → 크레딧 차감 안 함, 빈 목록 반환");
+      const _detailRaw = reasoning.replace("PRIVATE_INFO_DETECTED", "").replace(/^[\s:\-–—]+/, "").split("\n")[0].trim();
+      const privateInfoDetail = _detailRaw.length > 2 && _detailRaw.length < 150 ? _detailRaw : null;
       return res.status(200).json({
         items: [],
         reviewItems: [],
         privateInfoDetected: true,
+        privateInfoDetail: privateInfoDetail,
         message: "개인정보가 포함된 사진으로 AI 분석에서 제외되었습니다.",
         creditsRemaining: serialRow.ai_credits
       });
