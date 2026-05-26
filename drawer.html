@@ -398,15 +398,15 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 @keyframes spin{to{transform:rotate(360deg)}}
 /* ─── 분석 오버레이 (미디어 중앙) ─── */
 .analyze-overlay-inner{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
   background:rgba(12,12,12,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border-radius:24px;padding:32px 36px;min-width:200px;
+  border-radius:24px;padding:26px 28px;min-width:0;
   border:1px solid rgba(255,255,255,.10);
   animation:ovFadeIn .35s cubic-bezier(.22,.61,.36,1) both;
 }
 @keyframes ovFadeIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
 /* 링 스피너 */
-.arc-ring{width:44px;height:44px;position:relative;flex-shrink:0}
+.arc-ring{width:62px;height:62px;position:relative;flex-shrink:0}
 .arc-ring svg{animation:spin 1s linear infinite}
 /* 문구 교차 영역 */
 .analyze-txt-wrap{position:relative;height:24px;display:flex;align-items:center;justify-content:center}
@@ -987,9 +987,7 @@ function renderItems(filter='',animate=false){
                 ontouchstart="sStart(event,${it.idx})"
                 ontouchmove="sMove(event,${it.idx})"
                 ontouchend="sEnd(event,${it.idx})"
-                onmousedown="startLP(${it.idx})"
-                onmouseup="cancelLP()"
-                onmouseleave="cancelLP()">
+                ondblclick="openCtx(${it.idx})">
                 <div class="item-ico">${icoSvg}</div>
                 <div class="item-info">
                   <div class="item-name">${hl(it.name,filter)}</div>
@@ -1101,7 +1099,6 @@ function sStart(e,idx){
   if(activeSwipeIdx!==-1&&activeSwipeIdx!==idx)resetSwipe(activeSwipeIdx);
   var t=e.touches?e.touches[0]:e;
   _swStartX=t.clientX;_swStartY=t.clientY;_swDX=0;_swLock=null;isSwiping=false;
-  startLP(idx);
 }
 function sMove(e,idx){
   var t=e.touches?e.touches[0]:e;
@@ -1123,7 +1120,7 @@ function sMove(e,idx){
 }
 function sEnd(e,idx){
   cancelLP();
-  if(_swLock!=='x'){_swLock=null;return;}
+  if(_swLock!=='x'){_swLock=null;_checkDblTap(idx);return;}
   var front=document.getElementById('front-'+idx);
   if(front){
     front.style.transition='';
@@ -1132,6 +1129,14 @@ function sEnd(e,idx){
   }
   _swLock=null;
   setTimeout(function(){isSwiping=false;},60);
+}
+// ─── 더블탭 감지 ───
+var _dblTapIdx=-1,_dblTapTime=0;
+function _checkDblTap(idx){
+  if(isSwiping)return;
+  var now=Date.now();
+  if(_dblTapIdx===idx&&now-_dblTapTime<350){_dblTapIdx=-1;openCtx(idx);}
+  else{_dblTapIdx=idx;_dblTapTime=now;}
 }
 function resetSwipe(idx){
   var front=document.getElementById('front-'+idx);
@@ -1371,8 +1376,7 @@ async function runAnalysis(filePath,mimeType,videoFrames=null){
     if(d.privateInfoDetected){
       rmOv();renderItems();
       const _lockSvg=`<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="var(--ink,#1a1f2e)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`;
-      const _detailTxt=d.privateInfoDetail?`감지 항목: ${d.privateInfoDetail}\n\n`:'';
-      showResultModal(_lockSvg,'개인정보가 감지되었습니다',`${_detailTxt}해당 항목을 가리거나 제외하고 다시 등록해 주세요. 이용권은 차감되지 않았습니다.`,false,true);
+      showResultModal(_lockSvg,'개인정보가 감지되었습니다','가리거나 제외하고 다시 등록해 주세요.\n이용권은 차감되지 않았습니다.',false,true);
       return;
     }
     // ────────────────────────────────────────────────────────────
