@@ -1346,6 +1346,7 @@ function mpickReanalyze(){
 }
 
 async function runAnalysis(filePath,mimeType,videoFrames=null){
+  const _analysisStart=Date.now();
   const box=document.getElementById('media-box');const el=document.getElementById('media-el');
   // ── 미디어 중앙에 분석 오버레이 표시 ──
   if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="3.5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible" id="analyze-txt-a">물품 분석 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span><span class="analyze-txt hidden" id="analyze-txt-b">목록 생성 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;
@@ -1380,7 +1381,17 @@ async function runAnalysis(filePath,mimeType,videoFrames=null){
     rmOv();renderItems('',true);
     if(d.reviewItems?.length)showReview(d.reviewItems);
     else if(items.length>0){const credMsg=d.creditsRemaining!==undefined?` (남은 이용권: ${d.creditsRemaining}건)`:'';}
-  }catch(err){rmOv();showResultModal('⚠️','분석 오류',err.message);renderItems();}
+  }catch(err){
+    rmOv();
+    const _is503=err.message&&(err.message.includes('503')||err.message.includes('UNAVAILABLE')||err.message.includes('high demand'));
+    if(_is503){
+      const _elapsed=Math.round((Date.now()-_analysisStart)/1000);
+      showResultModal('⚠️','AI 서버가 혼잡합니다','잠시 후 다시 시도해주세요. ('+_elapsed+'초 경과)');
+    }else{
+      showResultModal('⚠️','분석 오류',err.message);
+    }
+    renderItems();
+  }
 }
 
 function showReview(rv){pendingReview=rv;reviewSel={};document.getElementById('confirm-list').innerHTML=rv.map((it,i)=>`<div class="confirm-block"><div class="confirm-q">항목 ${i+1}</div>${(it.candidates||[it.name]).map((c,ci)=>`<button class="confirm-cand" id="cand-${i}-${ci}" onclick="selCand(${i},${ci},'${c}',${(it.candidates||[it.name]).length})">${c}</button>`).join('')}<button class="confirm-skip" onclick="skipCand(${i})">건너뛰기</button></div>`).join('');document.getElementById('confirm-ov').classList.add('open');}
