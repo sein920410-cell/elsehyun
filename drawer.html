@@ -1386,7 +1386,7 @@ async function runAnalysis(filePath,mimeType,videoFrames=null){
     const _is503=err.message&&(err.message.includes('503')||err.message.includes('UNAVAILABLE')||err.message.includes('high demand'));
     if(_is503){
       const _elapsed=Math.round((Date.now()-_analysisStart)/1000);
-      showResultModal('⚠️','AI 서버가 혼잡합니다','잠시 후 다시 시도해주세요. ('+_elapsed+'초 경과)');
+      showResultModal('⚠️','서버가 혼잡합니다','잠시 후 다시 시도해주세요. ('+_elapsed+'초 경과)');
     }else{
       showResultModal('⚠️','분석 오류',err.message);
     }
