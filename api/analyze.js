@@ -5,10 +5,10 @@ const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE
 
 // 분석(비전) 전용 모델 — 채팅/검색용 GEMINI_MODEL과 분리하여 비용 격리
 const GEMINI_MODEL = process.env.GEMINI_VISION_MODEL || process.env.GEMINI_MODEL || "gemini-3-flash-preview";
-// 비전 해상도: medium(작은 물건 인식 + 비용 절감 균형). 환경변수로 조절 가능
-const MEDIA_RESOLUTION = process.env.GEMINI_MEDIA_RESOLUTION || "media_resolution_medium";
-// thinking 레벨: low(목록화는 복잡한 추론 불필요 → 토큰·비용 절감, 출력 공간 확보)
-const THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || "low";
+// 비전 해상도: high(작은 물건·라벨까지 인식 — 누락 방지의 핵심). 환경변수로 조절 가능
+const MEDIA_RESOLUTION = process.env.GEMINI_MEDIA_RESOLUTION || "media_resolution_high";
+// thinking 레벨: medium(꼼꼼한 시각 탐색에 필요 — 공식 권장 기본값, 최고 품질). 환경변수로 조절 가능
+const THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || "medium";
 
 const VALID_CATS = ["의류", "위생", "청소", "케어", "생활", "전자", "주방", "공구", "기타"];
 function normCat(c) {
@@ -82,24 +82,24 @@ const RESPONSE_SCHEMA = {
 };
 
 const BASE_GEN_CONFIG = {
-  temperature: 0,        // 정확도 최우선 (변경 금지)
-  maxOutputTokens: 6144, // thinking을 low로 줄였으므로 출력 공간 충분히 확보
-  thinkingConfig: { thinkingLevel: THINKING_LEVEL },  // 핵심: thinking이 출력 토큰을 잠식하지 않게 제어
-  mediaResolution: MEDIA_RESOLUTION.toUpperCase(),    // 비전 해상도 (전역)
+  // temperature 미지정 → Gemini 3 기본값(1.0) 사용. 공식 권장. (0으로 두면 성능 저하·조기 종료)
+  maxOutputTokens: 8192,                              // 생각(medium) + 목록 출력 공간 충분히 확보
+  thinkingConfig: { thinkingLevel: THINKING_LEVEL },  // medium: 꼼꼼한 시각 탐색 (누락 방지)
   responseMimeType: "application/json",
   responseSchema: RESPONSE_SCHEMA
+  // 해상도(mediaResolution)는 각 이미지 part에 직접 부착(per-part) — v1alpha에서 정확히 적용됨
 };
 
 async function callGeminiImage(b64, mimeType, prompt) {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1alpha/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{
           parts: [
-            { inline_data: { mime_type: mimeType, data: b64 } },
+            { inline_data: { mime_type: mimeType, data: b64 }, media_resolution: { level: MEDIA_RESOLUTION } },
             { text: prompt }
           ]
         }],
@@ -118,10 +118,11 @@ async function callGeminiImage(b64, mimeType, prompt) {
 
 async function callGeminiVideoFrames(frames, prompt) {
   const imageParts = frames.map(b64 => ({
-    inline_data: { mime_type: "image/jpeg", data: b64 }
+    inline_data: { mime_type: "image/jpeg", data: b64 },
+    media_resolution: { level: MEDIA_RESOLUTION }
   }));
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1alpha/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -198,14 +199,14 @@ async function callGeminiVideo(videoBuffer, mimeType, prompt) {
   }
 
   const analyzeResp = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1alpha/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{
           parts: [
-            { file_data: { mime_type: mimeType, file_uri: fileUri } },
+            { file_data: { mime_type: mimeType, file_uri: fileUri }, media_resolution: { level: MEDIA_RESOLUTION } },
             { text: prompt }
           ]
         }],
