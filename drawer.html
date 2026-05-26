@@ -776,14 +776,16 @@ function _gyeolSyncToDB(){
     _sb.auth.getSession().then(function(r){
       var s=r&&r.data&&r.data.session;
       if(!s||!s.user||!s.user.email)return;
+      var _items=(typeof items!=='undefined'&&Array.isArray(items))?items:JSON.parse(localStorage.getItem('gyeol_'+tag)||'[]');
+      var _corr=(typeof corrections!=='undefined'&&Array.isArray(corrections))?corrections:JSON.parse(localStorage.getItem('corrections_'+tag)||'[]');
       var row={
         user_email:s.user.email, tag:tag,
         name:localStorage.getItem('name_'+tag),
-        items:JSON.parse(localStorage.getItem('gyeol_'+tag)||'[]'),
+        items:_items,
         media_path:localStorage.getItem('mediaPath_'+tag),
         media_rot:parseInt(localStorage.getItem('rot_'+tag)||'0',10)||0,
         color_theme:localStorage.getItem(_themeKey),
-        corrections:JSON.parse(localStorage.getItem('corrections_'+tag)||'[]')
+        corrections:_corr
       };
       _sb.from('drawers').upsert(row,{onConflict:'user_email,tag'}).then(function(res){
         if(res&&res.error)console.warn('수납장 DB저장 오류',res.error);
@@ -1374,6 +1376,7 @@ async function runAnalysis(filePath,mimeType,videoFrames=null){
     }
     // ────────────────────────────────────────────────────────────
     if(d.items?.length){d.items.forEach(it=>items.push({n:`${it.category}:${it.name}`,q:it.qty||1}));localStorage.setItem('gyeol_'+tag,JSON.stringify(items));}
+    clearTimeout(_gyeolSyncTimer);setTimeout(_gyeolSyncToDB,300);
     rmOv();renderItems('',true);
     if(d.reviewItems?.length)showReview(d.reviewItems);
     else if(items.length>0){const credMsg=d.creditsRemaining!==undefined?` (남은 이용권: ${d.creditsRemaining}건)`:'';}
