@@ -79,22 +79,22 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .brand:active{background:var(--h-btn)}
 .brand-anim{position:relative;height:22px;overflow:hidden;min-width:76px}
 .brand-a,.brand-b{position:absolute;left:0;top:0;white-space:nowrap;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s}
-.brand-a{font-size:14px;font-weight:700;letter-spacing:.02em;color:var(--h-sub);transform:translateY(0);opacity:1;line-height:22px}
+.brand-a{font-size:15px;font-weight:700;letter-spacing:.02em;color:var(--h-sub);transform:translateY(0);opacity:1;line-height:22px}
 .brand-b{display:flex;align-items:center;height:22px;transform:translateY(110%);opacity:0;gap:5px}
 .brand-b svg{width:15px;height:15px;stroke:var(--h-sub);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.brand-b-txt{font-size:13px;font-weight:600;color:var(--h-sub);letter-spacing:-.01em}
+.brand-b-txt{font-size:14px;font-weight:600;color:var(--h-sub);letter-spacing:-.01em}
 .brand.swap .brand-a{transform:translateY(-110%);opacity:0}
 .brand.swap .brand-b{transform:translateY(0);opacity:1}
 .header-title-wrap{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
 .header-title-wrap .drawer-btn{pointer-events:all}
 .drawer-btn{display:flex;align-items:center;padding:7px 14px;border-radius:var(--r);background:transparent;border:none;cursor:pointer;font-family:var(--font);transition:background .15s}
 .drawer-btn:active{background:var(--h-btn)}
-.drawer-btn-txt{font-size:16px;font-weight:700;color:var(--h-txt);letter-spacing:-.02em}
+.drawer-btn-txt{font-size:17px;font-weight:700;color:var(--h-txt);letter-spacing:-.02em}
 .header-right{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-left:auto;z-index:1}
-.hdr-sq{width:38px;height:38px;border-radius:var(--r);background:var(--h-btn);border:1px solid var(--h-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--h-txt);font-size:22px;font-weight:300;flex-shrink:0}
+.hdr-sq{width:38px;height:38px;border-radius:var(--r);background:var(--h-btn);border:1px solid var(--h-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--h-txt);font-size:23px;font-weight:300;flex-shrink:0}
 .hdr-sq:active{opacity:.7}
 .hdr-search-btn{background:transparent!important;border:none!important;width:38px!important;height:38px!important;}
-.hdr-search-btn svg{width:17px!important;height:17px!important;}
+.hdr-search-btn svg{width:18px!important;height:18px!important;}
 
 /* ─── 미디어 ─── */
 .media-section{background:var(--h-bg);padding:10px 14px 12px;flex-shrink:0;transition:background .4s;overflow:hidden}
@@ -400,7 +400,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .analyze-overlay-inner{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
   background:rgba(12,12,12,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border-radius:24px;padding:26px 28px;min-width:0;
+  border-radius:12px;padding:22px 26px;min-width:0;
   border:1px solid rgba(255,255,255,.10);
   animation:ovFadeIn .35s cubic-bezier(.22,.61,.36,1) both;
 }
@@ -1275,7 +1275,7 @@ async function confirmUpload(){
   items=[];localStorage.setItem('gyeol_'+tag,'[]');renderItems();
   document.getElementById('rot-ov').classList.remove('open');
   const box=document.getElementById('media-box');box.className='media-box filled';
-  const _prevUrl=URL.createObjectURL(selFile);const _preOv=`<div id="pre-upload-ov" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="3.5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible">업로드 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;box.innerHTML=`<img src="${_prevUrl}" class="rotate${rot}" id="media-el">`+_preOv;
+  const _prevUrl=URL.createObjectURL(selFile);const _preOv=`<div id="pre-upload-ov" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible">업로드 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;box.innerHTML=`<img src="${_prevUrl}" class="rotate${rot}" id="media-el">`+_preOv;
   try{
     const fileToUpload=await compressImage(selFile);
     const ext=fileToUpload.name.split('.').pop()||'jpg';
@@ -1354,7 +1354,7 @@ function mpickReanalyze(){
 async function runAnalysis(filePath,mimeType,videoFrames=null){
   const box=document.getElementById('media-box');const el=document.getElementById('media-el');
   // ── 미디어 중앙에 분석 오버레이 표시 ──
-  if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="3.5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible" id="analyze-txt-a">물품 분석 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span><span class="analyze-txt hidden" id="analyze-txt-b">목록 생성 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;
+  if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible" id="analyze-txt-a">물품 분석 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span><span class="analyze-txt hidden" id="analyze-txt-b">목록 생성 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;
   // ── 5초 후 문구 교차 (A→B), 이후 10초마다 반복 ──
   let _phase=0;
   function _switchTxt(){
@@ -1376,7 +1376,8 @@ async function runAnalysis(filePath,mimeType,videoFrames=null){
     if(d.privateInfoDetected){
       rmOv();renderItems();
       const _lockSvg=`<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="var(--ink,#1a1f2e)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`;
-      showResultModal(_lockSvg,'개인정보가 감지되었습니다','가리거나 제외하고 다시 등록해 주세요.\n이용권은 차감되지 않았습니다.',false,true);
+      const _det=d.privateInfoDetail?'감지 항목: '+d.privateInfoDetail+'\n':'';
+      showResultModal(_lockSvg,'개인정보가 감지되었습니다',_det+'가리거나 제외하고 다시 등록해 주세요.\n이용권은 차감되지 않았습니다.',false,true);
       return;
     }
     // ────────────────────────────────────────────────────────────
@@ -1398,7 +1399,7 @@ async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?
 function toggleRec(){if(!isRec){const dw=document.getElementById('dark-warn');if(dw&&dw.style.display==='flex')return;recChunks=[];const mt=['video/webm;codecs=vp9','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';const recOpts=mt?{mimeType:mt,videoBitsPerSecond:800000}:{videoBitsPerSecond:800000};mediaRec=new MediaRecorder(mediaStream,recOpts);mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};mediaRec.onstop=()=>{stopGuideTips();const type=(mt||'video/webm').split(';')[0];recBlob=new Blob(recChunks,{type});const pb=document.getElementById('rec-playback');pb.src=URL.createObjectURL(recBlob);pb.style.display='block';document.getElementById('rec-live').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-btn').style.display='none';document.getElementById('rec-confirm').style.display='inline-flex';document.getElementById('rec-retake').style.display='inline-flex';document.getElementById('rec-hint').textContent='영상을 확인하고 등록하거나 다시 촬영하세요.';document.getElementById('rec-hint').classList.remove('fade');clearTimeout(window._recHintTimer);isRec=false;};mediaRec.start();isRec=true;recSec=0;document.getElementById('rec-btn').className='rec-circle recording';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-ind').style.display='block';const ht2=document.getElementById('rec-hint');ht2.classList.add('fade');startGuideTips();startBrightCheck();recTimer=setInterval(()=>{if(mediaRec?.state==='paused')return;recSec++;document.getElementById('rec-timer').textContent=`00:${String(recSec).padStart(2,'0')}`;if(recSec>=25)document.getElementById('rec-timer').className='rec-timer danger';if(recSec>=30)stopRec();},1000);}else{stopRec();}}
 function stopRec(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;stopGuideTips();const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';const po=document.getElementById('rec-pause-ov');if(po)po.style.display='none';if(mediaRec?.state==='paused')mediaRec.resume();if(mediaRec?.state!=='inactive')mediaRec.stop();}
 function retakeRec(){recBlob=null;recChunks=[];document.getElementById('rec-live').style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';const ht3=document.getElementById('rec-hint');ht3.textContent='버튼을 눌러 촬영을 시작하세요';ht3.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht3.classList.add('fade'),2800);isRec=false;startBrightCheck();}
-async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';const _recPrevUrl=URL.createObjectURL(recBlob);const _recPreOv=`<div id="pre-upload-ov" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="3.5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible">프레임 추출 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;box.innerHTML=`<video src="${_recPrevUrl}" class="rotate0" id="media-el" playsinline muted loop autoplay></video>`+_recPreOv;try{const videoFrames=await extractVideoFrames(recBlob,8);const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';const _recPrevUrl=URL.createObjectURL(recBlob);const _recPreOv=`<div id="pre-upload-ov" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible">프레임 추출 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;box.innerHTML=`<video src="${_recPrevUrl}" class="rotate0" id="media-el" playsinline muted loop autoplay></video>`+_recPreOv;try{const videoFrames=await extractVideoFrames(recBlob,8);const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
     // 같은 수납장의 이전 사진만 삭제 (다른 수납장 사진 건드리지 않음)
     const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});
     const{error:ue}=await _sb.storage.from('user_uploads').upload(path,new File([recBlob],`rec.${ext}`,{type:recBlob.type}),{cacheControl:'3600',upsert:false,contentType:recBlob.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,0);
