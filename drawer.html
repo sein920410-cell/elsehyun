@@ -1386,7 +1386,7 @@ async function runAnalysis(filePath,mimeType,videoFrames=null){
     const _is503=err.message&&(err.message.includes('503')||err.message.includes('UNAVAILABLE')||err.message.includes('high demand'));
     if(_is503){
       const _elapsed=Math.round((Date.now()-_analysisStart)/1000);
-      showResultModal('⚠️','현재 요청이 많아 응답이 지연되고 있습니다','잠시 후 다시 시도해주세요. ('+_elapsed+'초 경과)');
+      showResultModal('<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="18" cy="18" r="16" stroke="currentColor" stroke-width="2"/><line x1="18" y1="11" x2="18" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="18" cy="25" r="1.2" fill="currentColor"/></svg>','현재 요청이 많아 응답이 지연되고 있습니다','잠시 후 다시 시도해주세요. ('+_elapsed+'초 경과)');
     }else{
       showResultModal('⚠️','분석 오류',err.message);
     }
