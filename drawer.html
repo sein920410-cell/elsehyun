@@ -785,9 +785,20 @@ function _gyeolSyncToDB(){
         color_theme:localStorage.getItem(_themeKey),
         corrections:JSON.parse(localStorage.getItem('corrections_'+tag)||'[]')
       };
-      _sb.from('drawers').upsert(row,{onConflict:'user_email,tag'}).then(function(res){
-        if(res&&res.error)console.warn('수납장 DB저장 오류',res.error);
-      });
+      // DB 유니크 제약 유무와 무관하게 (회원+수납장) 단위로 정확히 저장:
+      // 기존 행을 tag로 찾아 있으면 update, 없으면 insert (인앱 브라우저·새로고침에도 영구 보존)
+      _sb.from('drawers').select('tag').eq('user_email',s.user.email).eq('tag',tag).limit(1)
+        .then(function(found){
+          if(found&&found.error){console.warn('수납장 조회 오류',found.error);return;}
+          var exists=found&&found.data&&found.data.length>0;
+          if(exists){
+            _sb.from('drawers').update(row).eq('user_email',s.user.email).eq('tag',tag)
+              .then(function(res){ if(res&&res.error)console.warn('수납장 DB갱신 오류',res.error); });
+          }else{
+            _sb.from('drawers').insert(row)
+              .then(function(res){ if(res&&res.error)console.warn('수납장 DB삽입 오류',res.error); });
+          }
+        });
     });
   }catch(e){console.warn('동기화 오류',e);}
 }
@@ -1557,8 +1568,8 @@ window.addEventListener('load',function(){
       var session=r&&r.data&&r.data.session;
       if(!session||!session.user||!session.user.email){ _renderLocalMedia(); renderItems(); return; }
       _sb.from('drawers').select('name,items,media_path,media_rot,color_theme,corrections')
-        .eq('user_email',session.user.email).eq('tag',tag).maybeSingle().then(function(res){
-        var d=res&&res.data;
+        .eq('user_email',session.user.email).eq('tag',tag).limit(1).then(function(res){
+        var d=res&&res.data&&res.data[0];
         if(d){
           // DB에 이 수납장 데이터 있음 → DB값으로 복원
           _gyeolRestoring=true;
