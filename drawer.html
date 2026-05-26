@@ -396,18 +396,33 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .maintenance-title{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em;margin-bottom:10px;text-align:center}
 .maintenance-msg{font-size:15px;color:rgba(255,255,255,.6);text-align:center;line-height:1.7;max-width:280px}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* 영상 촬영 가이드박스 */
+#rec-guide-mask{position:absolute;top:20%;left:10%;width:80%;height:60%;
+  border:2px solid rgba(255,255,255,.75);border-radius:10px;pointer-events:none;z-index:10;
+  box-shadow:0 0 0 9999px rgba(0,0,0,.38)}
+.gc{position:absolute;width:20px;height:20px;border-color:#fff;border-style:solid}
+.gc.tl{top:-3px;left:-3px;border-width:3px 0 0 3px;border-radius:5px 0 0 0}
+.gc.tr{top:-3px;right:-3px;border-width:3px 3px 0 0;border-radius:0 5px 0 0}
+.gc.bl{bottom:-3px;left:-3px;border-width:0 0 3px 3px;border-radius:0 0 0 5px}
+.gc.br{bottom:-3px;right:-3px;border-width:0 3px 3px 0;border-radius:0 0 5px 0}
+.gc-label{position:absolute;bottom:-26px;left:0;right:0;text-align:center;
+  color:rgba(255,255,255,.85);font-size:12px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
 /* ─── 분석 오버레이 (미디어 중앙) ─── */
 .analyze-overlay-inner{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
   background:rgba(12,12,12,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border-radius:24px;padding:32px 36px;min-width:200px;
+  border-radius:22px;padding:24px;width:130px;
   border:1px solid rgba(255,255,255,.10);
   animation:ovFadeIn .35s cubic-bezier(.22,.61,.36,1) both;
 }
 @keyframes ovFadeIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
-/* 링 스피너 */
-.arc-ring{width:44px;height:44px;position:relative;flex-shrink:0}
-.arc-ring svg{animation:spin 1s linear infinite}
+/* 그라데이션 회오리 스피너 */
+.arc-ring{width:44px;height:44px;flex-shrink:0;border-radius:50%;
+  background:conic-gradient(from 0deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.15) 30%,rgba(255,255,255,.6) 65%,rgba(255,255,255,1) 90%,rgba(255,255,255,0) 100%);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 0);
+  mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 0);
+  animation:spin .85s linear infinite}
+.arc-ring svg{display:none}
 /* 문구 교차 영역 */
 .analyze-txt-wrap{position:relative;height:24px;display:flex;align-items:center;justify-content:center}
 .analyze-txt{
@@ -714,7 +729,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <!-- 영상 촬영 -->
 <div class="rec-ov" id="rec-ov">
   <div class="rec-hdr"><span>영상 촬영</span><div class="x-btn" onclick="cancelRecording()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
-  <div class="rec-vid" style="position:relative"><video id="rec-live" autoplay muted playsinline></video><video id="rec-playback" style="display:none" playsinline controls></video><div class="rec-ind" id="rec-ind">● REC</div><div class="rec-toast" id="rec-hint">버튼을 눌러 촬영을 시작하세요</div><div class="dark-warn-ov" id="dark-warn"><div class="dw-icon">💡</div><div class="dw-txt">주변이 어둡습니다<br>밝은 곳으로 이동해주세요<br><span style="font-size:13px;opacity:.8">이동하면 자동으로 재개돼요</span></div></div>
+  <div class="rec-vid" style="position:relative"><video id="rec-live" autoplay muted playsinline></video><video id="rec-playback" style="display:none" playsinline controls></video><div id="rec-guide-mask"><span class="gc tl"></span><span class="gc tr"></span><span class="gc bl"></span><span class="gc br"></span><div class="gc-label">서랍 안을 박스에 맞춰 촬영하세요</div></div><div class="rec-ind" id="rec-ind">● REC</div><div class="rec-toast" id="rec-hint">버튼을 눌러 촬영을 시작하세요</div><div class="dark-warn-ov" id="dark-warn"><div class="dw-icon">💡</div><div class="dw-txt">주변이 어둡습니다<br>밝은 곳으로 이동해주세요<br><span style="font-size:13px;opacity:.8">이동하면 자동으로 재개돼요</span></div></div>
   <!-- 가이드 팁 -->
   <div id="rec-guide" style="display:none;position:absolute;top:12px;left:0;right:0;text-align:center;pointer-events:none;z-index:5">
     <span id="rec-guide-txt" style="display:inline-block;background:rgba(0,0,0,.52);backdrop-filter:blur(8px);color:#fff;font-size:14px;font-weight:600;padding:7px 16px;border-radius:20px;letter-spacing:-.01em;transition:opacity .5s">천천히 움직여 주세요</span>
@@ -1107,7 +1122,7 @@ function sMove(e,idx){
   var dx=t.clientX-_swStartX, dy=t.clientY-_swStartY;
   if(_swLock===null){
     if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>6)_swLock='x';
-    else if(Math.abs(dy)>6)_swLock='y';
+    else if(Math.abs(dy)>4){_swLock='y';cancelLP();}
     else return;
   }
   if(_swLock!=='x')return;
@@ -1231,7 +1246,7 @@ async function extractVideoFrames(blob,numFrames=5){
     const url=URL.createObjectURL(blob);video.src=url;
     const canvas=document.createElement('canvas');canvas.width=640;canvas.height=360;
     const ctx=canvas.getContext('2d');const frames=[];
-    const captureFrame=()=>{ctx.drawImage(video,0,0,640,360);const d=canvas.toDataURL('image/jpeg',0.75);if(d&&d.length>2000)frames.push(d.split(',')[1]);};
+    const captureFrame=()=>{const vw=video.videoWidth||640,vh=video.videoHeight||480;const cx=vw*.10,cy=vh*.20,cw=vw*.80,ch=vh*.60;ctx.drawImage(video,cx,cy,cw,ch,0,0,640,360);const d=canvas.toDataURL('image/jpeg',0.75);if(d&&d.length>2000)frames.push(d.split(',')[1]);};
     video.onloadedmetadata=async()=>{
       const dur=isFinite(video.duration)&&video.duration>0?video.duration:null;
       if(dur){const step=dur/(numFrames+1);for(let i=1;i<=numFrames;i++){await new Promise(res=>{video.currentTime=Math.min(step*i,dur-0.05);video.onseeked=()=>{requestAnimationFrame(()=>{captureFrame();res();});};});};URL.revokeObjectURL(url);resolve(frames);}
@@ -1401,9 +1416,9 @@ function confirmReview(){document.getElementById('confirm-ov').classList.remove(
 
 // ─── 영상 촬영 ───
 async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?.getUserMedia){alert('이 브라우저는 영상 촬영을 지원하지 않습니다.');return;}try{mediaStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},facingMode:{ideal:'environment'}},audio:false});const lv=document.getElementById('rec-live');lv.srcObject=mediaStream;lv.style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-ind').style.display='none';const ht=document.getElementById('rec-hint');ht.textContent='버튼을 눌러 촬영을 시작하세요';ht.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht.classList.add('fade'),2800);recBlob=null;isRec=false;startBrightCheck();document.getElementById('rec-ov').classList.add('open');}catch(err){alert('카메라 접근 실패: '+err.message);}}
-function toggleRec(){if(!isRec){const dw=document.getElementById('dark-warn');if(dw&&dw.style.display==='flex')return;recChunks=[];const mt=['video/webm;codecs=vp9','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';const recOpts=mt?{mimeType:mt,videoBitsPerSecond:800000}:{videoBitsPerSecond:800000};mediaRec=new MediaRecorder(mediaStream,recOpts);mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};mediaRec.onstop=()=>{stopGuideTips();const type=(mt||'video/webm').split(';')[0];recBlob=new Blob(recChunks,{type});const pb=document.getElementById('rec-playback');pb.src=URL.createObjectURL(recBlob);pb.style.display='block';document.getElementById('rec-live').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-btn').style.display='none';document.getElementById('rec-confirm').style.display='inline-flex';document.getElementById('rec-retake').style.display='inline-flex';document.getElementById('rec-hint').textContent='영상을 확인하고 등록하거나 다시 촬영하세요.';document.getElementById('rec-hint').classList.remove('fade');clearTimeout(window._recHintTimer);isRec=false;};mediaRec.start();isRec=true;recSec=0;document.getElementById('rec-btn').className='rec-circle recording';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-ind').style.display='block';const ht2=document.getElementById('rec-hint');ht2.classList.add('fade');startGuideTips();startBrightCheck();recTimer=setInterval(()=>{if(mediaRec?.state==='paused')return;recSec++;document.getElementById('rec-timer').textContent=`00:${String(recSec).padStart(2,'0')}`;if(recSec>=25)document.getElementById('rec-timer').className='rec-timer danger';if(recSec>=30)stopRec();},1000);}else{stopRec();}}
+function toggleRec(){if(!isRec){const dw=document.getElementById('dark-warn');if(dw&&dw.style.display==='flex')return;recChunks=[];const mt=['video/webm;codecs=vp9','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';const recOpts=mt?{mimeType:mt,videoBitsPerSecond:800000}:{videoBitsPerSecond:800000};mediaRec=new MediaRecorder(mediaStream,recOpts);mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};mediaRec.onstop=()=>{stopGuideTips();const gm=document.getElementById('rec-guide-mask');if(gm)gm.style.display='none';const type=(mt||'video/webm').split(';')[0];recBlob=new Blob(recChunks,{type});const pb=document.getElementById('rec-playback');pb.src=URL.createObjectURL(recBlob);pb.style.display='block';document.getElementById('rec-live').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-btn').style.display='none';document.getElementById('rec-confirm').style.display='inline-flex';document.getElementById('rec-retake').style.display='inline-flex';document.getElementById('rec-hint').textContent='영상을 확인하고 등록하거나 다시 촬영하세요.';document.getElementById('rec-hint').classList.remove('fade');clearTimeout(window._recHintTimer);isRec=false;};mediaRec.start();isRec=true;recSec=0;document.getElementById('rec-btn').className='rec-circle recording';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-ind').style.display='block';const ht2=document.getElementById('rec-hint');ht2.classList.add('fade');startGuideTips();startBrightCheck();recTimer=setInterval(()=>{if(mediaRec?.state==='paused')return;recSec++;document.getElementById('rec-timer').textContent=`00:${String(recSec).padStart(2,'0')}`;if(recSec>=25)document.getElementById('rec-timer').className='rec-timer danger';if(recSec>=30)stopRec();},1000);}else{stopRec();}}
 function stopRec(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;stopGuideTips();const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';const po=document.getElementById('rec-pause-ov');if(po)po.style.display='none';if(mediaRec?.state==='paused')mediaRec.resume();if(mediaRec?.state!=='inactive')mediaRec.stop();}
-function retakeRec(){recBlob=null;recChunks=[];document.getElementById('rec-live').style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';const ht3=document.getElementById('rec-hint');ht3.textContent='버튼을 눌러 촬영을 시작하세요';ht3.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht3.classList.add('fade'),2800);isRec=false;startBrightCheck();}
+function retakeRec(){const gm=document.getElementById('rec-guide-mask');if(gm)gm.style.display='block';recBlob=null;recChunks=[];document.getElementById('rec-live').style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';const ht3=document.getElementById('rec-hint');ht3.textContent='버튼을 눌러 촬영을 시작하세요';ht3.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht3.classList.add('fade'),2800);isRec=false;startBrightCheck();}
 async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';const _recPrevUrl=URL.createObjectURL(recBlob);const _recPreOv=`<div id="pre-upload-ov" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="3.5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible">프레임 추출 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;box.innerHTML=`<video src="${_recPrevUrl}" class="rotate0" id="media-el" playsinline muted loop autoplay></video>`+_recPreOv;try{const videoFrames=await extractVideoFrames(recBlob,8);const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
     // 같은 수납장의 이전 사진만 삭제 (다른 수납장 사진 건드리지 않음)
     const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});
