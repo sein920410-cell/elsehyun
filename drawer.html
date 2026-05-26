@@ -785,20 +785,9 @@ function _gyeolSyncToDB(){
         color_theme:localStorage.getItem(_themeKey),
         corrections:JSON.parse(localStorage.getItem('corrections_'+tag)||'[]')
       };
-      // DB 유니크 제약 유무와 무관하게 (회원+수납장) 단위로 정확히 저장:
-      // 기존 행을 tag로 찾아 있으면 update, 없으면 insert (인앱 브라우저·새로고침에도 영구 보존)
-      _sb.from('drawers').select('tag').eq('user_email',s.user.email).eq('tag',tag).limit(1)
-        .then(function(found){
-          if(found&&found.error){console.warn('수납장 조회 오류',found.error);return;}
-          var exists=found&&found.data&&found.data.length>0;
-          if(exists){
-            _sb.from('drawers').update(row).eq('user_email',s.user.email).eq('tag',tag)
-              .then(function(res){ if(res&&res.error)console.warn('수납장 DB갱신 오류',res.error); });
-          }else{
-            _sb.from('drawers').insert(row)
-              .then(function(res){ if(res&&res.error)console.warn('수납장 DB삽입 오류',res.error); });
-          }
-        });
+      _sb.from('drawers').upsert(row,{onConflict:'user_email,tag'}).then(function(res){
+        if(res&&res.error)console.warn('수납장 DB저장 오류',res.error);
+      });
     });
   }catch(e){console.warn('동기화 오류',e);}
 }
@@ -1357,7 +1346,7 @@ function mpickReanalyze(){
 async function runAnalysis(filePath,mimeType,videoFrames=null){
   const box=document.getElementById('media-box');const el=document.getElementById('media-el');
   // ── 미디어 중앙에 분석 오버레이 표시 ──
-  if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="3.5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible" id="analyze-txt-a">분석 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span><span class="analyze-txt hidden" id="analyze-txt-b">목록 생성 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;
+  if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="3.5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible" id="analyze-txt-a">물품 분석 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span><span class="analyze-txt hidden" id="analyze-txt-b">목록 생성 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;
   // ── 5초 후 문구 교차 (A→B), 이후 10초마다 반복 ──
   let _phase=0;
   function _switchTxt(){
@@ -1568,8 +1557,8 @@ window.addEventListener('load',function(){
       var session=r&&r.data&&r.data.session;
       if(!session||!session.user||!session.user.email){ _renderLocalMedia(); renderItems(); return; }
       _sb.from('drawers').select('name,items,media_path,media_rot,color_theme,corrections')
-        .eq('user_email',session.user.email).eq('tag',tag).limit(1).then(function(res){
-        var d=res&&res.data&&res.data[0];
+        .eq('user_email',session.user.email).eq('tag',tag).maybeSingle().then(function(res){
+        var d=res&&res.data;
         if(d){
           // DB에 이 수납장 데이터 있음 → DB값으로 복원
           _gyeolRestoring=true;
