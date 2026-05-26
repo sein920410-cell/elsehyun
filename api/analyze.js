@@ -90,6 +90,23 @@ const BASE_GEN_CONFIG = {
   // 해상도(mediaResolution)는 각 이미지 part에 직접 부착(per-part) — v1alpha에서 정확히 적용됨
 };
 
+// ─── Gemini 재시도 래퍼 (503 대비) ───
+async function withRetry(fn, maxRetry = 2, delayMs = 2000) {
+  let lastErr;
+  for (let i = 0; i <= maxRetry; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastErr = e;
+      const is503 = e.message && (e.message.includes('503') || e.message.includes('UNAVAILABLE'));
+      if (!is503 || i === maxRetry) throw e;
+      console.log(`Gemini 503 재시도 ${i + 1}/${maxRetry} (${delayMs}ms 대기)`);
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+  throw lastErr;
+}
+
 async function callGeminiImage(b64, mimeType, prompt) {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1alpha/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -344,13 +361,13 @@ export default async function handler(req, res) {
     let scanText;
 
     if (useFrames) {
-      scanText = await callGeminiVideoFrames(videoFrames, prompt);
+      scanText = await withRetry(() => callGeminiVideoFrames(videoFrames, prompt));
     } else if (isVideo) {
       console.log(`영상 크기: ${(fileBuffer.length / 1024 / 1024).toFixed(1)}MB`);
-      scanText = await callGeminiVideo(fileBuffer, mimeType, prompt);
+      scanText = await withRetry(() => callGeminiVideo(fileBuffer, mimeType, prompt));
     } else {
       const b64 = fileBuffer.toString("base64");
-      scanText = await callGeminiImage(b64, mimeType || "image/jpeg", prompt);
+      scanText = await withRetry(() => callGeminiImage(b64, mimeType || "image/jpeg", prompt));
     }
 
     console.log("Gemini 전체 응답:", scanText.slice(0, 800));
