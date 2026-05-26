@@ -5,10 +5,12 @@ const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE
 
 // 분석(비전) 전용 모델 — 채팅/검색용 GEMINI_MODEL과 분리하여 비용 격리
 const GEMINI_MODEL = process.env.GEMINI_VISION_MODEL || process.env.GEMINI_MODEL || "gemini-3-flash-preview";
-// 비전 해상도: high(작은 물건·라벨까지 인식 — 누락 방지의 핵심). 환경변수로 조절 가능
+// 비전 해상도: high(작은 물건·라벨까지 인식 — 누락 방지의 핵심). 입력 토큰이라 비용 영향 작음 → 유지
 const MEDIA_RESOLUTION = process.env.GEMINI_MEDIA_RESOLUTION || "media_resolution_high";
-// thinking 레벨: medium(꼼꼼한 시각 탐색에 필요 — 공식 권장 기본값, 최고 품질). 환경변수로 조절 가능
-const THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || "medium";
+// thinking 레벨: low로 고정.
+//  - medium은 "생각 토큰"을 과다 생성 → ① 출력 토큰 과금 폭등(건당 33~50원) ② 출력 칸을 잡아먹어 목록이 5개로 잘림.
+//  - low는 물건 탐색에 충분하면서 비용/잘림을 모두 해소. (env var로 덮어쓰지 않도록 하드코딩)
+const THINKING_LEVEL = "low";
 
 const VALID_CATS = ["의류", "위생", "청소", "케어", "생활", "전자", "주방", "공구", "기타"];
 function normCat(c) {
@@ -60,10 +62,12 @@ function deduplicateItems(items) {
 
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
+  // propertyOrdering: items를 reasoning보다 "먼저" 생성하게 강제 → 목록이 잘리지 않도록 보장
+  propertyOrdering: ["private_info", "items", "reasoning"],
   properties: {
-    reasoning: {
-      type: "STRING",
-      description: "화면을 5개 구역으로 나누어 각 구역에 있는 물건을 짧게 나열"
+    private_info: {
+      type: "BOOLEAN",
+      description: "개인정보 문서/정보가 화면에 보이면 true, 아니면 false"
     },
     items: {
       type: "ARRAY",
@@ -76,15 +80,19 @@ const RESPONSE_SCHEMA = {
         },
         required: ["category", "name", "qty"]
       }
+    },
+    reasoning: {
+      type: "STRING",
+      description: "한 줄 이내로만. (긴 설명 금지 — 토큰 절약). 개인정보 감지 시 감지 항목명만 짧게."
     }
   },
-  required: ["reasoning", "items"]
+  required: ["private_info", "items"]
 };
 
 const BASE_GEN_CONFIG = {
   // temperature 미지정 → Gemini 3 기본값(1.0) 사용. 공식 권장. (0으로 두면 성능 저하·조기 종료)
-  maxOutputTokens: 8192,                              // 생각(medium) + 목록 출력 공간 충분히 확보
-  thinkingConfig: { thinkingLevel: THINKING_LEVEL },  // medium: 꼼꼼한 시각 탐색 (누락 방지)
+  maxOutputTokens: 4096,                              // thinking low + 목록에 충분. 비용 상한 가드(최악 ~17원)
+  thinkingConfig: { thinkingLevel: THINKING_LEVEL },  // low: 비용·잘림 방지의 핵심
   responseMimeType: "application/json",
   responseSchema: RESPONSE_SCHEMA
   // 해상도(mediaResolution)는 각 이미지 part에 직접 부착(per-part) — v1alpha에서 정확히 적용됨
@@ -288,9 +296,9 @@ function buildScanPrompt(isVideo, userCorrections) {
 
 [카테고리] 의류 / 위생 / 청소 / 케어 / 생활 / 전자 / 주방 / 공구 / 기타
 
-[reasoning] 화면을 칸(선반)별로 또는 좌·우·중앙·앞·뒤로 나누어, 각 구역에서 찾은 물건을 짧게 나열하세요. 특히 맨 아래 칸·구석을 점검해 빠진 물건이 없는지 스스로 확인하세요. (간결하게)
+[reasoning] 비워두거나 한 줄만 적으세요. 절대 길게 쓰지 마세요. (물건 목록을 빠짐없이 채우는 것이 최우선 — 설명에 토큰을 쓰지 말 것)
 
-[개인정보 보호 — 절대 필수] 아래 목록 중 하나라도 사진·영상에 보이면 items를 반드시 빈 배열([])로 반환하고 reasoning 첫 줄 첫 단어로 "PRIVATE_INFO_DETECTED" 기재할 것.
+[개인정보 보호 — 절대 필수] 정상 사진이면 private_info를 false로 두세요. 아래 목록 중 하나라도 사진·영상에 보이면 private_info를 true로, items를 반드시 빈 배열([])로 반환하고 reasoning에 감지 항목명만 짧게 적으세요.
     차단 대상 문서·정보:
     ▸ 신원 증명: 주민등록증, 운전면허증, 여권, 외국인등록증, 학생증
     ▸ 주소·가족 증명: 주민등록등본/초본, 가족관계증명서, 기본증명서, 출생증명서
@@ -383,7 +391,8 @@ export default async function handler(req, res) {
       parsedFull = JSON.parse(cleaned);
     } catch (_) {}
     const reasoning = parsedFull?.reasoning || "";
-    if (reasoning.includes("PRIVATE_INFO_DETECTED")) {
+    const privateDetected = parsedFull?.private_info === true || reasoning.includes("PRIVATE_INFO_DETECTED");
+    if (privateDetected) {
       console.log("개인정보 감지 → 크레딧 차감 안 함, 빈 목록 반환");
       const _detailRaw = reasoning.replace("PRIVATE_INFO_DETECTED", "").replace(/^[\s:\-–—]+/, "").split("\n")[0].trim();
       const privateInfoDetail = _detailRaw.length > 2 && _detailRaw.length < 150 ? _detailRaw : null;
