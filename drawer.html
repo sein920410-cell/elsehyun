@@ -102,6 +102,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .media-box.empty{border:none;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13);}
 .media-box.filled{border:1px solid rgba(255,255,255,.07)}
 .media-box img,.media-box video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.media-date{position:absolute;right:8px;bottom:8px;z-index:3;font-size:10.5px;font-weight:500;letter-spacing:0.02em;color:rgba(255,255,255,.92);background:rgba(0,0,0,.32);padding:2px 7px;border-radius:7px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);pointer-events:none;font-variant-numeric:tabular-nums}
 .media-empty-inner{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
 .media-empty-sq{width:42px;height:42px;border-radius:var(--r);border:1px solid var(--h-border);background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center}
 .media-empty-sq svg{width:20px;height:20px;stroke:var(--h-sub);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -1301,7 +1302,20 @@ async function confirmUpload(){
   selFile=null;
 }
 
-function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;}
+// 파일 경로에 담긴 업로드 시각(Date.now() ms)을 "YYYY.MM.DD HH:MM"으로 변환
+function _mediaDateLabel(){
+  try{
+    var mp=localStorage.getItem('mediaPath_'+tag)||'';
+    // 경로 형식: "{tag}/{밀리초}-{랜덤}.{확장자}" → 슬래시 뒤 첫 숫자 덩어리가 업로드 시각
+    var m=mp.split('/').pop().match(/^(\d{10,})/);
+    if(!m)return '';
+    var d=new Date(parseInt(m[1],10));
+    if(isNaN(d.getTime()))return '';
+    var p=function(n){return (n<10?'0':'')+n;};
+    return d.getFullYear()+'.'+p(d.getMonth()+1)+'.'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+  }catch(e){return '';}
+}
+function showMedia(url,r){const box=document.getElementById('media-box');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');var _dl=_mediaDateLabel();var _stamp=_dl?`<div class="media-date" aria-hidden="true">${_dl}</div>`:'';box.innerHTML=(isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`)+_stamp;}
 function resetMediaBox(){const box=document.getElementById('media-box');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="media-empty-lbl" data-i18n="media_add">${window.t?t('media_add'):'사진·영상 탭하여 등록'}</div><div class="media-empty-sub" data-i18n="media_add_sub">${window.t?t('media_add_sub'):'물품 자동 인식'}</div></div>`;}
 function openFull(){const el=document.getElementById('media-el');if(!el)return;const fc=document.getElementById('fs-content');fc.innerHTML=el.tagName==='VIDEO'?`<video src="${el.src}" class="${el.className}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`:`<img src="${el.src}" class="${el.className}" style="max-width:100%;max-height:100%;object-fit:contain">`;document.getElementById('fs-ov').classList.add('open');}
 function closeFull(){document.getElementById('fs-ov').classList.remove('open');}
