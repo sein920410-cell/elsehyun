@@ -6,7 +6,11 @@ const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE
 // 분석(비전) 전용 모델 — 채팅/검색용 GEMINI_MODEL과 분리하여 비용 격리
 const GEMINI_MODEL = process.env.GEMINI_VISION_MODEL || process.env.GEMINI_MODEL || "gemini-3-flash-preview";
 // 비전 해상도: high(작은 물건·라벨까지 인식 — 누락 방지의 핵심). 입력 토큰이라 비용 영향 작음 → 유지
+//  - 영상 프레임/영상은 high 유지 (ultra_high는 이미지 모달리티 전용이라 영상엔 미지원)
 const MEDIA_RESOLUTION = process.env.GEMINI_MEDIA_RESOLUTION || "media_resolution_high";
+// 사진(이미지) 전용 해상도: ultra_high — 작은 물건·라벨·어두운 칸 인식 향상.
+//  입력 토큰이라 단가 저렴($0.5) → 한 장당 1원 미만 추가로 "모델의 눈"을 키움. (출력 폭등 구조 아님)
+const IMAGE_MEDIA_RESOLUTION = process.env.GEMINI_IMAGE_MEDIA_RESOLUTION || "media_resolution_ultra_high";
 // thinking 레벨: low로 고정.
 //  - medium은 "생각 토큰"을 과다 생성 → ① 출력 토큰 과금 폭등(건당 33~50원) ② 출력 칸을 잡아먹어 목록이 5개로 잘림.
 //  - low는 물건 탐색에 충분하면서 비용/잘림을 모두 해소. (env var로 덮어쓰지 않도록 하드코딩)
@@ -145,7 +149,7 @@ async function callGeminiImage(b64, mimeType, prompt) {
       body: JSON.stringify({
         contents: [{
           parts: [
-            { inline_data: { mime_type: mimeType, data: b64 }, media_resolution: { level: MEDIA_RESOLUTION } },
+            { inline_data: { mime_type: mimeType, data: b64 }, media_resolution: { level: IMAGE_MEDIA_RESOLUTION } },
             { text: prompt }
           ]
         }],
