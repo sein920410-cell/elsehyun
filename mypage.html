@@ -556,7 +556,7 @@ body {
       <div class="row-ico"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div>
       <div class="row-info">
         <div class="row-title">인트로 다시 보기</div>
-        <div class="row-sub">봄의 첫 인사 화면을 다시 재생합니다</div>
+        <div class="row-sub">봄의 첫 인사와 사용 안내를 다시 봅니다</div>
       </div>
       <svg viewBox="0 0 24 24" width="16" height="16" style="stroke:var(--muted2);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
@@ -766,9 +766,9 @@ function setSize(val){
   });
 }
 
-/* 인트로 다시 보기 */
+/* 인트로 다시 보기: 인사+가이드 둘 다 초기화 */
 function replayIntro(){
-  try { localStorage.removeItem('bom_intro_done'); } catch(e){}
+  try { localStorage.removeItem('bom_intro_done'); localStorage.removeItem('ob_index_done'); } catch(e){}
   location.href = 'index.html';
 }
 
