@@ -46,8 +46,8 @@
             });
         }
     } catch(e) { console.warn('수납장 복원 오류', e); }
-    // 봄 인트로 (1회) → 끝나면 온보딩
-    setTimeout(function(){ bomStart(); }, 200);
+    // 봄 인사 인트로 (1회) → 끝나면 가이드
+    setTimeout(function(){ bomHello(); }, 200);
         })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -302,109 +302,48 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
 
 
 
-/* ═══════════ 봄 인트로 v2 ═══════════ */
+/* ═══════════ 봄 인사 인트로 ═══════════ */
 #bom { position:fixed; inset:0; z-index:8000; background:var(--bg);
   display:flex; align-items:center; justify-content:center; overflow:hidden;
-  transition:opacity .6s ease, background .35s; }
+  transition:opacity .55s ease; }
 #bom.fade-out { opacity:0; pointer-events:none; }
-#bom.flash { background:#fff; }
-html[data-theme="dark"] #bom.flash { background:#fff; }
-
 .bom-skip { position:absolute; top:16px; right:16px; z-index:8020;
   padding:8px 16px; border-radius:20px; background:rgba(0,0,0,.04);
   border:.5px solid var(--field-border); color:var(--muted);
   font-size:12.5px; font-weight:500; font-family:'DM Sans','Noto Sans KR',sans-serif;
-  cursor:pointer; letter-spacing:.02em; transition:background .15s, opacity .4s; }
+  cursor:pointer; letter-spacing:.02em; transition:background .15s; }
 html[data-theme="dark"] .bom-skip { background:rgba(255,255,255,.06); }
 .bom-skip:active { background:rgba(180,148,100,.14); }
-
 .bom-scene { position:relative; width:100%; max-width:440px; height:100%;
   display:flex; flex-direction:column; align-items:center; justify-content:center; }
-
-/* 자막 (캐릭터 위) */
-.bom-cap { position:absolute; top:18%; left:0; right:0; text-align:center;
-  font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:600;
-  color:var(--ink-soft); letter-spacing:.01em; padding:0 24px;
+.bom-cap { position:absolute; top:20%; left:0; right:0; text-align:center;
+  font-family:'Cormorant Garamond',serif; font-size:25px; font-weight:600;
+  color:var(--ink-soft); letter-spacing:.01em; padding:0 28px; line-height:1.4;
   opacity:0; transform:translateY(8px); transition:opacity .55s ease, transform .55s ease;
   z-index:30; pointer-events:none; }
 .bom-cap.show { opacity:1; transform:translateY(0); }
 html[data-theme="dark"] .bom-cap { color:#E4DCD0; }
-
-/* 캐릭터 영상 */
-.bom-char-wrap { position:absolute; z-index:20;
-  display:flex; align-items:center; justify-content:center;
+.bom-char-wrap { position:absolute; z-index:20; display:flex; align-items:center; justify-content:center;
   opacity:0; transform:translateY(14px) scale(.96);
   transition:opacity .6s ease, transform .7s cubic-bezier(.22,.9,.3,1); }
 .bom-char-wrap.in { opacity:1; transform:translateY(0) scale(1); }
-.bom-char-wrap.out { opacity:0; transform:translateY(-10px) scale(.92); }
-.bom-char { width:60vw; max-width:260px; height:auto; display:block; border-radius:18px; }
+.bom-char { width:60vw; max-width:250px; height:auto; display:block; border-radius:18px; }
 
-/* ── 책 ── */
-.bom-book-stage { position:absolute; z-index:10;
-  width:80vw; max-width:340px; height:62vh; max-height:440px;
-  perspective:2000px; display:none; }
-.bom-book-stage.on { display:block; }
-.bom-book { position:absolute; inset:0; transform-style:preserve-3d;
-  opacity:0; transform:rotateY(0deg) scale(.55);
-  transition:opacity .5s ease; }
-.bom-book.spin { animation:bomSpin 1.9s cubic-bezier(.4,.05,.25,1) forwards; }
-@keyframes bomSpin {
-  0%   { opacity:0; transform:rotateY(0deg) scale(.55); }
-  12%  { opacity:1; }
-  100% { opacity:1; transform:rotateY(720deg) scale(1); }
+/* ═══════════ 봄 가이드 (온보딩 합체) ═══════════ */
+.ob-bom { position:fixed; z-index:9003; width:118px; height:auto; pointer-events:none;
+  opacity:0;
+  transition:opacity .4s ease, left .5s cubic-bezier(.3,.8,.3,1), top .5s cubic-bezier(.3,.8,.3,1), transform .5s ease;
+  transform:rotate(0deg); transform-origin:bottom center; }
+.ob-bom.show { opacity:1; }
+.ob-bom.lean-left { transform:rotate(-7deg); }
+.ob-bom.lean-right { transform:rotate(7deg); }
+.ob-bom img { width:100%; height:auto; display:block;
+  filter:drop-shadow(0 8px 16px rgba(80,60,30,.22));
+  animation:bomBounce 1.4s ease-in-out infinite; }
+@keyframes bomBounce {
+  0%,100% { transform:translateY(0); }
+  50% { transform:translateY(-11px); }
 }
-
-/* 표지(앞면) — 회전 끝나면 왼쪽으로 열림 */
-.bom-cover { position:absolute; top:4%; left:6%; width:88%; height:92%;
-  transform-origin:left center; transform:rotateY(0deg);
-  transition:transform 1.15s cubic-bezier(.35,.7,.25,1);
-  background:linear-gradient(135deg, var(--accent), #9C7E52);
-  border-radius:5px 11px 11px 5px;
-  box-shadow:0 16px 44px rgba(120,90,50,.32);
-  display:flex; align-items:center; justify-content:center;
-  backface-visibility:hidden; z-index:4; }
-.bom-book.open .bom-cover { transform:rotateY(-172deg); }
-.bom-cover-t { font-family:'Cormorant Garamond',serif; color:#fff;
-  font-size:34px; font-weight:700; letter-spacing:.04em; opacity:.96; }
-
-/* 펼쳐진 속지 */
-.bom-paper { position:absolute; top:4%; left:6%; width:88%; height:92%;
-  background:linear-gradient(180deg,#FFFDF9,#FBF6ED);
-  border-radius:5px 11px 11px 5px; border:.5px solid #EFE7D8;
-  box-shadow:inset 0 0 30px rgba(120,100,70,.06); z-index:2; }
-html[data-theme="dark"] .bom-paper {
-  background:linear-gradient(180deg,#26241F,#1F1D18); border-color:rgba(255,255,255,.08); }
-.bom-paper::before { content:''; position:absolute; left:0; top:0; bottom:0; width:5%;
-  background:linear-gradient(90deg, rgba(120,100,70,.14), transparent); border-radius:5px 0 0 5px; }
-
-/* 자필 메뉴 */
-.bom-menu { position:absolute; top:4%; left:6%; width:88%; height:92%;
-  padding:30px 24px; z-index:3; display:flex; flex-direction:column; }
-.bom-menu-head { text-align:center; font-size:16px; font-weight:500; color:var(--ink);
-  padding-bottom:11px; margin:4px auto 16px; border-bottom:1.5px solid var(--accent);
-  width:fit-content; opacity:0; }
-.bom-menu-list { display:flex; flex-direction:column; gap:10px; }
-.bom-mi { display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:11px;
-  background:rgba(180,148,100,.07); border:.5px solid rgba(180,148,100,.16);
-  cursor:pointer; opacity:0; transform:translateX(-6px);
-  transition:transform .12s, background .15s; }
-.bom-mi.w { animation:bomWrite .5s ease forwards; }
-@keyframes bomWrite { to { opacity:1; transform:translateX(0); } }
-.bom-menu-head.w { animation:bomWrite .5s ease forwards; }
-.bom-mi:active { transform:scale(.97); background:rgba(180,148,100,.14); }
-.bom-mi .num { width:22px; height:22px; border-radius:50%; background:var(--accent);
-  color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center;
-  justify-content:center; flex-shrink:0; }
-.bom-mi .label { flex:1; font-size:13.5px; font-weight:600; color:var(--ink); letter-spacing:-.01em; }
-.bom-mi .arr { color:var(--accent); font-size:15px; }
-html[data-theme="dark"] .bom-mi { background:rgba(200,168,112,.10); border-color:rgba(200,168,112,.18); }
-.bom-mi.soon { cursor:default; background:rgba(0,0,0,.03); border-color:var(--line); }
-.bom-mi.soon:active { transform:none; background:rgba(0,0,0,.03); }
-.bom-mi.soon .num { background:var(--muted2); }
-.bom-mi.soon .label { color:var(--muted); font-weight:500; }
-.bom-mi.soon .stag { font-size:9.5px; font-weight:700; letter-spacing:.06em; color:var(--muted);
-  background:var(--line); padding:3px 7px; border-radius:6px; text-transform:uppercase; }
-html[data-theme="dark"] .bom-mi.soon { background:rgba(255,255,255,.03); }
 
 /* 온보딩 */
 .ob-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000}
@@ -423,40 +362,15 @@ html[data-theme="dark"] .bom-mi.soon { background:rgba(255,255,255,.03); }
 </head>
 <body>
 
-<!-- ═══════════ 봄 인트로 v2 ═══════════ -->
+<!-- ═══════════ 봄 인사 인트로 ═══════════ -->
 <div id="bom" style="display:none">
   <button class="bom-skip" id="bom-skip" onclick="bomSkip()">건너뛰기</button>
   <div class="bom-scene">
     <div class="bom-cap" id="bom-cap"></div>
-
     <div class="bom-char-wrap" id="bom-char-wrap">
       <video class="bom-char" id="bom-char" muted playsinline autoplay preload="auto" aria-label="도우미 봄">
         <source id="bom-char-src" src="assets/character/gyeol_light.mp4" type="video/mp4">
       </video>
-    </div>
-
-    <div class="bom-book-stage" id="bom-book-stage">
-      <div class="bom-book" id="bom-book">
-        <div class="bom-paper"></div>
-        <div class="bom-menu" id="bom-menu">
-          <div class="bom-menu-head" id="bom-mh">무엇을 도와드릴까요?</div>
-          <div class="bom-menu-list">
-            <div class="bom-mi" data-i="0" onclick="bomGo('search')">
-              <span class="num">1</span><span class="label">물품 검색</span><span class="arr">→</span>
-            </div>
-            <div class="bom-mi" data-i="1" onclick="bomGo('drawer')">
-              <span class="num">2</span><span class="label">수납장 이동</span><span class="arr">→</span>
-            </div>
-            <div class="bom-mi" data-i="2" onclick="bomGo('contact')">
-              <span class="num">3</span><span class="label">문의하기</span><span class="arr">→</span>
-            </div>
-            <div class="bom-mi soon" data-i="3">
-              <span class="num">4</span><span class="label">봄과 정리정돈</span><span class="stag">Coming Soon</span>
-            </div>
-          </div>
-        </div>
-        <div class="bom-cover" id="bom-cover"><div class="bom-cover-t">공간:결</div></div>
-      </div>
     </div>
   </div>
 </div>
@@ -464,6 +378,7 @@ html[data-theme="dark"] .bom-mi.soon { background:rgba(255,255,255,.03); }
 
 <div class="ob-ov" id="ob-ov" onclick="obClose()">
   <div class="ob-hl" id="ob-hl"></div>
+  <div class="ob-bom" id="ob-bom"><img id="ob-bom-img" src="assets/character/bom_hi.png" alt="봄"></div>
   <div class="ob-box" onclick="event.stopPropagation()">
     <div class="ob-nn" id="ob-nn"></div>
     <div class="ob-tt" id="ob-tt"></div>
@@ -679,6 +594,8 @@ function obShow(i){
   document.getElementById('ob-prev').style.display=i>0?'':'none';
   document.getElementById('ob-close').style.display=i===_OB_S.length-1?'none':'';
   el.scrollIntoView({block:'center',behavior:'smooth'});
+  // 봄 포즈 교체
+  if(s.pose){ document.getElementById('ob-bom-img').src='assets/character/'+s.pose; }
   setTimeout(function(){
     var r=el.getBoundingClientRect();
     var hl=document.getElementById('ob-hl');
@@ -686,7 +603,38 @@ function obShow(i){
     hl.style.top=(r.top-5)+'px';
     hl.style.width=(r.width+10)+'px';
     hl.style.height=(r.height+10)+'px';
-  },350);
+    bomPlace(r);
+  },380);
+}
+/* 봄 캐릭터를 하이라이트 요소 근처에 배치 + 대상 쪽으로 살짝 기울임 */
+function bomPlace(r){
+  var bom=document.getElementById('ob-bom');
+  var vw=window.innerWidth, vh=window.innerHeight;
+  var bw=118, bh=bom.offsetHeight||150;
+  var cx=r.left+r.width/2;
+
+  // 요소가 화면 위쪽이면 봄은 그 아래, 아니면 위에
+  var below = r.top < vh*0.4;
+  var top = below ? (r.bottom + 14) : (r.top - bh - 14);
+
+  // 좌우: 요소 중심 기준, 화면 안쪽 보정
+  var left = cx - bw/2;
+  if(left < 8) left = 8;
+  if(left+bw > vw-8) left = vw-bw-8;
+  if(top < 8) top = 8;
+  if(top+bh > vh-180) top = vh-180-bh;
+  if(top < 8) top = 8;
+
+  bom.style.left = left+'px';
+  bom.style.top = top+'px';
+
+  // 봄 중심과 대상 중심을 비교해 대상 쪽으로 기울임
+  var bomCx = left + bw/2;
+  bom.classList.remove('lean-left','lean-right');
+  if(cx < bomCx - 20) bom.classList.add('lean-left');   // 대상이 봄 왼쪽 → 왼쪽으로 숙임
+  else if(cx > bomCx + 20) bom.classList.add('lean-right');
+
+  bom.classList.add('show');
 }
 function obNext(){_OB_I++;obShow(_OB_I);}
 function obPrev(){if(_OB_I>0){_OB_I--;obShow(_OB_I);}}
@@ -694,123 +642,56 @@ function obDone(){localStorage.setItem(_OB_KEY,'1');obClose();}
 function obClose(){
   document.getElementById('ob-ov').classList.remove('on');
   document.getElementById('ob-hl').style.width='0';
+  var bom=document.getElementById('ob-bom');
+  bom.classList.remove('show','lean-left','lean-right');
   localStorage.setItem(_OB_KEY,'1');
 }
-/* ═══════════ 봄 인트로 v2 로직 ═══════════ */
+/* ═══════════ 봄 인사 인트로 ═══════════ */
 var _bomTimers=[], _bomDone=false;
 function _bt(fn,ms){ var id=setTimeout(fn,ms); _bomTimers.push(id); return id; }
 
-function bomStart(){
-  if(localStorage.getItem('bom_intro_done')==='1'){ _bt(startOnboarding,500); return; }
-
-  // 테마에 맞는 캐릭터 영상 선택 (다크 영상 준비됨)
-  var isDark = (localStorage.getItem('gyeol_theme')==='dark');
-  var src = document.getElementById('bom-char-src');
-  src.src = isDark ? 'assets/character/gyeol_dark.mp4' : 'assets/character/gyeol_light.mp4';
-  var char = document.getElementById('bom-char');
-  char.load();
-
+function bomHello(){
+  if(localStorage.getItem('bom_intro_done')==='1'){ _bt(startOnboarding,400); return; }
+  var isDark=(localStorage.getItem('gyeol_theme')==='dark');
+  var src=document.getElementById('bom-char-src');
+  src.src=isDark?'assets/character/gyeol_dark.mp4':'assets/character/gyeol_light.mp4';
+  var char=document.getElementById('bom-char'); char.load();
   document.getElementById('bom').style.display='flex';
-  var cw = document.getElementById('bom-char-wrap');
-  var cap = document.getElementById('bom-cap');
+  var cw=document.getElementById('bom-char-wrap');
+  var cap=document.getElementById('bom-cap');
+  try{ var p=char.play(); if(p&&p.catch)p.catch(function(){}); }catch(e){}
 
-  try { var p=char.play(); if(p&&p.catch) p.catch(function(){}); } catch(e){}
-
-  // 1) 캐릭터 등장 + 인사
   _bt(function(){ cw.classList.add('in'); }, 100);
   _bt(function(){ bomCap('안녕하세요'); }, 1000);
-  _bt(function(){ bomCap('공간:결의 도우미 봄이예요'); }, 3000);
-  _bt(function(){ cap.classList.remove('show'); }, 5200);
-
-  // 2) 캐릭터 퇴장
-  _bt(function(){ cw.classList.remove('in'); cw.classList.add('out'); }, 5500);
-
-  // 3) 책 등장 + 회전
-  _bt(function(){ bomBook(); }, 6100);
+  _bt(function(){ bomCap('공간:결의 도우미 봄이예요'); }, 2900);
+  _bt(function(){ bomCap('제가 사용법을 간단히 안내해드릴게요'); }, 5000);
+  _bt(function(){ cap.classList.remove('show'); }, 7200);
+  _bt(function(){ bomEndHello(); }, 7600);
 }
-
 function bomCap(t){
   var cap=document.getElementById('bom-cap');
   cap.classList.remove('show');
   _bt(function(){ cap.textContent=t; cap.classList.add('show'); }, 320);
 }
-
-function bomBook(){
-  var cw=document.getElementById('bom-char-wrap');
-  cw.style.display='none';                 // 캐릭터 완전 숨김
-  var stage=document.getElementById('bom-book-stage');
-  var book=document.getElementById('bom-book');
-  stage.classList.add('on');
-  _bt(function(){ book.classList.add('spin'); }, 50);   // 두 바퀴 회전+등장
-  _bt(function(){ book.classList.add('open'); }, 2000); // 표지 열림
-  _bt(function(){ bomWrite(); }, 3150);                 // 자필 쓰기 시작
-}
-
-// 자필처럼 한 줄씩 써내려감
-function bomWrite(){
-  var mh=document.getElementById('bom-mh');
-  mh.classList.add('w');
-  var items=document.querySelectorAll('#bom-menu .bom-mi');
-  items.forEach(function(el,i){
-    _bt(function(){ el.classList.add('w'); }, 450 + i*420);
-  });
-}
-
-// 메뉴 선택 → 캐릭터 재등장 "절 따라오세요" → 화면 환해지며 이동
-function bomGo(dest){
+function bomEndHello(){
   if(_bomDone) return; _bomDone=true;
-  var stage=document.getElementById('bom-book-stage');
-  var cw=document.getElementById('bom-char-wrap');
-  var cap=document.getElementById('bom-cap');
-  document.getElementById('bom-menu').style.pointerEvents='none';
-
-  // 책 사라지고 캐릭터 재등장
-  stage.style.transition='opacity .5s ease, transform .5s ease';
-  stage.style.opacity='0'; stage.style.transform='scale(.9)';
-  cw.style.display='flex'; cw.classList.remove('out');
-  _bt(function(){ cw.classList.add('in'); }, 250);
-  _bt(function(){ cap.classList.remove('show'); _bt(function(){ cap.textContent='절 따라오세요'; cap.classList.add('show'); },300); }, 350);
-
-  // 플래시 → 페이드아웃 → 이동
-  _bt(function(){
-    var ov=document.getElementById('bom'); ov.classList.add('flash');
-    _bt(function(){ ov.classList.add('fade-out'); bomNav(dest); }, 400);
-  }, 1500);
-}
-
-function bomNav(dest){
   localStorage.setItem('bom_intro_done','1');
-  if(dest==='search'){
-    _bt(function(){
-      var ov=document.getElementById('bom'); if(ov) ov.style.display='none';
-      var si=document.getElementById('search-input'); if(si) si.focus();
-      startOnboarding();
-    }, 650);
-  } else if(dest==='drawer'){
-    var tag=bomFirstDrawer();
-    location.href = tag ? ('drawer.html?tag='+tag) : 'serial.html?add=true';
-  } else if(dest==='contact'){
-    location.href='mypage.html';
-  }
+  var ov=document.getElementById('bom'); ov.classList.add('fade-out');
+  setTimeout(function(){ ov.style.display='none'; startOnboarding(); }, 600);
 }
-
-function bomFirstDrawer(){
-  try { if(typeof getAllDrawers==='function'){ var d=getAllDrawers(); if(d&&d.length) return d[0].tag; } } catch(e){}
-  return null;
-}
-
 function bomSkip(){
   if(_bomDone) return; _bomDone=true;
   _bomTimers.forEach(clearTimeout); _bomTimers=[];
   localStorage.setItem('bom_intro_done','1');
   var ov=document.getElementById('bom'); ov.classList.add('fade-out');
-  setTimeout(function(){ ov.style.display='none'; startOnboarding(); }, 650);
+  setTimeout(function(){ ov.style.display='none'; startOnboarding(); }, 600);
 }
 
 function startOnboarding(){
   obStart([
-    {sel:'.mypage-btn',title:'마이페이지',desc:'우측 상단 아이콘을 클릭하시면 마이페이지로 이동합니다.\nAI 이용권 확인, 테마 설정, 계정 관리 등 다양한 기능을 이용하실 수 있습니다.',warn:null},
-    {sel:'.search-wrap',title:'통합 검색',desc:'수납장 목록을 등록한 뒤 물품명을 검색하시면, 해당 물품이 보관된 수납장을 손쉽게 확인하실 수 있습니다.',warn:null}
+    {sel:'.search-wrap',title:'물건을 찾는 곳이에요',desc:'앞으로 촬영하실 물품 보관함이 이곳에 모이게 돼요.\n물품명을 검색하시면 어느 수납장에 있는지 손쉽게 찾으실 수 있답니다.',warn:null,pose:'bom_search.png'},
+    {sel:'.mypage-btn',title:'마이페이지예요',desc:'우측 상단 아이콘을 누르시면 마이페이지로 이동해요.\nAI 이용권 충전, 테마 설정, 계정 관리를 하실 수 있어요.',warn:null,pose:'bom_phone.png'},
+    {sel:'.search-wrap',title:'이제 시작해볼까요?',desc:'수납장은 QR 태그를 찍으면 바로 만들 수 있어요.\n무엇이든 봄에게 물어봐 주세요!',warn:null,pose:'bom_yay.png'}
   ], 'ob_index_done');
 }
 </script>
