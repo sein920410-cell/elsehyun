@@ -558,7 +558,7 @@ body {
         <div class="row-title">인트로 다시 보기</div>
         <div class="row-sub">봄의 첫 인사 화면을 다시 재생합니다</div>
       </div>
-      <svg class="row-arrow" viewBox="0 0 24 24" width="16" height="16" style="stroke:var(--muted2);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round"><polyline points="9 18 15 12 9 6"/></svg>
+      <svg viewBox="0 0 24 24" width="16" height="16" style="stroke:var(--muted2);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
   </div>
 
@@ -766,7 +766,7 @@ function setSize(val){
   });
 }
 
-/* 인트로 다시 보기 → 기록 삭제 후 검색 화면으로 (들어가면 인트로 재생됨) */
+/* 인트로 다시 보기 */
 function replayIntro(){
   try { localStorage.removeItem('bom_intro_done'); } catch(e){}
   location.href = 'index.html';
