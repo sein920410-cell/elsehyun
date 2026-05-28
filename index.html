@@ -46,12 +46,12 @@
             });
         }
     } catch(e) { console.warn('수납장 복원 오류', e); }
-    // 봄 인사 인트로 (1회) → 끝나면 가이드
-    setTimeout(function(){ bomHello(); }, 200);
+    // 온보딩 자동 실행
+    setTimeout(function(){ startOnboarding(); }, 1000);
         })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Cormorant+Garamond:wght@500;600;700&family=Kaushan+Script&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 input { -webkit-user-select: text; user-select: text; }
@@ -91,9 +91,9 @@ body {
 }
 
 .logo-en {
-  font-family: 'Kaushan Script', cursive;
-  font-weight: 400;
-  letter-spacing: 0.01em;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  letter-spacing: 0.12em;
 }
 
 .header {
@@ -109,12 +109,12 @@ body {
 }
 .brand { 
   flex: 1;
-  font-size: 30px;
-  line-height: 1.15;
+  font-size: 26px;
+  line-height: 1.25;
   color: var(--muted);
 }
-.brand .sp { letter-spacing: 0.01em; }
-.brand .gy { letter-spacing: 0.01em; margin-left: 4px; }
+.brand .sp { letter-spacing: 0.08em; }
+.brand .gy { letter-spacing: 0.04em; margin-left: 2px; }
 html[data-theme="dark"] .brand { color: #C2B5A0; }
 .header-divider {
   height: 0.5px; background: var(--divider);
@@ -302,49 +302,6 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
 
 
 
-/* ═══════════ 봄 인사 인트로 ═══════════ */
-#bom { position:fixed; inset:0; z-index:8000; background:var(--bg);
-  display:flex; align-items:center; justify-content:center; overflow:hidden;
-  transition:opacity .55s ease; }
-#bom.fade-out { opacity:0; pointer-events:none; }
-.bom-skip { position:absolute; top:16px; right:16px; z-index:8020;
-  padding:8px 16px; border-radius:20px; background:rgba(0,0,0,.04);
-  border:.5px solid var(--field-border); color:var(--muted);
-  font-size:12.5px; font-weight:500; font-family:'DM Sans','Noto Sans KR',sans-serif;
-  cursor:pointer; letter-spacing:.02em; transition:background .15s; }
-html[data-theme="dark"] .bom-skip { background:rgba(255,255,255,.06); }
-.bom-skip:active { background:rgba(180,148,100,.14); }
-.bom-scene { position:relative; width:100%; max-width:440px; height:100%;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.bom-cap { position:absolute; top:20%; left:0; right:0; text-align:center;
-  font-family:'Cormorant Garamond',serif; font-size:25px; font-weight:600;
-  color:var(--ink-soft); letter-spacing:.01em; padding:0 28px; line-height:1.4;
-  opacity:0; transform:translateY(8px); transition:opacity .55s ease, transform .55s ease;
-  z-index:30; pointer-events:none; }
-.bom-cap.show { opacity:1; transform:translateY(0); }
-html[data-theme="dark"] .bom-cap { color:#E4DCD0; }
-.bom-char-wrap { position:absolute; z-index:20; display:flex; align-items:center; justify-content:center;
-  opacity:0; transform:translateY(14px) scale(.96);
-  transition:opacity .6s ease, transform .7s cubic-bezier(.22,.9,.3,1); }
-.bom-char-wrap.in { opacity:1; transform:translateY(0) scale(1); }
-.bom-char { width:60vw; max-width:250px; height:auto; display:block; border-radius:18px; }
-
-/* ═══════════ 봄 가이드 (온보딩 합체) ═══════════ */
-.ob-bom { position:fixed; z-index:9003; width:118px; height:auto; pointer-events:none;
-  opacity:0;
-  transition:opacity .4s ease, left .5s cubic-bezier(.3,.8,.3,1), top .5s cubic-bezier(.3,.8,.3,1), transform .5s ease;
-  transform:rotate(0deg); transform-origin:bottom center; }
-.ob-bom.show { opacity:1; }
-.ob-bom.lean-left { transform:rotate(-7deg); }
-.ob-bom.lean-right { transform:rotate(7deg); }
-.ob-bom img { width:100%; height:auto; display:block;
-  filter:drop-shadow(0 8px 16px rgba(80,60,30,.22));
-  animation:bomBounce 1.4s ease-in-out infinite; }
-@keyframes bomBounce {
-  0%,100% { transform:translateY(0); }
-  50% { transform:translateY(-11px); }
-}
-
 /* 온보딩 */
 .ob-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000}
 .ob-ov.on{display:block}
@@ -362,23 +319,8 @@ html[data-theme="dark"] .bom-cap { color:#E4DCD0; }
 </head>
 <body>
 
-<!-- ═══════════ 봄 인사 인트로 ═══════════ -->
-<div id="bom" style="display:none">
-  <button class="bom-skip" id="bom-skip" onclick="bomSkip()">건너뛰기</button>
-  <div class="bom-scene">
-    <div class="bom-cap" id="bom-cap"></div>
-    <div class="bom-char-wrap" id="bom-char-wrap">
-      <video class="bom-char" id="bom-char" muted playsinline autoplay preload="auto" aria-label="도우미 봄">
-        <source id="bom-char-src" src="assets/character/gyeol_light.mp4" type="video/mp4">
-      </video>
-    </div>
-  </div>
-</div>
-
-
 <div class="ob-ov" id="ob-ov" onclick="obClose()">
   <div class="ob-hl" id="ob-hl"></div>
-  <div class="ob-bom" id="ob-bom"><img id="ob-bom-img" src="assets/character/bom_hi.png" alt="봄"></div>
   <div class="ob-box" onclick="event.stopPropagation()">
     <div class="ob-nn" id="ob-nn"></div>
     <div class="ob-tt" id="ob-tt"></div>
@@ -395,7 +337,7 @@ html[data-theme="dark"] .bom-cap { color:#E4DCD0; }
 
 
 <div class="header">
-  <div class="brand"><span class="logo-en"><span class="sp">SPACE:</span><span class="gy">GYEOL</span></span></div>
+  <div class="brand"><span class="logo-en"><span class="sp">SPACE·</span><span class="gy">GYEOL</span></span></div>
   <button class="mypage-btn" onclick="location.href='mypage.html'" title="마이페이지">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke="currentColor" fill="none"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" fill="none"/></svg>
   </button>
@@ -594,8 +536,6 @@ function obShow(i){
   document.getElementById('ob-prev').style.display=i>0?'':'none';
   document.getElementById('ob-close').style.display=i===_OB_S.length-1?'none':'';
   el.scrollIntoView({block:'center',behavior:'smooth'});
-  // 봄 포즈 교체
-  if(s.pose){ document.getElementById('ob-bom-img').src='assets/character/'+s.pose; }
   setTimeout(function(){
     var r=el.getBoundingClientRect();
     var hl=document.getElementById('ob-hl');
@@ -603,38 +543,7 @@ function obShow(i){
     hl.style.top=(r.top-5)+'px';
     hl.style.width=(r.width+10)+'px';
     hl.style.height=(r.height+10)+'px';
-    bomPlace(r);
-  },380);
-}
-/* 봄 캐릭터를 하이라이트 요소 근처에 배치 + 대상 쪽으로 살짝 기울임 */
-function bomPlace(r){
-  var bom=document.getElementById('ob-bom');
-  var vw=window.innerWidth, vh=window.innerHeight;
-  var bw=118, bh=bom.offsetHeight||150;
-  var cx=r.left+r.width/2;
-
-  // 요소가 화면 위쪽이면 봄은 그 아래, 아니면 위에
-  var below = r.top < vh*0.4;
-  var top = below ? (r.bottom + 14) : (r.top - bh - 14);
-
-  // 좌우: 요소 중심 기준, 화면 안쪽 보정
-  var left = cx - bw/2;
-  if(left < 8) left = 8;
-  if(left+bw > vw-8) left = vw-bw-8;
-  if(top < 8) top = 8;
-  if(top+bh > vh-180) top = vh-180-bh;
-  if(top < 8) top = 8;
-
-  bom.style.left = left+'px';
-  bom.style.top = top+'px';
-
-  // 봄 중심과 대상 중심을 비교해 대상 쪽으로 기울임
-  var bomCx = left + bw/2;
-  bom.classList.remove('lean-left','lean-right');
-  if(cx < bomCx - 20) bom.classList.add('lean-left');   // 대상이 봄 왼쪽 → 왼쪽으로 숙임
-  else if(cx > bomCx + 20) bom.classList.add('lean-right');
-
-  bom.classList.add('show');
+  },350);
 }
 function obNext(){_OB_I++;obShow(_OB_I);}
 function obPrev(){if(_OB_I>0){_OB_I--;obShow(_OB_I);}}
@@ -642,56 +551,12 @@ function obDone(){localStorage.setItem(_OB_KEY,'1');obClose();}
 function obClose(){
   document.getElementById('ob-ov').classList.remove('on');
   document.getElementById('ob-hl').style.width='0';
-  var bom=document.getElementById('ob-bom');
-  bom.classList.remove('show','lean-left','lean-right');
   localStorage.setItem(_OB_KEY,'1');
 }
-/* ═══════════ 봄 인사 인트로 ═══════════ */
-var _bomTimers=[], _bomDone=false;
-function _bt(fn,ms){ var id=setTimeout(fn,ms); _bomTimers.push(id); return id; }
-
-function bomHello(){
-  if(localStorage.getItem('bom_intro_done')==='1'){ _bt(startOnboarding,400); return; }
-  var isDark=(localStorage.getItem('gyeol_theme')==='dark');
-  var src=document.getElementById('bom-char-src');
-  src.src=isDark?'assets/character/gyeol_dark.mp4':'assets/character/gyeol_light.mp4';
-  var char=document.getElementById('bom-char'); char.load();
-  document.getElementById('bom').style.display='flex';
-  var cw=document.getElementById('bom-char-wrap');
-  var cap=document.getElementById('bom-cap');
-  try{ var p=char.play(); if(p&&p.catch)p.catch(function(){}); }catch(e){}
-
-  _bt(function(){ cw.classList.add('in'); }, 100);
-  _bt(function(){ bomCap('안녕하세요'); }, 1000);
-  _bt(function(){ bomCap('공간:결의 도우미 봄이예요'); }, 2900);
-  _bt(function(){ bomCap('제가 사용법을 간단히 안내해드릴게요'); }, 5000);
-  _bt(function(){ cap.classList.remove('show'); }, 7200);
-  _bt(function(){ bomEndHello(); }, 7600);
-}
-function bomCap(t){
-  var cap=document.getElementById('bom-cap');
-  cap.classList.remove('show');
-  _bt(function(){ cap.textContent=t; cap.classList.add('show'); }, 320);
-}
-function bomEndHello(){
-  if(_bomDone) return; _bomDone=true;
-  localStorage.setItem('bom_intro_done','1');
-  var ov=document.getElementById('bom'); ov.classList.add('fade-out');
-  setTimeout(function(){ ov.style.display='none'; startOnboarding(); }, 600);
-}
-function bomSkip(){
-  if(_bomDone) return; _bomDone=true;
-  _bomTimers.forEach(clearTimeout); _bomTimers=[];
-  localStorage.setItem('bom_intro_done','1');
-  var ov=document.getElementById('bom'); ov.classList.add('fade-out');
-  setTimeout(function(){ ov.style.display='none'; startOnboarding(); }, 600);
-}
-
 function startOnboarding(){
   obStart([
-    {sel:'.search-wrap',title:'물건을 찾는 곳이에요',desc:'앞으로 촬영하실 물품 보관함이 이곳에 모이게 돼요.\n물품명을 검색하시면 어느 수납장에 있는지 손쉽게 찾으실 수 있답니다.',warn:null,pose:'bom_search.png'},
-    {sel:'.mypage-btn',title:'마이페이지예요',desc:'우측 상단 아이콘을 누르시면 마이페이지로 이동해요.\nAI 이용권 충전, 테마 설정, 계정 관리를 하실 수 있어요.',warn:null,pose:'bom_phone.png'},
-    {sel:'.search-wrap',title:'이제 시작해볼까요?',desc:'수납장은 QR 태그를 찍으면 바로 만들 수 있어요.\n무엇이든 봄에게 물어봐 주세요!',warn:null,pose:'bom_yay.png'}
+    {sel:'.mypage-btn',title:'마이페이지',desc:'우측 상단 아이콘을 클릭하시면 마이페이지로 이동합니다.\nAI 이용권 확인, 테마 설정, 계정 관리 등 다양한 기능을 이용하실 수 있습니다.',warn:null},
+    {sel:'.search-wrap',title:'통합 검색',desc:'수납장 목록을 등록한 뒤 물품명을 검색하시면, 해당 물품이 보관된 수납장을 손쉽게 확인하실 수 있습니다.',warn:null}
   ], 'ob_index_done');
 }
 </script>
