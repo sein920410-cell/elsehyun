@@ -20,6 +20,7 @@
     if (!serial && !singleSerial) { window.location.replace('serial.html'); return; }
     window.sb = _authClient;
     document.body.style.visibility = 'visible';
+    setTimeout(checkSystemAnnouncement, 300);
     setTimeout(function(){ startOnboarding(); }, 1000);
     })();
 </script>
@@ -389,7 +390,9 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .announce-icon{font-size:18px;flex-shrink:0;margin-top:1px}
 .announce-body{flex:1;min-width:0}
 .announce-title{font-size:13px;font-weight:700;letter-spacing:-.01em;line-height:1.4}
-.announce-msg{font-size:12px;opacity:.75;margin-top:2px;line-height:1.5}
+.announce-msg{font-size:12px;opacity:.75;margin-top:2px;line-height:1.5;white-space:nowrap;overflow:hidden}
+.announce-msg .mq{display:inline-block;animation:ann-mq 14s linear infinite}
+@keyframes ann-mq{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
 .announce-close{width:28px;height:28px;border-radius:5px;background:rgba(255,255,255,.12);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .announce-close svg{width:12px;height:12px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
 .maintenance-ov{display:none;position:fixed;inset:0;background:#0C0D10;z-index:2000;flex-direction:column;align-items:center;justify-content:center;padding:32px}
@@ -1459,8 +1462,9 @@ async function checkSystemAnnouncement(){
       const dismissed=localStorage.getItem('gyeol_ann_dismissed_'+ann.id);
       if(dismissed)return;
       document.getElementById('announce-title').textContent=ann.title||'공지사항';
-      document.getElementById('announce-msg').textContent=ann.message;
-      document.getElementById('announce-bar').classList.add('show');
+      const _msgEl=document.getElementById('announce-msg');_msgEl.innerHTML='';
+      const _mq=document.createElement('span');_mq.className='mq';_mq.textContent=ann.message;_msgEl.appendChild(_mq);
+      const _bar=document.getElementById('announce-bar');_bar.dataset.annId=ann.id;_bar.classList.add('show');
       // 배너 높이만큼 헤더 아래로 밀기
       setTimeout(()=>{
         const h=document.getElementById('announce-bar').offsetHeight;
@@ -1473,10 +1477,9 @@ function closeAnnounce(){
   const bar=document.getElementById('announce-bar');
   bar.classList.remove('show');
   document.querySelector('.header').style.marginTop='';
-  // 이미 본 공지 기억 (다시 안 보임)
-  const titleEl=document.getElementById('announce-title');
-  // id를 data attribute에서 가져오기 어려우므로 session 동안만 닫힘
-  localStorage.setItem('gyeol_ann_dismissed_session','1');
+  // 이 공지를 다시 안 보이게 (id 기준 영구 저장)
+  const id=bar.dataset.annId;
+  if(id)localStorage.setItem('gyeol_ann_dismissed_'+id,'1');
 }
 const GUIDE_TIPS=['천천히 움직여 주세요','각도를 바꿔가며 찍어주세요','물건을 화면 가득 채워주세요','내부 상태가 잘 보이게 촬영','가까이서 찍어주세요'];
 let _guideTimer=null,_guideIdx=0;
