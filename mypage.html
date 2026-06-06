@@ -408,9 +408,40 @@ body {
 .ob-close{padding:10px 14px;background:#eee;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#666;cursor:pointer;font-family:inherit}
 .ob-prev{padding:10px 14px;background:#eee;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#444;cursor:pointer;font-family:inherit}
 .ob-nxt{flex:1;padding:10px;background:#111;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
+/* 점검/공지 배너 */
+.announce-bar{position:fixed;top:0;left:0;right:0;z-index:1000;background:#111318;color:#fff;padding:12px 16px;display:none;align-items:flex-start;gap:10px}
+.announce-bar.show{display:flex}
+.announce-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.announce-body{flex:1;min-width:0}
+.announce-title{font-size:13px;font-weight:700;line-height:1.4}
+.announce-msg{font-size:12px;opacity:.75;margin-top:2px;line-height:1.5;white-space:nowrap;overflow:hidden}
+.announce-msg .mq{display:inline-block;animation:ann-mq 14s linear infinite}
+@keyframes ann-mq{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+.announce-close{width:28px;height:28px;border-radius:5px;background:rgba(255,255,255,.12);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.announce-close svg{width:12px;height:12px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
+.maintenance-ov{display:none;position:fixed;inset:0;background:#0C0D10;z-index:2000;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+.maintenance-ov.show{display:flex}
+.maintenance-icon{font-size:52px;margin-bottom:20px}
+.maintenance-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:10px;text-align:center}
+.maintenance-msg{font-size:15px;color:rgba(255,255,255,.6);text-align:center;line-height:1.7;max-width:280px}
 </style>
 </head>
 <body>
+
+<!-- 점검/공지 -->
+<div class="maintenance-ov" id="maintenance-ov">
+  <div class="maintenance-icon">🔧</div>
+  <div class="maintenance-title">서비스 점검 중</div>
+  <div class="maintenance-msg" id="maintenance-msg">더 나은 서비스를 위해 점검 중입니다.<br>잠시 후 다시 이용해 주세요.</div>
+</div>
+<div class="announce-bar" id="announce-bar">
+  <div class="announce-icon">📢</div>
+  <div class="announce-body">
+    <div class="announce-title" id="announce-title">공지사항</div>
+    <div class="announce-msg" id="announce-msg"></div>
+  </div>
+  <button class="announce-close" onclick="closeAnnounce()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+</div>
 
 <div class="ob-ov" id="ob-ov" onclick="obClose()">
   <div class="ob-hl" id="ob-hl"></div>
@@ -911,7 +942,36 @@ window.addEventListener('popstate', function(){
 });
 document.addEventListener('DOMContentLoaded', function(){
   history.pushState(null, '', location.href);
+  checkSystemAnnouncement();
 });
+async function checkSystemAnnouncement(){
+  try{
+    var _annSb=(typeof window!=='undefined'&&window._searchSb)?window._searchSb:(typeof sb!=='undefined'?sb:null);
+    if(!_annSb)return;
+    var r=await _annSb.from('system_announcements').select('*').eq('active',true).order('created_at',{ascending:false}).limit(1);
+    if(r.error||!r.data||!r.data.length)return;
+    var ann=r.data[0];
+    if(ann.ends_at&&new Date(ann.ends_at)<new Date())return;
+    if(ann.type==='maintenance'){
+      document.getElementById('maintenance-msg').innerHTML=ann.message.replace(/\n/g,'<br>');
+      document.getElementById('maintenance-ov').classList.add('show');
+    }else{
+      if(localStorage.getItem('gyeol_ann_dismissed_'+ann.id))return;
+      document.getElementById('announce-title').textContent=ann.title||'공지사항';
+      var _m=document.getElementById('announce-msg');_m.innerHTML='';
+      var _s=document.createElement('span');_s.className='mq';_s.textContent=ann.message;_m.appendChild(_s);
+      var _b=document.getElementById('announce-bar');_b.dataset.annId=ann.id;_b.classList.add('show');
+      setTimeout(function(){var b=document.getElementById('announce-bar');var hd=document.querySelector('.header');if(b&&hd)hd.style.marginTop=b.offsetHeight+'px';},50);
+    }
+  }catch(e){console.log('공지 체크 실패',e.message);}
+}
+function closeAnnounce(){
+  var bar=document.getElementById('announce-bar');
+  bar.classList.remove('show');
+  var hd=document.querySelector('.header');if(hd)hd.style.marginTop='';
+  var id=bar.dataset.annId;
+  if(id)localStorage.setItem('gyeol_ann_dismissed_'+id,'1');
+}
 function openHelp(){document.getElementById('help-ov').classList.add('open');}
 function closeHelp(){document.getElementById('help-ov').classList.remove('open');}
 
