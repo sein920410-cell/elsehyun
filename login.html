@@ -196,8 +196,15 @@
         </div>
         <div>
             <label class="block text-sm text-gray-400 mb-1">비밀번호</label>
-            <input id="password" type="password" placeholder="비밀번호"
-                class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 transition">
+            <div class="relative">
+                <input id="password" type="password" placeholder="비밀번호"
+                    class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 pr-11 text-white text-sm outline-none focus:border-blue-500 transition">
+                <button type="button" id="pw-toggle" onclick="togglePw()" aria-label="비밀번호 표시"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200">
+                    <svg id="eye-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg id="eye-off" style="display:none" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+            </div>
         </div>
         <div id="error-msg" class="text-red-400 text-sm text-center hidden"></div>
         <button id="login-btn" onclick="handleLogin()"
@@ -236,7 +243,7 @@
                 <li>추가 이용권은 유료이며, 계정 삭제 시 잔여 이용권은 소멸됩니다.</li>
                 <li>AI 분석 결과는 참고 정보로만 활용되며, 오류가 있을 수 있습니다. 회사는 분석 결과의 정확성을 보증하지 않습니다.</li>
                 <li>AI 분석에 사용된 이미지·영상은 외부 AI 분석 서비스 제공업체(Google LLC)로 전송됩니다.</li>
-                <li>AI 채팅 기능 이용 시, 질문 내용과 해당 서랍의 물품 목록이 답변 생성을 위해 Google LLC(Gemini)로 전송됩니다.</li>
+                <li>AI 채팅 기능 이용 시, 질문 내용과 해당 서랍의 물품 목록이 답변 생성을 위해 Google LLC로 전송됩니다.</li>
             </ul>
 
             <h3>제4조 개인정보 보호 (AI 자동 차단)</h3>
@@ -330,7 +337,7 @@
             <ul>
                 <li>Supabase Inc. (미국) — DB, 파일 저장, 인증</li>
                 <li>Vercel Inc. (미국) — 서비스 호스팅</li>
-                <li>Google LLC (미국) — Google 소셜 로그인(OAuth 2.0) 및 AI 분석 서비스(Gemini API 포함)</li>
+                <li>Google LLC (미국) — Google 소셜 로그인(OAuth 2.0) 및 AI 분석 서비스</li>
                 <li>Kakao Corp. (대한민국) — 카카오 소셜 로그인 서비스</li>
             </ul>
 
@@ -452,6 +459,13 @@
         }
     };
 
+    window.togglePw = function(){
+      var p=document.getElementById('password');
+      var open=document.getElementById('eye-open');
+      var off=document.getElementById('eye-off');
+      if(p.type==='password'){p.type='text';open.style.display='none';off.style.display='';}
+      else{p.type='password';open.style.display='';off.style.display='none';}
+    };
     document.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
 </script>
 </body>
