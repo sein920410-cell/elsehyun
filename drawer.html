@@ -1405,11 +1405,16 @@ async function runAnalysis(filePath,mimeType,videoFrames=null){
     if(!r.ok){const errData=await r.json().catch(()=>({}));if(r.status===402){rmOv();showResultModal('💳','이용권이 소진되었습니다','물품명을 직접 입력해서 목록을 관리할 수 있어요.',true);return;}throw new Error(errData.error||'분석 오류');}
     const d=await r.json();items=[];localStorage.setItem('gyeol_'+tag,'[]');
     // ── 개인정보 감지 처리 ──────────────────────────────────────
-    if(d.privateInfoDetected){
+    if(d.privateInfoDetected || d.privateBlocked){
       rmOv();renderItems();
       const _lockSvg=`<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="var(--ink,#1a1f2e)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`;
-      const _detailTxt=d.privateInfoDetail?`감지 항목: ${d.privateInfoDetail}\n\n`:'';
-      showResultModal(_lockSvg,'개인정보가 감지되었습니다',`${_detailTxt}해당 항목을 가리거나 제외하고 다시 등록해 주세요. 이용권은 차감되지 않았습니다.`,false,true);
+      if(d.privateBlocked){
+        showResultModal(_lockSvg,'분석이 일시 제한되었습니다','오늘 개인정보 감지가 5회 누적되어 분석 기능이 오늘 하루 제한됩니다.\n내일 자정 이후 자동 해제됩니다.',false,false);
+      }else{
+        const _detailTxt=d.privateInfoDetail?`감지 항목: ${d.privateInfoDetail}\n\n`:'';
+        const _countTxt=d.privateBlockCount?` (${d.privateBlockCount}/5회 누적)`:'';
+        showResultModal(_lockSvg,'개인정보가 감지되었습니다',`${_detailTxt}해당 항목을 가리거나 제외하고 다시 등록해 주세요. 이용권은 차감되지 않았습니다.${_countTxt}`,false,true);
+      }
       return;
     }
     // ────────────────────────────────────────────────────────────
