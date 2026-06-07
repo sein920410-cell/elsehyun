@@ -368,7 +368,7 @@ export default async function handler(req, res) {
   try {
     const { data: rows, error: creditErr } = await supa
       .from("serials")
-      .select("ai_credits")
+      .select("ai_credits, private_block_count, private_block_date")
       .eq("used_by", userEmail)
       .limit(1);
     const serialRow = rows?.[0];
@@ -389,6 +389,19 @@ export default async function handler(req, res) {
     }
 
     console.log(`크레딧 확인: ${serialRow.ai_credits}건 남음`);
+
+    // 개인정보 반복 차단 체크 (하루 5회 초과 시 당일 Gemini 호출 차단)
+    const _today = new Date().toISOString().slice(0, 10);
+    const _blockCount = serialRow.private_block_count || 0;
+    const _blockDate = serialRow.private_block_date ? String(serialRow.private_block_date).slice(0, 10) : null;
+    if (_blockDate === _today && _blockCount >= 5) {
+      return res.status(200).json({
+        items: [], reviewItems: [], lowItems: [],
+        privateBlocked: true,
+        message: "오늘 개인정보 감지가 5회 반복되어 분석 기능이 일시 제한되었습니다. 내일 자정 이후 다시 이용하실 수 있습니다.",
+        creditsRemaining: serialRow.ai_credits
+      });
+    }
 
     const { data: signedData, error: signedErr } = await supa
       .storage.from("user_uploads").createSignedUrl(filePath, 120);
@@ -430,13 +443,22 @@ export default async function handler(req, res) {
     const reasoning = parsedFull?.reasoning || "";
     const privateDetected = parsedFull?.private_info === true || reasoning.includes("PRIVATE_INFO_DETECTED");
     if (privateDetected) {
-      console.log("개인정보 감지 → 크레딧 차감 안 함, 빈 목록 반환");
+      console.log("개인정보 감지 → 크레딧 차감 안 함, 카운터 업데이트");
+      const _today = new Date().toISOString().slice(0, 10);
+      const _blockCount = serialRow.private_block_count || 0;
+      const _blockDate = serialRow.private_block_date ? String(serialRow.private_block_date).slice(0, 10) : null;
+      const newCount = (_blockDate === _today) ? _blockCount + 1 : 1;
+      await supa.from("serials")
+        .update({ private_block_count: newCount, private_block_date: _today })
+        .eq("used_by", userEmail);
       const _detailRaw = reasoning.replace("PRIVATE_INFO_DETECTED", "").replace(/^[\s:\-–—]+/, "").split("\n")[0].trim();
       const privateInfoDetail = _detailRaw.length > 2 && _detailRaw.length < 150 ? _detailRaw : null;
       return res.status(200).json({
         items: [],
         reviewItems: [],
         privateInfoDetected: true,
+        privateBlockCount: newCount,
+        privateBlocked: newCount >= 5,
         privateInfoDetail: privateInfoDetail,
         message: "개인정보가 포함된 사진으로 AI 분석에서 제외되었습니다.",
         creditsRemaining: serialRow.ai_credits
