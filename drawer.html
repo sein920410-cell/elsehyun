@@ -1303,7 +1303,7 @@ async function confirmUpload(){
     localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,rot);localStorage.setItem('mime_'+tag,fileToUpload.type||'image/jpeg');
     // (media_path는 동기화 레이어가 drawers 테이블에 수납장별로 자동 저장)
     const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;
-    const _upMe=document.getElementById('media-el');if(_upMe)_upMe.src=sd.signedUrl;await runAnalysis(path,fileToUpload.type);
+    const _upMe=document.getElementById('media-el');if(_upMe)_upMe.src=sd.signedUrl;_renderMediaDate();await runAnalysis(path,fileToUpload.type);
   }catch(err){resetMediaBox();alert('오류: '+err.message);}
   selFile=null;
 }
@@ -1446,7 +1446,7 @@ async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTr
     const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});
     const{error:ue}=await _sb.storage.from('user_uploads').upload(path,new File([recBlob],`rec.${ext}`,{type:recBlob.type}),{cacheControl:'3600',upsert:false,contentType:recBlob.type});if(ue)throw ue;localStorage.setItem('mediaPath_'+tag,path);localStorage.setItem('rot_'+tag,0);
     // (media_path는 동기화 레이어가 drawers 테이블에 수납장별로 자동 저장)
-    const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;const _recMe=document.getElementById('media-el');if(_recMe)_recMe.src=sd.signedUrl;renderItems();await runAnalysis(path,recBlob.type,videoFrames);}catch(err){resetMediaBox();alert('오류: '+err.message);}}
+    const{data:sd,error:se}=await _sb.storage.from('user_uploads').createSignedUrl(path,3600);if(se)throw se;const _recMe=document.getElementById('media-el');if(_recMe)_recMe.src=sd.signedUrl;_renderMediaDate();renderItems();await runAnalysis(path,recBlob.type,videoFrames);}catch(err){resetMediaBox();alert('오류: '+err.message);}}
 // ─── 점검/공지 시스템 ───
 async function checkSystemAnnouncement(){
   try{
