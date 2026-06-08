@@ -666,18 +666,12 @@ async function checkSystemAnnouncement(){
       document.getElementById('maintenance-msg').innerHTML=ann.message.replace(/\n/g,'<br>');
       document.getElementById('maintenance-ov').classList.add('show');
     }else{
-      // 안 본 공지면 🔔 빨간 점 표시
+      // 검색 화면에서는 배너 표시 안 함 — 공지함(🔔)에서만 확인
       if(!localStorage.getItem('gyeol_ann_seen_'+ann.id)){
         var dot=document.getElementById('bell-dot');
         if(dot)dot.style.display='block';
         window._pendingAnnId=ann.id;
       }
-      if(localStorage.getItem('gyeol_ann_dismissed_'+ann.id))return;
-      document.getElementById('announce-title').textContent=ann.title||'공지사항';
-      var _m=document.getElementById('announce-msg');_m.innerHTML='';
-      var _s=document.createElement('span');_s.className='mq';_s.textContent=ann.message;_m.appendChild(_s);
-      var _b=document.getElementById('announce-bar');_b.dataset.annId=ann.id;_b.classList.add('show');
-      setTimeout(function(){var b=document.getElementById('announce-bar');var hd=document.querySelector('.header');if(b&&hd)hd.style.marginTop=b.offsetHeight+'px';},50);
     }
   }catch(e){console.log('공지 체크 실패',e.message);}
 }
