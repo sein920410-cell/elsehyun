@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.21.0/dist/tf.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js" defer></script>
 <style>body { visibility: hidden; }</style>
 <script>
 (async () => {
@@ -383,6 +385,9 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .dark-warn-ov{display:none;position:absolute;inset:0;background:rgba(0,0,0,.65);flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:10;pointer-events:none}
 .dark-warn-ov .dw-icon{font-size:36px}
 .dark-warn-ov .dw-txt{color:#fff;font-size:15px;font-weight:700;text-align:center;padding:0 26px;line-height:1.6;letter-spacing:-.3px}
+.face-warn-ov{display:none;position:absolute;inset:0;background:rgba(185,28,28,.78);flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:12;pointer-events:none}
+.face-warn-ov .fw-icon{font-size:36px}
+.face-warn-ov .fw-txt{color:#fff;font-size:15px;font-weight:700;text-align:center;padding:0 26px;line-height:1.6;letter-spacing:-.3px}
 
 /* ─── 점검/공지 ─── */
 .announce-bar{position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--h-bg);color:var(--h-txt);padding:12px 16px 12px;display:none;align-items:flex-start;gap:10px;transition:background .4s}
@@ -736,7 +741,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <!-- 영상 촬영 -->
 <div class="rec-ov" id="rec-ov">
   <div class="rec-hdr"><span>영상 촬영</span><div class="x-btn" onclick="cancelRecording()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
-  <div class="rec-vid" style="position:relative"><video id="rec-live" autoplay muted playsinline></video><video id="rec-playback" style="display:none" playsinline controls></video><div id="rec-guide-mask"><span class="gc tl"></span><span class="gc tr"></span><span class="gc bl"></span><span class="gc br"></span><div class="gc-label">서랍 안을 박스에 맞춰 촬영하세요</div></div><div class="rec-ind" id="rec-ind">● REC</div><div class="rec-toast" id="rec-hint">버튼을 눌러 촬영을 시작하세요</div><div class="dark-warn-ov" id="dark-warn"><div class="dw-icon">💡</div><div class="dw-txt">주변이 어둡습니다<br>밝은 곳으로 이동해주세요<br><span style="font-size:13px;opacity:.8">이동하면 자동으로 재개돼요</span></div></div>
+  <div class="rec-vid" style="position:relative"><video id="rec-live" autoplay muted playsinline></video><video id="rec-playback" style="display:none" playsinline controls></video><div id="rec-guide-mask"><span class="gc tl"></span><span class="gc tr"></span><span class="gc bl"></span><span class="gc br"></span><div class="gc-label">서랍 안을 박스에 맞춰 촬영하세요</div></div><div class="rec-ind" id="rec-ind">● REC</div><div class="rec-toast" id="rec-hint">버튼을 눌러 촬영을 시작하세요</div><div class="dark-warn-ov" id="dark-warn"><div class="dw-icon">💡</div><div class="dw-txt">주변이 어둡습니다<br>밝은 곳으로 이동해주세요<br><span style="font-size:13px;opacity:.8">이동하면 자동으로 재개돼요</span></div></div><div class="face-warn-ov" id="face-warn"><div class="fw-icon">🚫</div><div class="fw-txt">얼굴이 감지되었습니다<br>얼굴이 없는 곳을 촬영해주세요</div></div>
   <!-- 가이드 팁 -->
   <div id="rec-guide" style="display:none;position:absolute;top:12px;left:0;right:0;text-align:center;pointer-events:none;z-index:5">
     <span id="rec-guide-txt" style="display:inline-block;background:rgba(0,0,0,.52);backdrop-filter:blur(8px);color:#fff;font-size:14px;font-weight:600;padding:7px 16px;border-radius:20px;letter-spacing:-.01em;transition:opacity .5s">천천히 움직여 주세요</span>
@@ -1281,7 +1286,50 @@ async function compressImage(file){
   });
 }
 
-function handleFile(e){const f=e.target.files?.[0];if(!f)return;selFile=f;rot=0;const url=URL.createObjectURL(f);const rc=document.getElementById('rot-content');rc.innerHTML=f.type.startsWith('video')?`<video src="${url}" class="rotate0" style="max-width:100%;max-height:100%" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate0" style="max-width:100%;max-height:100%">`;document.getElementById('rot-ov').classList.add('open');e.target.value='';}
+async function handleFile(e){
+  const f=e.target.files?.[0];if(!f)return;
+  // 사진인 경우 업로드 전 얼굴 감지
+  if(f.type.startsWith('image/') && faceModel){
+    const url=URL.createObjectURL(f);
+    const img=new Image();
+    const _fallback=()=>{
+      URL.revokeObjectURL(url);
+      selFile=f;rot=0;
+      const url2=URL.createObjectURL(f);
+      const rc=document.getElementById('rot-content');
+      rc.innerHTML=`<img src="${url2}" class="rotate0" style="max-width:100%;max-height:100%">`;
+      document.getElementById('rot-ov').classList.add('open');
+      e.target.value='';
+    };
+    img.onerror=()=>_fallback();
+    img.onload=async()=>{
+      try{
+        const c=document.createElement('canvas');
+        c.width=Math.min(img.width,256);
+        c.height=Math.round(img.height*c.width/img.width);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        const faces=await faceModel.estimateFaces(c,false);
+        URL.revokeObjectURL(url);
+        if(faces.length>0){
+          alert('사진에 얼굴이 감지되었습니다.\n개인정보 보호를 위해 얼굴이 없는 사진을 사용해 주세요.');
+          e.target.value='';
+          return;
+        }
+      }catch(err){ URL.revokeObjectURL(url); }
+      // 얼굴 없으면 정상 진행
+      selFile=f;rot=0;
+      const url2=URL.createObjectURL(f);
+      const rc=document.getElementById('rot-content');
+      rc.innerHTML=`<img src="${url2}" class="rotate0" style="max-width:100%;max-height:100%">`;
+      document.getElementById('rot-ov').classList.add('open');
+      e.target.value='';
+    };
+    img.src=url;
+    return;
+  }
+  // 영상 또는 모델 미로드 시 기존 처리
+  selFile=f;rot=0;const url=URL.createObjectURL(f);const rc=document.getElementById('rot-content');rc.innerHTML=f.type.startsWith('video')?`<video src="${url}" class="rotate0" style="max-width:100%;max-height:100%" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate0" style="max-width:100%;max-height:100%">`;document.getElementById('rot-ov').classList.add('open');e.target.value='';
+}
 function rotateMedia(d){rot=(rot+d)%360;const el=document.getElementById('rot-content').firstChild;if(el)el.className='rotate'+rot;}
 function cancelUpload(){selFile=null;document.getElementById('rot-ov').classList.remove('open');}
 
@@ -1442,10 +1490,10 @@ function skipCand(i){reviewSel[i]=null;document.getElementById(`cand-${i}-0`)?.c
 function confirmReview(){document.getElementById('confirm-ov').classList.remove('open');pendingReview.forEach((it,i)=>{const n=reviewSel[i];if(n)items.push({n:`${it.category}:${n}`,q:it.qty||1});});if(items.length)localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();}
 
 // ─── 영상 촬영 ───
-async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?.getUserMedia){alert('이 브라우저는 영상 촬영을 지원하지 않습니다.');return;}try{mediaStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},facingMode:{ideal:'environment'}},audio:false});const lv=document.getElementById('rec-live');lv.srcObject=mediaStream;lv.style.display='block';const _gm=document.getElementById('rec-guide-mask');if(_gm)_gm.style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-ind').style.display='none';const ht=document.getElementById('rec-hint');ht.textContent='버튼을 눌러 촬영을 시작하세요';ht.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht.classList.add('fade'),2800);recBlob=null;isRec=false;startBrightCheck();document.getElementById('rec-ov').classList.add('open');}catch(err){alert('카메라 접근 실패: '+err.message);}}
-function toggleRec(){if(!isRec){const dw=document.getElementById('dark-warn');if(dw&&dw.style.display==='flex')return;recChunks=[];const mt=['video/webm;codecs=vp9','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';const recOpts=mt?{mimeType:mt,videoBitsPerSecond:800000}:{videoBitsPerSecond:800000};mediaRec=new MediaRecorder(mediaStream,recOpts);mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};mediaRec.onstop=()=>{stopGuideTips();const gm=document.getElementById('rec-guide-mask');if(gm)gm.style.display='none';const type=(mt||'video/webm').split(';')[0];recBlob=new Blob(recChunks,{type});const pb=document.getElementById('rec-playback');pb.src=URL.createObjectURL(recBlob);pb.style.display='block';document.getElementById('rec-live').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-btn').style.display='none';document.getElementById('rec-confirm').style.display='inline-flex';document.getElementById('rec-retake').style.display='inline-flex';document.getElementById('rec-hint').textContent='영상을 확인하고 등록하거나 다시 촬영하세요.';document.getElementById('rec-hint').classList.remove('fade');clearTimeout(window._recHintTimer);isRec=false;};mediaRec.start();isRec=true;recSec=0;document.getElementById('rec-btn').className='rec-circle recording';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-ind').style.display='block';const ht2=document.getElementById('rec-hint');ht2.classList.add('fade');startGuideTips();startBrightCheck();recTimer=setInterval(()=>{if(mediaRec?.state==='paused')return;recSec++;document.getElementById('rec-timer').textContent=`00:${String(recSec).padStart(2,'0')}`;if(recSec>=25)document.getElementById('rec-timer').className='rec-timer danger';if(recSec>=30)stopRec();},1000);}else{stopRec();}}
-function stopRec(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;stopGuideTips();const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';const po=document.getElementById('rec-pause-ov');if(po)po.style.display='none';if(mediaRec?.state==='paused')mediaRec.resume();if(mediaRec?.state!=='inactive')mediaRec.stop();}
-function retakeRec(){const gm=document.getElementById('rec-guide-mask');if(gm)gm.style.display='block';recBlob=null;recChunks=[];document.getElementById('rec-live').style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';const ht3=document.getElementById('rec-hint');ht3.textContent='버튼을 눌러 촬영을 시작하세요';ht3.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht3.classList.add('fade'),2800);isRec=false;startBrightCheck();}
+async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?.getUserMedia){alert('이 브라우저는 영상 촬영을 지원하지 않습니다.');return;}try{mediaStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},facingMode:{ideal:'environment'}},audio:false});const lv=document.getElementById('rec-live');lv.srcObject=mediaStream;lv.style.display='block';const _gm=document.getElementById('rec-guide-mask');if(_gm)_gm.style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-ind').style.display='none';const ht=document.getElementById('rec-hint');ht.textContent='버튼을 눌러 촬영을 시작하세요';ht.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht.classList.add('fade'),2800);recBlob=null;isRec=false;startBrightCheck();startFaceCheck();document.getElementById('rec-ov').classList.add('open');}catch(err){alert('카메라 접근 실패: '+err.message);}}
+function toggleRec(){if(!isRec){const dw=document.getElementById('dark-warn');if(dw&&dw.style.display==='flex')return;if(_faceDetected)return;recChunks=[];const mt=['video/webm;codecs=vp9','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';const recOpts=mt?{mimeType:mt,videoBitsPerSecond:800000}:{videoBitsPerSecond:800000};mediaRec=new MediaRecorder(mediaStream,recOpts);mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};mediaRec.onstop=()=>{stopGuideTips();const gm=document.getElementById('rec-guide-mask');if(gm)gm.style.display='none';const type=(mt||'video/webm').split(';')[0];recBlob=new Blob(recChunks,{type});const pb=document.getElementById('rec-playback');pb.src=URL.createObjectURL(recBlob);pb.style.display='block';document.getElementById('rec-live').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-btn').style.display='none';document.getElementById('rec-confirm').style.display='inline-flex';document.getElementById('rec-retake').style.display='inline-flex';document.getElementById('rec-hint').textContent='영상을 확인하고 등록하거나 다시 촬영하세요.';document.getElementById('rec-hint').classList.remove('fade');clearTimeout(window._recHintTimer);isRec=false;};mediaRec.start();isRec=true;recSec=0;document.getElementById('rec-btn').className='rec-circle recording';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-ind').style.display='block';const ht2=document.getElementById('rec-hint');ht2.classList.add('fade');startGuideTips();startBrightCheck();startFaceCheck();recTimer=setInterval(()=>{if(mediaRec?.state==='paused')return;recSec++;document.getElementById('rec-timer').textContent=`00:${String(recSec).padStart(2,'0')}`;if(recSec>=25)document.getElementById('rec-timer').className='rec-timer danger';if(recSec>=30)stopRec();},1000);}else{stopRec();}}
+function stopRec(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;stopGuideTips();stopFaceCheck();const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';const po=document.getElementById('rec-pause-ov');if(po)po.style.display='none';if(mediaRec?.state==='paused')mediaRec.resume();if(mediaRec?.state!=='inactive')mediaRec.stop();}
+function retakeRec(){const gm=document.getElementById('rec-guide-mask');if(gm)gm.style.display='block';recBlob=null;recChunks=[];document.getElementById('rec-live').style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';const ht3=document.getElementById('rec-hint');ht3.textContent='버튼을 눌러 촬영을 시작하세요';ht3.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht3.classList.add('fade'),2800);isRec=false;startBrightCheck();startFaceCheck();}
 async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';const _recPrevUrl=URL.createObjectURL(recBlob);const _recPreOv=`<div id="pre-upload-ov" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="3.5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible">프레임 추출 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;box.innerHTML=`<video src="${_recPrevUrl}" class="rotate0" id="media-el" playsinline muted loop autoplay></video>`+_recPreOv;try{const videoFrames=await extractVideoFrames(recBlob,8);const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
     // 같은 수납장의 이전 사진만 삭제 (다른 수납장 사진 건드리지 않음)
     const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});
@@ -1498,6 +1546,60 @@ function startGuideTips(){
 }
 function stopGuideTips(){clearInterval(_guideTimer);_guideTimer=null;const g=document.getElementById('rec-guide');if(g)g.style.display='none';}
 
+// ─── 얼굴 감지 (MediaPipe BlazeFace, 브라우저 처리 / GCP 비용 0) ───
+let faceModel = null;
+let _faceTimer = null;
+let _faceDetected = false;
+
+window.addEventListener('load', async()=>{
+  try{
+    if(typeof blazeface==='undefined') return;
+    faceModel = await blazeface.load({maxFaces:1});
+  }catch(e){}
+});
+
+function startFaceCheck(){
+  clearInterval(_faceTimer);
+  _faceDetected = false;
+  if(!faceModel) return;
+  _faceTimer = setInterval(async()=>{
+    const v = document.getElementById('rec-live');
+    if(!v || v.style.display==='none' || !mediaStream || v.readyState < 2) return;
+    try{
+      const c = document.createElement('canvas');
+      c.width = 128; c.height = 96;
+      c.getContext('2d').drawImage(v, 0, 0, 128, 96);
+      const faces = await faceModel.estimateFaces(c, false);
+      const hasFace = faces.length > 0;
+      if(hasFace !== _faceDetected){
+        _faceDetected = hasFace;
+        const fw = document.getElementById('face-warn');
+        if(fw) fw.style.display = hasFace ? 'flex' : 'none';
+        if(isRec){
+          const po = document.getElementById('rec-pause-ov');
+          if(hasFace && mediaRec?.state==='recording'){
+            mediaRec.pause();
+            if(po) po.style.display = 'flex';
+          } else if(!hasFace && mediaRec?.state==='paused'){
+            // 얼굴 사라진 경우만 재개 (밝기 조건도 확인)
+            const dw = document.getElementById('dark-warn');
+            const isDarkPaused = dw && dw.style.display==='flex';
+            if(!isDarkPaused){ mediaRec.resume(); if(po) po.style.display = 'none'; }
+          }
+        }
+      }
+    }catch(e){}
+  }, 800);
+}
+
+function stopFaceCheck(){
+  clearInterval(_faceTimer);
+  _faceTimer = null;
+  _faceDetected = false;
+  const fw = document.getElementById('face-warn');
+  if(fw) fw.style.display = 'none';
+}
+
 // ─── 촬영 중 밝기 체크 (pause/resume) ───
 function startBrightCheck(){
   clearInterval(window._brightTimer);
@@ -1525,7 +1627,7 @@ function startBrightCheck(){
     }catch(e){}
   },1200);
 }
-function cancelRecording(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';if(mediaRec?.state!=='inactive')mediaRec?.stop();if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');isRec=false;}
+function cancelRecording(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;stopFaceCheck();const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';if(mediaRec?.state!=='inactive')mediaRec?.stop();if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');isRec=false;}
 
 var OB_STEPS=[
   {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 변경하고\n12가지 색상 중 원하시는 테마를 선택하실 수 있습니다.',arrow:'down'},
