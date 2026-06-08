@@ -1116,6 +1116,8 @@ async function postAnnouncement() {
     if (!msg) { showToast('공지 내용을 입력해주세요'); return; }
     await sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
     await sb.from('system_announcements').insert({ active: true, type: 'announcement', title: '공지사항', message: msg });
+    // 기존 seen/dismissed 초기화 → 고객 기기에서 🔔 빨간점 다시 표시
+    Object.keys(localStorage).filter(k=>k.startsWith('gyeol_ann_')).forEach(k=>localStorage.removeItem(k));
     showToast('공지가 게시됐어요');
 }
 async function clearAnnouncement() {
