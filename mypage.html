@@ -131,6 +131,19 @@ body {
   border: 1.5px solid var(--header-bg);
   display: none;
 }
+/* ─── 공지 관리 목록 ─── */
+.ann-list-wrap{padding:0 16px 16px;}
+.ann-list-label{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;padding:12px 0 8px;}
+.ann-item{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);gap:7px;}
+.ann-item:last-child{border-bottom:none;}
+.ann-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0;letter-spacing:-.01em;}
+.ann-badge.on{background:rgba(74,222,128,.15);color:#16a34a;}
+.ann-badge.off{background:var(--tag-bg);color:var(--muted);}
+.ann-preview{flex:1;font-size:12px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.ann-date{font-size:11px;color:var(--muted);flex-shrink:0;white-space:nowrap;}
+.ann-btn{font-size:11px;font-weight:600;padding:4px 9px;border-radius:6px;cursor:pointer;border:none;font-family:var(--font);flex-shrink:0;}
+.ann-edit{background:var(--tag-bg);color:var(--ink);border:1px solid var(--border);}
+.ann-del{background:rgba(239,68,68,.08);color:#ef4444;border:none;}
 /* ─── 스크롤 바디 ─── */
 .scroll-body { padding: 16px 16px 72px; display: flex; flex-direction: column; gap: 10px; }
 
@@ -670,9 +683,16 @@ body {
       <div class="section-label" style="padding:12px 0 8px;font-size:9px">공지 메시지 (비워두면 공지 없음)</div>
       <textarea id="announce-input" placeholder="예: 5월 20일 오전 2시~3시 점검 예정입니다." style="width:100%;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 12px;font-size:13px;font-family:var(--font);color:var(--ink);resize:none;height:72px;outline:none;box-sizing:border-box;-webkit-user-select:text;user-select:text"></textarea>
       <div style="display:flex;gap:8px;margin-top:8px">
-        <button onclick="postAnnouncement()" style="flex:1;padding:11px;background:var(--badge-ok);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">공지 게시</button>
-        <button onclick="clearAnnouncement()" style="flex:1;padding:11px;background:var(--tag-bg);color:var(--muted);border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">공지 삭제</button>
+        <button id="ann-post-btn" onclick="postAnnouncement()" style="flex:1;padding:11px;background:var(--badge-ok);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">공지 게시</button>
+        <button id="ann-save-btn" onclick="saveAnnouncement()" style="flex:1;padding:11px;background:#2563eb;color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);display:none">수정 저장</button>
+        <button onclick="cancelEditAnnouncement()" id="ann-cancel-btn" style="padding:11px 14px;background:var(--tag-bg);color:var(--muted);border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:none">취소</button>
+        <button onclick="clearAnnouncement()" style="flex:1;padding:11px;background:var(--tag-bg);color:var(--muted);border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">공지 종료</button>
       </div>
+    </div>
+    <!-- 공지 내역 목록 -->
+    <div class="ann-list-wrap">
+      <div class="ann-list-label">공지 내역</div>
+      <div id="admin-ann-list"><div style="font-size:12px;color:var(--muted);padding:4px 0">불러오는 중...</div></div>
     </div>
   </div>
 
@@ -1084,6 +1104,7 @@ async function loadAdminStatus() {
     const { data } = await sb.from('system_announcements').select('*').eq('active', true).order('created_at', { ascending: false }).limit(1);
     if (!data || !data.length) {
         document.getElementById('maintenance-status-txt').textContent = '꺼짐 — 고객 정상 이용 중';
+        loadAdminAnnouncements();
         return;
     }
     const ann = data[0];
@@ -1095,6 +1116,7 @@ async function loadAdminStatus() {
         document.getElementById('announce-input').value = ann.message;
         document.getElementById('maintenance-status-txt').textContent = '꺼짐 — 공지 게시 중';
     }
+    loadAdminAnnouncements();
 }
 async function toggleMaintenance() {
     const on = document.getElementById('maintenance-toggle').checked;
@@ -1117,13 +1139,89 @@ async function postAnnouncement() {
     await sb.from('system_announcements').insert({ active: true, type: 'announcement', title: '공지사항', message: msg });
     // 기존 seen/dismissed 초기화 → 고객 기기에서 🔔 빨간점 다시 표시
     Object.keys(localStorage).filter(k=>k.startsWith('gyeol_ann_')).forEach(k=>localStorage.removeItem(k));
+    document.getElementById('announce-input').value = '';
     showToast('공지가 게시됐어요');
+    loadAdminAnnouncements();
 }
 async function clearAnnouncement() {
     await sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
     document.getElementById('announce-input').value = '';
-    showToast('공지가 삭제됐어요');
+    showToast('공지가 종료됐어요');
+    loadAdminAnnouncements();
 }
+
+/* ─── 공지 내역 관리 ─── */
+var _editAnnId = null;
+
+async function loadAdminAnnouncements() {
+    const el = document.getElementById('admin-ann-list');
+    if (!el) return;
+    try {
+        const { data, error } = await sb.from('system_announcements')
+            .select('*').neq('type','maintenance')
+            .order('created_at', { ascending: false }).limit(30);
+        if (error || !data?.length) {
+            el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">등록된 공지가 없습니다.</div>';
+            return;
+        }
+        el.innerHTML = '';
+        data.forEach(function(ann) {
+            var d = new Date(ann.created_at);
+            var ds = d.getFullYear()+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getDate().toString().padStart(2,'0');
+            var preview = (ann.message||'').replace(/\n/g,' ');
+            var item = document.createElement('div');
+            item.className = 'ann-item';
+            item.innerHTML =
+                '<span class="ann-badge '+(ann.active?'on':'off')+'">'+(ann.active?'게시중':'종료')+'</span>'+
+                '<span class="ann-preview">'+_annEsc(preview)+'</span>'+
+                '<span class="ann-date">'+ds+'</span>'+
+                '<button class="ann-btn ann-edit" onclick="editAnnouncement(\''+ann.id+'\',\''+_annEsc(ann.message||'').replace(/'/g,"&#39;").replace(/\n/g,'\\n')+'\')">편집</button>'+
+                '<button class="ann-btn ann-del" onclick="deleteAnnouncement(\''+ann.id+'\')">삭제</button>';
+            el.appendChild(item);
+        });
+    } catch(e) {
+        el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">불러오기 실패</div>';
+    }
+}
+
+function editAnnouncement(id, msg) {
+    _editAnnId = id;
+    document.getElementById('announce-input').value = msg.replace(/\\n/g,'\n');
+    document.getElementById('ann-post-btn').style.display = 'none';
+    document.getElementById('ann-save-btn').style.display = 'flex';
+    document.getElementById('ann-cancel-btn').style.display = 'flex';
+    document.getElementById('announce-input').focus();
+    document.getElementById('announce-input').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+async function saveAnnouncement() {
+    if (!_editAnnId) return;
+    const msg = document.getElementById('announce-input').value.trim();
+    if (!msg) { showToast('내용을 입력해주세요'); return; }
+    await sb.from('system_announcements').update({ message: msg }).eq('id', _editAnnId);
+    cancelEditAnnouncement();
+    showToast('공지가 수정됐어요');
+    loadAdminAnnouncements();
+}
+
+async function deleteAnnouncement(id) {
+    if (!confirm('이 공지를 완전히 삭제하시겠습니까?')) return;
+    await sb.from('system_announcements').delete().eq('id', id);
+    if (_editAnnId === id) cancelEditAnnouncement();
+    showToast('공지가 삭제됐어요');
+    loadAdminAnnouncements();
+}
+
+function cancelEditAnnouncement() {
+    _editAnnId = null;
+    document.getElementById('announce-input').value = '';
+    document.getElementById('ann-post-btn').style.display = '';
+    document.getElementById('ann-save-btn').style.display = 'none';
+    document.getElementById('ann-cancel-btn').style.display = 'none';
+}
+
+function _annEsc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 
 document.getElementById('name-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') saveName(); });
 
