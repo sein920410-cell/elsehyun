@@ -1397,17 +1397,14 @@ function resetChatTimeout(){if(chatTimeoutId)clearTimeout(chatTimeoutId);chatTim
 function openChat(){
   document.getElementById('chat-ov').classList.add('open');
   const greeting='안녕하세요! 수납 비서 봄이에요 😊\n수납장 관련 질문이나 서비스 이용 문의 편하게 남겨주세요.';
-  let history=loadChatHistory();
-  // 첫 봇 메시지는 항상 최신 인사말로 교체
-  if(history.length>0&&history[0].role==='bot'){history[0].text=greeting;}
-  else if(history.length===0){history=[{role:'bot',text:greeting}];}
+  // 항상 새 대화로 시작 (이전 기록 초기화)
+  const history=[{role:'bot',text:greeting}];
   saveChatHistory(history);
   const el=document.getElementById('chat-msgs');
   el.innerHTML='';
   const bubble=document.createElement('div');bubble.className='typing-bubble';bubble.innerHTML='<span></span><span></span><span></span>';
   el.appendChild(bubble);
-  const delay=history.length<=1?1600:900;
-  setTimeout(()=>{bubble.remove();renderChatHistory(history);},delay);
+  setTimeout(()=>{bubble.remove();renderChatHistory(history);},1600);
   resetChatTimeout();
 }
 function closeChat(){document.getElementById('chat-ov').classList.remove('open');}
