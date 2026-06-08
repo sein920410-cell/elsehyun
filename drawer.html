@@ -1592,6 +1592,8 @@ window.addEventListener('load', async()=>{
 function startFaceCheck(){
   clearInterval(_faceTimer);
   _faceDetected = false;
+  const fw = document.getElementById('face-warn');
+  if(fw) fw.style.display = 'none';
   if(!faceModel) return;
   _faceTimer = setInterval(async()=>{
     const v = document.getElementById('rec-live');
