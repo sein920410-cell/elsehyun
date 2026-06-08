@@ -701,7 +701,7 @@ async function loadNotices(){
   try{
     var _annSb=(typeof window._searchSb!=='undefined'&&window._searchSb)?window._searchSb:(typeof sb!=='undefined'?sb:null);
     if(!_annSb){list.innerHTML='<div class="notice-empty">불러올 수 없습니다</div>';return;}
-    var r=await _annSb.from('system_announcements').select('*').neq('type','maintenance').order('created_at',{ascending:false}).limit(20);
+    var r=await _annSb.from('system_announcements').select('*').eq('active',true).neq('type','maintenance').order('created_at',{ascending:false}).limit(20);
     if(r.error||!r.data){list.innerHTML='<div class="notice-empty">불러올 수 없습니다</div>';return;}
     _noticeData=r.data;
     if(!r.data.length){list.innerHTML='<div class="notice-empty">등록된 공지사항이 없습니다</div>';return;}
