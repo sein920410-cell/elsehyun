@@ -28,6 +28,8 @@
     // 인증 통과 → 화면 표시
     document.body.style.visibility = 'visible';
     checkSystemAnnouncement();
+    // 30초마다 새 공지 체크 (새로고침 없이 빨간점 표시)
+    setInterval(checkSystemAnnouncement, 30000);
     // drawers 테이블에서 이 사용자의 모든 수납장을 localStorage로 복원 (방문기록 지워도 유지)
     try {
         const { data: rows } = await _authClient
@@ -695,7 +697,7 @@ async function loadNotices(){
   try{
     var _annSb=(typeof window._searchSb!=='undefined'&&window._searchSb)?window._searchSb:(typeof sb!=='undefined'?sb:null);
     if(!_annSb){list.innerHTML='<div class="notice-empty">불러올 수 없습니다</div>';return;}
-    var r=await _annSb.from('system_announcements').select('*').eq('active',true).neq('type','maintenance').order('created_at',{ascending:false}).limit(20);
+    var r=await _annSb.from('system_announcements').select('*').neq('type','maintenance').order('created_at',{ascending:false}).limit(20);
     if(r.error||!r.data){list.innerHTML='<div class="notice-empty">불러올 수 없습니다</div>';return;}
     _noticeData=r.data;
     if(!r.data.length){list.innerHTML='<div class="notice-empty">등록된 공지사항이 없습니다</div>';return;}
