@@ -677,6 +677,12 @@ body {
         <span class="toggle-slider"></span>
       </label>
     </div>
+    <!-- 점검 종료 예상 시간 -->
+    <div id="maintenance-time-wrap" style="padding:8px 16px 4px;display:none">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600">점검 예상 종료 시간 (선택)</div>
+      <input type="datetime-local" id="maintenance-ends-at"
+        style="width:100%;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:9px 12px;font-size:13px;font-family:var(--font);color:var(--ink);outline:none;box-sizing:border-box">
+    </div>
 
     <!-- 공지 내용 입력 -->
     <div style="padding:0 16px 16px">
@@ -1121,14 +1127,18 @@ async function loadAdminStatus() {
 async function toggleMaintenance() {
     const on = document.getElementById('maintenance-toggle').checked;
     const msg = document.getElementById('announce-input').value.trim() || '서비스 점검 중입니다. 잠시 후 다시 이용해주세요.';
-    // 기존 활성 항목 모두 비활성화
+    const tw = document.getElementById('maintenance-time-wrap');
+    if(tw) tw.style.display = on ? 'block' : 'none';
     await sb.from('system_announcements').update({ active: false }).eq('active', true);
     if (on) {
-        await sb.from('system_announcements').insert({ active: true, type: 'maintenance', message: msg });
+        const endsAtVal = document.getElementById('maintenance-ends-at')?.value;
+        const endsAt = endsAtVal ? new Date(endsAtVal).toISOString() : null;
+        await sb.from('system_announcements').insert({ active: true, type: 'maintenance', message: msg, ends_at: endsAt });
         document.getElementById('maintenance-status-txt').textContent = '켜짐 — 점검 중 (고객 접근 차단됨)';
         showToast('점검 모드 시작됨');
     } else {
         document.getElementById('maintenance-status-txt').textContent = '꺼짐 — 고객 정상 이용 중';
+        document.getElementById('maintenance-ends-at').value = '';
         showToast('점검 모드 해제됨');
     }
 }
