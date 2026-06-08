@@ -509,7 +509,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 
 <!-- 공지 배너 -->
 <div class="announce-bar" id="announce-bar">
-  <div class="announce-icon">📢</div>
+  <div class="announce-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;stroke:#fff;flex-shrink:0"><path d="M3 11v2"/><path d="M5 9v6"/><path d="M19 4v16l-7-4H5V8h7L19 4z"/><path d="M19 8a4 4 0 0 1 0 8"/></svg></div>
   <div class="announce-body">
     <div class="announce-title" id="announce-title">공지사항</div>
     <div class="announce-msg" id="announce-msg"></div>
@@ -1557,9 +1557,14 @@ function closeAnnounce(){
   const bar=document.getElementById('announce-bar');
   bar.classList.remove('show');
   document.querySelector('.header').style.marginTop='';
-  // 이 공지를 다시 안 보이게 (id 기준 영구 저장)
   const id=bar.dataset.annId;
   if(id)localStorage.setItem('gyeol_ann_dismissed_'+id,'1');
+  // 공지함 안내 토스트
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:500;z-index:9999;text-align:center;line-height:1.6;pointer-events:none;max-width:300px;white-space:pre-line;box-shadow:0 4px 16px rgba(0,0,0,.18);';
+  t.textContent='공지사항은 홈 화면 상단\n알림 아이콘(🔔)에서 다시 확인할 수 있어요.';
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.transition='opacity .4s';t.style.opacity='0';setTimeout(()=>t.remove(),400);},3500);
 }
 const GUIDE_TIPS=['천천히 움직여 주세요','각도를 바꿔가며 찍어주세요','물건을 화면 가득 채워주세요','내부 상태가 잘 보이게 촬영','가까이서 찍어주세요'];
 let _guideTimer=null,_guideIdx=0;
