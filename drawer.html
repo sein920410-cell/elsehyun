@@ -1601,16 +1601,17 @@ function startFaceCheck(){
       c.getContext('2d').drawImage(v, 0, 0, 128, 96);
       const faces = await faceModel.estimateFaces(c, false);
       const hasFace = faces.length > 0;
+      // 상태 변경 시에만 오버레이 업데이트
       if(hasFace !== _faceDetected){
         _faceDetected = hasFace;
         const fw = document.getElementById('face-warn');
         if(fw) fw.style.display = hasFace ? 'flex' : 'none';
-        if(hasFace && isRec && mediaRec?.state==='recording'){
-          // 얼굴 감지 → 청크 버리고 강제 중지
-          recChunks = [];
-          _faceStopFlag = true;
-          mediaRec.stop();
-        }
+      }
+      // 강제 중지는 매 인터벌마다 독립 체크 (두 번째 촬영도 차단)
+      if(hasFace && isRec && mediaRec?.state==='recording' && !_faceStopFlag){
+        recChunks = [];
+        _faceStopFlag = true;
+        mediaRec.stop();
       }
     }catch(e){}
   }, 800);
