@@ -112,7 +112,25 @@ body {
   transition: background 0.15s;
 }
 .help-btn:active { background: rgba(255,255,255,0.22); }
-
+.bell-btn {
+  position: relative; width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.85);
+  font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s;
+}
+.bell-btn:active { background: rgba(255,255,255,0.22); }
+.bell-dot {
+  position: absolute; top: 3px; right: 3px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ef4444;
+  border: 1.5px solid var(--header-bg);
+  display: none;
+}
 /* ─── 스크롤 바디 ─── */
 .scroll-body { padding: 16px 16px 72px; display: flex; flex-direction: column; gap: 10px; }
 
@@ -518,6 +536,9 @@ body {
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
   </div>
   <div class="header-title" data-i18n="mypage_title">마이페이지</div>
+  <div class="bell-btn" id="bell-btn" onclick="openBellAnnounce()" title="공지사항">
+    🔔<span class="bell-dot" id="bell-dot"></span>
+  </div>
   <div class="help-btn" onclick="openHelp()" title="사용 안내">?</div>
 </div>
 
@@ -956,6 +977,12 @@ async function checkSystemAnnouncement(){
       document.getElementById('maintenance-msg').innerHTML=ann.message.replace(/\n/g,'<br>');
       document.getElementById('maintenance-ov').classList.add('show');
     }else{
+      // 안 본 공지면 🔔 빨간 점 표시
+      if(!localStorage.getItem('gyeol_ann_seen_'+ann.id)){
+        var dot=document.getElementById('bell-dot');
+        if(dot)dot.style.display='block';
+        window._pendingAnnId=ann.id;
+      }
       if(localStorage.getItem('gyeol_ann_dismissed_'+ann.id))return;
       document.getElementById('announce-title').textContent=ann.title||'공지사항';
       var _m=document.getElementById('announce-msg');_m.innerHTML='';
@@ -965,12 +992,36 @@ async function checkSystemAnnouncement(){
     }
   }catch(e){console.log('공지 체크 실패',e.message);}
 }
+function openBellAnnounce(){
+  var bar=document.getElementById('announce-bar');
+  var dot=document.getElementById('bell-dot');
+  // 빨간 점 제거 + seen 저장
+  if(window._pendingAnnId){
+    localStorage.setItem('gyeol_ann_seen_'+window._pendingAnnId,'1');
+    window._pendingAnnId=null;
+  }
+  if(dot)dot.style.display='none';
+  // 배너가 닫혀있으면 다시 열어줌
+  if(bar&&!bar.classList.contains('show')){
+    // dismissed 해제하고 다시 보여주기
+    var annId=bar.dataset.annId;
+    if(annId)localStorage.removeItem('gyeol_ann_dismissed_'+annId);
+    bar.classList.add('show');
+    setTimeout(function(){var hd=document.querySelector('.header');if(bar&&hd)hd.style.marginTop=bar.offsetHeight+'px';},50);
+  }
+}
 function closeAnnounce(){
   var bar=document.getElementById('announce-bar');
   bar.classList.remove('show');
   var hd=document.querySelector('.header');if(hd)hd.style.marginTop='';
   var id=bar.dataset.annId;
-  if(id)localStorage.setItem('gyeol_ann_dismissed_'+id,'1');
+  if(id){
+    localStorage.setItem('gyeol_ann_dismissed_'+id,'1');
+    localStorage.setItem('gyeol_ann_seen_'+id,'1');
+  }
+  var dot=document.getElementById('bell-dot');
+  if(dot)dot.style.display='none';
+  window._pendingAnnId=null;
 }
 function openHelp(){document.getElementById('help-ov').classList.add('open');}
 function closeHelp(){document.getElementById('help-ov').classList.remove('open');}
