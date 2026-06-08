@@ -335,6 +335,27 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
 .ob-prev{padding:10px 14px;background:#eee;border:none;border-radius:9px;font-size:12px;font-weight:600;color:#444;cursor:pointer;font-family:inherit}
 .ob-nxt{flex:1;padding:10px;background:#111;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit}
 /* 점검/공지 배너 */
+/* ─── 공지함 ─── */
+.notice-ov{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.45);display:none;align-items:flex-end;}
+.notice-ov.open{display:flex;}
+.notice-box{width:100%;max-height:78vh;background:var(--bg);border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;}
+.notice-hd{display:flex;align-items:center;gap:4px;padding:16px 16px 12px;border-bottom:1px solid var(--divider);flex-shrink:0;}
+.notice-back-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;display:none;}
+.notice-back-btn svg{width:18px;height:18px;stroke:var(--ink-soft);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.notice-hd-title{flex:1;font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.02em;}
+.notice-x{width:30px;height:30px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.notice-x svg{width:18px;height:18px;stroke:var(--muted);stroke-width:2;fill:none;stroke-linecap:round;}
+.notice-list{flex:1;overflow-y:auto;}
+.notice-item{display:flex;align-items:center;padding:15px 16px;border-bottom:1px solid var(--divider);cursor:pointer;gap:10px;transition:background 0.12s;}
+.notice-item:active{background:rgba(0,0,0,0.04);}
+.notice-item-title{flex:1;font-size:14px;font-weight:600;color:var(--ink);line-height:1.4;letter-spacing:-.01em;}
+.notice-item-date{font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+.notice-item-arr svg{width:14px;height:14px;stroke:var(--muted);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.notice-empty{padding:52px 16px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6;}
+.notice-detail{flex:1;overflow-y:auto;padding:20px 16px;display:none;}
+.notice-detail-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;letter-spacing:-.02em;line-height:1.4;}
+.notice-detail-date{font-size:12px;color:var(--muted);margin-bottom:18px;}
+.notice-detail-body{font-size:14px;color:var(--ink-soft);line-height:1.8;white-space:pre-wrap;}
 .announce-bar{position:fixed;top:0;left:0;right:0;z-index:1000;background:#111318;color:#fff;padding:12px 16px;display:none;align-items:flex-start;gap:10px}
 .announce-bar.show{display:flex}
 .announce-icon{font-size:18px;flex-shrink:0;margin-top:1px}
@@ -369,6 +390,22 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
   <button class="announce-close" onclick="closeAnnounce()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
 </div>
 
+<div class="notice-ov" id="notice-ov" onclick="if(event.target===this)closeNoticeBox()">
+  <div class="notice-box">
+    <div class="notice-hd">
+      <div class="notice-back-btn" id="notice-back-btn" onclick="noticeGoBack()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div class="notice-hd-title" id="notice-hd-title">공지사항</div>
+      <button class="notice-x" onclick="closeNoticeBox()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="notice-list" id="notice-list"></div>
+    <div class="notice-detail" id="notice-detail"></div>
+  </div>
+</div>
+
 <div class="ob-ov" id="ob-ov" onclick="obClose()">
   <div class="ob-hl" id="ob-hl"></div>
   <div class="ob-box" onclick="event.stopPropagation()">
@@ -390,7 +427,7 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
   <div class="brand"><span class="logo-en"><span class="sp">SPACE·</span><span class="gy">GYEOL</span></span></div>
   <div style="display:flex;align-items:center;gap:8px">
     <div class="bell-btn-wrap">
-      <button class="bell-btn-idx" id="bell-btn" onclick="openBellAnnounce()" title="공지사항">
+      <button class="bell-btn-idx" id="bell-btn" onclick="openNoticeBox()" title="공지사항">
         <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       </button>
       <span class="bell-dot-idx" id="bell-dot"></span>
@@ -644,21 +681,64 @@ async function checkSystemAnnouncement(){
     }
   }catch(e){console.log('공지 체크 실패',e.message);}
 }
-function openBellAnnounce(){
-  var bar=document.getElementById('announce-bar');
-  var dot=document.getElementById('bell-dot');
-  if(window._pendingAnnId){
-    localStorage.setItem('gyeol_ann_seen_'+window._pendingAnnId,'1');
-    window._pendingAnnId=null;
-  }
-  if(dot)dot.style.display='none';
-  if(bar&&!bar.classList.contains('show')){
-    var annId=bar.dataset.annId;
-    if(annId)localStorage.removeItem('gyeol_ann_dismissed_'+annId);
-    bar.classList.add('show');
-    setTimeout(function(){var hd=document.querySelector('.header');if(bar&&hd)hd.style.marginTop=bar.offsetHeight+'px';},50);
-  }
+var _noticeData=[];
+async function openNoticeBox(){
+  if(window._pendingAnnId){localStorage.setItem('gyeol_ann_seen_'+window._pendingAnnId,'1');window._pendingAnnId=null;}
+  var dot=document.getElementById('bell-dot');if(dot)dot.style.display='none';
+  var ov=document.getElementById('notice-ov');if(ov)ov.classList.add('open');
+  await loadNotices();
 }
+function closeNoticeBox(){var ov=document.getElementById('notice-ov');if(ov)ov.classList.remove('open');}
+async function loadNotices(){
+  var list=document.getElementById('notice-list');
+  var detail=document.getElementById('notice-detail');
+  var backBtn=document.getElementById('notice-back-btn');
+  var hdTitle=document.getElementById('notice-hd-title');
+  list.style.display='block';detail.style.display='none';
+  if(backBtn)backBtn.style.display='none';
+  if(hdTitle)hdTitle.textContent='공지사항';
+  list.innerHTML='<div class="notice-empty">불러오는 중...</div>';
+  try{
+    var _annSb=(typeof window._searchSb!=='undefined'&&window._searchSb)?window._searchSb:(typeof sb!=='undefined'?sb:null);
+    if(!_annSb){list.innerHTML='<div class="notice-empty">불러올 수 없습니다</div>';return;}
+    var r=await _annSb.from('system_announcements').select('*').neq('type','maintenance').order('created_at',{ascending:false}).limit(20);
+    if(r.error||!r.data){list.innerHTML='<div class="notice-empty">불러올 수 없습니다</div>';return;}
+    _noticeData=r.data;
+    if(!r.data.length){list.innerHTML='<div class="notice-empty">등록된 공지사항이 없습니다</div>';return;}
+    list.innerHTML='';
+    r.data.forEach(function(ann,i){
+      var d=new Date(ann.created_at);
+      var ds=(d.getFullYear()+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getDate().toString().padStart(2,'0'));
+      var el=document.createElement('div');el.className='notice-item';
+      el.innerHTML='<div class="notice-item-title">'+_esc(ann.title||'공지사항')+'</div><div class="notice-item-date">'+ds+'</div><div class="notice-item-arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>';
+      el.onclick=function(){showNoticeDetail(i);};
+      list.appendChild(el);
+    });
+  }catch(e){list.innerHTML='<div class="notice-empty">불러올 수 없습니다</div>';}
+}
+function showNoticeDetail(idx){
+  var ann=_noticeData[idx];if(!ann)return;
+  var list=document.getElementById('notice-list');
+  var detail=document.getElementById('notice-detail');
+  var backBtn=document.getElementById('notice-back-btn');
+  var hdTitle=document.getElementById('notice-hd-title');
+  list.style.display='none';detail.style.display='block';
+  if(backBtn)backBtn.style.display='flex';
+  if(hdTitle)hdTitle.textContent=ann.title||'공지사항';
+  var d=new Date(ann.created_at);
+  var ds=(d.getFullYear()+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getDate().toString().padStart(2,'0'));
+  detail.innerHTML='<div class="notice-detail-title">'+_esc(ann.title||'공지사항')+'</div><div class="notice-detail-date">'+ds+'</div><div class="notice-detail-body">'+_esc(ann.message||'')+'</div>';
+}
+function noticeGoBack(){
+  var list=document.getElementById('notice-list');
+  var detail=document.getElementById('notice-detail');
+  var backBtn=document.getElementById('notice-back-btn');
+  var hdTitle=document.getElementById('notice-hd-title');
+  list.style.display='block';detail.style.display='none';
+  if(backBtn)backBtn.style.display='none';
+  if(hdTitle)hdTitle.textContent='공지사항';
+}
+function _esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function closeAnnounce(){
   var bar=document.getElementById('announce-bar');
   bar.classList.remove('show');
