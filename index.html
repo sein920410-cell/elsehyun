@@ -299,6 +299,24 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
   stroke-linecap: round; stroke-linejoin: round;
   display: block;
 }
+.bell-btn-wrap {
+  position: relative; width: 34px; height: 34px; flex-shrink: 0;
+}
+.bell-btn-idx {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--muted2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s; color: var(--ink-soft);
+}
+.bell-btn-idx:active { background: rgba(180,148,100,0.10); }
+.bell-btn-idx svg { width: 17px; height: 17px; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; display: block; }
+.bell-dot-idx {
+  position: absolute; top: 2px; right: 2px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ef4444; border: 1.5px solid var(--bg, #f8f5ef);
+  display: none;
+}
 
 
 
@@ -343,7 +361,7 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
   <div class="maintenance-msg" id="maintenance-msg">더 나은 서비스를 위해 점검 중입니다.<br>잠시 후 다시 이용해 주세요.</div>
 </div>
 <div class="announce-bar" id="announce-bar">
-  <div class="announce-icon">📢</div>
+  <div class="announce-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;stroke:#fff"><path d="M3 11v2"/><path d="M5 9v6"/><path d="M19 4v16l-7-4H5V8h7L19 4z"/><path d="M19 8a4 4 0 0 1 0 8"/></svg></div>
   <div class="announce-body">
     <div class="announce-title" id="announce-title">공지사항</div>
     <div class="announce-msg" id="announce-msg"></div>
@@ -370,9 +388,17 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
 
 <div class="header">
   <div class="brand"><span class="logo-en"><span class="sp">SPACE·</span><span class="gy">GYEOL</span></span></div>
-  <button class="mypage-btn" onclick="location.href='mypage.html'" title="마이페이지">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke="currentColor" fill="none"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" fill="none"/></svg>
-  </button>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="bell-btn-wrap">
+      <button class="bell-btn-idx" id="bell-btn" onclick="openBellAnnounce()" title="공지사항">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+      <span class="bell-dot-idx" id="bell-dot"></span>
+    </div>
+    <button class="mypage-btn" onclick="location.href='mypage.html'" title="마이페이지">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke="currentColor" fill="none"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" fill="none"/></svg>
+    </button>
+  </div>
 </div>
 <div class="header-divider"></div>
 
@@ -603,6 +629,12 @@ async function checkSystemAnnouncement(){
       document.getElementById('maintenance-msg').innerHTML=ann.message.replace(/\n/g,'<br>');
       document.getElementById('maintenance-ov').classList.add('show');
     }else{
+      // 안 본 공지면 🔔 빨간 점 표시
+      if(!localStorage.getItem('gyeol_ann_seen_'+ann.id)){
+        var dot=document.getElementById('bell-dot');
+        if(dot)dot.style.display='block';
+        window._pendingAnnId=ann.id;
+      }
       if(localStorage.getItem('gyeol_ann_dismissed_'+ann.id))return;
       document.getElementById('announce-title').textContent=ann.title||'공지사항';
       var _m=document.getElementById('announce-msg');_m.innerHTML='';
@@ -612,12 +644,33 @@ async function checkSystemAnnouncement(){
     }
   }catch(e){console.log('공지 체크 실패',e.message);}
 }
+function openBellAnnounce(){
+  var bar=document.getElementById('announce-bar');
+  var dot=document.getElementById('bell-dot');
+  if(window._pendingAnnId){
+    localStorage.setItem('gyeol_ann_seen_'+window._pendingAnnId,'1');
+    window._pendingAnnId=null;
+  }
+  if(dot)dot.style.display='none';
+  if(bar&&!bar.classList.contains('show')){
+    var annId=bar.dataset.annId;
+    if(annId)localStorage.removeItem('gyeol_ann_dismissed_'+annId);
+    bar.classList.add('show');
+    setTimeout(function(){var hd=document.querySelector('.header');if(bar&&hd)hd.style.marginTop=bar.offsetHeight+'px';},50);
+  }
+}
 function closeAnnounce(){
   var bar=document.getElementById('announce-bar');
   bar.classList.remove('show');
   var hd=document.querySelector('.header');if(hd)hd.style.marginTop='';
   var id=bar.dataset.annId;
-  if(id)localStorage.setItem('gyeol_ann_dismissed_'+id,'1');
+  if(id){
+    localStorage.setItem('gyeol_ann_dismissed_'+id,'1');
+    localStorage.setItem('gyeol_ann_seen_'+id,'1');
+  }
+  var dot=document.getElementById('bell-dot');
+  if(dot)dot.style.display='none';
+  window._pendingAnnId=null;
 }
 </script>
 <!-- 검색 썸네일 전체화면 보기 -->
