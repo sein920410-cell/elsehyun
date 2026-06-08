@@ -133,7 +133,7 @@ body {
 }
 /* ─── 공지 관리 목록 ─── */
 .ann-list-wrap{padding:0 16px 16px;}
-.ann-list-label{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;padding:12px 0 8px;}
+.ann-list-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;padding:12px 0 8px;}
 .ann-item{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);gap:7px;}
 .ann-item:last-child{border-bottom:none;}
 .ann-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0;letter-spacing:-.01em;}
@@ -195,7 +195,7 @@ body {
 .profile-badge {
   display: inline-flex; align-items: center; gap: 4px;
   border-radius: 5px; padding: 2px 7px; margin-top: 5px;
-  font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
 }
 .profile-badge::before { content: '●'; font-size: 6px; }
 .profile-badge.founder { background: rgba(134,239,172,0.16); color: #86efac; border: 1px solid rgba(134,239,172,0.22); }
@@ -390,7 +390,7 @@ body {
 
 /* ─── 초대코드 ─── */
 .invite-code-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin: 14px 0 7px; text-align: center; }
-.invite-code-label { font-size: 9px; color: var(--muted); margin-bottom: 5px; letter-spacing: .05em; text-transform: uppercase; }
+.invite-code-label { font-size: 11px; color: var(--muted); margin-bottom: 5px; letter-spacing: .05em; text-transform: uppercase; }
 .invite-code-val { font-size: 18px; font-weight: 800; letter-spacing: .12em; color: var(--ink); font-family: monospace; }
 .invite-link-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; font-size: 11px; color: var(--muted); font-family: monospace; box-sizing: border-box; margin-bottom: 12px; outline: none; }
 
@@ -680,7 +680,7 @@ body {
 
     <!-- 공지 내용 입력 -->
     <div style="padding:0 16px 16px">
-      <div class="section-label" style="padding:12px 0 8px;font-size:9px">공지 메시지 (비워두면 공지 없음)</div>
+      <div class="section-label" style="padding:12px 0 8px;font-size:11px">공지 메시지 (비워두면 공지 없음)</div>
       <textarea id="announce-input" placeholder="예: 5월 20일 오전 2시~3시 점검 예정입니다." style="width:100%;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 12px;font-size:13px;font-family:var(--font);color:var(--ink);resize:none;height:72px;outline:none;box-sizing:border-box;-webkit-user-select:text;user-select:text"></textarea>
       <div style="display:flex;gap:8px;margin-top:8px">
         <button id="ann-post-btn" onclick="postAnnouncement()" style="flex:1;padding:11px;background:var(--badge-ok);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">공지 게시</button>
