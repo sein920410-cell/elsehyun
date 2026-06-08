@@ -19,8 +19,8 @@
     );
     const { data: { session } } = await _sb.auth.getSession();
     if (!session) { window.location.replace('login.html'); return; }
-    const { data: serial } = await _sb.from('serials').select('id').eq('used_by', session.user.email).maybeSingle();
-    if (!serial) { window.location.replace('serial.html'); return; }
+    const { data: serialRows } = await _sb.from('serials').select('id').eq('used_by', session.user.email).limit(1);
+    if (!serialRows?.[0]) { window.location.replace('serial.html'); return; }
     document.body.style.visibility = 'visible';
     setTimeout(function(){ startOnboarding(); }, 1000);
     })();
@@ -144,6 +144,14 @@ body {
 .ann-btn{font-size:11px;font-weight:600;padding:4px 9px;border-radius:6px;cursor:pointer;border:none;font-family:var(--font);flex-shrink:0;}
 .ann-edit{background:var(--tag-bg);color:var(--ink);border:1px solid var(--border);}
 .ann-del{background:rgba(239,68,68,.08);color:#ef4444;border:none;}
+/* ─── 운영 통계 ─── */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 16px 14px;}
+.stat-card{background:var(--tag-bg);border:1px solid var(--border);border-radius:8px;padding:10px 8px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.1;}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;letter-spacing:.02em;}
+/* ─── 관리자 섹션 구분선 ─── */
+.admin-sep{height:1px;background:var(--border);margin:0 16px;}
+.admin-sub-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;padding:10px 16px 6px;}
 /* ─── 스크롤 바디 ─── */
 .scroll-body { padding: 16px 16px 72px; display: flex; flex-direction: column; gap: 10px; }
 
@@ -452,6 +460,14 @@ body {
 .announce-close svg{width:12px;height:12px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
 .maintenance-ov{display:none;position:fixed;inset:0;background:#0C0D10;z-index:2000;flex-direction:column;align-items:center;justify-content:center;padding:32px}
 .maintenance-ov.show{display:flex}
+/* ─── 잔여량 알림 모달 ─── */
+.credit-alert-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1900;align-items:flex-end;justify-content:center;padding:0 0 24px}
+.credit-alert-ov.show{display:flex}
+.credit-alert-box{background:var(--surface);border-radius:18px;padding:24px 20px 20px;width:calc(100% - 32px);max-width:380px;box-shadow:0 8px 40px rgba(0,0,0,.18)}
+.credit-alert-icon{width:44px;height:44px;border-radius:12px;background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.2);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.credit-alert-title{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:6px}
+.credit-alert-msg{font-size:13px;color:var(--muted);line-height:1.65;white-space:pre-line}
+.credit-alert-btn{margin-top:16px;width:100%;padding:13px;background:var(--ink);color:var(--bg);border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)}
 .maintenance-icon{font-size:52px;margin-bottom:20px}
 .maintenance-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:10px;text-align:center}
 .maintenance-msg{font-size:15px;color:rgba(255,255,255,.6);text-align:center;line-height:1.7;max-width:280px}
@@ -461,9 +477,21 @@ body {
 
 <!-- 점검/공지 -->
 <div class="maintenance-ov" id="maintenance-ov">
-  <div class="maintenance-icon">🔧</div>
+  <div class="maintenance-icon"><svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
   <div class="maintenance-title">서비스 점검 중</div>
   <div class="maintenance-msg" id="maintenance-msg">더 나은 서비스를 위해 점검 중입니다.<br>잠시 후 다시 이용해 주세요.</div>
+</div>
+
+<!-- 잔여량 알림 모달 -->
+<div class="credit-alert-ov" id="credit-alert-ov">
+  <div class="credit-alert-box">
+    <div class="credit-alert-icon">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#eab308" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="credit-alert-title" id="credit-alert-title">이용권 잔여량 알림</div>
+    <div class="credit-alert-msg" id="credit-alert-msg"></div>
+    <button class="credit-alert-btn" onclick="closeCreditAlert()">확인</button>
+  </div>
 </div>
 <div class="announce-bar" id="announce-bar">
   <div class="announce-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;stroke:#fff"><path d="M3 11v2"/><path d="M5 9v6"/><path d="M19 4v16l-7-4H5V8h7L19 4z"/><path d="M19 8a4 4 0 0 1 0 8"/></svg></div>
@@ -556,7 +584,7 @@ body {
 
   <!-- 프로필 카드 -->
   <div class="profile-card">
-    <div class="avatar" id="avatar-wrap">👤</div>
+    <div class="avatar" id="avatar-wrap"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
     <div class="profile-info">
       <div class="profile-name-row">
         <div class="profile-name" id="profile-name">불러오는 중…</div>
@@ -660,13 +688,37 @@ body {
   </div>
 
   <!-- 관리자 전용 (운영자 계정만 노출) -->
-  <div class="section-card" id="admin-section" style="display:none;border:1.5px solid rgba(134,239,172,.3)">
-    <div class="section-label" style="color:var(--badge-ok)">⚙️ 관리자 도구</div>
+  <div class="section-card" id="admin-section" style="display:none;border:1.5px solid rgba(134,239,172,.3);padding-bottom:0">
+    <!-- 헤더 -->
+    <div class="section-label" style="color:var(--badge-ok);display:flex;align-items:center;gap:5px">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      관리자 도구
+    </div>
 
-    <!-- 점검 모드 토글 -->
+    <!-- 운영 현황 통계 -->
+    <div class="admin-sub-label">운영 현황</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-customers">–</div>
+        <div class="stat-lbl">총 고객수</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-drawers">–</div>
+        <div class="stat-lbl">수납장수</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-today">–</div>
+        <div class="stat-lbl">오늘 결제</div>
+      </div>
+    </div>
+
+    <div class="admin-sep"></div>
+
+    <!-- 점검 모드 -->
+    <div class="admin-sub-label">점검 모드</div>
     <div class="row" style="cursor:default">
-      <div class="row-ico" style="background:rgba(220,38,38,.1)">
-        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      <div class="row-ico" style="background:rgba(220,38,38,.1);border-color:rgba(220,38,38,.15)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
       </div>
       <div class="row-info">
         <div class="row-title">점검 모드</div>
@@ -677,16 +729,24 @@ body {
         <span class="toggle-slider"></span>
       </label>
     </div>
-    <!-- 점검 종료 예상 시간 -->
-    <div id="maintenance-time-wrap" style="padding:8px 16px 4px;display:none">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600">점검 예상 종료 시간 (선택)</div>
+    <!-- 점검 종료 예상 시간 (점검 ON일 때만 노출) -->
+    <div id="maintenance-time-wrap" style="padding:4px 16px 12px;display:none">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600">종료 예상 시간 (선택)</div>
       <input type="datetime-local" id="maintenance-ends-at"
         style="width:100%;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:9px 12px;font-size:13px;font-family:var(--font);color:var(--ink);outline:none;box-sizing:border-box">
+      <div style="margin-top:8px">
+        <button onclick="previewMaintenance()" style="width:100%;padding:10px;background:var(--tag-bg);color:var(--muted);border:1px solid var(--border);border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          고객 화면 미리보기
+        </button>
+      </div>
     </div>
 
-    <!-- 공지 내용 입력 -->
-    <div style="padding:0 16px 16px">
-      <div class="section-label" style="padding:12px 0 8px;font-size:11px">공지 메시지 (비워두면 공지 없음)</div>
+    <div class="admin-sep"></div>
+
+    <!-- 공지 게시 -->
+    <div class="admin-sub-label">공지 게시</div>
+    <div style="padding:0 16px 14px">
       <textarea id="announce-input" placeholder="예: 5월 20일 오전 2시~3시 점검 예정입니다." style="width:100%;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 12px;font-size:13px;font-family:var(--font);color:var(--ink);resize:none;height:72px;outline:none;box-sizing:border-box;-webkit-user-select:text;user-select:text"></textarea>
       <div style="display:flex;gap:8px;margin-top:8px">
         <button id="ann-post-btn" onclick="postAnnouncement()" style="flex:1;padding:11px;background:var(--badge-ok);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">공지 게시</button>
@@ -695,8 +755,10 @@ body {
         <button onclick="clearAnnouncement()" style="flex:1;padding:11px;background:var(--tag-bg);color:var(--muted);border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">공지 종료</button>
       </div>
     </div>
+
     <!-- 공지 내역 목록 -->
-    <div class="ann-list-wrap">
+    <div class="admin-sep"></div>
+    <div class="ann-list-wrap" style="padding-bottom:16px">
       <div class="ann-list-label">공지 내역</div>
       <div id="admin-ann-list"><div style="font-size:12px;color:var(--muted);padding:4px 0">불러오는 중...</div></div>
     </div>
@@ -755,7 +817,7 @@ body {
       <div style="font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-.02em">계정을 삭제하시겠습니까?</div>
     </div>
     <div style="margin:12px 0;padding:12px 14px;background:rgba(192,54,44,.07);border-radius:9px;font-size:12px;color:#C0362C;font-weight:600;line-height:1.6">
-      ⚠️ 삭제 후 14일 이내 같은 이메일로 재등록 시 복구 가능<br>
+      <span style="display:inline-flex;align-items:center;gap:4px;margin-bottom:2px"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#C0362C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 삭제 후 14일 이내 같은 이메일로 재등록 시 복구 가능</span><br>
       · 14일이 지나면 시리얼 코드가 완전 폐기됩니다<br>
       · 잔여 이용권은 복구되지 않습니다
     </div>
@@ -947,6 +1009,17 @@ sb.auth.getSession().then(function(res) {
         document.getElementById('used-count2').textContent = used;
         document.getElementById('remain-count').textContent = credits;
         setTimeout(function(){ document.getElementById('usage-bar').style.width = pct + '%'; }, 100);
+        // 잔여량 알림 (운영자 계정 제외)
+        if (FOUNDER_EMAILS.indexOf(email) === -1) {
+            var alertKey = 'gyeol_credit_alert_' + credits;
+            if ((credits === 10 || credits === 5 || credits === 0) && !localStorage.getItem(alertKey)) {
+                localStorage.setItem(alertKey, '1');
+                var alertMsg = credits === 0
+                    ? '이용권이 모두 소진되었습니다.\n이용권을 충전하시면 계속 이용하실 수 있어요.'
+                    : '이용권 잔여량이 ' + credits + '건 남았습니다.\n소진 전 미리 충전해 두시길 권장드려요.';
+                setTimeout(function() { showCreditAlert(alertMsg, credits); }, 800);
+            }
+        }
     });
 });
 let _obStep=0;
@@ -1107,6 +1180,9 @@ async function deleteAccount() {
 
 /* ─── 관리자 함수 ─── */
 async function loadAdminStatus() {
+    // 운영 현황 통계 로드
+    loadAdminStats();
+    // 점검/공지 상태 로드
     const { data } = await sb.from('system_announcements').select('*').eq('active', true).order('created_at', { ascending: false }).limit(1);
     if (!data || !data.length) {
         document.getElementById('maintenance-status-txt').textContent = '꺼짐 — 고객 정상 이용 중';
@@ -1118,11 +1194,40 @@ async function loadAdminStatus() {
         document.getElementById('maintenance-toggle').checked = true;
         document.getElementById('maintenance-status-txt').textContent = '켜짐 — 점검 중 (고객 접근 차단됨)';
         document.getElementById('announce-input').value = ann.message;
+        const tw = document.getElementById('maintenance-time-wrap');
+        if (tw) tw.style.display = 'block';
+        if (ann.ends_at) {
+            const dt = new Date(ann.ends_at);
+            const pad = n => String(n).padStart(2,'0');
+            document.getElementById('maintenance-ends-at').value =
+                dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate())+'T'+pad(dt.getHours())+':'+pad(dt.getMinutes());
+        }
     } else {
         document.getElementById('announce-input').value = ann.message;
         document.getElementById('maintenance-status-txt').textContent = '꺼짐 — 공지 게시 중';
     }
     loadAdminAnnouncements();
+}
+
+async function loadAdminStats() {
+    try {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const todayISO = today.toISOString();
+        const [custRes, drawerRes, todayRes] = await Promise.all([
+            sb.from('serials').select('id', { count: 'exact', head: true }).not('used_by', 'is', null).neq('used_by','gngn5803@nate.com'),
+            sb.from('drawers').select('id', { count: 'exact', head: true }),
+            sb.from('serials').select('id', { count: 'exact', head: true }).gte('used_at', todayISO).not('used_by', 'is', null).neq('used_by','gngn5803@nate.com')
+        ]);
+        const setVal = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = (v==null||v===undefined) ? '–' : v; };
+        setVal('stat-customers', custRes.count ?? '–');
+        setVal('stat-drawers', drawerRes.count ?? '–');
+        setVal('stat-today', todayRes.count ?? '0');
+    } catch(e) {
+        ['stat-customers','stat-drawers','stat-today'].forEach(id => {
+            const el = document.getElementById(id); if(el) el.textContent = '–';
+        });
+    }
 }
 async function toggleMaintenance() {
     const on = document.getElementById('maintenance-toggle').checked;
@@ -1208,9 +1313,11 @@ async function saveAnnouncement() {
     if (!_editAnnId) return;
     const msg = document.getElementById('announce-input').value.trim();
     if (!msg) { showToast('내용을 입력해주세요'); return; }
-    await sb.from('system_announcements').update({ message: msg }).eq('id', _editAnnId);
+    // 기존 row 종료 후 새 row insert → 새 ID 생성으로 고객 기기 재공지 처리
+    await sb.from('system_announcements').update({ active: false }).eq('id', _editAnnId);
+    await sb.from('system_announcements').insert({ active: true, type: 'announcement', title: '공지사항', message: msg });
     cancelEditAnnouncement();
-    showToast('공지가 수정됐어요');
+    showToast('공지가 수정·재게시됐어요');
     loadAdminAnnouncements();
 }
 
@@ -1231,6 +1338,45 @@ function cancelEditAnnouncement() {
 }
 
 function _annEsc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ─── 잔여량 알림 ─── */
+function showCreditAlert(msg, credits) {
+    const title = credits === 0 ? '이용권 소진' : '이용권 잔여량 알림';
+    document.getElementById('credit-alert-title').textContent = title;
+    document.getElementById('credit-alert-msg').textContent = msg;
+    document.getElementById('credit-alert-ov').classList.add('show');
+}
+function closeCreditAlert() {
+    document.getElementById('credit-alert-ov').classList.remove('show');
+}
+
+/* ─── 점검 화면 미리보기 ─── */
+function previewMaintenance() {
+    const ov = document.getElementById('maintenance-ov');
+    if (!ov) return;
+    // 미리보기 닫기 버튼 삽입
+    const msg = document.getElementById('announce-input').value.trim() || '더 나은 서비스를 위해 점검 중입니다.\n잠시 후 다시 이용해 주세요.';
+    const endsAtVal = document.getElementById('maintenance-ends-at')?.value;
+    let endsStr = '';
+    if (endsAtVal) {
+        const dt = new Date(endsAtVal);
+        endsStr = '<br><span style="font-size:13px;opacity:.7">' + (dt.getMonth()+1) + '월 ' + dt.getDate() + '일 ' +
+            String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + ' 완료 예정</span>';
+    }
+    const msgEl = document.getElementById('maintenance-msg');
+    if (msgEl) msgEl.innerHTML = msg.replace(/\n/g,'<br>') + endsStr;
+    ov.classList.add('show');
+    // 미리보기용 닫기 버튼 (원본에 없으므로 동적 추가)
+    let prevClose = document.getElementById('preview-close-btn');
+    if (!prevClose) {
+        prevClose = document.createElement('button');
+        prevClose.id = 'preview-close-btn';
+        prevClose.textContent = '미리보기 닫기';
+        prevClose.style.cssText = 'margin-top:24px;padding:12px 28px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit';
+        prevClose.onclick = function() { ov.classList.remove('show'); };
+        ov.appendChild(prevClose);
+    }
+}
 
 
 document.getElementById('name-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') saveName(); });
