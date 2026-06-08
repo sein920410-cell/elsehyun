@@ -331,7 +331,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .mctx-row:active{background:var(--bg)}
 .mctx-row svg{width:17px;height:17px;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .mctx-del svg{stroke:var(--danger)}.mctx-del span{font-size:14px;font-weight:600;color:var(--danger);letter-spacing:-.01em}
-.mctx-reanalyze svg{stroke:var(--ink2)}.mctx-reanalyze span{font-size:14px;font-weight:600;color:var(--ink2);letter-spacing:-.01em}
+
 .mctx-replace svg{stroke:var(--ink2)}.mctx-replace span{font-size:14px;font-weight:600;color:var(--ink2);letter-spacing:-.01em}
 .mctx-cancel svg{stroke:var(--muted)}.mctx-cancel span{font-size:14px;font-weight:500;color:var(--muted);letter-spacing:-.01em}
 
@@ -592,7 +592,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
     <div class="sh-handle"></div><div class="sh-title">미디어 추가</div>
     <div class="mpick" onclick="pickPhoto()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div><div><div class="mpick-title">사진 선택</div><div class="mpick-sub">갤러리 또는 카메라로 촬영</div></div></div>
     <div class="mpick" onclick="startVideoRecord()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div><div class="mpick-title">영상 촬영</div><div class="mpick-sub">최대 30초 · 제품 상태가 잘 보이게 촬영</div></div></div>
-    <div class="mpick" id="mpick-re" style="display:none" onclick="mpickReanalyze()"><div class="mpick-ico"><svg viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg></div><div><div class="mpick-title">재분석</div><div class="mpick-sub">등록된 사진으로 다시 분석</div></div></div>
+    
     <button class="sh-cancel" onclick="closeMediaPicker()">취소</button>
   </div>
 </div>
@@ -644,7 +644,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 <!-- 미디어 컨텍스트 (롱프레스) -->
 <div class="mctx-ov" id="mctx-ov" onclick="closeMctx()">
   <div class="mctx-menu" onclick="event.stopPropagation()">
-    <div class="mctx-row mctx-reanalyze" onclick="closeMctx();mpickReanalyze()"><svg viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg><span>다시 분석</span></div>
+    
     <div class="mctx-row mctx-replace" onclick="closeMctx();showMediaPicker()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>교체</span></div>
     <div class="mctx-row mctx-del" onclick="confirmDelMedia()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg><span>미디어 삭제</span></div>
     <div class="mctx-row mctx-cancel" onclick="closeMctx()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span>취소</span></div>
@@ -1246,7 +1246,7 @@ function initMediaEvents(){
   box.addEventListener('contextmenu',e=>e.preventDefault());
   box.onclick=()=>{if(localStorage.getItem('mediaPath_'+tag))openFull();else showMediaPicker();};
 }
-function showMediaPicker(){const re=document.getElementById('mpick-re');if(re)re.style.display=localStorage.getItem('mediaPath_'+tag)?'flex':'none';document.getElementById('media-picker-ov').classList.add('open');}
+function showMediaPicker(){document.getElementById('media-picker-ov').classList.add('open');}
 function closeMediaPicker(e){if(e&&e.target!==document.getElementById('media-picker-ov'))return;document.getElementById('media-picker-ov').classList.remove('open');}
 function closeMctx(){document.getElementById('mctx-ov').classList.remove('open');}
 function confirmDelMedia(){closeMctx();if(!confirm('사진/영상을 삭제할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)_sb.storage.from('user_uploads').remove([p]).catch(()=>{});localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();clearTimeout(_gyeolSyncTimer);_gyeolSyncToDB();}
@@ -1423,15 +1423,16 @@ async function sendMsg(){
 
 function showResultModal(icon,title,sub,showAddBtn,showRetryBtn){const iconEl=document.getElementById('result-modal-icon');if(icon&&typeof icon==='string'&&icon.trim().startsWith('<')){iconEl.innerHTML=icon;}else{iconEl.textContent=icon||'';}document.getElementById('result-modal-title').textContent=title;document.getElementById('result-modal-sub').textContent=sub||'';document.getElementById('result-modal-add-btn').style.display=showAddBtn?'block':'none';document.getElementById('result-modal-retry-btn').style.display=showRetryBtn?'block':'none';document.getElementById('result-modal-ov').classList.add('open');}
 
-function mpickReanalyze(){
-  closeMediaPicker();const fp=localStorage.getItem('mediaPath_'+tag);const mt=localStorage.getItem('mime_'+tag)||'image/jpeg';
-  if(!fp){showResultModal('📷','등록된 사진이 없습니다','상단 미디어 영역을 탭해서 사진을 먼저 추가하세요');return;}
-  if(!confirm('사진을 다시 분석할까요?\n기존 목록이 초기화됩니다.'))return;
-  items=[];localStorage.setItem('gyeol_'+tag,'[]');renderItems();runAnalysis(fp,mt);
-}
-
 async function runAnalysis(filePath,mimeType,videoFrames=null){
   const _analysisStart=Date.now();
+  // ── 분석 중 새로고침/이탈 경고 ──
+  window._isAnalyzing = true;
+  const _beforeUnloadHandler = (e)=>{
+    e.preventDefault();
+    e.returnValue='분석이 진행 중입니다. 지금 나가면 크레딧이 차감된 채로 결과를 받지 못합니다.';
+    return e.returnValue;
+  };
+  window.addEventListener('beforeunload', _beforeUnloadHandler);
   const box=document.getElementById('media-box');const el=document.getElementById('media-el');
   // ── 미디어 중앙에 분석 오버레이 표시 ──
   if(el)box.innerHTML=`${el.outerHTML}<div id="analyze-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="3.5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible" id="analyze-txt-a">물품 분석 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span><span class="analyze-txt hidden" id="analyze-txt-b">목록 생성 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;
@@ -1446,7 +1447,7 @@ async function runAnalysis(filePath,mimeType,videoFrames=null){
   }
   const _txtTimer=setTimeout(()=>{_switchTxt();window._analyzeCycle=setInterval(_switchTxt,5000);},5000);
   showSkeleton(5);
-  const rmOv=()=>{clearTimeout(_txtTimer);clearInterval(window._analyzeCycle);const o=document.getElementById('analyze-overlay');if(o)o.remove()};
+  const rmOv=()=>{clearTimeout(_txtTimer);clearInterval(window._analyzeCycle);const o=document.getElementById('analyze-overlay');if(o)o.remove();window._isAnalyzing=false;window.removeEventListener('beforeunload',_beforeUnloadHandler);};
   try{
     const{data:{session}}=await _sb.auth.getSession();const accessToken=session?.access_token||'';
     const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${accessToken}`},body:JSON.stringify({filePath,mimeType:mimeType||'image/jpeg',userCorrections:corrections,...(videoFrames?.length?{videoFrames}:{})})});
