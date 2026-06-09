@@ -155,10 +155,10 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .swipe-actions{position:absolute;top:0;right:0;bottom:0;display:flex;width:130px}
 .swipe-edit-btn{flex:1;background:#4A7FA8;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:3px}
 .swipe-edit-btn svg{width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.swipe-edit-lbl{font-size:10px;font-weight:700;color:#fff;letter-spacing:.03em}
+.swipe-edit-lbl{font-size:11px;font-weight:700;color:#fff;letter-spacing:.02em}
 .swipe-del-btn{flex:1;background:var(--danger);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:3px}
 .swipe-del-btn svg{width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.swipe-del-lbl{font-size:10px;font-weight:700;color:#fff;letter-spacing:.03em}
+.swipe-del-lbl{font-size:11px;font-weight:700;color:#fff;letter-spacing:.02em}
 .item-row{display:flex;align-items:center;padding:13px 14px;gap:12px;background:var(--surface);border:none;border-radius:0;position:relative;z-index:1;transition:transform .18s cubic-bezier(.25,0,.25,1);touch-action:pan-y}
 .item-swipe-l{display:flex;align-items:center;gap:12px;flex:1;min-width:0;touch-action:pan-y}
 .item-ico{width:40px;height:40px;border-radius:calc(var(--r) - 1px);background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;line-height:1}
@@ -166,12 +166,12 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .item-info{flex:1;min-width:0}
 .item-name{font-size:15px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.02em;line-height:1.3}
 .item-sub-row{display:flex;align-items:center;gap:5px;margin-top:4px}
-.item-cat-lbl{font-size:9px;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase}
-.item-memo-badge{display:inline-flex;align-items:center;gap:3px;background:var(--h-bg);color:var(--h-txt);border-radius:4px;padding:2px 6px;font-size:9px;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .4s}
+.item-cat-lbl{font-size:11px;font-weight:700;color:var(--muted2);letter-spacing:.05em;text-transform:uppercase}
+.item-memo-badge{display:inline-flex;align-items:center;gap:3px;background:var(--h-bg);color:var(--h-txt);border-radius:4px;padding:3px 7px;font-size:11px;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .4s}
 .qty-wrap{display:flex;align-items:center;background:var(--field);border:1px solid var(--border);border-radius:5px;overflow:hidden;flex-shrink:0}
-.qty-btn{width:32px;height:32px;font-size:18px;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;font-family:var(--font);line-height:1;transition:background .12s ease}
+.qty-btn{width:40px;height:40px;font-size:20px;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;font-family:var(--font);line-height:1;transition:background .12s ease}
 .qty-btn:active{background:var(--border)}
-.qty-num{font-size:13px;font-weight:600;color:var(--ink);width:28px;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);height:32px;line-height:32px;font-variant-numeric:tabular-nums}
+.qty-num{font-size:14px;font-weight:600;color:var(--ink);width:32px;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);height:40px;line-height:40px;font-variant-numeric:tabular-nums}
 
 /* ─── 하단 액션 ─── */
 .bottom-section{padding:14px 0 10px;display:flex;flex-direction:column;align-items:center;gap:10px}
@@ -253,7 +253,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .theme-sw{width:100%;aspect-ratio:1;border-radius:10px;border:2px solid transparent;transition:transform .12s,box-shadow .12s}
 .theme-sw.active{outline:2.5px solid var(--ink);outline-offset:2px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .theme-cell:active .theme-sw{transform:scale(.93)}
-.theme-lbl{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:-.01em;text-align:center}
+.theme-lbl{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:-.01em;text-align:center}
 .dt-save{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);margin-top:2px}
 
 /* ─── 아이템 컨텍스트 메뉴 ─── */
@@ -264,7 +264,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .ctx-preview{padding:12px 14px;border-bottom:1px solid var(--bg);display:flex;align-items:center;gap:10px}
 .ctx-p-ico{width:32px;height:32px;background:var(--bg);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
 .ctx-p-name{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
-.ctx-p-cat{font-size:10px;color:var(--muted2);letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
+.ctx-p-cat{font-size:11px;color:var(--muted2);letter-spacing:.03em;text-transform:uppercase;margin-top:2px}
 .ctx-btn{padding:13px 14px;display:flex;align-items:center;gap:10px;cursor:pointer}
 .ctx-btn:active{background:var(--bg)}
 .ctx-btn svg{width:17px;height:17px;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
@@ -291,7 +291,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 /* ─── 항목 추가 ─── */
 .add-item-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:350;backdrop-filter:blur(6px);align-items:flex-end}
 .add-item-sheet{background:var(--surface);width:100%;border-radius:14px 14px 0 0;padding:0 18px 44px;animation:sheetUp .28s cubic-bezier(.32,0,0,1)}
-.ai-cat-lbl{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+.ai-cat-lbl{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
 .ai-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px}
 .ai-chip{padding:7px 14px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--bg);font-size:13px;color:var(--ink);cursor:pointer;font-family:inherit;font-weight:500}
 .ai-chip.sel{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
@@ -344,7 +344,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .confirm-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px}
 .confirm-sub{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
 .confirm-block{background:var(--bg);border-radius:var(--r);padding:12px;margin-bottom:9px;border:1px solid var(--border)}
-.confirm-q{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px}
+.confirm-q{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:9px}
 .confirm-cand{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:5px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-weight:500;color:var(--ink);margin-bottom:5px;cursor:pointer;font-family:var(--font)}
 .confirm-cand.selected{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
 .confirm-skip{display:block;width:100%;text-align:center;padding:9px;border:none;background:none;font-size:12px;color:var(--muted2);cursor:pointer;font-family:var(--font)}
