@@ -193,8 +193,8 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
 
 .result-area { padding: 22px 20px 0; }
 .result-label {
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 0.14em; text-transform: uppercase;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.10em; text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 12px;
 }
@@ -233,7 +233,7 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
   color: var(--accent);
   font-weight: 700; 
 }
-.result-meta { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+.result-meta { font-size: 13px; color: var(--muted); margin-top: 3px; }
 
 /* 검색 결과 수납장 썸네일 (색상으로 못 집는 물건을 눈으로 확인) */
 .result-thumb { overflow: hidden; padding: 0; cursor: zoom-in; position: relative; }
@@ -266,12 +266,13 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
 .result-meta b { color: var(--ink-soft); font-weight: 600; }
 
 .go-btn {
-  padding: 8px 15px; border-radius: 10px;
+  padding: 11px 18px; border-radius: 10px;
   background: var(--accent);
   border: none;
-  color: #fff; font-size: 12px; font-weight: 600;
+  color: #fff; font-size: 13px; font-weight: 700;
   font-family: inherit; cursor: pointer; white-space: nowrap;
   flex-shrink: 0;
+  min-height: 44px; display: flex; align-items: center;
 }
 
 .empty-state {
@@ -554,7 +555,7 @@ function onSearch() {
   resultLabel.textContent = '검색결과 ' + results.length + '건';
 
   if (!results.length) {
-    resultList.innerHTML = '<div class="empty-state"><div style="font-size:36px;margin-bottom:12px">🔍</div>"' + query + '"에 대한 결과가 없어요</div>';
+    resultList.innerHTML = '<div class="empty-state"><div style="width:52px;height:52px;border-radius:16px;background:rgba(180,148,100,.08);display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>"' + query + '"에 대한 결과가 없어요</div>';
     return;
   }
 
