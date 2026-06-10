@@ -62,28 +62,42 @@
 input { -webkit-user-select: text; user-select: text; }
 
 :root {
-  --bg: #FBFAF8;
-  --surface: #ffffff;
+  --bg: #E8E5DF;
+  --surface: #EFECE6;
+  --surface2: #F4F1EB;
   --ink: #2B2722;
   --ink-soft: #3A352E;
-  --muted: #A39A8C;
-  --muted2: #BDB4A6;
-  --line: #ECE7DE;
-  --field-border: #EAE3D8;
+  --muted: #9A9186;
+  --muted2: #B5ACA0;
+  --line: rgba(163,154,140,0.25);
+  --field-border: rgba(163,154,140,0.3);
   --accent: #B49464;
-  --divider: #ECE7DE;
+  --divider: rgba(163,154,140,0.2);
+  /* 뉴모피즘 그림자 */
+  --nm-raise: 8px 8px 18px rgba(163,154,140,0.52), -8px -8px 18px rgba(255,255,255,0.88);
+  --nm-raise-sm: 5px 5px 12px rgba(163,154,140,0.44), -5px -5px 12px rgba(255,255,255,0.84);
+  --nm-raise-xs: 3px 3px 8px rgba(163,154,140,0.38), -3px -3px 8px rgba(255,255,255,0.78);
+  --nm-inset: inset 5px 5px 12px rgba(163,154,140,0.48), inset -5px -5px 12px rgba(255,255,255,0.86);
+  --nm-inset-sm: inset 3px 3px 8px rgba(163,154,140,0.4), inset -3px -3px 8px rgba(255,255,255,0.82);
 }
 html[data-theme="dark"] {
-  --bg: #14130F;
-  --surface: #1E1C18;
+  --bg: #1A1917;
+  --surface: #201E1B;
+  --surface2: #252320;
   --ink: #F0EBE2;
   --ink-soft: #D8D1C5;
   --muted: #8E867A;
   --muted2: #6B645A;
-  --line: rgba(255,255,255,0.08);
-  --field-border: rgba(255,255,255,0.12);
+  --line: rgba(255,255,255,0.07);
+  --field-border: rgba(255,255,255,0.1);
   --accent: #C8A870;
-  --divider: rgba(255,255,255,0.08);
+  --divider: rgba(255,255,255,0.07);
+  /* 뉴모피즘 다크 그림자 */
+  --nm-raise: 7px 7px 16px rgba(0,0,0,0.68), -7px -7px 16px rgba(255,255,255,0.04);
+  --nm-raise-sm: 4px 4px 10px rgba(0,0,0,0.62), -4px -4px 10px rgba(255,255,255,0.035);
+  --nm-raise-xs: 3px 3px 7px rgba(0,0,0,0.58), -3px -3px 7px rgba(255,255,255,0.03);
+  --nm-inset: inset 5px 5px 12px rgba(0,0,0,0.68), inset -5px -5px 12px rgba(255,255,255,0.04);
+  --nm-inset-sm: inset 3px 3px 8px rgba(0,0,0,0.62), inset -3px -3px 8px rgba(255,255,255,0.035);
 }
 
 body {
@@ -126,26 +140,35 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
   margin: 16px 20px 0; transition: background 0.3s;
 }
 
-.search-area { padding: 36px 20px 0; }
+.search-area { padding: 28px 20px 0; }
 
-.hero-text { margin-bottom: 22px; }
+.search-hero-card {
+  background: var(--surface2);
+  border-radius: 28px;
+  padding: 32px 28px 28px;
+  margin-bottom: 0;
+  box-shadow: var(--nm-raise);
+  transition: box-shadow 0.3s, background 0.3s;
+}
+
+.hero-text { margin-bottom: 24px; }
 .hero-title {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.45;
+  letter-spacing: -0.025em;
+  line-height: 1.4;
   color: var(--ink);
 }
 .hero-sub {
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--muted);
   line-height: 1.5;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .search-wrap { position: relative; }
 .search-icon {
-  position: absolute; left: 16px; top: 50%;
+  position: absolute; left: 18px; top: 50%;
   transform: translateY(-50%);
   width: 16px; height: 16px;
   stroke: var(--muted2);
@@ -155,31 +178,33 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
 }
 .search-input {
   width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--field-border);
-  border-radius: 13px;
-  padding: 15px 44px 15px 44px;
-  font-size: 14px;
+  background: var(--bg);
+  border: none;
+  border-radius: 50px;
+  padding: 16px 44px 16px 48px;
+  font-size: 14.5px;
   font-family: inherit;
   color: var(--ink);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s, background 0.3s;
+  box-shadow: var(--nm-inset);
+  transition: box-shadow 0.2s, background 0.3s;
   -webkit-appearance: none;
 }
 .search-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(180,148,100,0.10);
+  box-shadow: var(--nm-inset), 0 0 0 2px rgba(180,148,100,0.25);
 }
 .search-input::placeholder { color: var(--muted2); }
 .clear-btn {
-  position: absolute; right: 12px; top: 50%;
+  position: absolute; right: 14px; top: 50%;
   transform: translateY(-50%);
-  width: 26px; height: 26px; border-radius: 50%;
-  background: var(--line); border: none;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--surface2); border: none;
   color: var(--muted);
   cursor: pointer;
   font-size: 12px; display: none;
   align-items: center; justify-content: center;
+  box-shadow: var(--nm-raise-xs);
+  transition: box-shadow 0.15s;
 }
 .clear-btn.vis { display: flex; }
 
@@ -191,35 +216,38 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
   line-height: 1.7;
 }
 
-.result-area { padding: 22px 20px 0; }
+.result-area { padding: 24px 20px 0; }
 .result-label {
-  font-size: 13px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.10em; text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  padding-left: 2px;
 }
 
 .result-item {
-  background: var(--surface);
-  border: 0.5px solid var(--line);
-  border-radius: 14px;
-  padding: 14px 16px;
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 8px; cursor: pointer;
-  transition: transform 0.1s, border-color 0.15s;
+  background: var(--surface2);
+  border: none;
+  border-radius: 20px;
+  padding: 14px 14px;
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 12px; cursor: pointer;
+  box-shadow: var(--nm-raise-sm);
+  transition: box-shadow 0.15s, transform 0.1s, background 0.3s;
 }
-.result-item:active { transform: scale(0.985); border-color: var(--field-border); }
+.result-item:active { transform: scale(0.985); box-shadow: var(--nm-inset-sm); }
 
 .result-ico {
-  width: 56px; height: 56px; border-radius: 12px;
-  background: rgba(180, 148, 100, 0.10);
+  width: 56px; height: 56px; border-radius: 14px;
+  background: var(--bg);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+  box-shadow: var(--nm-inset-sm);
 }
 .result-ico svg {
-  width: 18px; height: 18px;
+  width: 22px; height: 22px;
   stroke: var(--accent);
-  stroke-width: 1.7; fill: none;
+  stroke-width: 1.6; fill: none;
   stroke-linecap: round; stroke-linejoin: round;
 }
 .result-info { flex: 1; min-width: 0; }
@@ -233,10 +261,10 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
   color: var(--accent);
   font-weight: 700; 
 }
-.result-meta { font-size: 14.5px; color: var(--muted); margin-top: 3px; }
+.result-meta { font-size: 14px; color: var(--muted); margin-top: 3px; }
 
-/* 검색 결과 수납장 썸네일 (색상으로 못 집는 물건을 눈으로 확인) */
-.result-thumb { overflow: hidden; padding: 0; cursor: zoom-in; position: relative; }
+/* 검색 결과 수납장 썸네일 */
+.result-thumb { overflow: hidden; padding: 0; cursor: zoom-in; position: relative; border-radius: 14px; box-shadow: var(--nm-inset-sm); }
 .result-thumb img, .result-thumb video {
   width: 100%; height: 100%; object-fit: cover; display: block;
 }
@@ -266,14 +294,18 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
 .result-meta b { color: var(--ink-soft); font-weight: 600; }
 
 .go-btn {
-  padding: 12px 22px; border-radius: 10px;
-  background: var(--accent);
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--surface2);
   border: none;
-  color: #fff; font-size: 14px; font-weight: 700;
-  font-family: inherit; cursor: pointer; white-space: nowrap;
+  color: var(--accent); font-size: 18px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
   flex-shrink: 0;
-  min-height: 48px; display: flex; align-items: center;
+  box-shadow: var(--nm-raise-sm);
+  display: flex; align-items: center; justify-content: center;
+  transition: box-shadow 0.15s;
 }
+.go-btn:active { box-shadow: var(--nm-inset-sm); }
+.go-btn::after { content: '›'; font-size: 22px; line-height: 1; }
 
 .empty-state {
   text-align: center; padding: 56px 20px;
@@ -289,14 +321,16 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
   margin-bottom: 12px;
 }
 .mypage-btn {
-  width: 34px; height: 34px; border-radius: 50%;
-  background: transparent;
-  border: 1px solid var(--muted2); cursor: pointer;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--surface2);
+  border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; transition: background 0.15s;
+  flex-shrink: 0;
   color: var(--ink-soft);
+  box-shadow: var(--nm-raise-xs);
+  transition: box-shadow 0.15s;
 }
-.mypage-btn:active { background: rgba(180, 148, 100, 0.10); }
+.mypage-btn:active { box-shadow: var(--nm-inset-sm); }
 .mypage-btn svg {
   width: 17px; height: 17px;
   stroke: currentColor;
@@ -305,21 +339,23 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
   display: block;
 }
 .bell-btn-wrap {
-  position: relative; width: 34px; height: 34px; flex-shrink: 0;
+  position: relative; width: 38px; height: 38px; flex-shrink: 0;
 }
 .bell-btn-idx {
-  width: 34px; height: 34px; border-radius: 50%;
-  background: transparent;
-  border: 1px solid var(--muted2); cursor: pointer;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--surface2);
+  border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s; color: var(--ink-soft);
+  color: var(--ink-soft);
+  box-shadow: var(--nm-raise-xs);
+  transition: box-shadow 0.15s;
 }
-.bell-btn-idx:active { background: rgba(180,148,100,0.10); }
+.bell-btn-idx:active { box-shadow: var(--nm-inset-sm); }
 .bell-btn-idx svg { width: 17px; height: 17px; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; display: block; }
 .bell-dot-idx {
   position: absolute; top: 2px; right: 2px;
   width: 8px; height: 8px; border-radius: 50%;
-  background: #ef4444; border: 1.5px solid var(--bg, #f8f5ef);
+  background: #ef4444; border: 1.5px solid var(--bg);
   display: none;
 }
 
@@ -452,14 +488,16 @@ html[data-theme="dark"] .brand { color: #C2B5A0; }
 <div class="header-divider"></div>
 
 <div class="search-area">
-  <div class="hero-text" id="hero-text">
-    <div class="hero-title">무엇을<br>찾으시나요?</div>
-    <div class="hero-sub">찾으시는 물품의 위치를 안내해드려요</div>
-  </div>
-  <div class="search-wrap">
-    <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input id="search-input" class="search-input" type="text" placeholder="물품명 검색" autocomplete="off" autocorrect="off" spellcheck="false" oninput="onSearch()">
-    <button class="clear-btn" id="clear-btn" onclick="clearSearch()">✕</button>
+  <div class="search-hero-card">
+    <div class="hero-text" id="hero-text">
+      <div class="hero-title">무엇을<br>찾으시나요?</div>
+      <div class="hero-sub">찾으시는 물품의 위치를 안내해드려요</div>
+    </div>
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search-input" class="search-input" type="text" placeholder="물품명 검색" autocomplete="off" autocorrect="off" spellcheck="false" oninput="onSearch()">
+      <button class="clear-btn" id="clear-btn" onclick="clearSearch()">✕</button>
+    </div>
   </div>
 </div>
 
@@ -563,7 +601,7 @@ function onSearch() {
     const thumb = r.mediaPath
       ? `<div class="result-ico result-thumb" data-thumb="${i}" data-path="${encodeURIComponent(r.mediaPath)}" onclick="event.stopPropagation();openThumbFull(${i})"><div class="thumb-skel"></div></div>`
       : `<div class="result-ico">\n        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>\n      </div>`;
-    return `\n    <div class="result-item" onclick="location.href='drawer.html?tag=${r.tag}'">\n      ${thumb}\n      <div class="result-info">\n        <div class="result-name">${highlight(r.name, query)}</div>\n        <div class="result-meta"><b>${r.drawerName}</b> · ${r.cat} · ${r.qty}개</div>\n      </div>\n      <button class="go-btn" onclick="event.stopPropagation();location.href='drawer.html?tag=${r.tag}'">${window.t?t('go'):'이동'}</button>\n    </div>\n  `;
+    return `\n    <div class="result-item" onclick="location.href='drawer.html?tag=${r.tag}'">\n      ${thumb}\n      <div class="result-info">\n        <div class="result-name">${highlight(r.name, query)}</div>\n        <div class="result-meta"><b>${r.drawerName}</b> · ${r.cat} · ${r.qty}개</div>\n      </div>\n      <button class="go-btn" onclick="event.stopPropagation();location.href='drawer.html?tag=${r.tag}'"></button>\n    </div>\n  `;
   }).join('');
   loadThumbnails();
 }
