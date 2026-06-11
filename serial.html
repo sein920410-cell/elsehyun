@@ -145,6 +145,15 @@
             window.location.replace('login.html');
         } else {
             currentSession = session;
+
+            // 구글 로그인 후 원래 URL 복귀
+            const afterLogin = localStorage.getItem('gyeol_after_login');
+            if (afterLogin) {
+                localStorage.removeItem('gyeol_after_login');
+                window.location.replace(afterLogin);
+                return;
+            }
+
             const params = new URLSearchParams(window.location.search);
             const urlCode = params.get('code');
             const isAdd = params.get('add') === 'true';
