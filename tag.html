@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>공간:결</title>
+    <script>
+        // ⚠️ 도메인 통일: vercel.app으로 진입하면 elsehyun.com으로 즉시 이동
+        // (로그인 세션·localStorage는 도메인별로 분리되므로 반드시 elsehyun.com에서 처리)
+        if (location.hostname.endsWith('vercel.app')) {
+            location.replace('https://elsehyun.com' + location.pathname + location.search);
+        }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <style>
