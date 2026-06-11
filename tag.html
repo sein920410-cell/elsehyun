@@ -137,16 +137,17 @@
                 const { data: { session } } = await supabase.auth.getSession();
 
                 if (!session) {
+                    localStorage.setItem('gyeol_after_login', window.location.href);
                     window.location.replace(`login.html?redirect=${encodeURIComponent(window.location.href)}`);
 
                 } else if (parsed.type === 'single') {
                     // ── 단품 태그 처리 ─────────────────────────────
-                    const { data: single } = await supabase
+                    const { data: rows_single } = await supabase
                         .from('single_serials')
                         .select('used_by, item_number')
                         .eq('item_number', parsed.num)
-                        .limit(1)
-                        .maybeSingle();
+                        .limit(1);
+                    const single = rows_single?.[0];
 
                     if (!single) {
                         document.getElementById('invalid-code').textContent = code;
@@ -164,12 +165,12 @@
 
                 } else {
                     // ── 패키지 태그 처리 ───────────────────────────
-                    const { data: serial } = await supabase
+                    const { data: rows_serial } = await supabase
                         .from('serials')
                         .select('used_by, set_number')
                         .eq('set_number', parsed.num)
-                        .limit(1)
-                        .maybeSingle();
+                        .limit(1);
+                    const serial = rows_serial?.[0];
 
                     if (!serial) {
                         document.getElementById('invalid-code').textContent = code;
