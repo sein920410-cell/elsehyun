@@ -570,7 +570,7 @@
         btn.disabled = true;
         await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: 'https://elsehyun.com/serial.html' }
+            options: { redirectTo: window.location.origin + '/serial.html' }
         });
     };
 
