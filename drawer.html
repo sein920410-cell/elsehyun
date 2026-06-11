@@ -99,18 +99,13 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 }
 .brand-logo-txt{
   font-family:Georgia,'Noto Serif KR',serif;
-  font-size:13px;font-weight:700;
+  font-size:15px;font-weight:700;
   letter-spacing:.08em;
   white-space:nowrap;
-  background:linear-gradient(105deg,#5C6E7A 0%,#8AA0AE 28%,#C0D0D8 50%,#8AA0AE 72%,#5C6E7A 100%);
-  background-size:220% auto;
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  animation:gyeol-shimmer 7s ease-in-out infinite;
-}
-html[data-mode="dark"] .brand-logo-txt{
   background:linear-gradient(105deg,#8A6830 0%,#C8A870 28%,#F4E0A8 50%,#C8A870 72%,#8A6830 100%);
   background-size:220% auto;
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:gyeol-shimmer 7s ease-in-out infinite;
 }
 @keyframes gyeol-shimmer{
   0%{background-position:0% center}
@@ -119,16 +114,21 @@ html[data-mode="dark"] .brand-logo-txt{
 }
 .hdr-chat-btn{
   width:38px;height:38px;border-radius:50%;flex-shrink:0;
-  background:rgba(255,255,255,0.22);
-  border:1px solid rgba(255,255,255,0.32);
+  background:rgba(255,255,255,0.18);
+  border:1px solid rgba(255,255,255,0.28);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  box-shadow:0 2px 8px rgba(0,0,0,0.10),inset 0 1px 1px rgba(255,255,255,0.38);
+  box-shadow:3px 3px 10px rgba(0,0,0,0.45),-1px -1px 5px rgba(255,255,255,0.18),inset 0 1px 1px rgba(255,255,255,0.3);
   display:flex;align-items:center;justify-content:center;cursor:pointer;
   transition:box-shadow .15s;
 }
-.hdr-chat-btn:active{box-shadow:inset 2px 2px 6px rgba(0,0,0,0.12)}
-.hdr-chat-btn svg{width:16px;height:16px;stroke:var(--h-txt);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
-.header-title-wrap{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.hdr-chat-btn:active{box-shadow:inset 3px 3px 8px rgba(0,0,0,0.25),inset -1px -1px 4px rgba(255,255,255,0.1)}
+.hdr-chat-btn svg{width:16px;height:16px;stroke:#fff;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.95}
+html[data-mode="dark"] .hdr-chat-btn{
+  background:rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.16);
+  box-shadow:4px 4px 12px rgba(0,0,0,0.65),-1px -1px 4px rgba(255,255,255,0.06),inset 0 1px 1px rgba(255,255,255,0.08);
+}
+.header-title-wrap{position:absolute;left:50%;top:0;bottom:0;transform:translateX(-50%);display:flex;align-items:center;pointer-events:none}
 .header-title-wrap .drawer-btn{pointer-events:all}
 .drawer-btn{display:flex;align-items:center;padding:6px 14px;border-radius:20px;background:transparent;border:none;cursor:pointer;font-family:var(--font);transition:background .15s}
 .drawer-btn:active{background:var(--h-btn)}
@@ -164,7 +164,7 @@ html[data-mode="dark"] .brand-logo-txt{
 /* ─── 툴바 + 인라인 검색 ─── */
 .toolbar{display:flex;align-items:center;gap:10px;padding:10px 14px 8px;flex-shrink:0;background:var(--bg)}
 .toolbar-left{display:flex;align-items:center;flex-shrink:0}
-.toolbar-cnt{font-size:13px;font-weight:800;padding:0 13px;border-radius:20px;background:var(--h-bg);color:var(--h-txt,#fff);letter-spacing:.04em;display:none;transition:background .4s;height:34px;align-items:center;justify-content:center;min-width:44px}
+.toolbar-cnt{font-size:13px;font-weight:800;padding:0 13px;border-radius:20px;background:var(--h-bg);color:var(--h-txt,#fff);letter-spacing:.04em;display:none;transition:background .4s;height:34px;align-items:center;justify-content:center;min-width:44px;box-shadow:3px 3px 8px rgba(0,0,0,0.28),-1px -1px 4px rgba(255,255,255,0.12)}
 .toolbar-cnt.vis{display:inline-flex}
 .toolbar-search-inline{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:50px;padding:10px 14px;box-shadow:var(--nm-inset-sm);transition:box-shadow .18s}
 .toolbar-search-inline:focus-within{box-shadow:var(--nm-inset),0 0 0 2px rgba(180,148,100,0.18)}
@@ -207,10 +207,10 @@ html[data-mode="dark"] .brand-logo-txt{
 .item-sub-row{display:flex;align-items:center;gap:5px;margin-top:4px}
 .item-cat-lbl{font-size:11px;font-weight:700;color:var(--muted2);letter-spacing:.05em;text-transform:uppercase}
 .item-memo-badge{display:inline-flex;align-items:center;gap:3px;background:var(--h-bg);color:var(--h-txt);border-radius:6px;padding:3px 7px;font-size:11px;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .4s}
-.qty-wrap{display:flex;align-items:center;background:var(--bg);border:none;border-radius:10px;overflow:hidden;flex-shrink:0;box-shadow:var(--nm-inset-sm)}
-.qty-btn{width:40px;height:40px;font-size:20px;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;font-family:var(--font);line-height:1;transition:box-shadow .12s ease}
-.qty-btn:active{box-shadow:var(--nm-raise-xs)}
-.qty-num{font-size:14px;font-weight:600;color:var(--ink);width:32px;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);height:40px;line-height:40px;font-variant-numeric:tabular-nums}
+.qty-wrap{display:flex;align-items:center;background:var(--bg);border:none;border-radius:10px;overflow:hidden;flex-shrink:0;box-shadow:var(--nm-raise-xs)}
+.qty-btn{width:36px;height:36px;font-size:18px;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;font-family:var(--font);line-height:1;transition:box-shadow .12s ease}
+.qty-btn:active{box-shadow:var(--nm-inset-sm)}
+.qty-num{font-size:14px;font-weight:600;color:var(--ink);width:28px;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);height:36px;line-height:36px;font-variant-numeric:tabular-nums}
 
 /* ─── 하단 액션 ─── */
 .bottom-section{padding:14px 0 10px;display:flex;flex-direction:column;align-items:center;gap:10px}
@@ -303,9 +303,11 @@ html[data-mode="dark"] .brand-logo-txt{
 @keyframes popIn{from{transform:scale(.86);opacity:0}to{transform:scale(1);opacity:1}}
 .ctx-menu{background:var(--surface2);border-radius:20px;width:240px;overflow:hidden;box-shadow:var(--nm-raise),0 20px 50px rgba(0,0,0,.26);animation:popIn .2s cubic-bezier(.34,1.56,.64,1)}
 .ctx-preview{padding:14px 16px;border-bottom:1px solid var(--divider,rgba(163,154,140,.18));display:flex;align-items:center;gap:10px}
-.ctx-p-ico{width:36px;height:36px;background:var(--bg);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;box-shadow:var(--nm-inset-xs)}
+.ctx-p-ico{width:36px;height:36px;background:var(--bg);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;box-shadow:var(--nm-raise-xs)}
 .ctx-p-name{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
 .ctx-p-cat{font-size:11px;color:var(--muted2);letter-spacing:.03em;text-transform:uppercase;margin-top:2px}
+.ctx-btn-ico{width:36px;height:36px;border-radius:10px;background:var(--bg);box-shadow:var(--nm-raise-xs);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ctx-del .ctx-btn-ico{background:rgba(217,48,37,.08)}
 .ctx-btn{padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s}
 .ctx-btn:active{background:var(--bg)}
 .ctx-btn svg{width:17px;height:17px;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
@@ -374,9 +376,9 @@ html[data-mode="dark"] .brand-logo-txt{
 .mctx-row{padding:17px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;border-bottom:1px solid var(--divider,rgba(163,154,140,.15))}
 .mctx-row:last-child{border-bottom:none}
 .mctx-row:active{background:var(--bg)}
-.mctx-ico{width:40px;height:40px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 3px 3px 8px rgba(0,0,0,0.62),inset -3px -3px 8px rgba(255,255,255,0.035)}
+.mctx-ico{width:40px;height:40px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--nm-raise-xs)}
 .mctx-row svg{width:18px;height:18px;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.mctx-del .mctx-ico{background:rgba(217,48,37,.1);box-shadow:inset 2px 2px 6px rgba(0,0,0,.4),inset -2px -2px 6px rgba(255,255,255,.03)}
+.mctx-del .mctx-ico{background:rgba(217,48,37,.1);box-shadow:var(--nm-raise-xs)}
 .mctx-del svg{stroke:var(--danger)}.mctx-del span{font-size:15px;font-weight:600;color:var(--danger);letter-spacing:-.01em}
 .mctx-replace .mctx-ico{background:var(--bg)}
 .mctx-replace svg{stroke:var(--ink2)}.mctx-replace span{font-size:15px;font-weight:600;color:var(--ink2);letter-spacing:-.01em}
@@ -716,9 +718,9 @@ html[data-mode="dark"] .brand-logo-txt{
 <div class="ctx-ov" id="ctx-ov" onclick="closeCtx()">
   <div class="ctx-menu" onclick="event.stopPropagation()">
     <div class="ctx-preview"><div class="ctx-p-ico" id="ctx-ico"></div><div><div class="ctx-p-name" id="ctx-name"></div><div class="ctx-p-cat" id="ctx-cat"></div></div></div>
-    <div class="ctx-btn ctx-edit" onclick="ctxEditName()"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 8.5-8.5z"/></svg><span>이름 편집</span></div>
-    <div class="ctx-btn ctx-ico-e" onclick="ctxEditIcon()"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4Z"/></svg><span>아이콘 변경</span></div>
-    <div class="ctx-btn ctx-del" onclick="ctxDelete()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span>항목 삭제</span></div>
+    <div class="ctx-btn ctx-edit" onclick="ctxEditName()"><div class="ctx-btn-ico"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 8.5-8.5z"/></svg></div><span>이름 편집</span></div>
+    <div class="ctx-btn ctx-ico-e" onclick="ctxEditIcon()"><div class="ctx-btn-ico"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4Z"/></svg></div><span>아이콘 변경</span></div>
+    <div class="ctx-btn ctx-del" onclick="ctxDelete()"><div class="ctx-btn-ico"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></div><span>항목 삭제</span></div>
   </div>
 </div>
 
