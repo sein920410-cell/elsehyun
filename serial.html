@@ -4,31 +4,121 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>공간:결 - 시리얼 번호 등록</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-    <style>body { font-family: 'Pretendard', sans-serif; background-color: #0C1220; color: white; }</style>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #1A1917;
+            --surface2: #252320;
+            --accent: #C8A870;
+            --text: #E8E5DF;
+            --sub: #8C8880;
+            --nm-raise-sm: 4px 4px 10px rgba(0,0,0,0.62), -4px -4px 10px rgba(255,255,255,0.035);
+            --nm-inset-sm: inset 3px 3px 8px rgba(0,0,0,0.62), inset -3px -3px 8px rgba(255,255,255,0.035);
+            --nm-inset: inset 5px 5px 12px rgba(0,0,0,0.68), inset -5px -5px 12px rgba(255,255,255,0.04);
+        }
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px 20px;
+        }
+        .container { width: 100%; max-width: 380px; }
+        .logo-area { text-align: center; margin-bottom: 28px; }
+        .logo-title {
+            font-family: Georgia, serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.02em;
+        }
+        .logo-sub { font-size: 13px; color: var(--sub); margin-top: 6px; }
+        .nm-card {
+            background: var(--surface2);
+            border-radius: 24px;
+            padding: 24px 20px;
+            box-shadow: var(--nm-raise-sm);
+        }
+        .field-wrap { margin-bottom: 16px; }
+        .field-label {
+            display: block;
+            font-size: 12px;
+            color: var(--sub);
+            margin-bottom: 6px;
+            padding-left: 2px;
+        }
+        .nm-input {
+            width: 100%;
+            background: var(--bg);
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--nm-inset-sm);
+            padding: 13px 14px;
+            font-size: 14px;
+            color: var(--text);
+            font-family: 'Pretendard', sans-serif;
+            outline: none;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            transition: box-shadow .2s;
+        }
+        .nm-input::placeholder { color: var(--sub); opacity: 0.5; letter-spacing: 0; text-transform: none; }
+        .nm-input:focus { box-shadow: var(--nm-inset), 0 0 0 2px rgba(200,168,112,0.25); }
+        .msg { font-size: 12px; text-align: center; margin-bottom: 12px; }
+        .error-msg { color: #E07070; }
+        .success-msg { color: #7EC87E; }
+        .submit-btn {
+            width: 100%;
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Pretendard', sans-serif;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.5), -1px -1px 4px rgba(255,255,255,0.06);
+            transition: opacity .15s;
+            margin-bottom: 12px;
+        }
+        .submit-btn:active { opacity: 0.85; }
+        .submit-btn:disabled { opacity: 0.4; cursor: default; }
+        .logout-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            color: var(--sub);
+            font-size: 12px;
+            cursor: pointer;
+            font-family: 'Pretendard', sans-serif;
+            padding: 6px;
+            opacity: 0.6;
+            transition: opacity .15s;
+        }
+        .logout-btn:hover { opacity: 1; }
+    </style>
 </head>
 <body>
-    <div class="max-w-sm mx-auto min-h-screen flex flex-col justify-center px-6">
-        <div class="text-center mb-10">
-            <h1 class="text-3xl font-bold tracking-tight">공간:결</h1>
-            <p class="text-gray-400 text-sm mt-2">제품 시리얼 번호를 등록해주세요</p>
+    <div class="container">
+        <div class="logo-area">
+            <div class="logo-title">공간:결</div>
+            <p class="logo-sub">제품 시리얼 번호를 등록해주세요</p>
         </div>
-        <div class="bg-gray-800 rounded-2xl p-8 space-y-5">
-            <div>
-                <label class="block text-sm text-gray-400 mb-1">시리얼 번호</label>
-                <input id="serial" type="text" placeholder="시리얼 번호를 입력하세요"
-                    class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 transition uppercase tracking-widest">
+        <div class="nm-card">
+            <div class="field-wrap">
+                <label class="field-label" for="serial">시리얼 번호</label>
+                <input id="serial" type="text" class="nm-input" placeholder="시리얼 번호를 입력하세요">
             </div>
-            <div id="error-msg" class="text-red-400 text-sm text-center hidden"></div>
-            <div id="success-msg" class="text-green-400 text-sm text-center hidden"></div>
-            <button id="submit-btn" type="button"
-                class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold py-3 rounded-xl transition text-sm">
-                등록하기
-            </button>
-            <button id="logout-btn" type="button" class="w-full text-gray-500 text-xs py-2 hover:text-gray-300 transition">
-                로그아웃
-            </button>
+            <div id="error-msg" class="msg error-msg" style="display:none"></div>
+            <div id="success-msg" class="msg success-msg" style="display:none"></div>
+            <button id="submit-btn" type="button" class="submit-btn">등록하기</button>
+            <button id="logout-btn" type="button" class="logout-btn">로그아웃</button>
         </div>
     </div>
 
@@ -41,7 +131,6 @@
 
         let currentSession = null;
 
-        // 1. 세션 확인
         const { data: { session } } = await supabase.auth.getSession();
 
         if (!session) {
@@ -53,12 +142,10 @@
             const isAdd = params.get('add') === 'true';
 
             if (urlCode && urlCode.toUpperCase().startsWith('GYEOL-S-')) {
-                // 단품 QR에서 넘어온 경우 — 코드 자동 입력
                 document.getElementById('serial').value = urlCode.toUpperCase();
             } else if (isAdd) {
-                // 마이페이지 "추가 등록" 버튼에서 넘어온 경우 — 그냥 폼 표시
+                // 마이페이지 "추가 등록" — 그냥 폼 표시
             } else {
-                // 직접 접속한 경우 — 이미 패키지 등록된 유저면 index.html로 이동
                 const { data: rows } = await supabase
                     .from('serials')
                     .select('id')
@@ -70,7 +157,6 @@
             }
         }
 
-        // 2. 등록하기 버튼
         document.getElementById('submit-btn').addEventListener('click', async () => {
             const session = currentSession;
             const code = document.getElementById('serial').value.trim().toUpperCase();
@@ -78,12 +164,12 @@
             const sucEl = document.getElementById('success-msg');
             const btn = document.getElementById('submit-btn');
 
-            errEl.classList.add('hidden');
-            sucEl.classList.add('hidden');
+            errEl.style.display = 'none';
+            sucEl.style.display = 'none';
 
             if (!code) {
                 errEl.textContent = '시리얼 번호를 입력해주세요.';
-                errEl.classList.remove('hidden');
+                errEl.style.display = 'block';
                 return;
             }
             if (!session) {
@@ -96,18 +182,20 @@
 
             const now = new Date().toISOString();
 
-            // ── 단품 코드 (GYEOL-S-) 처리 ──────────────────────────
+            // ── 단품 코드 (GYEOL-S-) ──────────────────────────────
             if (code.startsWith('GYEOL-S-')) {
-                const { data: single, error: sErr } = await supabase
+                const { data: rows, error: sErr } = await supabase
                     .from('single_serials')
                     .select('*')
                     .eq('serial_code', code)
                     .is('used_by', null)
-                    .maybeSingle();
+                    .limit(1);
+
+                const single = rows?.[0];
 
                 if (sErr || !single) {
                     errEl.textContent = '유효하지 않은 시리얼 번호예요. 다시 확인해주세요.';
-                    errEl.classList.remove('hidden');
+                    errEl.style.display = 'block';
                     btn.textContent = '등록하기';
                     btn.disabled = false;
                     return;
@@ -120,65 +208,63 @@
 
                 if (upErr) {
                     errEl.textContent = '등록 중 오류가 발생했어요. 다시 시도해주세요.';
-                    errEl.classList.remove('hidden');
+                    errEl.style.display = 'block';
                     btn.textContent = '등록하기';
                     btn.disabled = false;
                     return;
                 }
 
                 sucEl.textContent = '등록 완료! 잠시 후 이동합니다.';
-                sucEl.classList.remove('hidden');
+                sucEl.style.display = 'block';
                 btn.textContent = '완료';
                 setTimeout(() => { window.location.replace(`drawer.html?tag=GYEOL-S-${single.item_number}`); }, 1500);
                 return;
             }
 
-            // ── 패키지 코드 처리 ────────────────────────────────────
-            const { data: serial, error } = await supabase
+            // ── 패키지 코드 ───────────────────────────────────────
+            const { data: rows2, error } = await supabase
                 .from('serials')
                 .select('*')
                 .eq('serial_code', code)
-                .maybeSingle();
+                .limit(1);
+
+            const serial = rows2?.[0];
 
             if (error || !serial) {
                 errEl.textContent = '유효하지 않은 시리얼 번호예요. 다시 확인해주세요.';
-                errEl.classList.remove('hidden');
+                errEl.style.display = 'block';
                 btn.textContent = '등록하기';
                 btn.disabled = false;
                 return;
             }
 
-            // ── 14일 유예 / 잠금 체크 ───────────────────────────────
+            // ── 14일 유예 / 잠금 체크 ────────────────────────────
             if (serial.deleted_at) {
                 const deletedAt = new Date(serial.deleted_at);
                 const daysPassed = (new Date() - deletedAt) / (1000 * 60 * 60 * 24);
                 if (daysPassed >= 14) {
-                    // 14일 경과 → 완전 폐기
                     errEl.textContent = '이미 사용 이력이 있는 시리얼 번호예요. 고객센터로 문의해주세요.';
-                    errEl.classList.remove('hidden');
+                    errEl.style.display = 'block';
                     btn.textContent = '등록하기';
                     btn.disabled = false;
                     return;
                 }
                 if (serial.original_owner !== session.user.email) {
-                    // 14일 이내지만 다른 이메일 → 차단
                     errEl.textContent = '이미 사용 이력이 있는 시리얼 번호예요. 본인 계정으로 로그인 후 다시 시도해주세요.';
-                    errEl.classList.remove('hidden');
+                    errEl.style.display = 'block';
                     btn.textContent = '등록하기';
                     btn.disabled = false;
                     return;
                 }
                 // 14일 이내 + 본인 이메일 → 복구 허용 (아래로 계속)
             } else if (serial.used_by) {
-                // 정상 사용 중인 다른 계정
                 errEl.textContent = '이미 등록된 시리얼 번호예요.';
-                errEl.classList.remove('hidden');
+                errEl.style.display = 'block';
                 btn.textContent = '등록하기';
                 btn.disabled = false;
                 return;
             }
 
-            // 세트번호로 QR 태그 3개 한꺼번에 등록
             const setNum = serial.set_number;
             const tagCodes = [
                 `GYEOL-${setNum}-MAIN`,
@@ -193,25 +279,23 @@
 
             if (tagError) {
                 errEl.textContent = '등록 중 오류가 발생했어요. 다시 시도해주세요.';
-                errEl.classList.remove('hidden');
+                errEl.style.display = 'block';
                 btn.textContent = '등록하기';
                 btn.disabled = false;
                 return;
             }
 
-            // serials 테이블에 사용자 이메일 기록 + 유예 컬럼 초기화
             await supabase
                 .from('serials')
                 .update({ used_by: session.user.email, used_at: now, deleted_at: null, original_owner: null })
                 .eq('serial_code', code);
 
             sucEl.textContent = '등록 완료! 잠시 후 이동합니다.';
-            sucEl.classList.remove('hidden');
+            sucEl.style.display = 'block';
             btn.textContent = '완료';
             setTimeout(() => { window.location.replace('index.html'); }, 1500);
         });
 
-        // 3. 로그아웃 버튼
         document.getElementById('logout-btn').addEventListener('click', async () => {
             await supabase.auth.signOut();
             window.location.replace('login.html');
