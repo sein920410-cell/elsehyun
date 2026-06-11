@@ -145,15 +145,6 @@
             window.location.replace('login.html');
         } else {
             currentSession = session;
-
-            // 구글 로그인 후 원래 URL 복귀
-            const afterLogin = localStorage.getItem('gyeol_after_login');
-            if (afterLogin) {
-                localStorage.removeItem('gyeol_after_login');
-                window.location.replace(afterLogin);
-                return;
-            }
-
             const params = new URLSearchParams(window.location.search);
             const urlCode = params.get('code');
             const isAdd = params.get('add') === 'true';
@@ -169,7 +160,14 @@
                     .eq('used_by', session.user.email)
                     .limit(1);
                 if (rows && rows.length > 0) {
-                    window.location.replace('index.html');
+                    // 이미 시리얼 등록됨 → after_login URL 있으면 거기로, 없으면 index
+                    const afterLogin = localStorage.getItem('gyeol_after_login');
+                    if (afterLogin) {
+                        localStorage.removeItem('gyeol_after_login');
+                        window.location.replace(afterLogin);
+                    } else {
+                        window.location.replace('index.html');
+                    }
                 }
             }
         }
@@ -310,7 +308,13 @@
             sucEl.textContent = '등록 완료! 잠시 후 이동합니다.';
             sucEl.style.display = 'block';
             btn.textContent = '완료';
-            setTimeout(() => { window.location.replace('index.html'); }, 1500);
+            const afterLogin = localStorage.getItem('gyeol_after_login');
+            if (afterLogin) {
+                localStorage.removeItem('gyeol_after_login');
+                setTimeout(() => { window.location.replace(afterLogin); }, 1500);
+            } else {
+                setTimeout(() => { window.location.replace('index.html'); }, 1500);
+            }
         });
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
