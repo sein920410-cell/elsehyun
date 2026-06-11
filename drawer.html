@@ -16,7 +16,7 @@
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
     );
     const { data: { session } } = await _authClient.auth.getSession();
-    if (!session) { window.location.replace('login.html'); return; }
+    if (!session) { window.location.replace('login.html?redirect=' + encodeURIComponent(location.href)); return; }
     const { data: serialRows } = await _authClient.from('serials').select('id').eq('used_by', session.user.email).limit(1);
     const { data: singleRows } = await _authClient.from('single_serials').select('id').eq('used_by', session.user.email).limit(1);
     if (!serialRows?.[0] && !singleRows?.[0]) { window.location.replace('serial.html'); return; }
