@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>공간:결 - 마이페이지</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="lib/supabase.umd.min.js"></script>
 <style>body { visibility: hidden; }
 .app-footer{text-align:center;padding:20px 16px 8px;border-top:1px solid var(--divider);margin-top:4px}
 .app-footer-brand{font-size:13px;font-weight:800;letter-spacing:-.01em;margin-bottom:6px;background:linear-gradient(105deg,#5C6E7A 0%,#8AA0AE 28%,#C0D0D8 50%,#8AA0AE 72%,#5C6E7A 100%);background-size:220% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gyeol-shimmer 7s ease-in-out infinite}
@@ -17,7 +17,8 @@
 (async () => {
     const _sb = supabase.createClient(
         'https://tqhtggusphhcsygiitrv.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc',
+        { auth: { storage: window.localStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
     );
     const { data: { session } } = await _sb.auth.getSession();
     if (!session) { window.location.replace('login.html'); return; }
@@ -961,7 +962,8 @@ body {
 <script>
 var sb = supabase.createClient(
     'https://tqhtggusphhcsygiitrv.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc',
+    { auth: { storage: window.localStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
 );
 
 var FOUNDER_EMAILS = ['gngn5803@nate.com'];
