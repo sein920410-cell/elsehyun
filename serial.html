@@ -160,7 +160,13 @@
                     .eq('used_by', session.user.email)
                     .limit(1);
                 if (rows && rows.length > 0) {
-                    window.location.replace('index.html');
+                    const afterLogin = localStorage.getItem('gyeol_after_login');
+                    if (afterLogin) {
+                        localStorage.removeItem('gyeol_after_login');
+                        window.location.replace(afterLogin);
+                    } else {
+                        window.location.replace('index.html');
+                    }
                 }
             }
         }
