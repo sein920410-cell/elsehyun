@@ -160,14 +160,7 @@
                     .eq('used_by', session.user.email)
                     .limit(1);
                 if (rows && rows.length > 0) {
-                    // 이미 시리얼 등록됨 → after_login URL 있으면 거기로, 없으면 index
-                    const afterLogin = localStorage.getItem('gyeol_after_login');
-                    if (afterLogin) {
-                        localStorage.removeItem('gyeol_after_login');
-                        window.location.replace(afterLogin);
-                    } else {
-                        window.location.replace('index.html');
-                    }
+                    window.location.replace('index.html');
                 }
             }
         }
