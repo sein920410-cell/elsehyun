@@ -38,8 +38,16 @@
             font-family: Georgia, serif;
             font-size: 28px;
             font-weight: 700;
-            color: var(--accent);
             letter-spacing: 0.02em;
+            background: linear-gradient(105deg,#8A6830 0%,#C8A870 28%,#F4E0A8 50%,#C8A870 72%,#8A6830 100%);
+            background-size: 220% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: gyeol-shimmer 7s ease-in-out infinite;
+        }
+        @keyframes gyeol-shimmer {
+            0% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+            100% { background-position: 0% center; }
         }
         .logo-sub { font-size: 13px; color: var(--sub); margin-top: 6px; }
 
