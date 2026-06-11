@@ -148,29 +148,18 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .media-empty-lbl{font-size:14px;font-weight:600;color:var(--h-sub)}
 .media-empty-sub{font-size:12px;color:var(--h-sub);opacity:.7;text-align:center;line-height:1.5}
 
-/* ─── 검색바 ─── */
-.search-bar{display:none;align-items:center;gap:10px;padding:11px 14px 12px;background:var(--bg);flex-shrink:0}
-.search-bar.open{display:flex}
-.search-inner{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:50px;padding:12px 16px;border:none;box-shadow:var(--nm-inset-sm);transition:box-shadow .18s}
-.search-inner:focus-within{box-shadow:var(--nm-inset),0 0 0 2px rgba(180,148,100,0.2)}
-.search-inner svg{width:14px;height:14px;stroke:var(--muted2);stroke-width:1.8;fill:none;stroke-linecap:round;flex-shrink:0}
-.search-inner:focus-within svg{stroke:var(--ink2)}
-.search-input{flex:1;border:none;outline:none;font-size:15px;font-family:var(--font);color:var(--ink);background:transparent;-webkit-user-select:text;user-select:text}
-.search-input::placeholder{color:var(--muted2)}
-.search-cancel{font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
-.hl{background:#FFF3C4;border-radius:2px;padding:0 1px}
-
-/* ─── 툴바 ─── */
-.toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;flex-shrink:0;background:var(--bg)}
-.toolbar-left{display:flex;align-items:center}
+/* ─── 툴바 + 인라인 검색 ─── */
+.toolbar{display:flex;align-items:center;gap:10px;padding:10px 14px 8px;flex-shrink:0;background:var(--bg)}
+.toolbar-left{display:flex;align-items:center;flex-shrink:0}
 .toolbar-cnt{font-size:13px;font-weight:800;padding:0 13px;border-radius:20px;background:var(--h-bg);color:var(--h-txt,#fff);letter-spacing:.04em;display:none;transition:background .4s;height:34px;align-items:center;justify-content:center;min-width:44px}
 .toolbar-cnt.vis{display:inline-flex}
-.toolbar-right{display:flex;align-items:center;gap:8px}
-.toolbar-search-btn{width:40px;height:40px;border-radius:50%;background:var(--surface2);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--nm-raise-xs);transition:box-shadow .15s;flex-shrink:0}
-.toolbar-search-btn svg{width:17px;height:17px;stroke:var(--ink2);stroke-width:2;fill:none;stroke-linecap:round;display:block}
-.toolbar-search-btn:active{box-shadow:var(--nm-inset-sm)}
-html[data-mode="dark"] .toolbar-search-btn{background:var(--surface);box-shadow:var(--nm-raise-sm)}
-html[data-mode="dark"] .toolbar-search-btn svg{stroke:var(--ink)}
+.toolbar-search-inline{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:50px;padding:10px 14px;box-shadow:var(--nm-inset-sm);transition:box-shadow .18s}
+.toolbar-search-inline:focus-within{box-shadow:var(--nm-inset),0 0 0 2px rgba(180,148,100,0.18)}
+.toolbar-search-inline svg{width:14px;height:14px;stroke:var(--muted2);stroke-width:2;fill:none;stroke-linecap:round;flex-shrink:0}
+.search-input{flex:1;border:none;outline:none;font-size:14.5px;font-family:var(--font);color:var(--ink);background:transparent;-webkit-user-select:text;user-select:text}
+.search-input::placeholder{color:var(--muted2)}
+.toolbar-search-clear{width:18px;height:18px;border-radius:50%;background:var(--muted2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0}
+.toolbar-search-clear svg{width:8px;height:8px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
 .hl{background:#FFF3C4;border-radius:2px;padding:0 1px}
 
 /* ─── 목록 ─── */
@@ -612,20 +601,15 @@ html[data-mode="dark"] .toolbar-search-btn svg{stroke:var(--ink)}
       <span id="cnt-num">0</span>
     </div>
   </div>
-  <div class="toolbar-right">
-    <button class="toolbar-search-btn" onclick="toggleSearch()" title="검색">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  <div class="toolbar-search-inline">
+    <svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+    <input class="search-input" id="search-input" data-i18n-ph="search_ph" placeholder="물품 검색..." oninput="renderItems(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="toolbar-search-clear" id="toolbar-search-clear" onclick="clearInlineSearch()" style="display:none">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
 </div>
 
-<div class="search-bar" id="search-bar">
-  <div class="search-inner">
-    <svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
-    <input class="search-input" id="search-input" data-i18n-ph="search_ph" placeholder="물품 검색..." oninput="renderItems(this.value)">
-  </div>
-  <span class="search-cancel" onclick="closeSearch()">취소</span>
-</div>
 
 <div class="list-wrap" id="list-wrap">
   <div class="list-inner">
@@ -1001,8 +985,7 @@ function openDrawerSettings(){document.getElementById('dt-input').value=document
 function closeDrawerSettings(e){if(e&&e.target!==document.getElementById('drawer-ov'))return;applyTheme(currentTheme,false);document.getElementById('drawer-ov').classList.remove('open');}
 async function saveDrawerSettings(){const n=document.getElementById('dt-input').value.trim();if(n){document.getElementById('drawer-title').textContent=n;localStorage.setItem('name_'+tag,n);}document.getElementById('drawer-ov').classList.remove('open');applyTheme(pendingTheme);try{const{data:{session:_s}}=await _sb.auth.getSession();if(_s?.user?.email){await _sb.from('drawers').update({color_theme:pendingTheme}).eq('user_email',_s.user.email).eq('tag',tag);_sb.from('serials').update({color_theme:pendingTheme}).eq('used_by',_s.user.email);}}catch(e){console.warn('테마저장오류',e);}}
 
-function toggleSearch(){const b=document.getElementById('search-bar');if(b.classList.contains('open')){closeSearch();}else{b.classList.add('open');setTimeout(()=>document.getElementById('search-input').focus(),100);}}
-function closeSearch(){document.getElementById('search-bar').classList.remove('open');document.getElementById('search-input').value='';renderItems('');}
+function clearInlineSearch(){const inp=document.getElementById('search-input');inp.value='';renderItems('');document.getElementById('toolbar-search-clear').style.display='none';}
 
 // ─── 렌더링 ───
 function showSkeleton(rows=4){
@@ -1017,6 +1000,8 @@ function showSkeleton(rows=4){
   container.innerHTML=html;
 }
 function renderItems(filter='',animate=false){
+  const clrBtn=document.getElementById('toolbar-search-clear');
+  if(clrBtn)clrBtn.style.display=filter?'flex':'none';
   const container=document.getElementById('list-items');
   const groups={};
   items.forEach((it,idx)=>{
