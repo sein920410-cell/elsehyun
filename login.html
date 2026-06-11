@@ -563,14 +563,12 @@
 
     window.handleGoogle = async () => {
         saveConsent();
-        const redir = new URLSearchParams(location.search).get('redirect');
-        if (redir) { localStorage.setItem('gyeol_after_login', redir); }
         const btn = document.getElementById('google-btn');
         btn.textContent = '연결 중...';
         btn.disabled = true;
         await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: window.location.origin + '/serial.html' }
+            options: { redirectTo: 'https://elsehyun.com/serial.html' }
         });
     };
 
