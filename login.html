@@ -4,299 +4,442 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>공간:결 - 로그인</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #0C1220; color: white; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #1A1917;
+            --surface: #201E1B;
+            --surface2: #252320;
+            --accent: #C8A870;
+            --text: #E8E5DF;
+            --sub: #8C8880;
+            --nm-raise-sm: 4px 4px 10px rgba(0,0,0,0.62), -4px -4px 10px rgba(255,255,255,0.035);
+            --nm-raise-xs: 3px 3px 7px rgba(0,0,0,0.58), -3px -3px 7px rgba(255,255,255,0.03);
+            --nm-inset-sm: inset 3px 3px 8px rgba(0,0,0,0.62), inset -3px -3px 8px rgba(255,255,255,0.035);
+            --nm-inset: inset 5px 5px 12px rgba(0,0,0,0.68), inset -5px -5px 12px rgba(255,255,255,0.04);
+        }
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px 20px;
+        }
+        .container { width: 100%; max-width: 380px; }
 
-        /* 커스텀 체크박스 */
-        .gyeol-check { display:none; }
+        /* 로고 */
+        .logo-area { text-align: center; margin-bottom: 28px; }
+        .logo-title {
+            font-family: Georgia, serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.02em;
+        }
+        .logo-sub { font-size: 13px; color: var(--sub); margin-top: 6px; }
+
+        /* 카드 */
+        .nm-card {
+            background: var(--surface2);
+            border-radius: 24px;
+            padding: 24px 20px;
+            box-shadow: var(--nm-raise-sm);
+        }
+
+        /* 동의 섹션 */
+        .consent-section { margin-bottom: 4px; }
+        .gyeol-check { display: none; }
+        .consent-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .consent-item:last-child { margin-bottom: 0; }
         .gyeol-check-label {
-            display: flex; align-items: flex-start; gap: 10px;
-            cursor: pointer; user-select: none;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            flex: 1;
         }
         .gyeol-check-box {
             flex-shrink: 0;
-            width: 18px; height: 18px; margin-top: 1px;
-            border: 1.5px solid #4B5563;
-            border-radius: 4px;
-            background: #111827;
-            display: flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px;
+            margin-top: 1px;
+            border-radius: 6px;
+            background: var(--bg);
+            box-shadow: var(--nm-inset-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all .18s ease;
         }
         .gyeol-check:checked + .gyeol-check-label .gyeol-check-box {
-            background: #3B82F6;
-            border-color: #3B82F6;
+            background: var(--accent);
+            box-shadow: none;
         }
         .gyeol-check-box svg { opacity: 0; transition: opacity .15s; }
         .gyeol-check:checked + .gyeol-check-label .gyeol-check-box svg { opacity: 1; }
-        .gyeol-check-text { font-size: 13px; color: #9CA3AF; line-height: 1.5; }
-        .gyeol-check-text .badge {
-            display: inline-block;
-            font-size: 10px; font-weight: 700;
-            color: #60A5FA; margin-right: 4px;
-        }
+        .gyeol-check-text { font-size: 13px; color: var(--sub); line-height: 1.5; }
+        .badge { font-size: 10px; font-weight: 700; color: var(--accent); margin-right: 4px; }
         .detail-link {
-            color: #6B7280; font-size: 12px;
-            text-decoration: underline; text-underline-offset: 2px;
-            cursor: pointer; white-space: nowrap;
-            transition: color .15s;
+            font-size: 11px;
+            color: var(--sub);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            cursor: pointer;
+            white-space: nowrap;
+            opacity: 0.6;
+            flex-shrink: 0;
+            margin-top: 2px;
         }
-        .detail-link:hover { color: #9CA3AF; }
+        .divider {
+            height: 1px;
+            background: rgba(255,255,255,0.06);
+            margin: 16px 0;
+        }
+
+        /* 소셜 버튼 */
+        .social-btn {
+            width: 100%;
+            border-radius: 14px;
+            padding: 13px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-family: 'Pretendard', sans-serif;
+            transition: opacity .15s;
+            margin-bottom: 10px;
+        }
+        .google-btn {
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: var(--nm-raise-sm);
+        }
+        .kakao-btn {
+            background: #F9E000;
+            color: #3C1E1E;
+            box-shadow: var(--nm-raise-sm);
+            opacity: 0.45;
+            cursor: default;
+        }
+        .kakao-soon {
+            font-size: 10px;
+            font-weight: 700;
+            background: rgba(0,0,0,0.12);
+            color: #3C1E1E;
+            border-radius: 6px;
+            padding: 2px 7px;
+            margin-left: 2px;
+        }
+
+        /* 입력 필드 */
+        .field-wrap { margin-bottom: 12px; }
+        .field-label {
+            display: block;
+            font-size: 12px;
+            color: var(--sub);
+            margin-bottom: 6px;
+            padding-left: 2px;
+        }
+        .nm-input {
+            width: 100%;
+            background: var(--bg);
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--nm-inset-sm);
+            padding: 13px 14px;
+            font-size: 14px;
+            color: var(--text);
+            font-family: 'Pretendard', sans-serif;
+            outline: none;
+            transition: box-shadow .2s;
+        }
+        .nm-input::placeholder { color: var(--sub); opacity: 0.5; }
+        .nm-input:focus { box-shadow: var(--nm-inset), 0 0 0 2px rgba(200,168,112,0.25); }
+        .pw-wrap { position: relative; }
+        .pw-wrap .nm-input { padding-right: 44px; }
+        .eye-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: var(--sub);
+            opacity: 0.6;
+        }
+
+        /* 에러 */
+        .error-msg {
+            font-size: 12px;
+            color: #E07070;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        /* 로그인 버튼 */
+        .login-btn {
+            width: 100%;
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Pretendard', sans-serif;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.5), -1px -1px 4px rgba(255,255,255,0.06);
+            transition: opacity .15s;
+            margin-top: 4px;
+        }
+        .login-btn:active { opacity: 0.85; }
+        .btn-disabled { opacity: 0.35; pointer-events: none; }
 
         /* 모달 */
         .modal-overlay {
-            display: none; position: fixed; inset: 0; z-index: 1000;
-            background: rgba(0,0,0,.75); backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            align-items: flex-end; justify-content: center;
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            align-items: flex-end;
+            justify-content: center;
         }
         .modal-overlay.open { display: flex; }
         .modal-sheet {
-            width: 100%; max-width: 420px;
-            background: #1C2333;
-            border-radius: 20px 20px 0 0;
-            padding: 0 0 env(safe-area-inset-bottom,0);
+            width: 100%;
+            max-width: 420px;
+            background: var(--surface2);
+            box-shadow: 7px 7px 16px rgba(0,0,0,0.68), -7px -7px 16px rgba(255,255,255,0.04);
+            border-radius: 24px 24px 0 0;
+            padding: 0 0 env(safe-area-inset-bottom, 0);
             max-height: 80vh;
-            display: flex; flex-direction: column;
+            display: flex;
+            flex-direction: column;
             animation: slideUp .25s cubic-bezier(.25,.46,.45,.94);
         }
         @keyframes slideUp {
             from { transform: translateY(100%); opacity: 0; }
-            to   { transform: translateY(0);    opacity: 1; }
+            to   { transform: translateY(0); opacity: 1; }
         }
         .modal-handle {
             width: 36px; height: 4px;
-            background: #374151; border-radius: 2px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 2px;
             margin: 12px auto 0;
         }
         .modal-header {
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 16px 20px 12px;
-            border-bottom: 1px solid #2D3748;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
             flex-shrink: 0;
         }
-        .modal-title { font-size: 15px; font-weight: 700; color: #F9FAFB; }
+        .modal-title { font-size: 15px; font-weight: 700; color: var(--text); }
         .modal-close {
-            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-            background: #374151; border-radius: 50%; cursor: pointer; flex-shrink: 0;
+            width: 28px; height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            box-shadow: var(--nm-raise-xs);
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--sub);
+            flex-shrink: 0;
         }
         .modal-body {
-            overflow-y: auto; padding: 20px;
-            font-size: 12.5px; color: #9CA3AF; line-height: 1.8;
+            overflow-y: auto;
+            padding: 20px;
+            font-size: 12.5px;
+            color: var(--sub);
+            line-height: 1.8;
             -webkit-overflow-scrolling: touch;
         }
-        .modal-body h3 {
-            font-size: 13px; font-weight: 700; color: #E5E7EB;
-            margin: 16px 0 6px;
-        }
+        .modal-body h3 { font-size: 13px; font-weight: 700; color: var(--text); margin: 16px 0 6px; }
         .modal-body h3:first-child { margin-top: 0; }
         .modal-body p { margin-bottom: 6px; }
         .modal-body ul { padding-left: 14px; margin-bottom: 8px; }
         .modal-body ul li { margin-bottom: 3px; list-style: disc; }
-        .modal-body .em { color: #D1D5DB; }
+        .modal-body .em { color: rgba(232,229,223,0.7); }
         .modal-agree-btn {
             margin: 0 20px 20px;
-            background: #3B82F6; color: white;
-            border: none; border-radius: 12px;
-            padding: 13px; font-size: 14px; font-weight: 700;
-            cursor: pointer; width: calc(100% - 40px);
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            border-radius: 14px;
+            padding: 13px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            width: calc(100% - 40px);
             font-family: 'Pretendard', sans-serif;
-            flex-shrink: 0; transition: background .15s;
+            flex-shrink: 0;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
         }
-        .modal-agree-btn:hover { background: #2563EB; }
-
-        /* 비활성 버튼 */
-        .btn-disabled { opacity: .4; pointer-events: none; }
     </style>
 </head>
 <body>
-<div class="max-w-sm mx-auto min-h-screen flex flex-col justify-center px-6">
-    <div class="text-center mb-10">
-        <h1 class="text-3xl font-bold tracking-tight">공간:결</h1>
-        <p class="text-gray-400 text-sm mt-2">공간의 결을 더하다</p>
+<div class="container">
+    <div class="logo-area">
+        <div class="logo-title">공간:결</div>
+        <p class="logo-sub">공간의 결을 더하다</p>
     </div>
-    <div class="bg-gray-800 rounded-2xl p-8 space-y-5">
-
-        <!-- 동의 섹션 (최초 1회만 노출) -->
-        <div id="consent-section" style="display:none">
-            <div class="space-y-3 mb-5">
-                <!-- 이용약관 -->
-                <div class="flex items-start gap-2">
-                    <input type="checkbox" id="chk-terms" class="gyeol-check" onchange="updateBtns()">
-                    <label for="chk-terms" class="gyeol-check-label flex-1">
-                        <div class="gyeol-check-box">
-                            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                                <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </div>
-                        <span class="gyeol-check-text">
-                            <span class="badge">[필수]</span>이용약관에 동의합니다.
-                        </span>
-                    </label>
-                    <span class="detail-link mt-0.5" onclick="openModal('terms')">더보기</span>
-                </div>
-                <!-- 개인정보 -->
-                <div class="flex items-start gap-2">
-                    <input type="checkbox" id="chk-privacy" class="gyeol-check" onchange="updateBtns()">
-                    <label for="chk-privacy" class="gyeol-check-label flex-1">
-                        <div class="gyeol-check-box">
-                            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                                <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </div>
-                        <span class="gyeol-check-text">
-                            <span class="badge">[필수]</span>개인정보 수집·이용에 동의합니다.
-                        </span>
-                    </label>
-                    <span class="detail-link mt-0.5" onclick="openModal('privacy')">더보기</span>
-                </div>
-                <!-- 만 14세 이상 -->
-                <div class="flex items-start gap-2">
-                    <input type="checkbox" id="chk-age" class="gyeol-check" onchange="updateBtns()">
-                    <label for="chk-age" class="gyeol-check-label flex-1">
-                        <div class="gyeol-check-box">
-                            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                                <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </div>
-                        <span class="gyeol-check-text">
-                            <span class="badge">[필수]</span>만 14세 이상입니다.
-                        </span>
-                    </label>
-                </div>
+    <div class="nm-card">
+        <!-- 동의 섹션 (최초 1회) -->
+        <div id="consent-section" class="consent-section" style="display:none">
+            <div class="consent-item">
+                <input type="checkbox" id="chk-terms" class="gyeol-check" onchange="updateBtns()">
+                <label for="chk-terms" class="gyeol-check-label">
+                    <div class="gyeol-check-box">
+                        <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+                            <path d="M1 4.5L4 7.5L10 1" stroke="#1A1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span class="gyeol-check-text"><span class="badge">[필수]</span>이용약관에 동의합니다.</span>
+                </label>
+                <span class="detail-link" onclick="openModal('terms')">더보기</span>
             </div>
-            <div class="h-px bg-gray-700 mb-5"></div>
+            <div class="consent-item">
+                <input type="checkbox" id="chk-privacy" class="gyeol-check" onchange="updateBtns()">
+                <label for="chk-privacy" class="gyeol-check-label">
+                    <div class="gyeol-check-box">
+                        <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+                            <path d="M1 4.5L4 7.5L10 1" stroke="#1A1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span class="gyeol-check-text"><span class="badge">[필수]</span>개인정보 수집·이용에 동의합니다.</span>
+                </label>
+                <span class="detail-link" onclick="openModal('privacy')">더보기</span>
+            </div>
+            <div class="consent-item" style="margin-bottom:0">
+                <input type="checkbox" id="chk-age" class="gyeol-check" onchange="updateBtns()">
+                <label for="chk-age" class="gyeol-check-label">
+                    <div class="gyeol-check-box">
+                        <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+                            <path d="M1 4.5L4 7.5L10 1" stroke="#1A1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span class="gyeol-check-text"><span class="badge">[필수]</span>만 14세 이상입니다.</span>
+                </label>
+            </div>
+            <div class="divider"></div>
         </div>
 
-        <!-- 구글 로그인 버튼 -->
-        <button id="google-btn" onclick="handleGoogle()"
-            class="w-full bg-white hover:bg-gray-100 text-gray-800 font-semibold py-3 rounded-xl transition text-sm flex items-center justify-center gap-3">
+        <!-- 구글 로그인 -->
+        <button id="google-btn" class="social-btn google-btn" onclick="handleGoogle()">
             <svg width="18" height="18" viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
                 <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
                 <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
             </svg>
             Google로 로그인
         </button>
 
-        <!-- 구분선 -->
-        <div class="flex items-center gap-3">
-            <div class="flex-1 h-px bg-gray-600"></div>
-            <span class="text-gray-500 text-xs">또는</span>
-            <div class="flex-1 h-px bg-gray-600"></div>
-        </div>
+        <!-- 카카오 로그인 (UI만, 준비 중) -->
+        <button class="social-btn kakao-btn" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#3C1E1E">
+                <path d="M12 3C6.477 3 2 6.8 2 11.5c0 2.955 1.742 5.532 4.36 7.089L5.5 21.5l3.354-1.966A11.6 11.6 0 0012 20c5.523 0 10-3.8 10-8.5S17.523 3 12 3z"/>
+            </svg>
+            카카오로 로그인
+            <span class="kakao-soon">준비 중</span>
+        </button>
+
+        <div class="divider"></div>
 
         <!-- 이메일 로그인 -->
-        <div>
-            <label class="block text-sm text-gray-400 mb-1">이메일</label>
-            <input id="email" type="email" placeholder="이메일"
-                class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 transition">
+        <div class="field-wrap">
+            <label class="field-label" for="email">이메일</label>
+            <input id="email" class="nm-input" type="email" placeholder="이메일 주소 입력">
         </div>
-        <div>
-            <label class="block text-sm text-gray-400 mb-1">비밀번호</label>
-            <div class="relative">
-                <input id="password" type="password" placeholder="비밀번호"
-                    class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 pr-11 text-white text-sm outline-none focus:border-blue-500 transition">
-                <button type="button" id="pw-toggle" onclick="togglePw()" aria-label="비밀번호 표시"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200">
-                    <svg id="eye-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <svg id="eye-off" style="display:none" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        <div class="field-wrap">
+            <label class="field-label" for="password">비밀번호</label>
+            <div class="pw-wrap">
+                <input id="password" class="nm-input" type="password" placeholder="비밀번호 입력">
+                <button class="eye-btn" onclick="togglePw()" type="button" aria-label="비밀번호 표시/숨기기">
+                    <svg id="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <svg id="eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                        <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
                 </button>
             </div>
         </div>
-        <div id="error-msg" class="text-red-400 text-sm text-center hidden"></div>
-        <button id="login-btn" onclick="handleLogin()"
-            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition text-sm">
-            이메일로 로그인
-        </button>
+
+        <div id="error-msg" class="error-msg" style="display:none"></div>
+
+        <button id="login-btn" class="login-btn" onclick="handleLogin()">이메일로 로그인</button>
     </div>
 </div>
 
-<!-- ── 이용약관 모달 ── -->
+<!-- 이용약관 모달 -->
 <div class="modal-overlay" id="modal-terms" onclick="closeOnBg(event,'modal-terms')">
     <div class="modal-sheet">
         <div class="modal-handle"></div>
         <div class="modal-header">
             <span class="modal-title">이용약관</span>
             <div class="modal-close" onclick="closeModal('modal-terms')">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M1 1l10 10M11 1L1 11" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
             </div>
         </div>
         <div class="modal-body">
             <h3>제1조 목적</h3>
-            <p>본 약관은 엘세현(이하 "회사")이 운영하는 공간:결 서비스의 이용과 관련하여 회사와 이용자 간의 권리, 의무 및 책임사항을 규정합니다.</p>
-
-            <h3>제2조 이용 자격 및 연령 제한 [필수]</h3>
+            <p>이 약관은 엘세현(이하 "회사")이 제공하는 공간:결 서비스(이하 "서비스") 이용에 관한 조건 및 절차, 회사와 이용자의 권리·의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+            <h3>제2조 서비스 이용</h3>
+            <p>서비스를 이용하려면 소셜 로그인(Google, 카카오 등)을 통해 계정을 생성하고, 제품 시리얼 코드를 등록해야 합니다.</p>
+            <h3>제3조 금지행위</h3>
             <ul>
-                <li><strong>본 서비스는 만 14세 이상만 이용할 수 있습니다.</strong></li>
-                <li>서비스는 유효한 시리얼 코드를 보유하고 소셜 계정(Google, 카카오 등)으로 로그인한 이용자에 한해 제공됩니다.</li>
-                <li>1개의 시리얼 코드는 1개의 계정에만 등록 가능합니다.</li>
+                <li>타인의 개인정보 도용</li>
+                <li>서비스 운영 방해</li>
+                <li>시리얼 코드 무단 공유 또는 양도</li>
+                <li>서비스를 통한 불법적인 활동</li>
             </ul>
-
-            <h3>제3조 AI 이용권 및 서비스</h3>
-            <ul>
-                <li>기본 AI 이용권은 계정당 무료 50건이 제공됩니다.</li>
-                <li>추가 이용권은 유료이며, 계정 삭제 시 잔여 이용권은 소멸됩니다.</li>
-                <li>AI 분석 결과는 참고 정보로만 활용되며, 오류가 있을 수 있습니다. 회사는 분석 결과의 정확성을 보증하지 않습니다.</li>
-                <li>AI 분석에 사용된 이미지·영상은 외부 AI 분석 서비스 제공업체(Google LLC)로 전송됩니다.</li>
-                <li>AI 채팅 기능 이용 시, 질문 내용과 해당 서랍의 물품 목록이 답변 생성을 위해 Google LLC로 전송됩니다.</li>
-            </ul>
-
-            <h3>제4조 개인정보 보호 (AI 자동 차단)</h3>
-            <ul>
-                <li>신분증·통장·카드·계약서·처방전·등본 등 민감한 개인정보가 포함된 사진·영상은 AI 분석에서 자동 제외됩니다.</li>
-                <li>이 기능은 AI 기반으로 동작하며 완벽한 차단을 보장하지 않습니다. 민감한 문서는 사진에 함께 두지 않을 것을 권장합니다.</li>
-            </ul>
-
-            <h3>제5조 서비스 중단 및 점검</h3>
-            <ul>
-                <li>정기 점검은 최소 24시간 전에 사전 공지합니다.</li>
-                <li>긴급 점검은 불가피한 경우 사전 공지 없이 진행될 수 있습니다.</li>
-            </ul>
-
-            <h3>제6조 이용자 의무</h3>
-            <ul>
-                <li>타인의 계정·시리얼 코드를 무단 사용해서는 안 됩니다.</li>
-                <li>업로드한 사진·영상에 대해 적법한 권리를 보유해야 합니다.</li>
-                <li>만 14세 미만 제3자의 개인정보를 서비스에 등록해서는 안 됩니다.</li>
-            </ul>
-
-            <h3>제7조 책임 제한</h3>
-            <ul>
-                <li>회사는 무료 서비스 범위 내 오류 및 AI 분석 결과 부정확에 대해 배상 책임을 지지 않습니다.</li>
-                <li>외부 서비스(Supabase, Google LLC, Vercel 등) 장애로 인한 손해에 대해 책임을 지지 않습니다.</li>
-                <li>이용자 귀책 사유로 인한 피해는 회사 책임이 아닙니다.</li>
-            </ul>
-
-            <h3>제8조 분쟁 해결</h3>
-            <p>본 약관 관련 분쟁은 대한민국 법률에 따릅니다.</p>
-            <p class="em">문의: on@elsehyun.com &nbsp;|&nbsp; 카카오채널: 엘세현</p>
+            <h3>제4조 서비스 중단</h3>
+            <p>회사는 시스템 점검, 장애 등의 사유로 서비스를 일시적으로 중단할 수 있으며, 사전에 공지합니다.</p>
+            <h3>제5조 면책조항</h3>
+            <p>회사는 이용자가 서비스에 업로드한 사진 및 영상의 내용에 대한 책임을 지지 않습니다.</p>
             <p class="em">시행일: 2026년 05월 13일</p>
         </div>
         <button class="modal-agree-btn" onclick="agreeAndClose('terms')">확인 및 동의</button>
     </div>
 </div>
 
-<!-- ── 개인정보처리방침 모달 ── -->
+<!-- 개인정보처리방침 모달 -->
 <div class="modal-overlay" id="modal-privacy" onclick="closeOnBg(event,'modal-privacy')">
     <div class="modal-sheet">
         <div class="modal-handle"></div>
         <div class="modal-header">
-            <span class="modal-title">개인정보 수집·이용 동의</span>
+            <span class="modal-title">개인정보처리방침</span>
             <div class="modal-close" onclick="closeModal('modal-privacy')">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M1 1l10 10M11 1L1 11" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
             </div>
         </div>
         <div class="modal-body">
             <h3>연령 제한</h3>
             <p><strong>본 서비스는 만 14세 이상만 이용할 수 있습니다.</strong> 만 14세 미만 아동의 개인정보는 수집하지 않습니다.</p>
-
             <h3>제1조 수집하는 개인정보 항목 및 수집 방법</h3>
             <p><span class="em">수집 항목</span></p>
             <ul>
@@ -311,7 +454,6 @@
                 <li>소셜 로그인을 통한 간편 로그인 (Google OAuth 2.0, 카카오 로그인 등)</li>
                 <li>서비스 이용 과정에서 이용자가 직접 입력·업로드</li>
             </ul>
-
             <h3>제2조 수집·이용 목적</h3>
             <ul>
                 <li>서비스 제공 및 본인 확인</li>
@@ -320,7 +462,6 @@
                 <li>서비스 품질 개선 및 오류 대응</li>
                 <li>법령상 의무 이행</li>
             </ul>
-
             <h3>제3조 보유 및 이용 기간</h3>
             <ul>
                 <li>계정이 유지되는 동안 보유합니다.</li>
@@ -329,10 +470,8 @@
                 <li>소비자 분쟁처리 기록: 3년 (법령 의무)</li>
                 <li>접속 로그 기록: 3개월</li>
             </ul>
-
             <h3>제4조 개인정보의 제3자 제공</h3>
             <p>이용자의 개인정보를 원칙적으로 제3자에게 제공하지 않습니다. 단, 이용자가 사전에 동의한 경우 또는 법령에 의한 요청이 있는 경우는 예외입니다.</p>
-
             <h3>제5조 처리 위탁</h3>
             <ul>
                 <li>Supabase Inc. (미국) — DB, 파일 저장, 인증</li>
@@ -340,11 +479,9 @@
                 <li>Google LLC (미국) — Google 소셜 로그인(OAuth 2.0) 및 AI 분석 서비스</li>
                 <li>Kakao Corp. (대한민국) — 카카오 소셜 로그인 서비스</li>
             </ul>
-
             <h3>제6조 이용자 권리</h3>
             <p>언제든지 개인정보 열람·정정·삭제·처리 정지를 요청할 수 있습니다. 마이페이지에서 계정을 삭제하면 모든 데이터가 즉시 파기됩니다.</p>
             <p class="em">문의: on@elsehyun.com, 카카오 고객센터: 엘세현</p>
-
             <h3>제7조 개인정보의 파기</h3>
             <ul>
                 <li>보유 기간 경과 또는 처리 목적 달성 시 지체 없이 파기합니다.</li>
@@ -352,19 +489,16 @@
                 <li>업로드된 사진·영상은 서비스 제공을 위해 서버(Supabase)에 보관되며, 이용자가 직접 삭제하거나 계정을 삭제하면 즉시 파기됩니다.</li>
                 <li>계정 삭제 시 업로드된 사진·영상 및 AI 채팅 기록은 즉시 서버에서 삭제됩니다.</li>
             </ul>
-
             <h3>제8조 쿠키 및 자동 수집 정보</h3>
             <ul>
                 <li>서비스는 로그인 상태 유지를 위해 브라우저 localStorage를 사용합니다.</li>
                 <li>이용자는 브라우저 설정을 통해 localStorage 데이터를 직접 삭제할 수 있습니다.</li>
             </ul>
-
             <h3>제9조 개인정보처리방침 변경</h3>
             <p>본 방침은 시행일로부터 적용되며, 법령 및 서비스 변경에 따라 내용이 추가·수정될 수 있습니다. 변경 시 서비스 공지사항을 통해 안내합니다.</p>
-
             <h3>제10조 개인정보 보호책임자</h3>
             <p class="em">상호: 엘세현 (ELSEHYUN)</p>
-            <p class="em">대표: 박세인 </p>
+            <p class="em">대표: 박세인</p>
             <p class="em">on@elsehyun.com, 카카오 고객센터: 엘세현</p>
             <p>이용자는 서비스 이용 중 발생하는 개인정보 관련 문의, 불만, 피해구제 등에 관한 사항을 개인정보 보호책임자에게 문의하실 수 있습니다.</p>
             <p class="em">시행일: 2026년 05월 13일</p>
@@ -380,13 +514,11 @@
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc'
     );
 
-    // ── 동의 상태 초기화 ──────────────────────────────────────
     const AGREED_KEY = 'gyeol_terms_agreed';
 
     function initConsent() {
         const alreadyAgreed = localStorage.getItem(AGREED_KEY);
         if (!alreadyAgreed) {
-            // 최초 방문 → 체크박스 노출, 버튼 비활성
             document.getElementById('consent-section').style.display = 'block';
             document.getElementById('google-btn').classList.add('btn-disabled');
             document.getElementById('login-btn').classList.add('btn-disabled');
@@ -394,7 +526,6 @@
     }
     initConsent();
 
-    // ── 체크박스 상태 업데이트 ────────────────────────────────
     window.updateBtns = function() {
         const ok = document.getElementById('chk-terms').checked &&
                    document.getElementById('chk-privacy').checked &&
@@ -403,7 +534,6 @@
         document.getElementById('login-btn').classList.toggle('btn-disabled', !ok);
     };
 
-    // ── 모달 ─────────────────────────────────────────────────
     window.openModal = function(type) {
         document.getElementById('modal-' + type).classList.add('open');
         document.body.style.overflow = 'hidden';
@@ -415,19 +545,14 @@
     window.closeOnBg = function(e, id) {
         if (e.target === document.getElementById(id)) closeModal(id);
     };
-    // 더보기 → 확인 및 동의 누르면 해당 체크박스 자동 체크
     window.agreeAndClose = function(type) {
         document.getElementById('chk-' + type).checked = true;
         updateBtns();
         closeModal('modal-' + type);
     };
 
-    // ── 동의 저장 헬퍼 ────────────────────────────────────────
-    function saveConsent() {
-        localStorage.setItem(AGREED_KEY, '1');
-    }
+    function saveConsent() { localStorage.setItem(AGREED_KEY, '1'); }
 
-    // ── 구글 로그인 ───────────────────────────────────────────
     window.handleGoogle = async () => {
         saveConsent();
         const btn = document.getElementById('google-btn');
@@ -439,33 +564,38 @@
         });
     };
 
-    // ── 이메일 로그인 ─────────────────────────────────────────
     window.handleLogin = async () => {
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const errEl = document.getElementById('error-msg');
         const btn = document.getElementById('login-btn');
-        errEl.classList.add('hidden'); btn.textContent = '로그인 중...'; btn.disabled = true;
+        errEl.style.display = 'none';
+        btn.textContent = '로그인 중...';
+        btn.disabled = true;
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
-            errEl.textContent = '로그인 실패'; errEl.classList.remove('hidden');
-            btn.textContent = '이메일로 로그인'; btn.disabled = false;
+            errEl.textContent = '이메일 또는 비밀번호를 확인해주세요.';
+            errEl.style.display = 'block';
+            btn.textContent = '이메일로 로그인';
+            btn.disabled = false;
         } else {
             saveConsent();
-            const { data: s } = await supabase.from('serials').select('id').eq('used_by', data.user.email).maybeSingle();
+            const { data: rows } = await supabase.from('serials').select('id').eq('used_by', data.user.email).limit(1);
             const redir = new URLSearchParams(location.search).get('redirect');
             if (redir) { window.location.replace(redir); }
-            else if (s) { window.location.replace('index.html'); } else { window.location.replace('serial.html'); }
+            else if (rows && rows.length > 0) { window.location.replace('index.html'); }
+            else { window.location.replace('serial.html'); }
         }
     };
 
-    window.togglePw = function(){
-      var p=document.getElementById('password');
-      var open=document.getElementById('eye-open');
-      var off=document.getElementById('eye-off');
-      if(p.type==='password'){p.type='text';open.style.display='none';off.style.display='';}
-      else{p.type='password';open.style.display='';off.style.display='none';}
+    window.togglePw = function() {
+        var p = document.getElementById('password');
+        var open = document.getElementById('eye-open');
+        var off = document.getElementById('eye-off');
+        if (p.type === 'password') { p.type = 'text'; open.style.display = 'none'; off.style.display = ''; }
+        else { p.type = 'password'; open.style.display = ''; off.style.display = 'none'; }
     };
+
     document.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
 </script>
 </body>
