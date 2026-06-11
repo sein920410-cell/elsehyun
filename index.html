@@ -130,11 +130,23 @@ body {
   flex: 1;
   font-size: 26px;
   line-height: 1.25;
-  color: var(--muted);
+  background: linear-gradient(105deg,#5C6E7A 0%,#8AA0AE 28%,#C0D0D8 50%,#8AA0AE 72%,#5C6E7A 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: gyeol-shimmer 7s ease-in-out infinite;
 }
 .brand .sp { letter-spacing: 0.08em; }
 .brand .gy { letter-spacing: 0.04em; margin-left: 2px; }
-html[data-theme="dark"] .brand { color: #C2B5A0; }
+html[data-theme="dark"] .brand {
+  background: linear-gradient(105deg,#8A6830 0%,#C8A870 28%,#F4E0A8 50%,#C8A870 72%,#8A6830 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+@keyframes gyeol-shimmer {
+  0% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+  100% { background-position: 0% center; }
+}
 .header-divider {
   height: 0.5px; background: var(--divider);
   margin: 16px 20px 0; transition: background 0.3s;
