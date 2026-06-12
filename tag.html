@@ -6,198 +6,378 @@
     <title>공간:결</title>
     <script>
         // ⚠️ 도메인 통일: vercel.app으로 진입하면 elsehyun.com으로 즉시 이동
-        // (로그인 세션·localStorage는 도메인별로 분리되므로 반드시 elsehyun.com에서 처리)
         if (location.hostname.endsWith('vercel.app')) {
             location.replace('https://elsehyun.com' + location.pathname + location.search);
         }
+        // 다크모드 깜빡임 방지: 페이지 로드 전 적용
+        (function() {
+            try {
+                if (localStorage.getItem('gyeol_theme') === 'dark') {
+                    document.documentElement.setAttribute('data-mode', 'dark');
+                }
+            } catch(e) {}
+        })();
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #0C1220; color: white; }
+        /* ── 뉴모피즘 변수 ── */
+        :root {
+            --bg: #E8E5DF;
+            --surface: #EFECE6;
+            --surface2: #F4F1EB;
+            --text: #3A3630;
+            --muted: #8A8278;
+            --muted2: #AFA9A0;
+            --accent: #B49464;
+            --danger: #B85A44;
+            --nm-raise:    8px 8px 18px rgba(163,154,140,0.52), -8px -8px 18px rgba(255,255,255,0.88);
+            --nm-raise-sm: 5px 5px 12px rgba(163,154,140,0.44), -5px -5px 12px rgba(255,255,255,0.84);
+            --nm-raise-xs: 3px 3px 8px  rgba(163,154,140,0.38), -3px -3px 8px  rgba(255,255,255,0.78);
+            --nm-inset-sm: inset 3px 3px 8px rgba(163,154,140,0.4), inset -3px -3px 8px rgba(255,255,255,0.82);
+            --font: 'Pretendard', sans-serif;
+            --radius: 18px;
+        }
+        html[data-mode="dark"] {
+            --bg: #1A1917;
+            --surface: #201E1B;
+            --surface2: #252320;
+            --text: #E0DBD4;
+            --muted: #7A746A;
+            --muted2: #5A5550;
+            --accent: #C8A870;
+            --danger: #D06050;
+            --nm-raise:    7px 7px 16px rgba(0,0,0,0.68), -7px -7px 16px rgba(255,255,255,0.04);
+            --nm-raise-sm: 4px 4px 10px rgba(0,0,0,0.62), -4px -4px 10px rgba(255,255,255,0.035);
+            --nm-raise-xs: 3px 3px 7px  rgba(0,0,0,0.58), -3px -3px 7px  rgba(255,255,255,0.03);
+            --nm-inset-sm: inset 3px 3px 8px rgba(0,0,0,0.62), inset -3px -3px 8px rgba(255,255,255,0.035);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px;
+            transition: background .25s;
+        }
+        .wrap { width: 100%; max-width: 360px; }
+
+        /* ── 상태 공통 ── */
+        .state { display: none; }
+        .state.active { display: block; }
+
+        /* ── 페이드업 ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .state.anim { animation: fadeUp 0.38s ease forwards; }
+
+        /* ── 로딩 ── */
+        #state-loading { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .nm-spinner-wrap {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: var(--surface2);
+            box-shadow: var(--nm-raise-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .spinner { animation: spin 1s linear infinite; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-in { animation: fadeIn 0.4s ease forwards; }
+        .spinner-arc {
+            width: 34px;
+            height: 34px;
+            animation: spin 1.1s linear infinite;
+        }
+        .loading-txt {
+            font-size: 14px;
+            color: var(--muted);
+            letter-spacing: .02em;
+        }
+
+        /* ── 상태 카드 ── */
+        .state-card {
+            background: var(--surface2);
+            box-shadow: var(--nm-raise-sm);
+            border-radius: var(--radius);
+            padding: 32px 24px 28px;
+            text-align: center;
+        }
+        .ico-wrap {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--surface2);
+            box-shadow: var(--nm-raise-xs);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .ico-wrap svg {
+            width: 24px; height: 24px;
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 1.9;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .ico-wrap.c-danger svg { stroke: var(--danger); }
+        .ico-wrap.c-muted  svg { stroke: var(--muted); }
+
+        .state-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            letter-spacing: -.01em;
+        }
+        .state-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.65;
+            margin-bottom: 22px;
+        }
+        .state-desc:last-child { margin-bottom: 0; }
+
+        /* ── 버튼 ── */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: none;
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: .01em;
+            cursor: pointer;
+            background: var(--surface2);
+            color: var(--text);
+            box-shadow: var(--nm-raise-xs);
+            transition: box-shadow .15s, transform .12s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:active { box-shadow: var(--nm-inset-sm); transform: scale(.98); }
+        .btn-accent {
+            background: var(--accent);
+            color: #fff;
+        }
+        html[data-mode="dark"] .btn-accent { color: #1A1714; }
+
+        /* ── 코드 인라인 태그 ── */
+        .code-tag {
+            display: inline-block;
+            background: var(--surface);
+            box-shadow: var(--nm-inset-sm);
+            border-radius: 8px;
+            padding: 3px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--text);
+            margin: 2px 0 16px;
+        }
     </style>
 </head>
 <body>
-    <div class="max-w-sm mx-auto min-h-screen flex flex-col justify-center px-6">
+<div class="wrap">
 
-        <!-- 로딩 상태 -->
-        <div id="state-loading" class="text-center">
-            <div class="flex justify-center mb-6">
-                <svg class="spinner w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
-            </div>
-            <p class="text-gray-400 text-sm">태그를 확인하는 중이에요...</p>
+    <!-- 로딩 상태 -->
+    <div id="state-loading" class="state active">
+        <div class="nm-spinner-wrap">
+            <svg class="spinner-arc" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="17" cy="17" r="13" stroke="var(--surface)" stroke-width="3"/>
+                <path d="M17 4 A13 13 0 0 1 30 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+            </svg>
         </div>
-
-        <!-- 유효하지 않은 태그 (코드 형식 오류) -->
-        <div id="state-no-code" class="hidden fade-in text-center">
-            <div class="text-5xl mb-5">🏷️</div>
-            <h2 class="text-xl font-bold mb-2">유효하지 않은 태그예요</h2>
-            <p class="text-gray-400 text-sm mb-6">QR코드를 다시 스캔해주세요.</p>
-            <button onclick="location.href='index.html'" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-xl transition text-sm">
-                홈으로 이동
-            </button>
-        </div>
-
-        <!-- 다른 사용자의 태그 -->
-        <div id="state-taken" class="hidden fade-in text-center">
-            <div class="text-5xl mb-5">🔒</div>
-            <h2 class="text-xl font-bold mb-2">이미 등록된 태그예요</h2>
-            <p class="text-gray-400 text-sm mb-6">다른 사용자가 등록한 태그입니다.<br>본인 태그가 아닌 경우 고객센터로 문의해주세요.</p>
-            <button onclick="location.href='index.html'" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-xl transition text-sm">
-                내 보관함으로
-            </button>
-        </div>
-
-        <!-- DB에 없는 코드 (정품 아님) -->
-        <div id="state-invalid" class="hidden fade-in text-center">
-            <div class="text-5xl mb-5">❓</div>
-            <h2 class="text-xl font-bold mb-2">등록되지 않은 태그예요</h2>
-            <p class="text-gray-400 text-sm mb-4">코드: <span id="invalid-code" class="font-mono text-white text-xs bg-gray-700 px-2 py-1 rounded"></span></p>
-            <p class="text-gray-500 text-xs">공식 제품이 아닌 경우 이 메시지가 표시될 수 있어요.</p>
-        </div>
-
-        <!-- 시리얼 미등록 (패키지 구매 후 앱 등록 안 된 상태) -->
-        <div id="state-unregistered" class="hidden fade-in text-center">
-            <div class="text-5xl mb-5">📦</div>
-            <h2 class="text-xl font-bold mb-2">아직 등록되지 않은 태그예요</h2>
-            <p class="text-gray-400 text-sm mb-6">패키지 박스 안의 시리얼 코드를 입력하면<br>바로 사용할 수 있어요.</p>
-            <button id="btn-register" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition text-sm">
-                시리얼 코드 등록하기
-            </button>
-        </div>
-
+        <p class="loading-txt">태그를 확인하는 중이에요...</p>
     </div>
 
-    <script src="lib/supabase.umd.min.js"></script>
-    <script type="module">
-        const { createClient } = window.supabase;
+    <!-- 유효하지 않은 태그 (코드 형식 오류) -->
+    <div id="state-no-code" class="state">
+        <div class="state-card">
+            <div class="ico-wrap c-muted">
+                <!-- 태그 아이콘 -->
+                <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            </div>
+            <p class="state-title">유효하지 않은 태그예요</p>
+            <p class="state-desc">QR코드를 다시 스캔해주세요.</p>
+            <button onclick="location.href='index.html'" class="btn">홈으로 이동</button>
+        </div>
+    </div>
 
-        const SUPABASE_URL = 'https://tqhtggusphhcsygiitrv.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc';
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-            auth: { storage: window.localStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    <!-- 다른 사용자의 태그 -->
+    <div id="state-taken" class="state">
+        <div class="state-card">
+            <div class="ico-wrap c-danger">
+                <!-- 자물쇠 아이콘 -->
+                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <p class="state-title">이미 등록된 태그예요</p>
+            <p class="state-desc">다른 사용자가 등록한 태그입니다.<br>본인 태그가 아닌 경우 고객센터로 문의해주세요.</p>
+            <button onclick="location.href='index.html'" class="btn">내 보관함으로</button>
+        </div>
+    </div>
+
+    <!-- DB에 없는 코드 (정품 아님) -->
+    <div id="state-invalid" class="state">
+        <div class="state-card">
+            <div class="ico-wrap c-muted">
+                <!-- 물음표 원형 아이콘 -->
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <p class="state-title">등록되지 않은 태그예요</p>
+            <p class="state-desc">공식 제품이 아닌 경우 이 메시지가 표시될 수 있어요.</p>
+            <span id="invalid-code" class="code-tag"></span>
+        </div>
+    </div>
+
+    <!-- 시리얼 미등록 (패키지 구매 후 앱 등록 안 된 상태) -->
+    <div id="state-unregistered" class="state">
+        <div class="state-card">
+            <div class="ico-wrap">
+                <!-- 박스(패키지) 아이콘 -->
+                <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <p class="state-title">아직 등록되지 않은 태그예요</p>
+            <p class="state-desc">패키지 박스 안의 시리얼 코드를 입력하면<br>바로 사용할 수 있어요.</p>
+            <button id="btn-register" class="btn btn-accent">시리얼 코드 등록하기</button>
+        </div>
+    </div>
+
+</div>
+
+<script src="lib/supabase.umd.min.js"></script>
+<script type="module">
+    const { createClient } = window.supabase;
+
+    const SUPABASE_URL = 'https://tqhtggusphhcsygiitrv.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: { storage: window.localStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+
+    function show(id) {
+        ['state-loading','state-no-code','state-taken','state-invalid','state-unregistered'].forEach(s => {
+            const el = document.getElementById(s);
+            el.classList.remove('active', 'anim');
+            el.style.display = 'none';
         });
+        const target = document.getElementById(id);
+        target.style.display = (id === 'state-loading') ? 'flex' : 'block';
+        // 다음 프레임에 anim 추가해서 fadeUp 트리거
+        requestAnimationFrame(() => {
+            target.classList.add('active');
+            requestAnimationFrame(() => target.classList.add('anim'));
+        });
+    }
 
-        function show(id) {
-            ['state-loading','state-no-code','state-taken','state-invalid','state-unregistered'].forEach(s => {
-                document.getElementById(s).classList.add('hidden');
-            });
-            document.getElementById(id).classList.remove('hidden');
+    // ── 코드 추출 ──────────────────────────────────────────────
+    // 1순위: URL 경로 (/GYEOL-1-MAIN)
+    // 2순위: 쿼리 파라미터 (?id=GYEOL-1-S 또는 ?code=GYEOL-1-MAIN)
+    function extractCode() {
+        const path = window.location.pathname.replace(/^\//, '').replace(/\.html.*$/, '');
+        if (path && path.toUpperCase().startsWith('GYEOL-')) return path.toUpperCase();
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        if (id && id.toUpperCase().startsWith('GYEOL-')) return id.toUpperCase();
+        const q = params.get('code');
+        if (q && q.toUpperCase().startsWith('GYEOL-')) return q.toUpperCase();
+        return null;
+    }
+
+    // ── 코드 타입 판별 ─────────────────────────────────────────
+    // 패키지: GYEOL-1-MAIN / GYEOL-42-DR1
+    // 단품:   GYEOL-5-S
+    function parseCode(code) {
+        const parts = code.split('-');
+        if (parts.length >= 3 && parts[2] === 'S') {
+            const n = parseInt(parts[1], 10);
+            return isNaN(n) ? null : { type: 'single', num: n };
         }
-
-        // ── 코드 추출 ──────────────────────────────────────────────
-        // 1순위: URL 경로 (/GYEOL-1-MAIN)
-        // 2순위: 쿼리 파라미터 (?id=GYEOL-1-S 또는 ?code=GYEOL-1-MAIN)
-        function extractCode() {
-            const path = window.location.pathname.replace(/^\//, '').replace(/\.html.*$/, '');
-            if (path && path.toUpperCase().startsWith('GYEOL-')) return path.toUpperCase();
-            const params = new URLSearchParams(window.location.search);
-            const id = params.get('id');
-            if (id && id.toUpperCase().startsWith('GYEOL-')) return id.toUpperCase();
-            const q = params.get('code');
-            if (q && q.toUpperCase().startsWith('GYEOL-')) return q.toUpperCase();
-            return null;
+        if (parts.length >= 3) {
+            const n = parseInt(parts[1], 10);
+            return isNaN(n) ? null : { type: 'package', num: n };
         }
+        return null;
+    }
 
-        // ── 코드 타입 판별 ─────────────────────────────────────────
-        // 패키지: GYEOL-1-MAIN / GYEOL-42-DR1
-        // 단품:   GYEOL-5-S
-        function parseCode(code) {
-            const parts = code.split('-');
-            if (parts.length >= 3 && parts[2] === 'S') {
-                // 단품: GYEOL-{num}-S
-                const n = parseInt(parts[1], 10);
-                return isNaN(n) ? null : { type: 'single', num: n };
-            }
-            if (parts.length >= 3) {
-                // 패키지: GYEOL-{num}-MAIN/DR1/DR2
-                const n = parseInt(parts[1], 10);
-                return isNaN(n) ? null : { type: 'package', num: n };
-            }
-            return null;
-        }
+    // ── 태그 타입에 따라 이동할 URL 결정 ─────────────────────
+    function getRedirectUrl(code) {
+        if (code.endsWith('-S')) return `drawer.html?tag=${encodeURIComponent(code)}`;
+        if (code.endsWith('-MAIN')) return 'index.html';
+        return `drawer.html?tag=${encodeURIComponent(code)}`;
+    }
 
-        // ── 태그 타입에 따라 이동할 URL 결정 ─────────────────────
-        // 패키지 MAIN → index.html / DR1/DR2 → drawer.html
-        // 단품 → drawer.html?tag=GYEOL-{num}-S
-        function getRedirectUrl(code) {
-            if (code.endsWith('-S')) return `drawer.html?tag=${encodeURIComponent(code)}`;
-            if (code.endsWith('-MAIN')) return 'index.html';
-            return `drawer.html?tag=${encodeURIComponent(code)}`;
-        }
+    // ── 메인 로직 ──────────────────────────────────────────────
+    const code = extractCode();
 
-        // ── 메인 로직 ──────────────────────────────────────────────
-        const code = extractCode();
+    if (!code) {
+        show('state-no-code');
+    } else {
+        const parsed = parseCode(code);
 
-        if (!code) {
+        if (!parsed) {
             show('state-no-code');
         } else {
-            const parsed = parseCode(code);
+            const { data: { session } } = await supabase.auth.getSession();
 
-            if (!parsed) {
-                show('state-no-code');
-            } else {
-                const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                localStorage.setItem('gyeol_after_login', window.location.href);
+                window.location.replace(`login.html?redirect=${encodeURIComponent(window.location.href)}`);
 
-                if (!session) {
-                    localStorage.setItem('gyeol_after_login', window.location.href);
-                    window.location.replace(`login.html?redirect=${encodeURIComponent(window.location.href)}`);
+            } else if (parsed.type === 'single') {
+                // ── 단품 태그 처리 ─────────────────────────────
+                const { data: rows_single } = await supabase
+                    .from('single_serials')
+                    .select('used_by, item_number')
+                    .eq('item_number', parsed.num)
+                    .limit(1);
+                const single = rows_single?.[0];
 
-                } else if (parsed.type === 'single') {
-                    // ── 단품 태그 처리 ─────────────────────────────
-                    const { data: rows_single } = await supabase
-                        .from('single_serials')
-                        .select('used_by, item_number')
-                        .eq('item_number', parsed.num)
-                        .limit(1);
-                    const single = rows_single?.[0];
-
-                    if (!single) {
-                        document.getElementById('invalid-code').textContent = code;
-                        show('state-invalid');
-                    } else if (!single.used_by) {
-                        document.getElementById('btn-register').onclick = () => {
-                            window.location.replace(`serial.html?code=${encodeURIComponent(code)}`);
-                        };
-                        show('state-unregistered');
-                    } else if (single.used_by === session.user.email) {
-                        window.location.replace(getRedirectUrl(code));
-                    } else {
-                        show('state-taken');
-                    }
-
+                if (!single) {
+                    document.getElementById('invalid-code').textContent = code;
+                    show('state-invalid');
+                } else if (!single.used_by) {
+                    document.getElementById('btn-register').onclick = () => {
+                        window.location.replace(`serial.html?code=${encodeURIComponent(code)}`);
+                    };
+                    show('state-unregistered');
+                } else if (single.used_by === session.user.email) {
+                    window.location.replace(getRedirectUrl(code));
                 } else {
-                    // ── 패키지 태그 처리 ───────────────────────────
-                    const { data: rows_serial } = await supabase
-                        .from('serials')
-                        .select('used_by, set_number')
-                        .eq('set_number', parsed.num)
-                        .limit(1);
-                    const serial = rows_serial?.[0];
+                    show('state-taken');
+                }
 
-                    if (!serial) {
-                        document.getElementById('invalid-code').textContent = code;
-                        show('state-invalid');
-                    } else if (!serial.used_by) {
-                        document.getElementById('btn-register').onclick = () => {
-                            window.location.replace('serial.html');
-                        };
-                        show('state-unregistered');
-                    } else if (serial.used_by === session.user.email) {
-                        window.location.replace(getRedirectUrl(code));
-                    } else {
-                        show('state-taken');
-                    }
+            } else {
+                // ── 패키지 태그 처리 ───────────────────────────
+                const { data: rows_serial } = await supabase
+                    .from('serials')
+                    .select('used_by, set_number')
+                    .eq('set_number', parsed.num)
+                    .limit(1);
+                const serial = rows_serial?.[0];
+
+                if (!serial) {
+                    document.getElementById('invalid-code').textContent = code;
+                    show('state-invalid');
+                } else if (!serial.used_by) {
+                    document.getElementById('btn-register').onclick = () => {
+                        window.location.replace('serial.html');
+                    };
+                    show('state-unregistered');
+                } else if (serial.used_by === session.user.email) {
+                    window.location.replace(getRedirectUrl(code));
+                } else {
+                    show('state-taken');
                 }
             }
         }
-    </script>
-</body> 
+    }
+</script>
+</body>
 </html>
