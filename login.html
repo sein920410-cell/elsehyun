@@ -38,17 +38,18 @@
         .logo-title {
             font-family: 'Noto Serif KR', Georgia, serif;
             font-size: 28px;
-            font-weight: 400;
-            letter-spacing: 0.16em;
-            background: linear-gradient(105deg,#8A6830 0%,#C8A870 28%,#F4E0A8 50%,#C8A870 72%,#8A6830 100%);
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            background: linear-gradient(170deg,#F4E098 0%,#D4A828 28%,#A07018 52%,#C09028 75%,#ECC858 100%);
             background-size: 220% auto;
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            filter: drop-shadow(0 3px 5px rgba(90,50,0,0.42)) drop-shadow(0 0 12px rgba(200,150,20,0.5));
             animation: gyeol-shimmer 7s ease-in-out infinite;
         }
         @keyframes gyeol-shimmer {
-            0% { background-position: 0% center; }
-            50% { background-position: 100% center; }
-            100% { background-position: 0% center; }
+            0%   { background-position: 0% center;   filter: drop-shadow(0 3px 5px rgba(90,50,0,0.38)) drop-shadow(0 0 10px rgba(200,150,20,0.38)); }
+            50%  { background-position: 100% center; filter: drop-shadow(0 3px 5px rgba(90,50,0,0.38)) drop-shadow(0 0 22px rgba(225,175,35,0.82)); }
+            100% { background-position: 0% center;   filter: drop-shadow(0 3px 5px rgba(90,50,0,0.38)) drop-shadow(0 0 10px rgba(200,150,20,0.38)); }
         }
         .logo-sub { font-size: 13px; color: var(--sub); margin-top: 6px; }
 
