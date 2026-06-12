@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>공간:결</title>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="lib/supabase.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.21.0/dist/tf.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js" defer></script>
@@ -100,8 +100,8 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 }
 .brand-logo-txt{
   font-family:'Noto Serif KR',Georgia,serif;
-  font-size:15px;font-weight:700;
-  letter-spacing:.08em;
+  font-size:15px;font-weight:400;
+  letter-spacing:.16em;
   white-space:nowrap;
   background:linear-gradient(105deg,#8A6830 0%,#C8A870 28%,#F4E0A8 50%,#C8A870 72%,#8A6830 100%);
   background-size:220% auto;
@@ -476,12 +476,14 @@ html[data-mode="dark"] .hdr-chat-btn{
   max-width:90%;white-space:normal;text-align:center;line-height:1.5;
 }
 .rec-toast.fade{opacity:0}
-.dark-warn-ov{display:none;position:absolute;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(4px);flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:10;pointer-events:none}
-.dark-warn-ov .dw-icon{font-size:38px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))}
-.dark-warn-ov .dw-txt{color:rgba(255,255,255,.9);font-size:15px;font-weight:600;text-align:center;padding:0 32px;line-height:1.7;letter-spacing:-.02em}
-.face-warn-ov{display:none;position:absolute;inset:0;background:rgba(160,24,24,.72);backdrop-filter:blur(4px);flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:12;pointer-events:none}
-.face-warn-ov .fw-icon{font-size:38px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))}
-.face-warn-ov .fw-txt{color:rgba(255,255,255,.95);font-size:15px;font-weight:600;text-align:center;padding:0 32px;line-height:1.7;letter-spacing:-.02em}
+.dark-warn-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:609;pointer-events:none}
+.dark-warn-ov .dw-ico-wrap{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center}
+.dark-warn-ov .dw-ico-wrap svg{width:28px;height:28px;stroke:rgba(255,255,255,.9);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.dark-warn-ov .dw-txt{color:rgba(255,255,255,.9);font-size:15px;font-weight:600;text-align:center;padding:0 36px;line-height:1.75;letter-spacing:-.02em}
+.face-warn-ov{display:none;position:fixed;inset:0;background:rgba(140,18,18,.76);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:610;pointer-events:none}
+.face-warn-ov .fw-ico-wrap{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center}
+.face-warn-ov .fw-ico-wrap svg{width:28px;height:28px;stroke:rgba(255,255,255,.95);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.face-warn-ov .fw-txt{color:rgba(255,255,255,.95);font-size:15px;font-weight:600;text-align:center;padding:0 36px;line-height:1.75;letter-spacing:-.02em}
 
 /* ─── 점검/공지 ─── */
 .announce-bar{position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--h-bg);color:var(--h-txt);padding:11px 14px;display:none;align-items:center;gap:8px;transition:background .4s}
@@ -839,7 +841,7 @@ html[data-mode="dark"] .hdr-chat-btn{
       <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </div>
   </div>
-  <div class="rec-vid" style="position:relative"><video id="rec-live" autoplay muted playsinline></video><video id="rec-playback" style="display:none" playsinline controls></video><div id="rec-guide-mask"><span class="gc tl"></span><span class="gc tr"></span><span class="gc bl"></span><span class="gc br"></span><div class="gc-label">서랍 안을 박스에 맞춰 촬영하세요</div></div><div class="rec-ind" id="rec-ind">● REC</div><div class="rec-toast" id="rec-hint">버튼을 눌러 촬영을 시작하세요</div><div class="dark-warn-ov" id="dark-warn"><div class="dw-icon">💡</div><div class="dw-txt">주변이 어둡습니다<br>밝은 곳으로 이동해주세요<br><span style="font-size:13px;opacity:.8">이동하면 자동으로 재개돼요</span></div></div><div class="face-warn-ov" id="face-warn"><div class="fw-icon">🚫</div><div class="fw-txt">얼굴이 감지되었습니다<br>얼굴이 없는 곳을 촬영해주세요</div></div>
+  <div class="rec-vid" style="position:relative"><video id="rec-live" autoplay muted playsinline></video><video id="rec-playback" style="display:none" playsinline controls></video><div id="rec-guide-mask"><span class="gc tl"></span><span class="gc tr"></span><span class="gc bl"></span><span class="gc br"></span><div class="gc-label">서랍 안을 박스에 맞춰 촬영하세요</div></div><div class="rec-ind" id="rec-ind">● REC</div><div class="rec-toast" id="rec-hint">버튼을 눌러 촬영을 시작하세요</div><div class="dark-warn-ov" id="dark-warn"><div class="dw-ico-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div><div class="dw-txt">주변이 어둡습니다<br>밝은 곳으로 이동해주세요<br><span style="font-size:13px;opacity:.7">이동하면 자동으로 재개돼요</span></div></div><div class="face-warn-ov" id="face-warn"><div class="fw-ico-wrap"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg></div><div class="fw-txt">얼굴이 감지되었습니다<br>얼굴이 없는 곳을 촬영해주세요</div></div>
   <!-- 가이드 팁 -->
   <div id="rec-guide" style="display:none;position:absolute;top:80px;left:0;right:0;text-align:center;pointer-events:none;z-index:5">
     <span id="rec-guide-txt" style="display:inline-block;background:rgba(0,0,0,.52);backdrop-filter:blur(8px);color:#fff;font-size:13px;font-weight:600;padding:6px 16px;border-radius:20px;letter-spacing:-.01em;transition:opacity .5s">천천히 움직여 주세요</span>
