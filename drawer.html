@@ -85,7 +85,11 @@ html[data-mode="dark"] .ai-chip.sel{background:#C8A870;border-color:#C8A870;colo
 html[data-mode="dark"] .ai-confirm-btn{background:#C8A870;color:#1A1714}
 html[data-mode="dark"] .icon-done{background:#C8A870;color:#1A1714}
 html[data-mode="dark"] .dt-save{background:#C8A870;color:#1A1714}
-html[data-mode="dark"] .chat-send{background:#C8A870}
+html[data-mode="dark"] .chat-send{background:linear-gradient(145deg,#DBC08C,#C8A870 55%,#B28F57);box-shadow:0 4px 11px rgba(0,0,0,0.45),inset 0 1px 1.5px rgba(255,255,255,0.45)}
+html[data-mode="dark"] .chat-send svg{stroke:#3A2E18}
+html[data-mode="dark"] .qty-wrap{background:#302D28;box-shadow:4px 4px 9px rgba(0,0,0,0.5),-2px -2px 6px rgba(255,255,255,0.05)}
+html[data-mode="dark"] .qty-btn{color:var(--ink2)}
+html[data-mode="dark"] .qty-num{border-color:rgba(255,255,255,0.12)}
 html[data-mode="dark"] .confirm-done{background:#C8A870;color:#1A1714}
 html[data-mode="dark"] .confirm-cand.selected{background:#C8A870;border-color:#C8A870;color:#1A1714}
 html[data-mode="dark"] .result-modal-btn{color:#C8A870}
@@ -166,7 +170,7 @@ html[data-mode="dark"] .hdr-chat-btn{
 /* ─── 미디어 ─── */
 .media-section{background:var(--h-bg);padding:10px 14px 14px;flex-shrink:0;transition:background .4s;overflow:visible;position:relative}
 /* ─── 미디어 프레임 (gradient border 담당 — overflow:hidden 없는 래퍼) ─── */
-.media-frame{border-radius:19px;padding:1px;background:rgba(125,125,130,0.4);box-shadow:0 5px 13px rgba(0,0,0,0.10),0 -1px 0 rgba(255,255,255,0.4)}
+.media-frame{border-radius:19px;padding:1.5px;background:rgba(125,125,130,0.4);box-shadow:0 5px 13px rgba(0,0,0,0.10),0 -1px 0 rgba(255,255,255,0.4)}
 /* ─── 미디어 박스 (overflow:hidden만 — gradient border 없음) ─── */
 .media-box{height:220px;border-radius:16px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;transition:.2s;background:var(--h-bg)}
 .media-box.empty{}
@@ -409,7 +413,8 @@ html[data-mode="dark"] .hl{background:rgba(210,160,25,0.32);color:var(--ink)}
 .chat-inp-inner{flex:1;background:var(--bg);border-radius:50px;padding:0 16px;height:46px;display:flex;align-items:center;box-shadow:var(--nm-inset-sm)}
 .chat-inp{flex:1;border:none;outline:none;font-size:15px;font-family:var(--font);color:var(--ink);background:transparent;-webkit-user-select:text;user-select:text}
 .chat-inp::placeholder{color:var(--muted2)}
-.chat-send{width:44px;height:44px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:var(--nm-raise-xs)}
+.chat-send{width:44px;height:44px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,0.22),inset 0 1.5px 1.5px rgba(255,255,255,0.22)}
+.chat-send:active{box-shadow:0 2px 5px rgba(0,0,0,0.2),inset 0 2px 4px rgba(0,0,0,0.25);transform:translateY(1px)}
 .chat-send svg{width:17px;height:17px;stroke:#fff;stroke-width:2.2;fill:none;stroke-linecap:round}
 
 .mctx-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:250;backdrop-filter:blur(6px);align-items:flex-end;justify-content:center;padding:0 14px 44px}
