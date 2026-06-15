@@ -465,23 +465,25 @@ html[data-mode="dark"] .hl{background:rgba(210,160,25,0.32);color:var(--ink)}
 .rec-ov{display:none;position:fixed;inset:0;background:#0E0D0C;z-index:600;flex-direction:column}
 .rec-ov.open{display:flex}
 .rec-hdr{
-  position:absolute;top:0;left:0;right:0;z-index:10;
-  height:72px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;padding-top:env(safe-area-inset-top,0);
-  background:linear-gradient(to bottom,rgba(0,0,0,.72) 0%,rgba(0,0,0,0) 100%);
+  position:relative;z-index:10;flex-shrink:0;
+  height:58px;display:flex;align-items:center;justify-content:center;
+  margin:env(safe-area-inset-top,0) 0 0;padding:0 16px;
 }
 .rec-hdr-title{
-  font-family:Georgia,serif;font-size:15px;font-weight:700;
-  color:rgba(255,255,255,.92);letter-spacing:.02em;
+  font-family:Georgia,serif;font-size:17px;font-weight:700;
+  color:rgba(255,255,255,.95);letter-spacing:.02em;
 }
 .rec-hdr-close{
-  width:38px;height:38px;border-radius:50%;
-  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+  position:absolute;right:16px;top:50%;transform:translateY(-50%);
+  height:34px;padding:0 14px;border-radius:18px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-  box-shadow:0 2px 8px rgba(0,0,0,.3);
+  display:flex;align-items:center;gap:5px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  font-size:13px;font-weight:700;color:rgba(255,255,255,.92);letter-spacing:-.01em;
+  transition:transform .1s,background .15s;
 }
-.rec-hdr-close svg{width:14px;height:14px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round}
+.rec-hdr-close:active{transform:translateY(-50%) scale(.94);background:rgba(255,255,255,.2)}
+.rec-hdr-close svg{width:14px;height:14px;stroke:#fff;stroke-width:2.2;fill:none;stroke-linecap:round}
 .rec-vid--legacy-unused{}
 .rec-ind{position:absolute;top:20px;right:20px;background:rgba(220,38,38,.9);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;display:none;letter-spacing:.02em;z-index:16}
 .rec-ctrl{
@@ -578,12 +580,16 @@ html[data-mode="dark"] .hl{background:rgba(210,160,25,0.32);color:var(--ink)}
 #rec-grid::before,#rec-grid::after{content:"";position:absolute;background:rgba(255,255,255,.28)}
 #rec-grid::before{left:33.33%;right:33.33%;top:0;bottom:0;border-left:1px solid rgba(255,255,255,.28);border-right:1px solid rgba(255,255,255,.28);background:none}
 #rec-grid::after{top:33.33%;bottom:33.33%;left:0;right:0;border-top:1px solid rgba(255,255,255,.28);border-bottom:1px solid rgba(255,255,255,.28);background:none}
-/* 스캔라인 */
-#rec-scan{position:absolute;left:0;right:0;top:4%;height:2px;pointer-events:none;z-index:13;
-  background:linear-gradient(90deg,transparent,rgba(255,176,198,.65) 22%,rgba(255,220,235,.92) 50%,rgba(255,176,198,.65) 78%,transparent);
-  box-shadow:0 0 12px 1px rgba(255,176,198,.4);opacity:.85;
-  animation:recScan 2.8s cubic-bezier(.45,0,.55,1) infinite}
-@keyframes recScan{0%{top:4%;opacity:0}14%{opacity:.85}86%{opacity:.85}100%{top:96%;opacity:0}}
+/* 모서리 브래킷 은은한 펄스 (슬라이드 스캔라인 폐기) */
+.gc{animation:gcPulse 2.8s ease-in-out infinite}
+@keyframes gcPulse{0%,100%{border-color:rgba(255,255,255,.92)}50%{border-color:rgba(255,255,255,.5)}}
+#rec-scan{display:none}
+/* 카메라 영상 부드러운 줌 전환 */
+#rec-live{transition:transform .16s ease-out}
+/* 탭 초점 링 */
+#rec-focus-ring{position:absolute;width:74px;height:74px;margin:-37px 0 0 -37px;border:2px solid rgba(255,210,74,.95);border-radius:10px;z-index:15;pointer-events:none;opacity:0;box-shadow:0 0 8px rgba(0,0,0,.3)}
+#rec-focus-ring.show{animation:focusPop .9s ease-out}
+@keyframes focusPop{0%{opacity:0;transform:scale(1.4)}15%{opacity:1}40%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
 /* 플래시 버튼 (좌상단) */
 #rec-flash{position:absolute;top:22px;left:22px;z-index:16;width:40px;height:40px;border-radius:13px;
   display:flex;align-items:center;justify-content:center;cursor:pointer;
@@ -940,10 +946,10 @@ html[data-mode="dark"] .hl{background:rgba(210,160,25,0.32);color:var(--ink)}
   <div class="rec-hdr">
     <span class="rec-hdr-title">물품 촬영</span>
     <div class="rec-hdr-close" onclick="cancelRecording()">
-      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>나가기
     </div>
   </div>
-  <div class="rec-vid"><div class="rec-stage"><div class="rec-frame"><video id="rec-live" autoplay muted playsinline></video><video id="rec-playback" style="display:none" playsinline controls></video><div id="rec-guide-mask"><div id="rec-grid"></div><span class="gc tl"></span><span class="gc tr"></span><span class="gc bl"></span><span class="gc br"></span><span id="rec-scan"></span><button id="rec-flash" onclick="toggleFlash()" aria-label="플래시"><svg viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg></button><div id="rec-bright-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.5"/><line x1="4.3" y1="4.3" x2="6" y2="6"/><line x1="18" y1="18" x2="19.7" y2="19.7"/><line x1="2.5" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.5" y2="12"/><line x1="4.3" y1="19.7" x2="6" y2="18"/><line x1="18" y1="6" x2="19.7" y2="4.3"/></svg><div id="rec-bright-track"><div id="rec-bright-thumb"></div></div><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.4"/><line x1="12" y1="4" x2="12" y2="5.5"/><line x1="12" y1="18.5" x2="12" y2="20"/><line x1="5.5" y1="5.5" x2="6.6" y2="6.6"/><line x1="17.4" y1="17.4" x2="18.5" y2="18.5"/><line x1="4" y1="12" x2="5.5" y2="12"/><line x1="18.5" y1="12" x2="20" y2="12"/></svg></div><div id="rec-zoom-row"><button class="zoom-btn" data-z="1.5" onclick="setZoom(1.5,this)">X1.5</button><button class="zoom-btn on" data-z="1" onclick="setZoom(1,this)">X1</button><button class="zoom-btn" data-z="2" onclick="setZoom(2,this)">X2</button></div><div id="rec-zoom-ind"></div><div class="rec-ind" id="rec-ind">● REC</div></div></div></div><div class="gc-label" id="rec-gc-label">테두리 안에 수납함이 들어오도록 촬영하세요</div><div class="rec-mode-tab" id="rec-mode-tab"><span>Video</span></div><div class="rec-toast" id="rec-hint" style="bottom:auto;top:50%">버튼을 눌러 촬영을 시작하세요</div><div class="dark-warn-ov" id="dark-warn"><div class="cam-warn-card"><div class="cam-warn-ring"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-4.2 11.4c.7.6 1.2 1.3 1.2 2.1h6c0-.8.5-1.5 1.2-2.1A6.5 6.5 0 0 0 12 2.5z"/></svg></div><div class="cam-warn-title">주변이 어두워요</div><div class="cam-warn-sub">밝은 곳으로 옮기면<br>자동으로 다시 시작돼요</div></div></div><div class="face-warn-ov" id="face-warn"><div class="cam-warn-card"><div class="cam-warn-ring"><svg viewBox="0 0 24 24"><path d="M16 21v-1.5a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4V21"/><circle cx="10" cy="7" r="4"/><line x1="17" y1="6.5" x2="22" y2="11.5"/><line x1="22" y1="6.5" x2="17" y2="11.5"/></svg></div><div class="cam-warn-title">사람 얼굴이 감지됐어요</div><div class="cam-warn-sub">개인정보 보호를 위해<br>얼굴이 없는 곳을 비춰주세요</div></div></div>
+  <div class="rec-vid"><div class="rec-stage"><div class="rec-frame"><video id="rec-live" autoplay muted playsinline></video><video id="rec-playback" style="display:none" playsinline controls></video><div id="rec-guide-mask"><div id="rec-grid"></div><span class="gc tl"></span><span class="gc tr"></span><span class="gc bl"></span><span class="gc br"></span><span id="rec-scan"></span><div id="rec-focus-ring"></div><button id="rec-flash" onclick="toggleFlash()" aria-label="플래시"><svg viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg></button><div id="rec-bright-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.5"/><line x1="4.3" y1="4.3" x2="6" y2="6"/><line x1="18" y1="18" x2="19.7" y2="19.7"/><line x1="2.5" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.5" y2="12"/><line x1="4.3" y1="19.7" x2="6" y2="18"/><line x1="18" y1="6" x2="19.7" y2="4.3"/></svg><div id="rec-bright-track"><div id="rec-bright-thumb"></div></div><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.4"/><line x1="12" y1="4" x2="12" y2="5.5"/><line x1="12" y1="18.5" x2="12" y2="20"/><line x1="5.5" y1="5.5" x2="6.6" y2="6.6"/><line x1="17.4" y1="17.4" x2="18.5" y2="18.5"/><line x1="4" y1="12" x2="5.5" y2="12"/><line x1="18.5" y1="12" x2="20" y2="12"/></svg></div><div id="rec-zoom-row"><button class="zoom-btn" data-z="1.5" onclick="setZoom(1.5,this)">X1.5</button><button class="zoom-btn on" data-z="1" onclick="setZoom(1,this)">X1</button><button class="zoom-btn" data-z="2" onclick="setZoom(2,this)">X2</button></div><div id="rec-zoom-ind"></div><div class="rec-ind" id="rec-ind">● REC</div></div></div></div><div class="gc-label" id="rec-gc-label">테두리 안에 수납함이 들어오도록 촬영하세요</div><div class="rec-mode-tab" id="rec-mode-tab"><span>Video</span></div><div class="rec-toast" id="rec-hint" style="bottom:auto;top:50%">버튼을 눌러 촬영을 시작하세요</div><div class="dark-warn-ov" id="dark-warn"><div class="cam-warn-card"><div class="cam-warn-ring"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-4.2 11.4c.7.6 1.2 1.3 1.2 2.1h6c0-.8.5-1.5 1.2-2.1A6.5 6.5 0 0 0 12 2.5z"/></svg></div><div class="cam-warn-title">주변이 어두워요</div><div class="cam-warn-sub">밝은 곳으로 옮기면<br>자동으로 다시 시작돼요</div></div></div><div class="face-warn-ov" id="face-warn"><div class="cam-warn-card"><div class="cam-warn-ring"><svg viewBox="0 0 24 24"><path d="M16 21v-1.5a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4V21"/><circle cx="10" cy="7" r="4"/><line x1="17" y1="6.5" x2="22" y2="11.5"/><line x1="22" y1="6.5" x2="17" y2="11.5"/></svg></div><div class="cam-warn-title">사람 얼굴이 감지됐어요</div><div class="cam-warn-sub">개인정보 보호를 위해<br>얼굴이 없는 곳을 비춰주세요</div></div></div>
   <!-- 가이드 팁 -->
   <div id="rec-guide" style="display:none;position:absolute;top:80px;left:0;right:0;text-align:center;pointer-events:none;z-index:5">
     <span id="rec-guide-txt" style="display:inline-block;background:rgba(0,0,0,.52);backdrop-filter:blur(8px);color:#fff;font-size:13px;font-weight:600;padding:6px 16px;border-radius:20px;letter-spacing:-.01em;transition:opacity .5s">천천히 움직여 주세요</span>
@@ -1708,7 +1714,7 @@ function skipCand(i){reviewSel[i]=null;document.getElementById(`cand-${i}-0`)?.c
 function confirmReview(){document.getElementById('confirm-ov').classList.remove('open');pendingReview.forEach((it,i)=>{const n=reviewSel[i];if(n)items.push({n:`${it.category}:${n}`,q:it.qty||1});});if(items.length)localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();}
 
 // ─── 영상 촬영 ───
-async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?.getUserMedia){alert('이 브라우저는 영상 촬영을 지원하지 않습니다.');return;}try{mediaStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720},facingMode:{ideal:'environment'}},audio:false});const lv=document.getElementById('rec-live');lv.srcObject=mediaStream;lv.style.display='block';_setGuide(true);document.getElementById('rec-playback').style.display='none';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-ind').style.display='none';const ht=document.getElementById('rec-hint');ht.textContent='버튼을 눌러 촬영을 시작하세요';ht.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht.classList.add('fade'),2800);recBlob=null;isRec=false;_initBrightSlider();_resetBrightZoom();_setScan(true);startBrightCheck();startFaceCheck();document.getElementById('rec-ov').classList.add('open');}catch(err){alert('카메라 접근 실패: '+err.message);}}
+async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?.getUserMedia){alert('이 브라우저는 영상 촬영을 지원하지 않습니다.');return;}try{mediaStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720},facingMode:{ideal:'environment'}},audio:false});const lv=document.getElementById('rec-live');lv.srcObject=mediaStream;lv.style.display='block';_setGuide(true);document.getElementById('rec-playback').style.display='none';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-ind').style.display='none';const ht=document.getElementById('rec-hint');ht.textContent='버튼을 눌러 촬영을 시작하세요';ht.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht.classList.add('fade'),2800);recBlob=null;isRec=false;_initBrightSlider();_initRecGestures();_resetBrightZoom();_setScan(true);startBrightCheck();startFaceCheck();document.getElementById('rec-ov').classList.add('open');}catch(err){alert('카메라 접근 실패: '+err.message);}}
 function toggleRec(){if(!isRec){const dw=document.getElementById('dark-warn');if(dw&&dw.style.display==='flex')return;if(_faceDetected)return;recChunks=[];const mt=['video/webm;codecs=vp9','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';const recOpts=mt?{mimeType:mt,videoBitsPerSecond:800000}:{videoBitsPerSecond:800000};mediaRec=new MediaRecorder(mediaStream,recOpts);mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};mediaRec.onstop=()=>{
   clearInterval(recTimer);
   isRec=false;
@@ -1898,28 +1904,29 @@ function _applyBright(v){
   if(t){const pct=((window._recBright-0.4)/1.8*100);t.style.bottom=pct+'%';}
 }
 
-function setZoom(level,btn){
-  window._recZoom=level;
-  // 버튼 활성화 표시
-  document.querySelectorAll('#rec-zoom-row .zoom-btn').forEach(b=>b.classList.remove('on'));
-  if(btn)btn.classList.add('on');
+// 줌 연속 적용 코어 (1.0 ~ 3.0)
+function _setZoomValue(z){
+  z=Math.max(1.0,Math.min(3.0,z));
+  window._recZoom=z;
   const vid=document.getElementById('rec-live');
-  // 하드웨어 줌 우선 (화질 손실 없음)
   const tr=_track();const caps=tr?.getCapabilities?.();
-  let hwDone=false;
   if(caps?.zoom){
     const span=caps.zoom.max-caps.zoom.min;
-    // level 1~2 를 카메라 줌 범위에 매핑
-    const zv=caps.zoom.min+Math.min(1,(level-1)/1)*span*0.6;
-    tr.applyConstraints({advanced:[{zoom:Math.max(caps.zoom.min,Math.min(caps.zoom.max,zv))}]}).then(()=>{hwDone=true;}).catch(()=>{});
+    const zv=caps.zoom.min+Math.min(1,(z-1)/2)*span; // 1~3배를 카메라 줌 전구간에 매핑
+    tr.applyConstraints({advanced:[{zoom:Math.max(caps.zoom.min,Math.min(caps.zoom.max,zv))}]}).catch(()=>{});
     if(vid)vid.style.transform='';
+  }else if(vid){
+    vid.style.transform=z>1.001?`scale(${z.toFixed(3)})`:'';
   }
-  // 하드웨어 미지원 → CSS 확대 폴백
-  if(!caps?.zoom && vid){vid.style.transform=level>1?`scale(${level})`:'';}
+  // 가장 가까운 프리셋 버튼만 강조 (정확히 일치할 때)
+  document.querySelectorAll('#rec-zoom-row .zoom-btn').forEach(b=>{
+    b.classList.toggle('on', Math.abs(parseFloat(b.dataset.z)-z)<0.06);
+  });
   // 배율 표시
   const zi=document.getElementById('rec-zoom-ind');
-  if(zi){zi.style.display='block';zi.textContent=`${level}×`;clearTimeout(window._zoomIndT);window._zoomIndT=setTimeout(()=>{zi.style.display='none';},1200);}
+  if(zi){zi.style.display='block';zi.textContent=`${z.toFixed(1)}×`;clearTimeout(window._zoomIndT);window._zoomIndT=setTimeout(()=>{zi.style.display='none';},1100);}
 }
+function setZoom(level,btn){ _setZoomValue(level); }
 
 async function toggleFlash(){
   const btn=document.getElementById('rec-flash');
@@ -1967,6 +1974,48 @@ function _initBrightSlider(){
   wrap.addEventListener('touchmove',move,{passive:false});
   wrap.addEventListener('touchend',end,{passive:true});
   wrap.addEventListener('mousedown',e=>{start(e);const mm=ev=>move(ev),mu=()=>{end();document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu);};document.addEventListener('mousemove',mm);document.addEventListener('mouseup',mu);});
+}
+
+// 핀치 줌(미세조정) + 탭 초점
+var _gestureInit=false, _pinchDist=null, _pinchZoom=1.0;
+function _initRecGestures(){
+  if(_gestureInit)return;_gestureInit=true;
+  const frame=document.querySelector('.rec-frame');
+  if(!frame)return;
+  frame.addEventListener('touchstart',e=>{
+    if(e.touches.length===2){
+      _pinchDist=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);
+      _pinchZoom=window._recZoom||1;
+    }
+  },{passive:true});
+  frame.addEventListener('touchmove',e=>{
+    if(e.touches.length===2&&_pinchDist){
+      const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);
+      _setZoomValue(_pinchZoom*(d/_pinchDist));
+      if(e.cancelable)e.preventDefault();
+    }
+  },{passive:false});
+  frame.addEventListener('touchend',e=>{ if(e.touches.length<2)_pinchDist=null; },{passive:true});
+  // 탭 초점 (한 손가락 탭, 컨트롤 위는 제외)
+  frame.addEventListener('click',e=>{
+    if(e.target.closest('#rec-flash,#rec-bright-wrap,#rec-zoom-row'))return;
+    const r=frame.getBoundingClientRect();
+    const x=e.clientX-r.left, y=e.clientY-r.top;
+    _focusAt(x,y,r.width,r.height);
+  });
+}
+function _focusAt(x,y,w,h){
+  const ring=document.getElementById('rec-focus-ring');
+  if(ring){ring.style.left=x+'px';ring.style.top=y+'px';ring.classList.remove('show');void ring.offsetWidth;ring.classList.add('show');}
+  // 초점/노출 지점 적용 시도 (지원 기기 한정, 미지원이어도 무해)
+  const tr=_track();const caps=tr?.getCapabilities?.();
+  try{
+    const adv=[];
+    const px=Math.max(0,Math.min(1,x/w)), py=Math.max(0,Math.min(1,y/h));
+    if(caps&&'focusMode'in caps&&caps.focusMode?.includes?.('single-shot'))adv.push({focusMode:'single-shot'});
+    if(caps&&'pointsOfInterest'in caps)adv.push({pointsOfInterest:[{x:px,y:py}]});
+    if(adv.length&&tr)tr.applyConstraints({advanced:adv}).catch(()=>{});
+  }catch(_){}
 }
 
 
