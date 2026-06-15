@@ -482,8 +482,7 @@ html[data-mode="dark"] .hl{background:rgba(210,160,25,0.32);color:var(--ink)}
   box-shadow:0 2px 8px rgba(0,0,0,.3);
 }
 .rec-hdr-close svg{width:14px;height:14px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round}
-.rec-vid{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-#rec-live,#rec-playback{width:100%;height:100%;object-fit:cover}
+.rec-vid--legacy-unused{}
 .rec-ind{position:absolute;top:20px;right:20px;background:rgba(220,38,38,.9);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;display:none;letter-spacing:.02em;z-index:16}
 .rec-ctrl{
   padding:12px 20px;padding-bottom:max(28px,env(safe-area-inset-bottom,28px));
@@ -559,7 +558,7 @@ html[data-mode="dark"] .hl{background:rgba(210,160,25,0.32);color:var(--ink)}
 .maintenance-time-val{font-size:16px;font-weight:700;color:#B08D4E;letter-spacing:-.01em;line-height:1.55}
 @keyframes spin{to{transform:rotate(360deg)}}
 /* ─── 영상 촬영 가이드 프레임 (시안: 카드형 뷰파인더) ─── */
-.rec-vid{flex:1;display:flex;align-items:center;justify-content:center;position:relative;padding:0;overflow:visible}
+.rec-vid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:16px 0;overflow-y:auto;overflow-x:hidden}
 /* 카드(둥근 베젤) 안에 카메라가 들어가는 형태 */
 .rec-stage{position:relative;width:min(90vw,420px);aspect-ratio:1/1;
   border-radius:30px;padding:14px;
