@@ -509,6 +509,20 @@ body {
 .ob-close{padding:11px 15px;background:#EFEAE2;border:none;border-radius:11px;font-size:12.5px;font-weight:700;color:#8A7E6E;cursor:pointer;font-family:inherit}
 .ob-prev{padding:11px 15px;background:#EFEAE2;border:none;border-radius:11px;font-size:12.5px;font-weight:700;color:#6A5F52;cursor:pointer;font-family:inherit}
 .ob-nxt{flex:1;padding:12px;background:linear-gradient(135deg,#3A322A,#2A2218);border:none;border-radius:11px;font-size:13.5px;font-weight:800;color:#F0D888;cursor:pointer;font-family:inherit;letter-spacing:-.01em}
+/* ─── 공지 PC 2열 레이아웃 ─── */
+.ann-pc-grid { display: flex; flex-direction: column; }
+.ann-pc-left { min-width: 0; }
+.ann-pc-right { display: none; }
+@media (min-width: 720px) {
+  .ann-pc-grid { flex-direction: row; gap: 16px; align-items: flex-start; padding: 0 16px 16px; }
+  .ann-pc-left { flex: 1; min-width: 0; padding: 0; }
+  .ann-pc-right { display: block; width: 288px; flex-shrink: 0; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r); overflow: hidden; }
+  .ann-pc-right .ann-cal-wrap { margin: 0; border: none; border-radius: 0; background: transparent; }
+  .ann-pc-right .ann-cal-body { display: block !important; }
+  .ann-pc-right .ann-cal-trigger { cursor: default; border-bottom: 1px solid var(--divider); }
+  .ann-pc-right #ann-cal-chev { display: none; }
+  .ann-pc-left #ann-schedule-wrap { display: none !important; }
+}
 /* ─── 미니 캘린더 ─── */
 .ann-cal-wrap { background: var(--tag-bg); border: 1.5px solid var(--border); border-radius: var(--r); margin-top: 8px; overflow: hidden; }
 .ann-cal-trigger { display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer; transition: background .12s; }
@@ -893,90 +907,144 @@ body {
 
     <div class="admin-sep"></div>
 
-    <!-- 공지 게시 -->
     <div class="admin-sub-label">공지 게시</div>
-    <div style="padding:0 16px 14px">
-      <textarea id="announce-input" placeholder="예: 5월 20일 오전 2시~3시 점검 예정입니다." style="width:100%;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 12px;font-size:13px;font-family:var(--font);color:var(--ink);resize:none;height:72px;outline:none;box-sizing:border-box;-webkit-user-select:text;user-select:text"></textarea>
+    <div class="ann-pc-grid">
 
-      <!-- 예약 게시 토글 -->
-      <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
-        <label style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;flex-shrink:0">
-          <input type="checkbox" id="ann-schedule-toggle" onchange="toggleAnnSchedule()" style="width:14px;height:14px;accent-color:var(--badge-ok)">
-          예약 게시
-        </label>
+      <!-- 좌측: 입력 + 버튼 + 목록 -->
+      <div class="ann-pc-left">
+        <div style="padding:0 16px 0">
+          <textarea id="announce-input" placeholder="예: 5월 20일 오전 2시~3시 점검 예정입니다." style="width:100%;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 12px;font-size:13px;font-family:var(--font);color:var(--ink);resize:none;height:72px;outline:none;box-sizing:border-box;-webkit-user-select:text;user-select:text"></textarea>
+
+          <!-- 예약 게시 토글 -->
+          <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;flex-shrink:0">
+              <input type="checkbox" id="ann-schedule-toggle" onchange="toggleAnnSchedule()" style="width:14px;height:14px;accent-color:var(--badge-ok)">
+              예약 게시
+            </label>
+          </div>
+
+          <!-- 미니 캘린더 (모바일: 예약 시에만 노출 / PC: 우측 고정으로 대체됨) -->
+          <div id="ann-schedule-wrap" style="display:none">
+            <div class="ann-cal-wrap">
+              <div class="ann-cal-trigger" onclick="toggleAnnCal()">
+                <div class="ann-cal-ico">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div class="ann-cal-info">
+                  <div class="ann-cal-title" id="ann-cal-title">예약 날짜 설정</div>
+                  <div class="ann-cal-sub" id="ann-cal-sub">시작일과 종료일을 선택하세요</div>
+                </div>
+                <svg id="ann-cal-chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--muted2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div class="ann-cal-body" id="ann-cal-body">
+                <div class="ann-sel-row">
+                  <div class="ann-sel-box">
+                    <div class="ann-sel-label">시작</div>
+                    <div class="ann-sel-val empty" id="ann-sel-start">날짜 선택</div>
+                  </div>
+                  <div class="ann-sel-box">
+                    <div class="ann-sel-label">종료 <span style="font-weight:400;text-transform:none;letter-spacing:0">(선택)</span></div>
+                    <div class="ann-sel-val empty" id="ann-sel-end">날짜 선택</div>
+                  </div>
+                </div>
+                <div class="ann-cal-nav">
+                  <button class="ann-cal-nav-btn" onclick="annCalChangeMonth(-1)"><svg viewBox="0 0 24 24" width="11" height="11"><polyline points="15 18 9 12 15 6"/></svg></button>
+                  <span class="ann-cal-month" id="ann-cal-month"></span>
+                  <button class="ann-cal-nav-btn" onclick="annCalChangeMonth(1)"><svg viewBox="0 0 24 24" width="11" height="11"><polyline points="9 18 15 12 9 6"/></svg></button>
+                </div>
+                <div class="ann-cal-grid" id="ann-cal-grid"></div>
+                <div id="ann-time-wrap" style="display:none">
+                  <div class="ann-time-wrap">
+                    <div class="ann-time-block">
+                      <div class="ann-time-label">시작 시간</div>
+                      <div class="ann-time-sel">
+                        <select id="ann-sh"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option selected>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option></select>
+                        <select id="ann-sm"><option selected>00</option><option>10</option><option>20</option><option>30</option><option>40</option><option>50</option></select>
+                      </div>
+                    </div>
+                    <div class="ann-time-block" id="ann-end-time-block" style="display:none">
+                      <div class="ann-time-label">종료 시간</div>
+                      <div class="ann-time-sel">
+                        <select id="ann-eh"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option selected>23</option></select>
+                        <select id="ann-em"><option>00</option><option>10</option><option>20</option><option>30</option><option>40</option><option selected>50</option></select>
+                      </div>
+                    </div>
+                  </div>
+                  <button class="ann-cal-confirm" onclick="confirmAnnCal()">확인</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 실행 버튼 -->
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button id="ann-post-btn" onclick="postAnnouncement()" style="flex:1;padding:11px;background:var(--badge-ok);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">공지 게시</button>
+            <button id="ann-save-btn" onclick="saveAnnouncement()" style="flex:1;padding:11px;background:#2563eb;color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);display:none">수정 저장</button>
+            <button onclick="cancelEditAnnouncement()" id="ann-cancel-btn" style="padding:11px 14px;background:var(--tag-bg);color:var(--muted);border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:none">취소</button>
+          </div>
+        </div>
+
+        <!-- 공지 내역 목록 -->
+        <div class="admin-sep" style="margin-top:14px"></div>
+        <div class="ann-list-wrap" style="padding-bottom:16px">
+          <div class="ann-list-label">공지 내역</div>
+          <div id="admin-ann-list"><div style="font-size:12px;color:var(--muted);padding:4px 0">불러오는 중...</div></div>
+        </div>
       </div>
 
-      <!-- 미니 캘린더 (예약 시에만 노출) -->
-      <div id="ann-schedule-wrap" style="display:none">
+      <!-- 우측: PC 전용 캘린더 (항상 펼쳐진 상태) -->
+      <div class="ann-pc-right">
         <div class="ann-cal-wrap">
-          <div class="ann-cal-trigger" onclick="toggleAnnCal()">
+          <div class="ann-cal-trigger">
             <div class="ann-cal-ico">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
             <div class="ann-cal-info">
-              <div class="ann-cal-title" id="ann-cal-title">예약 날짜 설정</div>
-              <div class="ann-cal-sub" id="ann-cal-sub">시작일과 종료일을 선택하세요</div>
+              <div class="ann-cal-title" id="ann-cal-title-pc">예약 날짜 설정</div>
+              <div class="ann-cal-sub" id="ann-cal-sub-pc">시작일과 종료일을 선택하세요</div>
             </div>
-            <svg id="ann-cal-chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--muted2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
-          <div class="ann-cal-body" id="ann-cal-body">
-            <!-- 선택 표시 -->
+          <div class="ann-cal-body">
             <div class="ann-sel-row">
               <div class="ann-sel-box">
                 <div class="ann-sel-label">시작</div>
-                <div class="ann-sel-val empty" id="ann-sel-start">날짜 선택</div>
+                <div class="ann-sel-val empty" id="ann-sel-start-pc">날짜 선택</div>
               </div>
               <div class="ann-sel-box">
                 <div class="ann-sel-label">종료 <span style="font-weight:400;text-transform:none;letter-spacing:0">(선택)</span></div>
-                <div class="ann-sel-val empty" id="ann-sel-end">날짜 선택</div>
+                <div class="ann-sel-val empty" id="ann-sel-end-pc">날짜 선택</div>
               </div>
             </div>
-            <!-- 달력 -->
             <div class="ann-cal-nav">
               <button class="ann-cal-nav-btn" onclick="annCalChangeMonth(-1)"><svg viewBox="0 0 24 24" width="11" height="11"><polyline points="15 18 9 12 15 6"/></svg></button>
-              <span class="ann-cal-month" id="ann-cal-month"></span>
+              <span class="ann-cal-month" id="ann-cal-month-pc"></span>
               <button class="ann-cal-nav-btn" onclick="annCalChangeMonth(1)"><svg viewBox="0 0 24 24" width="11" height="11"><polyline points="9 18 15 12 9 6"/></svg></button>
             </div>
-            <div class="ann-cal-grid" id="ann-cal-grid"></div>
-            <!-- 시간 선택 (날짜 선택 후 노출) -->
-            <div id="ann-time-wrap" style="display:none">
+            <div class="ann-cal-grid" id="ann-cal-grid-pc"></div>
+            <div id="ann-time-wrap-pc" style="display:none">
               <div class="ann-time-wrap">
                 <div class="ann-time-block">
                   <div class="ann-time-label">시작 시간</div>
                   <div class="ann-time-sel">
-                    <select id="ann-sh"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option selected>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option></select>
-                    <select id="ann-sm"><option selected>00</option><option>10</option><option>20</option><option>30</option><option>40</option><option>50</option></select>
+                    <select id="ann-sh-pc"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option selected>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option></select>
+                    <select id="ann-sm-pc"><option selected>00</option><option>10</option><option>20</option><option>30</option><option>40</option><option>50</option></select>
                   </div>
                 </div>
-                <div class="ann-time-block" id="ann-end-time-block" style="display:none">
+                <div class="ann-time-block" id="ann-end-time-block-pc" style="display:none">
                   <div class="ann-time-label">종료 시간</div>
                   <div class="ann-time-sel">
-                    <select id="ann-eh"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option selected>23</option></select>
-                    <select id="ann-em"><option>00</option><option>10</option><option>20</option><option>30</option><option>40</option><option selected>50</option></select>
+                    <select id="ann-eh-pc"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option selected>23</option></select>
+                    <select id="ann-em-pc"><option>00</option><option>10</option><option>20</option><option>30</option><option>40</option><option selected>50</option></select>
                   </div>
                 </div>
               </div>
-              <button class="ann-cal-confirm" onclick="confirmAnnCal()">확인</button>
+              <button class="ann-cal-confirm" onclick="confirmAnnCalPc()">확인</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 실행 버튼 -->
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button id="ann-post-btn" onclick="postAnnouncement()" style="flex:1;padding:11px;background:var(--badge-ok);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">공지 게시</button>
-        <button id="ann-save-btn" onclick="saveAnnouncement()" style="flex:1;padding:11px;background:#2563eb;color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);display:none">수정 저장</button>
-        <button onclick="cancelEditAnnouncement()" id="ann-cancel-btn" style="padding:11px 14px;background:var(--tag-bg);color:var(--muted);border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:none">취소</button>
-      </div>
-    </div>
-
-    <!-- 공지 내역 목록 -->
-    <div class="admin-sep"></div>
-    <div class="ann-list-wrap" style="padding-bottom:16px">
-      <div class="ann-list-label">공지 내역</div>
-      <div id="admin-ann-list"><div style="font-size:12px;color:var(--muted);padding:4px 0">불러오는 중...</div></div>
-    </div>
-  </div>
+    </div><!-- /ann-pc-grid -->
 
   <!-- 공지 바텀시트 -->
   <div class="ann-sheet-ov" id="ann-sheet-ov" onclick="if(event.target===this)closeAnnSheet()">
@@ -1290,6 +1358,7 @@ window.addEventListener('popstate', function(){
 });
 document.addEventListener('DOMContentLoaded', function(){
   checkSystemAnnouncement();
+  annCalRender();
 });
 async function checkSystemAnnouncement(){
   try{
@@ -1484,15 +1553,17 @@ async function postAnnouncement() {
     const isScheduled = document.getElementById('ann-schedule-toggle').checked;
     if (isScheduled) {
         if (!_annCalStart) { showToast('시작 날짜를 선택해주세요'); return; }
-        const sh = document.getElementById('ann-sh').value;
-        const sm = document.getElementById('ann-sm').value;
-        const startDt = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d, parseInt(sh), parseInt(sm));
-        const scheduledAt = startDt.toISOString();
-        let endsAt = null;
+        // PC(720px+)면 -pc suffix, 모바일이면 일반 suffix
+        var isPc = window.innerWidth >= 720;
+        var sh = document.getElementById(isPc ? 'ann-sh-pc' : 'ann-sh').value;
+        var sm = document.getElementById(isPc ? 'ann-sm-pc' : 'ann-sm').value;
+        var startDt = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d, parseInt(sh), parseInt(sm));
+        var scheduledAt = startDt.toISOString();
+        var endsAt = null;
         if (_annCalEnd) {
-            const eh = document.getElementById('ann-eh').value;
-            const em = document.getElementById('ann-em').value;
-            const endDt = new Date(_annCalEnd.y, _annCalEnd.m, _annCalEnd.d, parseInt(eh), parseInt(em));
+            var eh = document.getElementById(isPc ? 'ann-eh-pc' : 'ann-eh').value;
+            var em = document.getElementById(isPc ? 'ann-em-pc' : 'ann-em').value;
+            var endDt = new Date(_annCalEnd.y, _annCalEnd.m, _annCalEnd.d, parseInt(eh), parseInt(em));
             endsAt = endDt.toISOString();
         }
         await sb.from('system_announcements').insert({
@@ -1641,8 +1712,17 @@ function annCalChangeMonth(d) {
 
 function annCalRender() {
     var months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-    document.getElementById('ann-cal-month').textContent = _annCalY + '년 ' + months[_annCalM];
-    var grid = document.getElementById('ann-cal-grid');
+    var monthTxt = _annCalY + '년 ' + months[_annCalM];
+    var monthEl = document.getElementById('ann-cal-month');
+    if (monthEl) monthEl.textContent = monthTxt;
+    var monthElPc = document.getElementById('ann-cal-month-pc');
+    if (monthElPc) monthElPc.textContent = monthTxt;
+    _annCalRenderGrid('ann-cal-grid');
+    _annCalRenderGrid('ann-cal-grid-pc');
+}
+function _annCalRenderGrid(gridId) {
+    var grid = document.getElementById(gridId);
+    if (!grid) return;
     grid.innerHTML = '';
     var dows = ['일','월','화','수','목','금','토'];
     dows.forEach(function(d) { var el = document.createElement('div'); el.className = 'ann-cal-dow'; el.textContent = d; grid.appendChild(el); });
@@ -1682,18 +1762,29 @@ function annCalPickDay(d) {
     }
     annCalUpdateSelDisplay();
     annCalRender();
+    // 모바일 시간 wrap
     var tw = document.getElementById('ann-time-wrap');
     var etb = document.getElementById('ann-end-time-block');
-    if (_annCalStart) { tw.style.display = 'block'; etb.style.display = _annCalEnd ? 'block' : 'none'; }
+    if (tw) { tw.style.display = _annCalStart ? 'block' : 'none'; }
+    if (etb) { etb.style.display = _annCalEnd ? 'block' : 'none'; }
+    // PC 시간 wrap
+    var twPc = document.getElementById('ann-time-wrap-pc');
+    var etbPc = document.getElementById('ann-end-time-block-pc');
+    if (twPc) { twPc.style.display = _annCalStart ? 'block' : 'none'; }
+    if (etbPc) { etbPc.style.display = _annCalEnd ? 'block' : 'none'; }
 }
 
 function annCalUpdateSelDisplay() {
     var ss = document.getElementById('ann-sel-start');
     var se = document.getElementById('ann-sel-end');
-    if (_annCalStart) { ss.textContent = (_annCalStart.m+1)+'월 '+_annCalStart.d+'일'; ss.className = 'ann-sel-val'; }
-    else { ss.textContent = '날짜 선택'; ss.className = 'ann-sel-val empty'; }
-    if (_annCalEnd) { se.textContent = (_annCalEnd.m+1)+'월 '+_annCalEnd.d+'일'; se.className = 'ann-sel-val'; }
-    else { se.textContent = '날짜 선택'; se.className = 'ann-sel-val empty'; }
+    var ssPc = document.getElementById('ann-sel-start-pc');
+    var sePc = document.getElementById('ann-sel-end-pc');
+    var startTxt = _annCalStart ? (_annCalStart.m+1)+'월 '+_annCalStart.d+'일' : null;
+    var endTxt = _annCalEnd ? (_annCalEnd.m+1)+'월 '+_annCalEnd.d+'일' : null;
+    if (ss) { ss.textContent = startTxt || '날짜 선택'; ss.className = startTxt ? 'ann-sel-val' : 'ann-sel-val empty'; }
+    if (se) { se.textContent = endTxt || '날짜 선택'; se.className = endTxt ? 'ann-sel-val' : 'ann-sel-val empty'; }
+    if (ssPc) { ssPc.textContent = startTxt || '날짜 선택'; ssPc.className = startTxt ? 'ann-sel-val' : 'ann-sel-val empty'; }
+    if (sePc) { sePc.textContent = endTxt || '날짜 선택'; sePc.className = endTxt ? 'ann-sel-val' : 'ann-sel-val empty'; }
 }
 
 function confirmAnnCal() {
@@ -1707,17 +1798,29 @@ function confirmAnnCal() {
     document.getElementById('ann-cal-body').classList.remove('open');
     document.getElementById('ann-cal-chev').style.transform = '';
 }
+function confirmAnnCalPc() {
+    if (!_annCalStart) return;
+    var sh = document.getElementById('ann-sh-pc').value;
+    var sm = document.getElementById('ann-sm-pc').value;
+    var txt = (_annCalStart.m+1)+'월 '+_annCalStart.d+'일 '+sh+':'+sm;
+    if (_annCalEnd) { var eh = document.getElementById('ann-eh-pc').value; var em = document.getElementById('ann-em-pc').value; txt += ' ~ '+(_annCalEnd.m+1)+'월 '+_annCalEnd.d+'일 '+eh+':'+em; }
+    var titlePc = document.getElementById('ann-cal-title-pc'); if (titlePc) titlePc.textContent = '예약 설정 완료';
+    var subPc = document.getElementById('ann-cal-sub-pc'); if (subPc) subPc.textContent = txt;
+}
 
 function resetAnnCal() {
     _annCalStart = null; _annCalEnd = null; _annCalStep = 0;
     _annCalY = new Date().getFullYear(); _annCalM = new Date().getMonth();
-    var tw = document.getElementById('ann-time-wrap'); if (tw) tw.style.display = 'none';
-    var etb = document.getElementById('ann-end-time-block'); if (etb) etb.style.display = 'none';
+    var ids = ['ann-time-wrap','ann-end-time-block','ann-time-wrap-pc','ann-end-time-block-pc'];
+    ids.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var body = document.getElementById('ann-cal-body'); if (body) body.classList.remove('open');
     var chev = document.getElementById('ann-cal-chev'); if (chev) chev.style.transform = '';
     var title = document.getElementById('ann-cal-title'); if (title) title.textContent = '예약 날짜 설정';
     var sub = document.getElementById('ann-cal-sub'); if (sub) sub.textContent = '시작일과 종료일을 선택하세요';
+    var titlePc = document.getElementById('ann-cal-title-pc'); if (titlePc) titlePc.textContent = '예약 날짜 설정';
+    var subPc = document.getElementById('ann-cal-sub-pc'); if (subPc) subPc.textContent = '시작일과 종료일을 선택하세요';
     annCalUpdateSelDisplay();
+    annCalRender();
 }
 
 /* ─── 공지 바텀시트 ─── */
