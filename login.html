@@ -40,7 +40,7 @@
         .logo-area { text-align: center; margin-bottom: 28px; }
         .logo-title {
             font-family: 'Noto Serif KR', Georgia, serif;
-            font-size: 28px;
+            font-size: clamp(28px, 5.5vw, 34px);
             font-weight: 700;
             letter-spacing: 0.04em;
             background: linear-gradient(170deg,#F4E098 0%,#D4A828 28%,#A07018 52%,#C09028 75%,#ECC858 100%);
@@ -598,10 +598,11 @@
             btn.disabled = false;
         } else {
             saveConsent();
-            const { data: rows } = await supabase.from('serials').select('id').eq('used_by', data.user.email).limit(1);
             const redir = new URLSearchParams(location.search).get('redirect');
-            if (redir) { window.location.replace(redir); }
-            else if (rows && rows.length > 0) { window.location.replace('search.html'); }
+            if (redir) { window.location.replace(redir); return; }
+            if (data.user.email === 'gngn5803@nate.com') { window.location.replace('mypage.html'); return; }
+            const { data: rows } = await supabase.from('serials').select('id').eq('used_by', data.user.email).limit(1);
+            if (rows && rows.length > 0) { window.location.replace('search.html'); }
             else { window.location.replace('serial.html'); }
         }
     };
