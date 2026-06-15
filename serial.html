@@ -161,17 +161,19 @@
             } else if (isAdd) {
                 // 마이페이지 "추가 등록" — 그냥 폼 표시
             } else {
-                const { data: rows } = await supabase
-                    .from('serials')
-                    .select('id')
-                    .eq('used_by', session.user.email)
-                    .limit(1);
-                if (rows && rows.length > 0) {
-                    const afterLogin = localStorage.getItem('gyeol_after_login');
-                    if (afterLogin) {
-                        localStorage.removeItem('gyeol_after_login');
-                        window.location.replace(afterLogin);
-                    } else {
+                // gyeol_after_login이 있으면 tag.html이 세트 검증을 직접 처리하므로 바로 이동
+                const afterLogin = localStorage.getItem('gyeol_after_login');
+                if (afterLogin) {
+                    localStorage.removeItem('gyeol_after_login');
+                    window.location.replace(afterLogin);
+                } else {
+                    // after_login 없을 때만 기존 등록 여부로 통과 판단
+                    const { data: rows } = await supabase
+                        .from('serials')
+                        .select('id')
+                        .eq('used_by', session.user.email)
+                        .limit(1);
+                    if (rows && rows.length > 0) {
                         window.location.replace('search.html');
                     }
                 }
