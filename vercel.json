@@ -3,10 +3,6 @@
     {
       "source": "/GYEOL-:path*",
       "destination": "/tag.html"
-    },
-    {
-      "source": "/",
-      "destination": "/landing.html"
     }
   ],
   "headers": [
