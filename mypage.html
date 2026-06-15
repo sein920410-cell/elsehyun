@@ -164,6 +164,7 @@ body {
 .ann-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0;letter-spacing:-.01em;}
 .ann-badge.on{background:rgba(74,222,128,.15);color:#16a34a;}
 .ann-badge.off{background:var(--tag-bg);color:var(--muted);}
+.ann-badge.sched{background:rgba(234,179,8,.15);color:#ca8a04;}
 .ann-preview{flex:1;font-size:12px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
 .ann-date{font-size:11px;color:var(--muted);flex-shrink:0;white-space:nowrap;}
 .ann-btn{font-size:11px;font-weight:600;padding:4px 9px;border-radius:6px;cursor:pointer;border:none;font-family:var(--font);flex-shrink:0;}
@@ -841,8 +842,19 @@ body {
           <input type="checkbox" id="ann-schedule-toggle" onchange="toggleAnnSchedule()" style="width:14px;height:14px;accent-color:var(--badge-ok)">
           예약 게시
         </label>
-        <input type="datetime-local" id="ann-schedule-at"
-          style="display:none;flex:1;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:7px 10px;font-size:12px;font-family:var(--font);color:var(--ink);outline:none;box-sizing:border-box">
+      </div>
+      <div id="ann-schedule-wrap" style="display:none;margin-top:8px;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 12px;box-sizing:border-box">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:700;color:var(--muted);width:36px;flex-shrink:0">시작</span>
+          <input type="datetime-local" id="ann-schedule-at"
+            style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;font-family:var(--font);color:var(--ink);outline:none;box-sizing:border-box">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;font-weight:700;color:var(--muted);width:36px;flex-shrink:0">종료</span>
+          <input type="datetime-local" id="ann-schedule-ends"
+            style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;font-family:var(--font);color:var(--ink);outline:none;box-sizing:border-box">
+          <span style="font-size:10px;color:var(--muted);flex-shrink:0">선택</span>
+        </div>
       </div>
       <div style="display:flex;gap:8px;margin-top:8px">
         <button id="ann-post-btn" onclick="postAnnouncement()" style="flex:1;padding:11px;background:var(--badge-ok);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">공지 게시</button>
@@ -1349,8 +1361,10 @@ async function postAnnouncement() {
     if (!msg) { showToast('공지 내용을 입력해주세요'); return; }
     const isScheduled = document.getElementById('ann-schedule-toggle').checked;
     const scheduleVal = document.getElementById('ann-schedule-at').value;
-    if (isScheduled && !scheduleVal) { showToast('예약 시간을 설정해주세요'); return; }
+    const endsVal = document.getElementById('ann-schedule-ends') ? document.getElementById('ann-schedule-ends').value : '';
+    if (isScheduled && !scheduleVal) { showToast('예약 시작 시간을 설정해주세요'); return; }
     const scheduledAt = isScheduled ? new Date(scheduleVal).toISOString() : null;
+    const endsAt = endsVal ? new Date(endsVal).toISOString() : null;
     // 예약이 아닌 경우만 기존 공지 종료
     if (!isScheduled) {
         await sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
@@ -1360,14 +1374,19 @@ async function postAnnouncement() {
         type: 'announcement',
         title: '공지사항',
         message: msg,
-        scheduled_at: scheduledAt
+        scheduled_at: scheduledAt,
+        ends_at: endsAt
     });
     if (!isScheduled) {
         Object.keys(localStorage).filter(k=>k.startsWith('gyeol_ann_')).forEach(k=>localStorage.removeItem(k));
+        // 배너 실시간 반영
+        checkSystemAnnouncement();
     }
     document.getElementById('announce-input').value = '';
     document.getElementById('ann-schedule-toggle').checked = false;
-    document.getElementById('ann-schedule-at').style.display = 'none';
+    document.getElementById('ann-schedule-wrap').style.display = 'none';
+    document.getElementById('ann-schedule-at').value = '';
+    if(document.getElementById('ann-schedule-ends')) document.getElementById('ann-schedule-ends').value = '';
     document.getElementById('ann-post-btn').textContent = '공지 게시';
     showToast(isScheduled ? `예약 등록됐어요 (${scheduleVal.replace('T',' ')})` : '공지가 게시됐어요');
     loadAdminAnnouncements();
@@ -1375,6 +1394,10 @@ async function postAnnouncement() {
 async function clearAnnouncement() {
     await sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
     document.getElementById('announce-input').value = '';
+    // 배너 실시간 숨김
+    var bar = document.getElementById('announce-bar');
+    if(bar){ bar.classList.remove('show'); var hd=document.querySelector('.header');if(hd)hd.style.marginTop=''; }
+    Object.keys(localStorage).filter(k=>k.startsWith('gyeol_ann_')).forEach(k=>localStorage.removeItem(k));
     showToast('공지가 종료됐어요');
     loadAdminAnnouncements();
 }
@@ -1401,7 +1424,7 @@ async function loadAdminAnnouncements() {
             var item = document.createElement('div');
             item.className = 'ann-item';
             item.innerHTML =
-                '<span class="ann-badge '+(ann.active?'on':'off')+'">'+(ann.active?'게시중':'종료')+'</span>'+
+                '<span class="ann-badge '+(!ann.active&&ann.scheduled_at?'sched':ann.active?'on':'off')+'">'+((!ann.active&&ann.scheduled_at)?'예약중':ann.active?'게시중':'종료')+'</span>'+
                 '<span class="ann-preview">'+_annEsc(preview)+'</span>'+
                 '<span class="ann-date">'+ds+'</span>'+
                 '<button class="ann-btn ann-edit" onclick="editAnnouncement(\''+ann.id+'\',\''+_annEsc(ann.message||'').replace(/'/g,"&#39;").replace(/\n/g,'\\n')+'\')">편집</button>'+
@@ -1456,8 +1479,7 @@ function _annEsc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
 /* ─── 공지 예약 토글 ─── */
 function toggleAnnSchedule() {
     const on = document.getElementById('ann-schedule-toggle').checked;
-    const inp = document.getElementById('ann-schedule-at');
-    inp.style.display = on ? 'block' : 'none';
+    document.getElementById('ann-schedule-wrap').style.display = on ? 'block' : 'none';
     document.getElementById('ann-post-btn').textContent = on ? '예약 등록' : '공지 게시';
 }
 
