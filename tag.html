@@ -209,7 +209,7 @@
             </div>
             <p class="state-title">유효하지 않은 태그예요</p>
             <p class="state-desc">QR코드를 다시 스캔해주세요.</p>
-            <button onclick="location.href='index.html'" class="btn">홈으로 이동</button>
+            <button onclick="location.href='search.html'" class="btn">홈으로 이동</button>
         </div>
     </div>
 
@@ -222,7 +222,7 @@
             </div>
             <p class="state-title">이미 등록된 태그예요</p>
             <p class="state-desc">다른 사용자가 등록한 태그입니다.<br>본인 태그가 아닌 경우 고객센터로 문의해주세요.</p>
-            <button onclick="location.href='index.html'" class="btn">내 보관함으로</button>
+            <button onclick="location.href='search.html'" class="btn">내 보관함으로</button>
         </div>
     </div>
 
@@ -312,7 +312,7 @@
     // ── 태그 타입에 따라 이동할 URL 결정 ─────────────────────
     function getRedirectUrl(code) {
         if (code.endsWith('-S')) return `drawer.html?tag=${encodeURIComponent(code)}`;
-        if (code.endsWith('-MAIN')) return 'index.html';
+        if (code.endsWith('-MAIN')) return 'search.html';
         return `drawer.html?tag=${encodeURIComponent(code)}`;
     }
 
