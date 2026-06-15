@@ -484,7 +484,7 @@ html[data-mode="dark"] .hl{background:rgba(210,160,25,0.32);color:var(--ink)}
 .rec-hdr-close svg{width:14px;height:14px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round}
 .rec-vid{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
 #rec-live,#rec-playback{width:100%;height:100%;object-fit:cover}
-.rec-ind{position:absolute;top:80px;left:16px;background:rgba(220,38,38,.88);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;display:none;letter-spacing:.02em}
+.rec-ind{position:absolute;top:20px;right:20px;background:rgba(220,38,38,.9);backdrop-filter:blur(8px);color:#fff;font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;display:none;letter-spacing:.02em;z-index:16}
 .rec-ctrl{
   padding:12px 20px;padding-bottom:max(28px,env(safe-area-inset-bottom,28px));
   flex-shrink:0;
@@ -558,29 +558,67 @@ html[data-mode="dark"] .hl{background:rgba(210,160,25,0.32);color:var(--ink)}
 .maintenance-time-label{font-size:10px;color:#B5A99A;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
 .maintenance-time-val{font-size:16px;font-weight:700;color:#B08D4E;letter-spacing:-.01em;line-height:1.55}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* ─── 영상 촬영 가이드 프레임 (AI 스캔 스타일) ─── */
-#rec-guide-mask{position:absolute;top:18%;left:8%;width:84%;height:60%;
-  border:1.5px solid rgba(255,255,255,.42);border-radius:16px;pointer-events:none;z-index:10;
-  box-shadow:0 0 0 9999px rgba(0,0,0,.40)}
-.gc{position:absolute;width:26px;height:26px;border-color:#E6C77A;border-style:solid}
-.gc.tl{top:-2px;left:-2px;border-width:2.5px 0 0 2.5px;border-radius:8px 0 0 0}
-.gc.tr{top:-2px;right:-2px;border-width:2.5px 2.5px 0 0;border-radius:0 8px 0 0}
-.gc.bl{bottom:-2px;left:-2px;border-width:0 0 2.5px 2.5px;border-radius:0 0 0 8px}
-.gc.br{bottom:-2px;right:-2px;border-width:0 2.5px 2.5px 0;border-radius:0 0 8px 0}
-.gc-label{position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);width:92%;text-align:center;
-  color:rgba(255,255,255,.82);font-size:12px;font-weight:600;letter-spacing:-.01em;line-height:1.4}
-#rec-scan{position:absolute;left:1px;right:1px;top:4%;height:2px;
-  background:linear-gradient(90deg,transparent,rgba(230,199,122,.85) 22%,rgba(255,236,184,.95) 50%,rgba(230,199,122,.85) 78%,transparent);
-  box-shadow:0 0 12px 1px rgba(230,199,122,.45);opacity:.9;
-  animation:recScan 2.6s cubic-bezier(.45,0,.55,1) infinite}
-@keyframes recScan{0%{top:4%;opacity:0}14%{opacity:.95}86%{opacity:.95}100%{top:95%;opacity:0}}
-.rec-reticle{position:absolute;top:50%;left:50%;width:46px;height:46px;transform:translate(-50%,-50%);pointer-events:none;opacity:.65}
-.rec-reticle svg{width:100%;height:100%;stroke:rgba(255,255,255,.85);stroke-width:1.4;fill:none;stroke-linecap:round}
-.rec-ai-badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;
-  background:rgba(18,16,14,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  border:1px solid rgba(230,199,122,.35);border-radius:20px;padding:5px 12px 5px 10px;white-space:nowrap}
-.rec-ai-badge svg{width:13px;height:13px;stroke:#E6C77A;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.rec-ai-badge span{color:rgba(255,240,210,.92);font-size:11px;font-weight:700;letter-spacing:.02em}
+/* ─── 영상 촬영 가이드 프레임 (시안: 카드형 뷰파인더) ─── */
+.rec-vid{flex:1;display:flex;align-items:center;justify-content:center;position:relative;padding:0;overflow:visible}
+/* 카드(둥근 베젤) 안에 카메라가 들어가는 형태 */
+.rec-stage{position:relative;width:min(90vw,420px);aspect-ratio:1/1;
+  border-radius:30px;padding:14px;
+  background:linear-gradient(160deg,rgba(58,54,50,.55),rgba(26,24,22,.65));
+  box-shadow:0 20px 50px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08)}
+.rec-frame{position:relative;width:100%;height:100%;border-radius:18px;overflow:hidden;background:#000}
+#rec-live,#rec-playback{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* 모서리 브래킷 */
+.gc{position:absolute;width:34px;height:34px;border-style:solid;border-color:rgba(255,255,255,.92);z-index:14;pointer-events:none}
+.gc.tl{top:10px;left:10px;border-width:2.5px 0 0 2.5px;border-radius:9px 0 0 0}
+.gc.tr{top:10px;right:10px;border-width:2.5px 2.5px 0 0;border-radius:0 9px 0 0}
+.gc.bl{bottom:10px;left:10px;border-width:0 0 2.5px 2.5px;border-radius:0 0 0 9px}
+.gc.br{bottom:10px;right:10px;border-width:0 2.5px 2.5px 0;border-radius:0 0 9px 0}
+/* 3x3 그리드 */
+#rec-grid{position:absolute;inset:0;z-index:12;pointer-events:none;opacity:.5}
+#rec-grid::before,#rec-grid::after{content:"";position:absolute;background:rgba(255,255,255,.28)}
+#rec-grid::before{left:33.33%;right:33.33%;top:0;bottom:0;border-left:1px solid rgba(255,255,255,.28);border-right:1px solid rgba(255,255,255,.28);background:none}
+#rec-grid::after{top:33.33%;bottom:33.33%;left:0;right:0;border-top:1px solid rgba(255,255,255,.28);border-bottom:1px solid rgba(255,255,255,.28);background:none}
+/* 스캔라인 */
+#rec-scan{position:absolute;left:0;right:0;top:4%;height:2px;pointer-events:none;z-index:13;
+  background:linear-gradient(90deg,transparent,rgba(255,176,198,.65) 22%,rgba(255,220,235,.92) 50%,rgba(255,176,198,.65) 78%,transparent);
+  box-shadow:0 0 12px 1px rgba(255,176,198,.4);opacity:.85;
+  animation:recScan 2.8s cubic-bezier(.45,0,.55,1) infinite}
+@keyframes recScan{0%{top:4%;opacity:0}14%{opacity:.85}86%{opacity:.85}100%{top:96%;opacity:0}}
+/* 플래시 버튼 (좌상단) */
+#rec-flash{position:absolute;top:22px;left:22px;z-index:16;width:40px;height:40px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:rgba(0,0,0,.28);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:none;-webkit-tap-highlight-color:transparent;transition:transform .1s}
+#rec-flash:active{transform:scale(.9)}
+#rec-flash svg{width:26px;height:26px;fill:#fff;stroke:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+#rec-flash.on svg{fill:#F4D24A;filter:drop-shadow(0 0 6px rgba(244,210,74,.7))}
+/* 밝기 슬라이더 (우측) */
+#rec-bright-wrap{position:absolute;right:20px;top:50%;transform:translateY(-50%);z-index:16;
+  width:26px;height:46%;display:flex;flex-direction:column;align-items:center;gap:7px;
+  touch-action:none;cursor:pointer}
+#rec-bright-wrap svg{width:17px;height:17px;flex-shrink:0;fill:none;stroke:#F4D24A;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+#rec-bright-track{flex:1;width:4px;border-radius:3px;position:relative;
+  background:linear-gradient(to top,rgba(244,210,74,.25),rgba(244,210,74,.85));
+  box-shadow:0 0 6px rgba(244,210,74,.3)}
+#rec-bright-thumb{position:absolute;left:50%;width:15px;height:15px;border-radius:50%;background:#F4D24A;
+  box-shadow:0 1px 5px rgba(0,0,0,.5),0 0 8px rgba(244,210,74,.6);transform:translateX(-50%) translateY(50%);bottom:62%}
+/* 줌 버튼 행 (하단) */
+#rec-zoom-row{position:absolute;left:0;right:0;bottom:22px;z-index:16;
+  display:flex;align-items:center;justify-content:center;gap:18px}
+.zoom-btn{font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:-.01em;color:rgba(255,255,255,.92);
+  background:none;border:none;cursor:pointer;padding:4px;-webkit-tap-highlight-color:transparent;
+  text-shadow:0 1px 3px rgba(0,0,0,.6);transition:transform .12s}
+.zoom-btn:active{transform:scale(.9)}
+.zoom-btn.on{width:40px;height:40px;border-radius:50%;background:rgba(40,38,35,.72);backdrop-filter:blur(6px);color:#F4D24A;display:flex;align-items:center;justify-content:center;text-shadow:none}
+/* 안내 문구 (프레임 아래) */
+.gc-label{margin-top:18px;text-align:center;color:rgba(255,255,255,.7);font-size:14px;font-weight:600;letter-spacing:-.01em}
+/* Video 탭 라벨 */
+.rec-mode-tab{display:flex;justify-content:center;margin-top:14px}
+.rec-mode-tab span{font-size:15px;font-weight:600;color:rgba(255,255,255,.85);padding-bottom:6px;border-bottom:2px solid rgba(255,255,255,.85);letter-spacing:.01em}
+/* AI 뱃지 (옵션, 상단 중앙) — 시안엔 없으므로 숨김 */
+.rec-ai-badge{display:none}
+.rec-reticle{display:none}
+#rec-zoom-ind{display:none;position:absolute;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);backdrop-filter:blur(10px);color:#fff;font-size:13px;font-weight:700;padding:5px 16px;border-radius:20px;z-index:17}
 /* ─── 분석 오버레이 (미디어 중앙) ─── */
 .analyze-overlay-inner{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
@@ -901,12 +939,12 @@ html[data-mode="dark"] .hl{background:rgba(210,160,25,0.32);color:var(--ink)}
 <!-- 영상 촬영 -->
 <div class="rec-ov" id="rec-ov">
   <div class="rec-hdr">
-    <span class="rec-hdr-title">영상 촬영</span>
+    <span class="rec-hdr-title">물품 촬영</span>
     <div class="rec-hdr-close" onclick="cancelRecording()">
       <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </div>
   </div>
-  <div class="rec-vid" style="position:relative"><video id="rec-live" autoplay muted playsinline></video><video id="rec-playback" style="display:none" playsinline controls></video><div id="rec-guide-mask"><span class="gc tl"></span><span class="gc tr"></span><span class="gc bl"></span><span class="gc br"></span><div class="rec-ai-badge"><svg viewBox="0 0 24 24"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9z"/><path d="M19 14l.6 1.6 1.6.6-1.6.6L19 19l-.6-1.6L16.8 16.8z"/></svg><span>AI 분석 촬영</span></div><span id="rec-scan"></span><div class="rec-reticle"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="13"/><line x1="24" y1="4" x2="24" y2="12"/><line x1="24" y1="36" x2="24" y2="44"/><line x1="4" y1="24" x2="12" y2="24"/><line x1="36" y1="24" x2="44" y2="24"/><circle cx="24" cy="24" r="1.8"/></svg></div><div class="gc-label">서랍 안을 박스에 맞춰 촬영하세요</div></div><div class="rec-ind" id="rec-ind">● REC</div><div class="rec-toast" id="rec-hint">버튼을 눌러 촬영을 시작하세요</div><div class="dark-warn-ov" id="dark-warn"><div class="cam-warn-card"><div class="cam-warn-ring"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-4.2 11.4c.7.6 1.2 1.3 1.2 2.1h6c0-.8.5-1.5 1.2-2.1A6.5 6.5 0 0 0 12 2.5z"/></svg></div><div class="cam-warn-title">주변이 어두워요</div><div class="cam-warn-sub">밝은 곳으로 옮기면<br>자동으로 다시 시작돼요</div></div></div><div class="face-warn-ov" id="face-warn"><div class="cam-warn-card"><div class="cam-warn-ring"><svg viewBox="0 0 24 24"><path d="M16 21v-1.5a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4V21"/><circle cx="10" cy="7" r="4"/><line x1="17" y1="6.5" x2="22" y2="11.5"/><line x1="22" y1="6.5" x2="17" y2="11.5"/></svg></div><div class="cam-warn-title">사람 얼굴이 감지됐어요</div><div class="cam-warn-sub">개인정보 보호를 위해<br>얼굴이 없는 곳을 비춰주세요</div></div></div>
+  <div class="rec-vid"><div class="rec-stage"><div class="rec-frame"><video id="rec-live" autoplay muted playsinline></video><video id="rec-playback" style="display:none" playsinline controls></video><div id="rec-guide-mask"><div id="rec-grid"></div><span class="gc tl"></span><span class="gc tr"></span><span class="gc bl"></span><span class="gc br"></span><span id="rec-scan"></span><button id="rec-flash" onclick="toggleFlash()" aria-label="플래시"><svg viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg></button><div id="rec-bright-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.5"/><line x1="4.3" y1="4.3" x2="6" y2="6"/><line x1="18" y1="18" x2="19.7" y2="19.7"/><line x1="2.5" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.5" y2="12"/><line x1="4.3" y1="19.7" x2="6" y2="18"/><line x1="18" y1="6" x2="19.7" y2="4.3"/></svg><div id="rec-bright-track"><div id="rec-bright-thumb"></div></div><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.4"/><line x1="12" y1="4" x2="12" y2="5.5"/><line x1="12" y1="18.5" x2="12" y2="20"/><line x1="5.5" y1="5.5" x2="6.6" y2="6.6"/><line x1="17.4" y1="17.4" x2="18.5" y2="18.5"/><line x1="4" y1="12" x2="5.5" y2="12"/><line x1="18.5" y1="12" x2="20" y2="12"/></svg></div><div id="rec-zoom-row"><button class="zoom-btn" data-z="1.5" onclick="setZoom(1.5,this)">X1.5</button><button class="zoom-btn on" data-z="1" onclick="setZoom(1,this)">X1</button><button class="zoom-btn" data-z="2" onclick="setZoom(2,this)">X2</button></div><div id="rec-zoom-ind"></div><div class="rec-ind" id="rec-ind">● REC</div></div></div></div><div class="gc-label" id="rec-gc-label">테두리 안에 수납함이 들어오도록 촬영하세요</div><div class="rec-mode-tab" id="rec-mode-tab"><span>Video</span></div><div class="rec-toast" id="rec-hint" style="bottom:auto;top:50%">버튼을 눌러 촬영을 시작하세요</div><div class="dark-warn-ov" id="dark-warn"><div class="cam-warn-card"><div class="cam-warn-ring"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-4.2 11.4c.7.6 1.2 1.3 1.2 2.1h6c0-.8.5-1.5 1.2-2.1A6.5 6.5 0 0 0 12 2.5z"/></svg></div><div class="cam-warn-title">주변이 어두워요</div><div class="cam-warn-sub">밝은 곳으로 옮기면<br>자동으로 다시 시작돼요</div></div></div><div class="face-warn-ov" id="face-warn"><div class="cam-warn-card"><div class="cam-warn-ring"><svg viewBox="0 0 24 24"><path d="M16 21v-1.5a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4V21"/><circle cx="10" cy="7" r="4"/><line x1="17" y1="6.5" x2="22" y2="11.5"/><line x1="22" y1="6.5" x2="17" y2="11.5"/></svg></div><div class="cam-warn-title">사람 얼굴이 감지됐어요</div><div class="cam-warn-sub">개인정보 보호를 위해<br>얼굴이 없는 곳을 비춰주세요</div></div></div>
   <!-- 가이드 팁 -->
   <div id="rec-guide" style="display:none;position:absolute;top:80px;left:0;right:0;text-align:center;pointer-events:none;z-index:5">
     <span id="rec-guide-txt" style="display:inline-block;background:rgba(0,0,0,.52);backdrop-filter:blur(8px);color:#fff;font-size:13px;font-weight:600;padding:6px 16px;border-radius:20px;letter-spacing:-.01em;transition:opacity .5s">천천히 움직여 주세요</span>
@@ -1437,7 +1475,11 @@ async function extractVideoFrames(blob,numFrames=5){
     const url=URL.createObjectURL(blob);video.src=url;
     const canvas=document.createElement('canvas');canvas.width=640;canvas.height=360;
     const ctx=canvas.getContext('2d');const frames=[];
-    const captureFrame=()=>{const vw=video.videoWidth||640,vh=video.videoHeight||480;const scale=Math.min(1,640/Math.max(vw,vh));const cw=Math.max(1,Math.round(vw*scale)),ch=Math.max(1,Math.round(vh*scale));canvas.width=cw;canvas.height=ch;ctx.drawImage(video,0,0,vw,vh,0,0,cw,ch);const d=canvas.toDataURL('image/jpeg',0.75);if(d&&d.length>2000)frames.push(d.split(',')[1]);};
+    const captureFrame=()=>{const vw=video.videoWidth||640,vh=video.videoHeight||480;const scale=Math.min(1,640/Math.max(vw,vh));const cw=Math.max(1,Math.round(vw*scale)),ch=Math.max(1,Math.round(vh*scale));canvas.width=cw;canvas.height=ch;
+      // 줌 crop 반영 (CSS zoom과 동일한 crop 적용)
+      const z=Math.max(1,window._recZoom||1);const sw2=vw/z,sh2=vh/z,sx2=(vw-sw2)/2,sy2=(vh-sh2)/2;
+      ctx.drawImage(video,sx2,sy2,sw2,sh2,0,0,cw,ch);
+      const d=canvas.toDataURL('image/jpeg',0.75);if(d&&d.length>2000)frames.push(d.split(',')[1]);};
     video.onloadedmetadata=async()=>{
       const dur=isFinite(video.duration)&&video.duration>0?video.duration:null;
       if(dur){const step=dur/(numFrames+1);for(let i=1;i<=numFrames;i++){await new Promise(res=>{video.currentTime=Math.min(step*i,dur-0.05);video.onseeked=()=>{requestAnimationFrame(()=>{captureFrame();res();});};});};URL.revokeObjectURL(url);resolve(frames);}
@@ -1667,7 +1709,7 @@ function skipCand(i){reviewSel[i]=null;document.getElementById(`cand-${i}-0`)?.c
 function confirmReview(){document.getElementById('confirm-ov').classList.remove('open');pendingReview.forEach((it,i)=>{const n=reviewSel[i];if(n)items.push({n:`${it.category}:${n}`,q:it.qty||1});});if(items.length)localStorage.setItem('gyeol_'+tag,JSON.stringify(items));renderItems();}
 
 // ─── 영상 촬영 ───
-async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?.getUserMedia){alert('이 브라우저는 영상 촬영을 지원하지 않습니다.');return;}try{mediaStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},facingMode:{ideal:'environment'}},audio:false});const lv=document.getElementById('rec-live');lv.srcObject=mediaStream;lv.style.display='block';const _gm=document.getElementById('rec-guide-mask');if(_gm)_gm.style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-ind').style.display='none';const ht=document.getElementById('rec-hint');ht.textContent='버튼을 눌러 촬영을 시작하세요';ht.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht.classList.add('fade'),2800);recBlob=null;isRec=false;startBrightCheck();startFaceCheck();document.getElementById('rec-ov').classList.add('open');}catch(err){alert('카메라 접근 실패: '+err.message);}}
+async function startVideoRecord(){closeMediaPicker();if(!navigator.mediaDevices?.getUserMedia){alert('이 브라우저는 영상 촬영을 지원하지 않습니다.');return;}try{mediaStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720},facingMode:{ideal:'environment'}},audio:false});const lv=document.getElementById('rec-live');lv.srcObject=mediaStream;lv.style.display='block';_setGuide(true);document.getElementById('rec-playback').style.display='none';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-ind').style.display='none';const ht=document.getElementById('rec-hint');ht.textContent='버튼을 눌러 촬영을 시작하세요';ht.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht.classList.add('fade'),2800);recBlob=null;isRec=false;_initBrightSlider();_resetBrightZoom();_setScan(true);startBrightCheck();startFaceCheck();document.getElementById('rec-ov').classList.add('open');}catch(err){alert('카메라 접근 실패: '+err.message);}}
 function toggleRec(){if(!isRec){const dw=document.getElementById('dark-warn');if(dw&&dw.style.display==='flex')return;if(_faceDetected)return;recChunks=[];const mt=['video/webm;codecs=vp9','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';const recOpts=mt?{mimeType:mt,videoBitsPerSecond:800000}:{videoBitsPerSecond:800000};mediaRec=new MediaRecorder(mediaStream,recOpts);mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};mediaRec.onstop=()=>{
   clearInterval(recTimer);
   isRec=false;
@@ -1675,7 +1717,7 @@ function toggleRec(){if(!isRec){const dw=document.getElementById('dark-warn');if
     // 얼굴 감지로 강제 중지 → 촬영 대기 상태로 복귀
     _faceStopFlag=false;
     recBlob=null;recChunks=[];
-    const gm=document.getElementById('rec-guide-mask');if(gm)gm.style.display='block';
+    _setGuide(true);
     document.getElementById('rec-live').style.display='block';
     document.getElementById('rec-playback').style.display='none';
     document.getElementById('rec-confirm').style.display='none';
@@ -1692,14 +1734,15 @@ function toggleRec(){if(!isRec){const dw=document.getElementById('dark-warn');if
     clearTimeout(window._recHintTimer);
     window._recHintTimer=setTimeout(()=>ht.classList.add('fade'),4000);
     stopGuideTips();
+    _setScan(true);_resetBrightZoom();
     startBrightCheck();startFaceCheck();
     return;
   }
   // 정상 종료 → 영상 확인 화면
-  stopGuideTips();const gm=document.getElementById('rec-guide-mask');if(gm)gm.style.display='none';const type=(mt||'video/webm').split(';')[0];recBlob=new Blob(recChunks,{type});const pb=document.getElementById('rec-playback');pb.src=URL.createObjectURL(recBlob);pb.style.display='block';document.getElementById('rec-live').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-btn').style.display='none';document.getElementById('rec-confirm').style.display='inline-flex';document.getElementById('rec-retake').style.display='inline-flex';document.getElementById('rec-hint').textContent='영상을 확인하고 등록하거나 다시 촬영하세요.';document.getElementById('rec-hint').classList.remove('fade');clearTimeout(window._recHintTimer);
-};mediaRec.start();isRec=true;recSec=0;document.getElementById('rec-btn').className='rec-circle recording';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-ind').style.display='block';const ht2=document.getElementById('rec-hint');ht2.classList.add('fade');startGuideTips();startBrightCheck();startFaceCheck();recTimer=setInterval(()=>{if(mediaRec?.state==='paused')return;recSec++;document.getElementById('rec-timer').textContent=`00:${String(recSec).padStart(2,'0')}`;if(recSec>=25)document.getElementById('rec-timer').className='rec-timer danger';if(recSec>=30)stopRec();},1000);}else{stopRec();}}
+  stopGuideTips();_setGuide(false);const type=(mt||'video/webm').split(';')[0];recBlob=new Blob(recChunks,{type});const pb=document.getElementById('rec-playback');pb.src=URL.createObjectURL(recBlob);pb.style.display='block';document.getElementById('rec-live').style.display='none';document.getElementById('rec-ind').style.display='none';document.getElementById('rec-btn').style.display='none';document.getElementById('rec-confirm').style.display='inline-flex';document.getElementById('rec-retake').style.display='inline-flex';document.getElementById('rec-hint').textContent='영상을 확인하고 등록하거나 다시 촬영하세요.';document.getElementById('rec-hint').classList.remove('fade');clearTimeout(window._recHintTimer);
+};mediaRec.start();isRec=true;recSec=0;_setScan(false);document.getElementById('rec-btn').className='rec-circle recording';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-ind').style.display='block';const ht2=document.getElementById('rec-hint');ht2.classList.add('fade');startGuideTips();startBrightCheck();startFaceCheck();recTimer=setInterval(()=>{if(mediaRec?.state==='paused')return;recSec++;document.getElementById('rec-timer').textContent=`00:${String(recSec).padStart(2,'0')}`;if(recSec>=25)document.getElementById('rec-timer').className='rec-timer danger';if(recSec>=30)stopRec();},1000);}else{stopRec();}}
 function stopRec(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;stopGuideTips();stopFaceCheck();const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';const po=document.getElementById('rec-pause-ov');if(po)po.style.display='none';if(mediaRec?.state==='paused')mediaRec.resume();if(mediaRec?.state!=='inactive')mediaRec.stop();}
-function retakeRec(){const gm=document.getElementById('rec-guide-mask');if(gm)gm.style.display='block';recBlob=null;recChunks=[];document.getElementById('rec-live').style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';const ht3=document.getElementById('rec-hint');ht3.textContent='버튼을 눌러 촬영을 시작하세요';ht3.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht3.classList.add('fade'),2800);isRec=false;startBrightCheck();startFaceCheck();}
+function retakeRec(){_setGuide(true);recBlob=null;recChunks=[];document.getElementById('rec-live').style.display='block';document.getElementById('rec-playback').style.display='none';document.getElementById('rec-confirm').style.display='none';document.getElementById('rec-retake').style.display='none';document.getElementById('rec-btn').style.display='flex';document.getElementById('rec-btn').className='rec-circle';document.getElementById('rec-btn').innerHTML='<div class="rec-inner" id="rec-inner"></div>';document.getElementById('rec-timer').textContent='00:00';document.getElementById('rec-timer').className='rec-timer';const ht3=document.getElementById('rec-hint');ht3.textContent='버튼을 눌러 촬영을 시작하세요';ht3.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht3.classList.add('fade'),2800);isRec=false;_setScan(true);_resetBrightZoom();startBrightCheck();startFaceCheck();}
 async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');items=[];localStorage.setItem('gyeol_'+tag,'[]');const box=document.getElementById('media-box');box.className='media-box filled';const _recPrevUrl=URL.createObjectURL(recBlob);const _recPreOv=`<div id="pre-upload-ov" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"><div class="analyze-overlay-inner"><div class="arc-ring"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.18)" stroke-width="3.5"/><path d="M22 4 A18 18 0 0 1 40 22" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></div><div class="analyze-txt-wrap"><span class="analyze-txt visible">프레임 추출 중<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div></div></div>`;box.innerHTML=`<video src="${_recPrevUrl}" class="rotate0" id="media-el" playsinline muted loop autoplay></video>`+_recPreOv;try{const videoFrames=await extractVideoFrames(recBlob,8);const ext=recBlob.type.includes('mp4')?'mp4':'webm';const path=`${tag}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
     // 같은 수납장의 이전 사진만 삭제 (다른 수납장 사진 건드리지 않음)
     const op=localStorage.getItem('mediaPath_'+tag);if(op)_sb.storage.from('user_uploads').remove([op]).catch(()=>{});
@@ -1781,6 +1824,7 @@ window.addEventListener('load', async()=>{
 function startFaceCheck(){
   clearInterval(_faceTimer);
   _faceDetected = false;
+  let _faceConsec = 0; // 연속 감지 카운트 (오인식 방지)
   const fw = document.getElementById('face-warn');
   if(fw) fw.style.display = 'none';
   if(!faceModel) return;
@@ -1792,7 +1836,14 @@ function startFaceCheck(){
       c.width = 128; c.height = 96;
       c.getContext('2d').drawImage(v, 0, 0, 128, 96);
       const faces = await faceModel.estimateFaces(c, false);
-      const hasFace = faces.length > 0;
+      // probability 0.87 이상인 얼굴만 실제 감지로 처리
+      const realFace = faces.some(f => {
+        const p = Array.isArray(f.probability) ? f.probability[0] : (f.probability ?? 0);
+        return p > 0.87;
+      });
+      // 2회 연속 감지되어야 경고 (일시적 오인식 차단)
+      if(realFace) { _faceConsec++; } else { _faceConsec = 0; }
+      const hasFace = _faceConsec >= 2;
       // 상태 변경 시에만 오버레이 업데이트
       if(hasFace !== _faceDetected){
         _faceDetected = hasFace;
@@ -1817,7 +1868,109 @@ function stopFaceCheck(){
   if(fw) fw.style.display = 'none';
 }
 
-// ─── 촬영 중 밝기 체크 (pause/resume) ───
+// ─── 스캔라인 제어 ───
+function _setScan(show){
+  const s=document.getElementById('rec-scan');
+  if(!s)return;
+  if(show){s.style.opacity='';s.style.animationPlayState='running';}
+  else{s.style.opacity='0';s.style.animationPlayState='paused';}
+}
+
+// ─── 가이드 오버레이(그리드·브래킷·플래시·밝기·줌·라벨) 일괄 표시/숨김 ───
+function _setGuide(show){
+  const gm=document.getElementById('rec-guide-mask');
+  const lb=document.getElementById('rec-gc-label');
+  const mt=document.getElementById('rec-mode-tab');
+  [gm,lb].forEach(el=>{if(el)el.style.display=show?'':'none';});
+  if(mt)mt.style.display=show?'flex':'none';
+}
+
+// ─── 밝기 / 줌 / 플래시 제어 ───
+window._recBright=1.0; window._recZoom=1.0; window._recFlash=false;
+var _brightDragInit=false, _flashSupported=null;
+
+function _track(){return mediaStream?mediaStream.getVideoTracks()[0]:null;}
+
+function _applyBright(v){
+  window._recBright=Math.max(0.4,Math.min(2.2,v));
+  const vid=document.getElementById('rec-live');
+  if(vid)vid.style.filter=`brightness(${window._recBright.toFixed(2)})`;
+  const t=document.getElementById('rec-bright-thumb');
+  if(t){const pct=((window._recBright-0.4)/1.8*100);t.style.bottom=pct+'%';}
+}
+
+function setZoom(level,btn){
+  window._recZoom=level;
+  // 버튼 활성화 표시
+  document.querySelectorAll('#rec-zoom-row .zoom-btn').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  const vid=document.getElementById('rec-live');
+  // 하드웨어 줌 우선 (화질 손실 없음)
+  const tr=_track();const caps=tr?.getCapabilities?.();
+  let hwDone=false;
+  if(caps?.zoom){
+    const span=caps.zoom.max-caps.zoom.min;
+    // level 1~2 를 카메라 줌 범위에 매핑
+    const zv=caps.zoom.min+Math.min(1,(level-1)/1)*span*0.6;
+    tr.applyConstraints({advanced:[{zoom:Math.max(caps.zoom.min,Math.min(caps.zoom.max,zv))}]}).then(()=>{hwDone=true;}).catch(()=>{});
+    if(vid)vid.style.transform='';
+  }
+  // 하드웨어 미지원 → CSS 확대 폴백
+  if(!caps?.zoom && vid){vid.style.transform=level>1?`scale(${level})`:'';}
+  // 배율 표시
+  const zi=document.getElementById('rec-zoom-ind');
+  if(zi){zi.style.display='block';zi.textContent=`${level}×`;clearTimeout(window._zoomIndT);window._zoomIndT=setTimeout(()=>{zi.style.display='none';},1200);}
+}
+
+async function toggleFlash(){
+  const btn=document.getElementById('rec-flash');
+  const tr=_track();const caps=tr?.getCapabilities?.();
+  if(!caps||!('torch'in caps)){
+    // 미지원 기기 안내
+    const ht=document.getElementById('rec-hint');
+    if(ht){ht.style.bottom='auto';ht.style.top='50%';ht.textContent='이 기기는 플래시를 지원하지 않아요';ht.classList.remove('fade');clearTimeout(window._recHintTimer);window._recHintTimer=setTimeout(()=>ht.classList.add('fade'),2200);}
+    return;
+  }
+  window._recFlash=!window._recFlash;
+  try{await tr.applyConstraints({advanced:[{torch:window._recFlash}]});if(btn)btn.classList.toggle('on',window._recFlash);}
+  catch(e){window._recFlash=false;if(btn)btn.classList.remove('on');}
+}
+
+function _resetBrightZoom(){
+  window._recBright=1.0;window._recZoom=1.0;
+  const vid=document.getElementById('rec-live');
+  if(vid){vid.style.filter='';vid.style.transform='';}
+  const t=document.getElementById('rec-bright-thumb');if(t)t.style.bottom='33%';
+  // 줌 버튼 X1로 복귀
+  document.querySelectorAll('#rec-zoom-row .zoom-btn').forEach(b=>b.classList.toggle('on',b.dataset.z==='1'));
+  // 플래시 끔
+  if(window._recFlash){const tr=_track();if(tr)tr.applyConstraints({advanced:[{torch:false}]}).catch(()=>{});window._recFlash=false;const fb=document.getElementById('rec-flash');if(fb)fb.classList.remove('on');}
+  const zi=document.getElementById('rec-zoom-ind');if(zi)zi.style.display='none';
+}
+
+// 밝기 슬라이더 드래그
+function _initBrightSlider(){
+  if(_brightDragInit)return;_brightDragInit=true;
+  const wrap=document.getElementById('rec-bright-wrap');
+  const track=document.getElementById('rec-bright-track');
+  if(!wrap||!track)return;
+  let dragging=false;
+  const calc=(clientY)=>{
+    const r=track.getBoundingClientRect();
+    let pct=1-(clientY-r.top)/r.height; // 위=1
+    pct=Math.max(0,Math.min(1,pct));
+    _applyBright(0.4+pct*1.8);
+  };
+  const start=e=>{dragging=true;calc((e.touches?e.touches[0]:e).clientY);};
+  const move=e=>{if(!dragging)return;calc((e.touches?e.touches[0]:e).clientY);if(e.cancelable)e.preventDefault();};
+  const end=()=>{dragging=false;};
+  wrap.addEventListener('touchstart',start,{passive:true});
+  wrap.addEventListener('touchmove',move,{passive:false});
+  wrap.addEventListener('touchend',end,{passive:true});
+  wrap.addEventListener('mousedown',e=>{start(e);const mm=ev=>move(ev),mu=()=>{end();document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu);};document.addEventListener('mousemove',mm);document.addEventListener('mouseup',mu);});
+}
+
+
 function startBrightCheck(){
   clearInterval(window._brightTimer);
   window._brightTimer=setInterval(()=>{
@@ -1844,7 +1997,7 @@ function startBrightCheck(){
     }catch(e){}
   },1200);
 }
-function cancelRecording(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;stopFaceCheck();const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';if(mediaRec?.state!=='inactive')mediaRec?.stop();if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}document.getElementById('rec-ov').classList.remove('open');isRec=false;}
+function cancelRecording(){clearInterval(recTimer);clearInterval(window._brightTimer);window._brightTimer=null;stopFaceCheck();const dw=document.getElementById('dark-warn');if(dw)dw.style.display='none';if(mediaRec?.state!=='inactive')mediaRec?.stop();if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}_resetBrightZoom();_setScan(true);document.getElementById('rec-ov').classList.remove('open');isRec=false;}
 
 var OB_STEPS=[
   {sel:'.drawer-btn',title:'수납장 이름 · 색상',desc:'수납장 이름을 변경하고\n12가지 색상 중 원하시는 테마를 선택하실 수 있습니다.',arrow:'down'},
