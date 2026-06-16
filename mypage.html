@@ -37,7 +37,6 @@
       .subscribe();
     checkSystemAnnouncement();
     loadAdminAnnouncements();
-    annCalRender();
     setTimeout(function(){ startOnboarding(); }, 1000);
     })();
 </script>
@@ -519,58 +518,6 @@ body {
 .ob-close{padding:11px 15px;background:#EFEAE2;border:none;border-radius:11px;font-size:12.5px;font-weight:700;color:#8A7E6E;cursor:pointer;font-family:inherit}
 .ob-prev{padding:11px 15px;background:#EFEAE2;border:none;border-radius:11px;font-size:12.5px;font-weight:700;color:#6A5F52;cursor:pointer;font-family:inherit}
 .ob-nxt{flex:1;padding:12px;background:linear-gradient(135deg,#3A322A,#2A2218);border:none;border-radius:11px;font-size:13.5px;font-weight:800;color:#F0D888;cursor:pointer;font-family:inherit;letter-spacing:-.01em}
-/* ─── 미니 캘린더 ─── */
-.ann-cal-wrap { background: var(--tag-bg); border: 1.5px solid var(--border); border-radius: var(--r); margin-top: 8px; overflow: hidden; }
-.ann-cal-trigger { display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer; transition: background .12s; }
-.ann-cal-trigger:active { background: rgba(163,154,140,.1); }
-.ann-cal-ico { width: 30px; height: 30px; border-radius: 8px; background: var(--surface2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: var(--nm-raise-xs); }
-.ann-cal-ico svg { stroke: var(--accent); }
-.ann-cal-info { flex: 1; }
-.ann-cal-title { font-size: 12px; font-weight: 700; color: var(--ink); }
-.ann-cal-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
-.ann-cal-body { display: none; border-top: 1px solid var(--divider); padding: 12px 14px 14px; }
-.ann-cal-body.open { display: block; }
-/* 선택 표시 */
-.ann-sel-row { display: flex; gap: 8px; margin-bottom: 10px; }
-.ann-sel-box { flex: 1; background: var(--bg); border-radius: 9px; padding: 7px 10px; box-shadow: var(--nm-inset-sm); }
-.ann-sel-label { font-size: 9px; font-weight: 700; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 3px; }
-.ann-sel-val { font-size: 12px; color: var(--ink); font-weight: 600; }
-.ann-sel-val.empty { color: var(--muted2); font-weight: 400; }
-/* 달력 그리드 */
-.ann-cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.ann-cal-nav-btn { width: 24px; height: 24px; border: none; background: var(--surface2); border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--nm-raise-xs); }
-.ann-cal-nav-btn svg { stroke: var(--muted); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.ann-cal-month { font-size: 12px; font-weight: 700; color: var(--ink); }
-.ann-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 10px; }
-.ann-cal-dow { font-size: 9px; font-weight: 700; color: var(--muted2); text-align: center; padding: 3px 0; }
-.ann-cal-day { height: 30px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--ink); border-radius: 6px; cursor: pointer; transition: background .1s; }
-.ann-cal-day:hover { background: rgba(163,154,140,.15); }
-.ann-cal-day.empty { pointer-events: none; }
-.ann-cal-day.past { color: var(--muted2); pointer-events: none; }
-.ann-cal-day.today { font-weight: 800; color: var(--accent); }
-.ann-cal-day.sel-start { background: var(--badge-ok); color: #fff; font-weight: 700; }
-.ann-cal-day.sel-end { background: var(--accent); color: #fff; font-weight: 700; }
-.ann-cal-day.sel-start.sel-end { background: linear-gradient(135deg, var(--badge-ok) 50%, var(--accent) 50%); color: #fff; font-weight: 700; }
-.ann-cal-day.in-range { background: rgba(180,148,100,.15); }
-[data-theme="dark"] .ann-cal-day.sel-start { color: #1A1917; }
-[data-theme="dark"] .ann-cal-day.sel-end { color: #1A1917; }
-[data-theme="dark"] .ann-cal-day.sel-start.sel-end { color: #1A1917; }
-[data-theme="dark"] .ann-cal-day.in-range { background: rgba(200,168,112,.12); }
-/* 시간 선택 */
-.ann-time-wrap { display: flex; gap: 10px; margin-bottom: 10px; }
-.ann-time-block { flex: 1; }
-.ann-time-label { font-size: 9px; font-weight: 700; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 4px; }
-.ann-time-sel { display: flex; gap: 4px; }
-.ann-time-sel select { width: 60px; flex: none; background: var(--bg); border: 1.5px solid var(--border2); border-radius: 8px; padding: 6px 4px; font-size: 11px; font-family: var(--font); color: var(--ink); outline: none; text-align: center; box-shadow: var(--nm-inset-sm); }
-.ann-min-wrap { position: relative; width: 60px; flex: none; }
-.ann-min-wrap input { width: 100%; background: var(--bg); border: 1.5px solid var(--border2); border-radius: 8px; padding: 6px 18px 6px 4px; font-size: 11px; font-family: var(--font); color: var(--ink); outline: none; text-align: center; box-shadow: var(--nm-inset-sm); box-sizing: border-box; -webkit-appearance: none; -moz-appearance: textfield; appearance: none; }
-.ann-min-wrap input::-webkit-inner-spin-button,
-.ann-min-wrap input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.ann-min-arrow { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 1px; }
-.ann-min-arrow button { background: none; border: none; padding: 1px 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
-.ann-min-wrap svg { display: block; }
-.ann-cal-confirm { width: 100%; padding: 10px; background: var(--badge-ok); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: var(--font); cursor: pointer; }
-[data-theme="dark"] .ann-cal-confirm { color: #1A1917; }
 
 /* ─── 공지 목록 바텀시트 ─── */
 .ann-sheet-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.48); z-index: 700; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
@@ -598,15 +545,6 @@ body {
 [data-theme="dark"] .asbt-ico.stop { background: rgba(239,68,68,.15); }
 .asbt-txt.muted { color: var(--muted); font-weight: 500; }
 
-/* ─── 캘린더 모달 ─── */
-.ann-cal-modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 800; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
-.ann-cal-modal-ov.open { display: flex; }
-.ann-cal-modal { background: var(--surface2); border-radius: 18px; width: 100%; max-width: 320px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.22); }
-.ann-cal-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; border-bottom: 1px solid var(--divider); }
-.ann-cal-modal-title { font-size: 14px; font-weight: 700; color: var(--ink); }
-.ann-cal-modal-close { width: 26px; height: 26px; border-radius: 7px; background: var(--tag-bg); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.ann-cal-modal-close svg { stroke: var(--muted); stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.ann-cal-modal-body { padding: 12px 16px 16px; }
 
 /* 점검/공지 배너 */
 .announce-bar{position:fixed;top:0;left:0;right:0;z-index:1000;background:#111318;color:#fff;padding:12px 16px;display:none;align-items:flex-start;gap:10px}
@@ -931,6 +869,18 @@ body {
 
     <div class="admin-sep"></div>
 
+    <!-- 현재 게시중 공지 요약 -->
+    <div class="admin-sub-label">현재 공지 상태</div>
+    <div style="padding:0 16px 14px">
+      <div id="ann-current-card" style="background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:13px 14px;display:flex;align-items:center;gap:11px">
+        <div id="ann-current-dot" style="width:9px;height:9px;border-radius:50%;background:var(--muted2);flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div id="ann-current-status" style="font-size:12px;font-weight:700;color:var(--ink)">게시 중인 공지 없음</div>
+          <div id="ann-current-msg" style="font-size:11px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:none"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="admin-sub-label">공지 게시</div>
     <div style="padding:0 16px 14px">
       <textarea id="announce-input" placeholder="예: 5월 20일 오전 2시~3시 점검 예정입니다." style="width:100%;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 12px;font-size:13px;font-family:var(--font);color:var(--ink);resize:none;height:72px;outline:none;box-sizing:border-box;-webkit-user-select:text;user-select:text"></textarea>
@@ -943,22 +893,26 @@ body {
         </label>
       </div>
 
-      <!-- 날짜 설정 트리거 버튼 (예약 시에만 노출) -->
-      <div id="ann-schedule-wrap" style="display:none;margin-top:8px">
-        <button onclick="openAnnCalModal()" style="width:100%;display:flex;align-items:center;gap:10px;background:var(--tag-bg);border:1.5px solid var(--border2);border-radius:var(--r);padding:11px 14px;cursor:pointer;font-family:var(--font);transition:background .12s" onmouseover="this.style.background='rgba(163,154,140,.15)'" onmouseout="this.style.background='var(--tag-bg)'">
-          <div style="width:30px;height:30px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--nm-raise-xs)">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <!-- 예약 일시 입력 (예약 시에만 노출) -->
+      <div id="ann-schedule-wrap" style="display:none;margin-top:10px">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;letter-spacing:.02em">게시 시작 일시</div>
+            <input type="datetime-local" id="ann-start-dt" style="width:100%;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:13px;font-family:var(--font);color:var(--ink);outline:none;box-sizing:border-box">
           </div>
-          <div style="flex:1;text-align:left">
-            <div style="font-size:12px;font-weight:700;color:var(--ink)" id="ann-cal-title">예약 날짜 설정</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:1px" id="ann-cal-sub">탭해서 날짜 선택</div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+              <span style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.02em">게시 종료 일시 <span style="font-weight:400;color:var(--muted2)">(선택)</span></span>
+              <button type="button" onclick="clearAnnEnd()" id="ann-end-clear" style="font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--font);text-decoration:underline;display:none">지우기</button>
+            </div>
+            <input type="datetime-local" id="ann-end-dt" style="width:100%;background:var(--tag-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:13px;font-family:var(--font);color:var(--ink);outline:none;box-sizing:border-box" oninput="document.getElementById('ann-end-clear').style.display=this.value?'inline':'none'">
+            <div style="font-size:10px;color:var(--muted2);margin-top:5px;line-height:1.5">비워두면 직접 중단할 때까지 계속 게시됩니다.</div>
           </div>
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--muted2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
+        </div>
       </div>
 
       <!-- 실행 버튼 -->
-      <div style="display:flex;gap:8px;margin-top:10px">
+      <div style="display:flex;gap:8px;margin-top:12px">
         <button id="ann-post-btn" onclick="postAnnouncement()" style="flex:1;padding:11px;background:var(--badge-ok);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">공지 게시</button>
         <button id="ann-save-btn" onclick="saveAnnouncement()" style="flex:1;padding:11px;background:#2563eb;color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);display:none">수정 저장</button>
         <button onclick="cancelEditAnnouncement()" id="ann-cancel-btn" style="padding:11px 14px;background:var(--tag-bg);color:var(--muted);border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:none">취소</button>
@@ -985,75 +939,6 @@ body {
         </label>
       </div>
       <div id="admin-ann-list"><div style="font-size:12px;color:var(--muted);padding:4px 0">불러오는 중...</div></div>
-    </div>
-  </div>
-
-  <!-- 캘린더 모달 -->
-  <div class="ann-cal-modal-ov" id="ann-cal-modal-ov" onclick="if(event.target===this)closeAnnCalModal()">
-    <div class="ann-cal-modal">
-      <div class="ann-cal-modal-header">
-        <span class="ann-cal-modal-title">예약 날짜 설정</span>
-        <button class="ann-cal-modal-close" onclick="closeAnnCalModal()">
-          <svg viewBox="0 0 24 24" width="12" height="12"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="ann-cal-modal-body">
-        <div class="ann-sel-row">
-          <div class="ann-sel-box">
-            <div class="ann-sel-label">시작</div>
-            <div class="ann-sel-val empty" id="ann-sel-start">날짜 선택</div>
-          </div>
-          <div class="ann-sel-box">
-            <div class="ann-sel-label">종료 <span style="font-weight:400;text-transform:none;letter-spacing:0">(선택)</span></div>
-            <div class="ann-sel-val empty" id="ann-sel-end">날짜 선택</div>
-          </div>
-        </div>
-        <div class="ann-cal-nav">
-          <button class="ann-cal-nav-btn" onclick="annCalChangeMonth(-1)"><svg viewBox="0 0 24 24" width="11" height="11"><polyline points="15 18 9 12 15 6"/></svg></button>
-          <span class="ann-cal-month" id="ann-cal-month"></span>
-          <button class="ann-cal-nav-btn" onclick="annCalChangeMonth(1)"><svg viewBox="0 0 24 24" width="11" height="11"><polyline points="9 18 15 12 9 6"/></svg></button>
-        </div>
-        <div class="ann-cal-grid" id="ann-cal-grid"></div>
-        <div id="ann-time-wrap" style="display:none">
-          <div class="ann-time-wrap">
-            <div class="ann-time-block">
-              <div class="ann-time-label">시작 시간</div>
-              <div class="ann-time-sel">
-                <select id="ann-sh"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option selected>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option></select>
-                <div class="ann-min-wrap">
-                  <input type="text" id="ann-sm" inputmode="numeric" maxlength="2" value="00" placeholder="분" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onblur="var v=parseInt(this.value||0);if(isNaN(v)||v<0)v=0;if(v>59)v=59;this.value=String(v).padStart(2,'0')">
-                  <div class="ann-min-arrow">
-                    <button type="button" onclick="var el=document.getElementById('ann-sm');var v=parseInt(el.value||0);v=v>=59?0:v+1;el.value=String(v).padStart(2,'0')">
-                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 4L4 1L7 4" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
-                    <button type="button" onclick="var el=document.getElementById('ann-sm');var v=parseInt(el.value||0);v=v<=0?59:v-1;el.value=String(v).padStart(2,'0')">
-                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1L4 4L7 1" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="ann-time-block" id="ann-end-time-block" style="display:none">
-              <div class="ann-time-label">종료 시간</div>
-              <div class="ann-time-sel">
-                <select id="ann-eh"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option selected>23</option></select>
-                <div class="ann-min-wrap">
-                  <input type="text" id="ann-em" inputmode="numeric" maxlength="2" value="50" placeholder="분" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onblur="var v=parseInt(this.value||0);if(isNaN(v)||v<0)v=0;if(v>59)v=59;this.value=String(v).padStart(2,'0')">
-                  <div class="ann-min-arrow">
-                    <button type="button" onclick="var el=document.getElementById('ann-em');var v=parseInt(el.value||0);v=v>=59?0:v+1;el.value=String(v).padStart(2,'0')">
-                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 4L4 1L7 4" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
-                    <button type="button" onclick="var el=document.getElementById('ann-em');var v=parseInt(el.value||0);v=v<=0?59:v-1;el.value=String(v).padStart(2,'0')">
-                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1L4 4L7 1" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <button class="ann-cal-confirm" onclick="confirmAnnCal()">확인</button>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1365,8 +1250,6 @@ window.addEventListener('popstate', function(){
   }
   var annSheet = document.getElementById('ann-sheet-ov');
   if(annSheet && annSheet.classList.contains('open')){ closeAnnSheet(); return; }
-  var annCal = document.getElementById('ann-cal-modal-ov');
-  if(annCal && annCal.classList.contains('open')){ closeAnnCalModal(); return; }
 });
 async function checkSystemAnnouncement(){
   try{
@@ -1560,35 +1443,36 @@ async function postAnnouncement() {
     if (!msg) { showToast('공지 내용을 입력해주세요'); return; }
     const isScheduled = document.getElementById('ann-schedule-toggle').checked;
     if (isScheduled) {
-        if (!_annCalStart) { showToast('시작 날짜를 선택해주세요'); return; }
-        var sh = document.getElementById('ann-sh').value;
-        var sm = document.getElementById('ann-sm').value;
-        var startDt = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d, parseInt(sh), parseInt(sm));
-        // 과거 시간 예약 방지
-        if (startDt <= new Date()) { showToast('예약 시간은 현재보다 이후여야 해요'); return; }
-        var scheduledAt = startDt.toISOString();
+        // ── 예약 게시 ──
+        var startVal = document.getElementById('ann-start-dt').value;
+        if (!startVal) { showToast('게시 시작 일시를 선택해주세요'); return; }
+        var startDt = new Date(startVal);
+        if (startDt <= new Date()) { showToast('시작 일시는 현재보다 이후여야 해요'); return; }
         var endsAt = null;
-        var eh = document.getElementById('ann-eh').value;
-        var em = document.getElementById('ann-em').value;
-        // 종료일 선택 여부와 무관하게 종료 시간 블록 입력값 사용 (미선택 시 당일 기준)
-        var endBase = _annCalEnd || _annCalStart;
-        var endDt = new Date(endBase.y, endBase.m, endBase.d, parseInt(eh), parseInt(em));
-        if (endDt <= startDt) { showToast('종료 시간은 시작 시간보다 이후여야 해요'); return; }
-        endsAt = endDt.toISOString();
-        await window.sb.from('system_announcements').insert({
-            active: false, type: 'announcement', title: '공지사항',
-            message: msg, scheduled_at: scheduledAt, ends_at: endsAt
-        });
-        _hideAnnounceBanner();
-        const label = (_annCalStart.m+1)+'월 '+_annCalStart.d+'일 '+sh+':'+sm;
-        showToast('예약 등록됐어요 ('+label+')');
-    } else {
+        var endVal = document.getElementById('ann-end-dt').value;
+        if (endVal) {
+            var endDt = new Date(endVal);
+            if (endDt <= startDt) { showToast('종료 일시는 시작 일시보다 이후여야 해요'); return; }
+            endsAt = endDt.toISOString();
+        }
         try {
-            // 기존 활성 공지 먼저 끄고
+            await window.sb.from('system_announcements').insert({
+                active: false, type: 'announcement', title: '공지사항',
+                message: msg, scheduled_at: startDt.toISOString(), ends_at: endsAt
+            });
+            _hideAnnounceBanner();
+            showToast('예약 등록됐어요 ('+_fmtDateTime(startDt)+')');
+        } catch(e) {
+            console.error('postAnnouncement 예약 오류:', e);
+            showToast('예약 등록 중 오류가 발생했어요');
+            return;
+        }
+    } else {
+        // ── 즉시 게시 (활성 1개 원칙: 기존 활성 공지 끄고 새로 켬) ──
+        try {
             await window.sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
-            // 새 공지 INSERT
             var insRes = await window.sb.from('system_announcements').insert({
-                active: true, type: 'announcement', title: '공지사항', message: msg
+                active: true, type: 'announcement', title: '공지사항', message: msg, scheduled_at: null, ends_at: null
             }).select().limit(1);
             var newId = insRes.data && insRes.data[0] ? insRes.data[0].id : '';
             _showAnnounceBanner(msg, newId);
@@ -1599,12 +1483,20 @@ async function postAnnouncement() {
             return;
         }
     }
+    _resetAnnForm();
+    loadAdminAnnouncements();
+}
+function _fmtDateTime(d) {
+    return (d.getMonth()+1)+'월 '+d.getDate()+'일 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function _resetAnnForm() {
     document.getElementById('announce-input').value = '';
     document.getElementById('ann-schedule-toggle').checked = false;
     document.getElementById('ann-schedule-wrap').style.display = 'none';
+    document.getElementById('ann-start-dt').value = '';
+    document.getElementById('ann-end-dt').value = '';
+    document.getElementById('ann-end-clear').style.display = 'none';
     document.getElementById('ann-post-btn').textContent = '공지 게시';
-    resetAnnCal();
-    loadAdminAnnouncements();
 }
 async function clearAnnouncement() {
     await window.sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
@@ -1685,6 +1577,41 @@ async function annBulkDelete() {
 function _annEsc(str) {
     return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+function _updateAnnCurrentCard(rows) {
+    var dot = document.getElementById('ann-current-dot');
+    var statusEl = document.getElementById('ann-current-status');
+    var msgEl = document.getElementById('ann-current-msg');
+    if (!dot || !statusEl || !msgEl) return;
+    var now = new Date();
+    // 활성 공지 (ends_at 만료 제외)
+    var active = rows.find(function(r){
+        return r.active && (!r.ends_at || new Date(r.ends_at) > now);
+    });
+    // 예약 대기 공지 (가장 가까운 것)
+    var scheduled = rows.filter(function(r){
+        return !r.active && r.scheduled_at && new Date(r.scheduled_at) > now;
+    }).sort(function(a,b){ return new Date(a.scheduled_at) - new Date(b.scheduled_at); })[0];
+
+    if (active) {
+        dot.style.background = '#16a34a';
+        var endTxt = active.ends_at ? ' · ' + _fmtDateTime(new Date(active.ends_at)) + ' 종료' : '';
+        statusEl.textContent = '게시 중' + endTxt;
+        statusEl.style.color = 'var(--ink)';
+        msgEl.textContent = (active.message || '').replace(/\n/g,' ');
+        msgEl.style.display = 'block';
+    } else if (scheduled) {
+        dot.style.background = '#ca8a04';
+        statusEl.textContent = '예약 대기 · ' + _fmtDateTime(new Date(scheduled.scheduled_at)) + ' 게시 예정';
+        statusEl.style.color = 'var(--ink)';
+        msgEl.textContent = (scheduled.message || '').replace(/\n/g,' ');
+        msgEl.style.display = 'block';
+    } else {
+        dot.style.background = 'var(--muted2)';
+        statusEl.textContent = '게시 중인 공지 없음';
+        statusEl.style.color = 'var(--muted)';
+        msgEl.style.display = 'none';
+    }
+}
 async function loadAdminAnnouncements() {
     const el = document.getElementById('admin-ann-list');
     if (!el) return;
@@ -1692,6 +1619,8 @@ async function loadAdminAnnouncements() {
         const { data, error } = await window.sb.from('system_announcements')
             .select('*').neq('type','maintenance')
             .order('created_at', { ascending: false }).limit(30);
+        // ── 현재 공지 상태 카드 갱신 ──
+        _updateAnnCurrentCard(data || []);
         if (error || !data?.length) {
             el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">등록된 공지가 없습니다.</div>';
             return;
@@ -1756,29 +1685,26 @@ async function saveAnnouncement() {
     const isScheduled = document.getElementById('ann-schedule-toggle').checked;
     try {
         if (isScheduled) {
-            if (!_annCalStart) { showToast('시작 날짜를 선택해주세요'); return; }
-            var sh = document.getElementById('ann-sh').value;
-            var sm = document.getElementById('ann-sm').value;
-            var startDt = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d, parseInt(sh), parseInt(sm));
-            if (startDt <= new Date()) { showToast('예약 시간은 현재보다 이후여야 해요'); return; }
-            var scheduledAt = startDt.toISOString();
+            // ── 예약 수정 (같은 row UPDATE) ──
+            var startVal = document.getElementById('ann-start-dt').value;
+            if (!startVal) { showToast('게시 시작 일시를 선택해주세요'); return; }
+            var startDt = new Date(startVal);
+            if (startDt <= new Date()) { showToast('시작 일시는 현재보다 이후여야 해요'); return; }
             var endsAt = null;
-            var eh = document.getElementById('ann-eh').value;
-            var em = document.getElementById('ann-em').value;
-            var endBase = _annCalEnd || _annCalStart;
-            var endDt = new Date(endBase.y, endBase.m, endBase.d, parseInt(eh), parseInt(em));
-            if (endDt <= startDt) { showToast('종료 시간은 시작 시간보다 이후여야 해요'); return; }
-            endsAt = endDt.toISOString();
-            // 같은 row에서 UPDATE (INSERT 하지 않음 → row 중복 생성 방지)
+            var endVal = document.getElementById('ann-end-dt').value;
+            if (endVal) {
+                var endDt = new Date(endVal);
+                if (endDt <= startDt) { showToast('종료 일시는 시작 일시보다 이후여야 해요'); return; }
+                endsAt = endDt.toISOString();
+            }
             await window.sb.from('system_announcements').update({
                 active: false, message: msg,
-                scheduled_at: scheduledAt, ends_at: endsAt
+                scheduled_at: startDt.toISOString(), ends_at: endsAt
             }).eq('id', _editAnnId);
             _hideAnnounceBanner();
-            var label = (_annCalStart.m+1)+'월 '+_annCalStart.d+'일 '+sh+':'+sm;
-            showToast('예약 수정됐어요 ('+label+')');
+            showToast('예약 수정됐어요 ('+_fmtDateTime(startDt)+')');
         } else {
-            // 즉시게시: 기존 활성 공지 모두 끄고, 같은 row를 active:true로 UPDATE
+            // ── 즉시게시 수정 (활성 1개 원칙) ──
             await window.sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
             await window.sb.from('system_announcements').update({
                 active: true, message: msg, scheduled_at: null, ends_at: null
@@ -1805,14 +1731,10 @@ async function deleteAnnouncement(id) {
 
 function cancelEditAnnouncement() {
     _editAnnId = null;
-    document.getElementById('announce-input').value = '';
     document.getElementById('ann-post-btn').style.display = '';
-    document.getElementById('ann-post-btn').textContent = '공지 게시';
     document.getElementById('ann-save-btn').style.display = 'none';
     document.getElementById('ann-cancel-btn').style.display = 'none';
-    document.getElementById('ann-schedule-toggle').checked = false;
-    document.getElementById('ann-schedule-wrap').style.display = 'none';
-    resetAnnCal();
+    _resetAnnForm();
 }
 
 /* ─── 공지 배너 즉시 반영 헬퍼 ─── */
@@ -1840,134 +1762,33 @@ function _hideAnnounceBanner() {
 }
 
 /* ─── 예약 토글 ─── */
+function _dtLocalValue(date) {
+    // Date → datetime-local input 값 (로컬 타임존 기준 YYYY-MM-DDTHH:mm)
+    var pad = function(n){ return String(n).padStart(2,'0'); };
+    return date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+'T'+pad(date.getHours())+':'+pad(date.getMinutes());
+}
 function toggleAnnSchedule() {
     var on = document.getElementById('ann-schedule-toggle').checked;
     document.getElementById('ann-schedule-wrap').style.display = on ? 'block' : 'none';
     document.getElementById('ann-post-btn').textContent = on ? '예약 등록' : '공지 게시';
-}
-
-/* ─── 캘린더 모달 ─── */
-var _annCalY = new Date().getFullYear();
-var _annCalM = new Date().getMonth();
-var _annCalStart = null;
-var _annCalEnd = null;
-var _annCalStep = 0;
-
-function openAnnCalModal() {
-    // 현재 시각으로 시작 시간 초기화
-    var now = new Date();
-    var sh = document.getElementById('ann-sh');
-    var sm = document.getElementById('ann-sm');
-    if (sh && !_annCalStart) sh.value = String(now.getHours()).padStart(2,'0');
-    if (sm && !_annCalStart) sm.value = String(now.getMinutes()).padStart(2,'0');
-    annCalRender();
-    document.getElementById('ann-cal-modal-ov').classList.add('open');
-    history.pushState(null, '', location.href);
-}
-function closeAnnCalModal() {
-    document.getElementById('ann-cal-modal-ov').classList.remove('open');
-}
-
-function annCalChangeMonth(d) {
-    _annCalM += d;
-    if (_annCalM > 11) { _annCalM = 0; _annCalY++; }
-    if (_annCalM < 0) { _annCalM = 11; _annCalY--; }
-    annCalRender();
-}
-
-function annCalRender() {
-    var months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-    var monthEl = document.getElementById('ann-cal-month');
-    if (monthEl) monthEl.textContent = _annCalY + '년 ' + months[_annCalM];
-    var grid = document.getElementById('ann-cal-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    var dows = ['일','월','화','수','목','금','토'];
-    dows.forEach(function(d) { var el = document.createElement('div'); el.className = 'ann-cal-dow'; el.textContent = d; grid.appendChild(el); });
-    var first = new Date(_annCalY, _annCalM, 1).getDay();
-    var days = new Date(_annCalY, _annCalM + 1, 0).getDate();
-    var today = new Date();
-    for (var i = 0; i < first; i++) { var el = document.createElement('div'); el.className = 'ann-cal-day empty'; grid.appendChild(el); }
-    for (var day = 1; day <= days; day++) {
-        var el = document.createElement('div');
-        el.textContent = day;
-        var cls = 'ann-cal-day';
-        var isPast = new Date(_annCalY, _annCalM, day) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        if (isPast) cls += ' past';
-        if (today.getFullYear()===_annCalY && today.getMonth()===_annCalM && today.getDate()===day) cls += ' today';
-        if (_annCalStart && _annCalStart.y===_annCalY && _annCalStart.m===_annCalM && _annCalStart.d===day) cls += ' sel-start';
-        if (_annCalEnd && _annCalEnd.y===_annCalY && _annCalEnd.m===_annCalM && _annCalEnd.d===day) cls += ' sel-end';
-        if (_annCalStart && _annCalEnd) {
-            var ds2 = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d);
-            var de2 = new Date(_annCalEnd.y, _annCalEnd.m, _annCalEnd.d);
-            var dc2 = new Date(_annCalY, _annCalM, day);
-            if (dc2 > ds2 && dc2 < de2) cls += ' in-range';
-        }
-        el.className = cls;
-        if (!isPast) { (function(d){ el.onclick = function() { annCalPickDay(d); }; })(day); }
-        grid.appendChild(el);
-    }
-}
-
-function annCalPickDay(d) {
-    if (_annCalStep === 0 || _annCalStep === 2) {
-        _annCalStart = { y: _annCalY, m: _annCalM, d: d }; _annCalEnd = null; _annCalStep = 1;
-    } else {
-        var picked = new Date(_annCalY, _annCalM, d);
-        var start = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d);
-        if (picked < start) {
-            // 시작일보다 이전 → 시작일 재설정
-            _annCalStart = { y: _annCalY, m: _annCalM, d: d }; _annCalEnd = null; _annCalStep = 1;
-        } else {
-            // 당일 포함 이후 → 종료일 설정
-            _annCalEnd = { y: _annCalY, m: _annCalM, d: d }; _annCalStep = 2;
+    // 예약 켤 때 시작 일시가 비어있으면 현재+10분으로 기본 세팅 (편의)
+    if (on) {
+        var startEl = document.getElementById('ann-start-dt');
+        if (startEl && !startEl.value) {
+            var t = new Date(Date.now() + 10*60*1000);
+            startEl.value = _dtLocalValue(t);
         }
     }
-    annCalUpdateSelDisplay();
-    annCalRender();
-    var tw = document.getElementById('ann-time-wrap');
-    var etb = document.getElementById('ann-end-time-block');
-    if (tw) tw.style.display = _annCalStart ? 'block' : 'none';
-    // 시작일 선택 시에도 종료 시간 블록 표시 (당일 종료 포함)
-    if (etb) etb.style.display = _annCalStart ? 'block' : 'none';
 }
-
-function annCalUpdateSelDisplay() {
-    var ss = document.getElementById('ann-sel-start');
-    var se = document.getElementById('ann-sel-end');
-    var startTxt = _annCalStart ? (_annCalStart.m+1)+'월 '+_annCalStart.d+'일' : null;
-    var endTxt = _annCalEnd ? (_annCalEnd.m+1)+'월 '+_annCalEnd.d+'일' : null;
-    if (ss) { ss.textContent = startTxt || '날짜 선택'; ss.className = startTxt ? 'ann-sel-val' : 'ann-sel-val empty'; }
-    if (se) { se.textContent = endTxt || '날짜 선택'; se.className = endTxt ? 'ann-sel-val' : 'ann-sel-val empty'; }
-}
-
-function confirmAnnCal() {
-    if (!_annCalStart) return;
-    var sh = document.getElementById('ann-sh').value;
-    var sm = document.getElementById('ann-sm').value;
-    var eh = document.getElementById('ann-eh').value;
-    var em = document.getElementById('ann-em').value;
-    var txt = (_annCalStart.m+1)+'월 '+_annCalStart.d+'일 '+sh+':'+sm;
-    var endBase = _annCalEnd || _annCalStart;
-    txt += ' ~ '+( endBase.m+1)+'월 '+endBase.d+'일 '+eh+':'+em;
-    var title = document.getElementById('ann-cal-title'); if (title) title.textContent = '예약 설정 완료';
-    var sub = document.getElementById('ann-cal-sub'); if (sub) sub.textContent = txt;
-    closeAnnCalModal();
-}
-
-function resetAnnCal() {
-    _annCalStart = null; _annCalEnd = null; _annCalStep = 0;
-    _annCalY = new Date().getFullYear(); _annCalM = new Date().getMonth();
-    var tw = document.getElementById('ann-time-wrap'); if (tw) tw.style.display = 'none';
-    var etb = document.getElementById('ann-end-time-block'); if (etb) etb.style.display = 'none';
-    var title = document.getElementById('ann-cal-title'); if (title) title.textContent = '예약 날짜 설정';
-    var sub = document.getElementById('ann-cal-sub'); if (sub) sub.textContent = '탭해서 날짜 선택';
-    annCalUpdateSelDisplay();
+function clearAnnEnd() {
+    document.getElementById('ann-end-dt').value = '';
+    document.getElementById('ann-end-clear').style.display = 'none';
 }
 
 /* ─── 공지 바텀시트 ─── */
 var _annSheetId = null;
 var _annSheetScheduledAt = null;
+var _annSheetEndsAt = null;
 
 function _makeAnnBtn(icoClass, icoSvg, txtClass, label, onclick) {
     return '<button class="asbt" onclick="'+onclick+'">' +
@@ -1979,6 +1800,7 @@ function _makeAnnBtn(icoClass, icoSvg, txtClass, label, onclick) {
 function openAnnSheet(id, badgeClass, badgeText, msg, date, scheduledAt, endsAt) {
     _annSheetId = id;
     _annSheetScheduledAt = scheduledAt || null;
+    _annSheetEndsAt = endsAt || null;
     var badge = document.getElementById('ann-sheet-badge');
     badge.textContent = badgeText; badge.className = 'ann-badge ' + badgeClass;
     document.getElementById('ann-sheet-date').textContent = date;
@@ -2033,27 +1855,29 @@ function annSheetEdit() {
     var msg = document.getElementById('ann-sheet-msg').textContent;
     var badge = document.getElementById('ann-sheet-badge');
     var isSched = badge && badge.classList.contains('sched');
+    var schedAt = _annSheetScheduledAt;
+    var endsAt = _annSheetEndsAt;
     closeAnnSheet();
     _editAnnId = id;
     document.getElementById('announce-input').value = msg;
     document.getElementById('ann-post-btn').style.display = 'none';
     document.getElementById('ann-save-btn').style.display = 'flex';
     document.getElementById('ann-cancel-btn').style.display = 'flex';
-    // 예약 공지 편집 시: 예약 토글 켜고 저장된 날짜/시간 복원
-    if (isSched && _annSheetScheduledAt) {
-        var sd = new Date(_annSheetScheduledAt);
+    // 예약 공지 편집 시: 예약 토글 켜고 datetime 입력에 시작/종료 복원
+    if (isSched && schedAt) {
         document.getElementById('ann-schedule-toggle').checked = true;
         document.getElementById('ann-schedule-wrap').style.display = 'block';
-        _annCalStart = { y: sd.getFullYear(), m: sd.getMonth(), d: sd.getDate() };
-        _annCalEnd = null;
-        _annCalStep = 1;
-        _annCalY = sd.getFullYear();
-        _annCalM = sd.getMonth();
-        document.getElementById('ann-sh').value = String(sd.getHours()).padStart(2,'0');
-        document.getElementById('ann-sm').value = String(sd.getMinutes()).padStart(2,'0');
-        var tw = document.getElementById('ann-time-wrap'); if (tw) tw.style.display = 'flex';
-        annCalRender();
-        annCalUpdateSelDisplay();
+        document.getElementById('ann-start-dt').value = _dtLocalValue(new Date(schedAt));
+        if (endsAt) {
+            document.getElementById('ann-end-dt').value = _dtLocalValue(new Date(endsAt));
+            document.getElementById('ann-end-clear').style.display = 'inline';
+        } else {
+            document.getElementById('ann-end-dt').value = '';
+            document.getElementById('ann-end-clear').style.display = 'none';
+        }
+    } else {
+        document.getElementById('ann-schedule-toggle').checked = false;
+        document.getElementById('ann-schedule-wrap').style.display = 'none';
     }
     document.getElementById('announce-input').focus();
     document.getElementById('announce-input').scrollIntoView({ behavior: 'smooth', block: 'center' });
