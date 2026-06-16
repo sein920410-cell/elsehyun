@@ -1765,7 +1765,14 @@ async function confirmRec(){if(!recBlob)return;if(mediaStream){mediaStream.getTr
 async function checkSystemAnnouncement(){
   try{
     const{data,error}=await window.sb.from('system_announcements').select('*').eq('active',true).order('created_at',{ascending:false}).limit(1);
-    if(error||!data?.length)return;
+    if(error||!data?.length){
+      // 활성 공지 없음 → 배너/점검화면 숨김
+      const _bar=document.getElementById('announce-bar');
+      if(_bar&&_bar.classList.contains('show')){_bar.classList.remove('show');document.querySelector('.header').style.marginTop='';}
+      const _mov=document.getElementById('maintenance-ov');
+      if(_mov&&_mov.classList.contains('show'))_mov.classList.remove('show');
+      return;
+    }
     const ann=data[0];
     const now=new Date();
     if(ann.ends_at&&new Date(ann.ends_at)<now){return;}
