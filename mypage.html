@@ -1529,15 +1529,16 @@ async function postAnnouncement() {
             active: false, type: 'announcement', title: '공지사항',
             message: msg, scheduled_at: scheduledAt, ends_at: endsAt
         });
+        _hideAnnounceBanner();
         const label = (_annCalStart.m+1)+'월 '+_annCalStart.d+'일 '+sh+':'+sm;
         showToast('예약 등록됐어요 ('+label+')');
     } else {
         await sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
-        await sb.from('system_announcements').insert({
+        var insRes = await sb.from('system_announcements').insert({
             active: true, type: 'announcement', title: '공지사항', message: msg
-        });
-        Object.keys(localStorage).filter(k=>k.startsWith('gyeol_ann_')).forEach(k=>localStorage.removeItem(k));
-        checkSystemAnnouncement();
+        }).select().limit(1);
+        var newId = insRes.data && insRes.data[0] ? insRes.data[0].id : '';
+        _showAnnounceBanner(msg, newId);
         showToast('공지가 게시됐어요');
     }
     document.getElementById('announce-input').value = '';
@@ -1613,9 +1614,10 @@ async function saveAnnouncement() {
     if (!_editAnnId) return;
     const msg = document.getElementById('announce-input').value.trim();
     if (!msg) { showToast('내용을 입력해주세요'); return; }
-    // 기존 row 종료 후 새 row insert → 새 ID 생성으로 고객 기기 재공지 처리
     await sb.from('system_announcements').update({ active: false }).eq('id', _editAnnId);
-    await sb.from('system_announcements').insert({ active: true, type: 'announcement', title: '공지사항', message: msg });
+    var insRes = await sb.from('system_announcements').insert({ active: true, type: 'announcement', title: '공지사항', message: msg }).select().limit(1);
+    var newId = insRes.data && insRes.data[0] ? insRes.data[0].id : '';
+    _showAnnounceBanner(msg, newId);
     cancelEditAnnouncement();
     showToast('공지가 수정·재게시됐어요');
     loadAdminAnnouncements();
@@ -1637,7 +1639,29 @@ function cancelEditAnnouncement() {
     document.getElementById('ann-cancel-btn').style.display = 'none';
 }
 
-function _annEsc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+/* ─── 공지 배너 즉시 반영 헬퍼 ─── */
+function _showAnnounceBanner(msg, annId) {
+    // localStorage 초기화
+    Object.keys(localStorage).filter(function(k){ return k.startsWith('gyeol_ann_'); }).forEach(function(k){ localStorage.removeItem(k); });
+    var bar = document.getElementById('announce-bar');
+    var titleEl = document.getElementById('announce-title');
+    var msgEl = document.getElementById('announce-msg');
+    if (!bar || !titleEl || !msgEl) return;
+    titleEl.textContent = '공지사항';
+    msgEl.innerHTML = '';
+    var span = document.createElement('span');
+    span.className = 'mq';
+    span.textContent = msg;
+    msgEl.appendChild(span);
+    bar.dataset.annId = annId || '';
+    bar.classList.add('show');
+    setTimeout(function(){ var hd = document.querySelector('.header'); if(hd) hd.style.marginTop = bar.offsetHeight + 'px'; }, 50);
+}
+function _hideAnnounceBanner() {
+    var bar = document.getElementById('announce-bar');
+    if (bar) { bar.classList.remove('show'); var hd = document.querySelector('.header'); if(hd) hd.style.marginTop = ''; }
+    Object.keys(localStorage).filter(function(k){ return k.startsWith('gyeol_ann_'); }).forEach(function(k){ localStorage.removeItem(k); });
+}
 
 /* ─── 예약 토글 ─── */
 function toggleAnnSchedule() {
@@ -1798,9 +1822,7 @@ async function annSheetStop() {
     if (!_annSheetId) return;
     if (!confirm('이 공지를 중단하시겠습니까?')) return;
     await sb.from('system_announcements').update({ active: false, scheduled_at: null }).eq('id', _annSheetId);
-    var bar = document.getElementById('announce-bar');
-    if (bar) { bar.classList.remove('show'); var hd = document.querySelector('.header'); if (hd) hd.style.marginTop = ''; }
-    Object.keys(localStorage).filter(function(k){ return k.startsWith('gyeol_ann_'); }).forEach(function(k){ localStorage.removeItem(k); });
+    _hideAnnounceBanner();
     closeAnnSheet(); showToast('공지가 중단됐어요'); loadAdminAnnouncements();
 }
 
