@@ -358,24 +358,31 @@
 
             } else {
                 // ── 패키지 태그 처리 ───────────────────────────
-                const { data: rows_serial } = await supabase
-                    .from('serials')
-                    .select('used_by, set_number')
-                    .eq('set_number', parsed.num)
+                // 검증 기준: serial_codes 테이블의 실제 태그(code) 소유 여부
+                // (serials의 set_number로 검증하면 세트 내 태그 하나만 등록돼도
+                //  세트 전체가 통과되는 보안 구멍이 생기므로, 태그 단위로 검증한다)
+                const { data: rows_codes } = await supabase
+                    .from('serial_codes')
+                    .select('used_by, code')
+                    .eq('code', code)
                     .limit(1);
-                const serial = rows_serial?.[0];
+                const tagRow = rows_codes?.[0];
 
-                if (!serial) {
+                if (!tagRow) {
+                    // serial_codes에 없는 코드 = 정품 아님
                     document.getElementById('invalid-code').textContent = code;
                     show('state-invalid');
-                } else if (!serial.used_by) {
+                } else if (tagRow.used_by === session.user.email) {
+                    // 본인 소유 태그 → 입장
+                    window.location.replace(getRedirectUrl(code));
+                } else if (!tagRow.used_by) {
+                    // 미등록 태그 → 시리얼 등록 화면 (입력 강제)
                     document.getElementById('btn-register').onclick = () => {
                         window.location.replace('serial.html');
                     };
                     show('state-unregistered');
-                } else if (serial.used_by === session.user.email) {
-                    window.location.replace(getRedirectUrl(code));
                 } else {
+                    // 다른 사용자가 등록한 태그 → 차단
                     show('state-taken');
                 }
             }
