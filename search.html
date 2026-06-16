@@ -744,7 +744,12 @@ async function checkSystemAnnouncement(){
     var _annSb=(typeof window!=='undefined'&&window._searchSb)?window._searchSb:(typeof sb!=='undefined'?sb:null);
     if(!_annSb)return;
     var r=await _annSb.from('system_announcements').select('*').eq('active',true).order('created_at',{ascending:false}).limit(1);
-    if(r.error||!r.data||!r.data.length)return;
+    if(r.error||!r.data||!r.data.length){
+      // 활성 공지 없음 → 점검화면 숨김
+      var _mov=document.getElementById('maintenance-ov');
+      if(_mov&&_mov.classList.contains('show'))_mov.classList.remove('show');
+      return;
+    }
     var ann=r.data[0];
     if(ann.ends_at&&new Date(ann.ends_at)<new Date())return;
     if(ann.type==='maintenance'){
