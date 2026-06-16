@@ -1687,12 +1687,23 @@ async function loadAdminAnnouncements() {
         data.forEach(function(ann) {
             var d = new Date(ann.created_at);
             var ds = d.getFullYear()+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getDate().toString().padStart(2,'0');
+            var dTime = d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
             var preview = (ann.message||'').replace(/\n/g,' ');
             var isScheduled = !ann.active && ann.scheduled_at;
             var isActive = ann.active;
             var badgeClass = isScheduled ? 'sched' : isActive ? 'on' : 'off';
             var badgeText = isScheduled ? '예약중' : isActive ? '게시중' : '종료';
             var safeId = ann.id;
+            // 예약중이면 scheduled_at 기준 날짜/시간 (예약 색상으로 구분)
+            var dateHtml;
+            if (isScheduled && ann.scheduled_at) {
+                var sd = new Date(ann.scheduled_at);
+                var sds = sd.getFullYear()+'.'+(sd.getMonth()+1).toString().padStart(2,'0')+'.'+sd.getDate().toString().padStart(2,'0');
+                var sdt = sd.getHours().toString().padStart(2,'0')+':'+sd.getMinutes().toString().padStart(2,'0');
+                dateHtml = '<span class="ann-date">'+sds+'</span><span style="font-size:11px;color:#ca8a04;flex-shrink:0;white-space:nowrap;margin-left:3px;font-weight:700">'+sdt+'</span>';
+            } else {
+                dateHtml = '<span class="ann-date">'+ds+' '+dTime+'</span>';
+            }
             var item = document.createElement('div');
             item.className = 'ann-item';
             item.style.cursor = 'pointer';
@@ -1701,7 +1712,7 @@ async function loadAdminAnnouncements() {
                 '<input type="checkbox" class="ann-check" data-id="'+safeId+'" onclick="event.stopPropagation();annCheckChange()" style="display:none;width:15px;height:15px;flex-shrink:0;cursor:pointer;accent-color:var(--badge-ok)">'+
                 '<span class="ann-badge '+badgeClass+'">'+badgeText+'</span>'+
                 '<span class="ann-preview">'+_annEsc(preview)+'</span>'+
-                '<span class="ann-date">'+ds+'</span>'+
+                dateHtml+
                 '<svg class="ann-arrow" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="var(--muted2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>';
             item.onclick = function() {
                 if(window._annSelectMode) return;
