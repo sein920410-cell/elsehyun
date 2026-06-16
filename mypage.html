@@ -966,14 +966,15 @@ body {
     <!-- 공지 내역 목록 -->
     <div class="admin-sep"></div>
     <div class="ann-list-wrap" style="padding-bottom:16px">
-      <div class="ann-list-label">공지 내역</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 8px">
-        <div id="ann-bulk-toolbar" style="display:none;align-items:center;gap:8px">
-          <span id="ann-sel-count" style="font-size:11px;color:var(--muted)">0개 선택</span>
-          <button onclick="annBulkDelete()" style="font-size:11px;font-weight:700;padding:4px 10px;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:var(--font)">선택 삭제</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 8px">
+        <div class="ann-list-label" style="padding:0;margin:0">공지 내역</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div id="ann-bulk-toolbar" style="display:none;align-items:center;gap:8px">
+            <span id="ann-sel-count" style="font-size:11px;color:var(--muted)">0개 선택</span>
+            <button onclick="annBulkDelete()" style="font-size:11px;font-weight:700;padding:4px 10px;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:var(--font)">선택 삭제</button>
+          </div>
+          <button id="ann-select-mode-btn" onclick="toggleAnnSelectMode()" style="font-size:11px;font-weight:600;padding:4px 10px;background:var(--tag-bg);color:var(--muted);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:var(--font)">선택</button>
         </div>
-        <div style="flex:1"></div>
-        <button id="ann-select-mode-btn" onclick="toggleAnnSelectMode()" style="font-size:11px;font-weight:600;padding:4px 10px;background:var(--tag-bg);color:var(--muted);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:var(--font)">선택</button>
       </div>
       <div id="ann-select-all-row" style="display:none;padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:2px">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--muted)">
