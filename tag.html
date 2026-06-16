@@ -173,17 +173,6 @@
         html[data-mode="dark"] .btn-accent { color: #1A1714; }
 
         /* ── 코드 인라인 태그 ── */
-        .code-tag {
-            display: inline-block;
-            background: var(--surface);
-            box-shadow: var(--nm-inset-sm);
-            border-radius: 8px;
-            padding: 3px 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            color: var(--text);
-            margin: 2px 0 16px;
-        }
     </style>
 </head>
 <body>
@@ -235,7 +224,6 @@
             </div>
             <p class="state-title">등록되지 않은 태그예요</p>
             <p class="state-desc">공식 제품이 아닌 경우 이 메시지가 표시될 수 있어요.</p>
-            <span id="invalid-code" class="code-tag"></span>
         </div>
     </div>
 
@@ -316,11 +304,30 @@
         return `drawer.html?tag=${encodeURIComponent(code)}`;
     }
 
+    // ── 운영자 계정 (DB 안 거치는 특수 케이스) ──────────────
+    // 운영자 세트는 serial_codes에 없고 serials에만 GYEOL-BOSS-* 로 존재한다.
+    // 일반 검증(serial_codes)을 타면 "정품 아님"으로 막히므로 별도 분기로 처리.
+    const ADMIN_EMAIL = 'gngn5803@nate.com';
+
     // ── 메인 로직 ──────────────────────────────────────────────
     const code = extractCode();
 
     if (!code) {
         show('state-no-code');
+    } else if (code.startsWith('GYEOL-BOSS-')) {
+        // ── 운영자 태그 처리 ───────────────────────────────────
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            // 로그인 후 다시 이 주소로 돌아오게
+            localStorage.setItem('gyeol_after_login', window.location.href);
+            window.location.replace(`login.html?redirect=${encodeURIComponent(window.location.href)}`);
+        } else if (session.user.email === ADMIN_EMAIL) {
+            // 운영자 본인만 입장 (사칭 방지)
+            window.location.replace(getRedirectUrl(code));
+        } else {
+            // 운영자 아닌 계정이 BOSS 주소로 접근 → 차단
+            show('state-taken');
+        }
     } else {
         const parsed = parseCode(code);
 
@@ -343,7 +350,6 @@
                 const single = rows_single?.[0];
 
                 if (!single) {
-                    document.getElementById('invalid-code').textContent = code;
                     show('state-invalid');
                 } else if (!single.used_by) {
                     document.getElementById('btn-register').onclick = () => {
@@ -369,8 +375,7 @@
                 const tagRow = rows_codes?.[0];
 
                 if (!tagRow) {
-                    // serial_codes에 없는 코드 = 정품 아님
-                    document.getElementById('invalid-code').textContent = code;
+                    // serial_codes에 없는 코드 = 정품 아님 (코드는 화면에 노출하지 않음)
                     show('state-invalid');
                 } else if (tagRow.used_by === session.user.email) {
                     // 본인 소유 태그 → 입장
