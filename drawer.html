@@ -28,7 +28,14 @@
     document.body.style.visibility = 'visible';
     // 방문 기록 (운영자 제외)
     try { if(session.user.email!=='gngn5803@nate.com') _authClient.from('page_views').insert({page:'drawer',user_email:session.user.email}); } catch(e){}
-    setTimeout(checkSystemAnnouncement, 300);
+    checkSystemAnnouncement();
+    // Realtime 구독: system_announcements 변경 즉시 반영
+    _authClient
+      .channel('ann_drawer')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'system_announcements' }, function() {
+        checkSystemAnnouncement();
+      })
+      .subscribe();
     setTimeout(function(){ startOnboarding(); }, 1000);
     })();
 </script>
@@ -1774,12 +1781,12 @@ async function checkSystemAnnouncement(){
       }
       document.getElementById('maintenance-ov').classList.add('show');
     } else {
-      const dismissed=localStorage.getItem('gyeol_ann_dismissed_'+ann.id);
+      const dismissed=localStorage.getItem('gyeol_ann_dismissed_'+ann.created_at);
       if(dismissed)return;
       document.getElementById('announce-title').textContent=ann.title||'공지사항';
       const _msgEl=document.getElementById('announce-msg');_msgEl.innerHTML='';
       const _mq=document.createElement('span');_mq.className='mq';_mq.textContent=ann.message;_msgEl.appendChild(_mq);
-      const _bar=document.getElementById('announce-bar');_bar.dataset.annId=ann.id;_bar.classList.add('show');
+      const _bar=document.getElementById('announce-bar');_bar.dataset.annId=ann.created_at;_bar.classList.add('show');
       // 배너 높이만큼 헤더 아래로 밀기
       setTimeout(()=>{
         const h=document.getElementById('announce-bar').offsetHeight;
