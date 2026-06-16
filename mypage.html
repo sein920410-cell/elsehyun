@@ -29,6 +29,18 @@
     const { data: serialRows } = await _sb.from('serials').select('id').eq('used_by', session.user.email).limit(1);
     if (!serialRows?.[0]) { window.location.replace('serial.html'); return; }
     document.body.style.visibility = 'visible';
+    // async IIFE 완료 시점에 sb 확정 → 이후 모든 함수 정상 동작
+    sb = window.sb;
+    checkSystemAnnouncement();
+    loadAdminAnnouncements();
+    annCalRender();
+    // Realtime 구독: 예약공지 자동활성화(pg_cron) 포함 모든 변경 즉시 반영
+    _sb.channel('ann_mypage')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'system_announcements' }, function() {
+        checkSystemAnnouncement();
+        loadAdminAnnouncements();
+      })
+      .subscribe();
     setTimeout(function(){ startOnboarding(); }, 1000);
     })();
 </script>
@@ -1153,7 +1165,7 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
-var sb = window.sb;
+var sb; // async IIFE 완료 후 할당 (페이지 로드 순서 문제 방지)
 
 var FOUNDER_EMAILS = ['gngn5803@nate.com'];
 var MAX_CREDITS = 50;
@@ -1340,10 +1352,6 @@ window.addEventListener('popstate', function(){
   if(annSheet && annSheet.classList.contains('open')){ closeAnnSheet(); return; }
   var annCal = document.getElementById('ann-cal-modal-ov');
   if(annCal && annCal.classList.contains('open')){ closeAnnCalModal(); return; }
-});
-document.addEventListener('DOMContentLoaded', function(){
-  checkSystemAnnouncement();
-  annCalRender();
 });
 async function checkSystemAnnouncement(){
   try{
