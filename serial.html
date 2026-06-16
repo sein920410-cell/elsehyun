@@ -156,28 +156,14 @@
             const urlCode = params.get('code');
             const isAdd = params.get('add') === 'true';
 
+            // 단품 코드가 URL에 있으면 입력창에 자동 채움 (편의)
             if (urlCode && urlCode.toUpperCase().startsWith('GYEOL-S-')) {
                 document.getElementById('serial').value = urlCode.toUpperCase();
-            } else if (isAdd) {
-                // 마이페이지 "추가 등록" — 그냥 폼 표시
-            } else {
-                // gyeol_after_login이 있으면 tag.html이 세트 검증을 직접 처리하므로 바로 이동
-                const afterLogin = localStorage.getItem('gyeol_after_login');
-                if (afterLogin) {
-                    localStorage.removeItem('gyeol_after_login');
-                    window.location.replace(afterLogin);
-                } else {
-                    // after_login 없을 때만 기존 등록 여부로 통과 판단
-                    const { data: rows } = await supabase
-                        .from('serials')
-                        .select('id')
-                        .eq('used_by', session.user.email)
-                        .limit(1);
-                    if (rows && rows.length > 0) {
-                        window.location.replace('search.html');
-                    }
-                }
             }
+            // isAdd(추가 등록) 또는 그 외의 경우: 폼을 그대로 표시하고 시리얼 입력을 받는다.
+            // ⚠️ 진입 시 자동 통과(gyeol_after_login 리다이렉트 / 등록이력 기반 통과)는
+            //    제거됨 — 시리얼 입력 없이 미등록 세트로 진입되는 보안 구멍이었음.
+            //    모든 진입 검증은 tag.html이 serial_codes(태그 단위)로 처리한다.
         }
 
         document.getElementById('submit-btn').addEventListener('click', async () => {
