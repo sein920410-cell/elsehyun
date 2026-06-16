@@ -966,7 +966,20 @@ body {
     <!-- 공지 내역 목록 -->
     <div class="admin-sep"></div>
     <div class="ann-list-wrap" style="padding-bottom:16px">
-      <div class="ann-list-label">공지 내역</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 6px">
+        <div class="ann-list-label" style="padding:0">공지 내역</div>
+        <div id="ann-bulk-toolbar" style="display:none;align-items:center;gap:8px">
+          <span id="ann-sel-count" style="font-size:11px;color:var(--muted)">0개 선택</span>
+          <button onclick="annBulkDelete()" style="font-size:11px;font-weight:700;padding:4px 10px;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:var(--font)">선택 삭제</button>
+        </div>
+        <button id="ann-select-mode-btn" onclick="toggleAnnSelectMode()" style="font-size:11px;font-weight:600;padding:4px 10px;background:var(--tag-bg);color:var(--muted);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:var(--font)">선택</button>
+      </div>
+      <div id="ann-select-all-row" style="display:none;padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:2px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--muted)">
+          <input type="checkbox" id="ann-check-all" onchange="annCheckAll(this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--badge-ok)">
+          전체 선택
+        </label>
+      </div>
       <div id="admin-ann-list"><div style="font-size:12px;color:var(--muted);padding:4px 0">불러오는 중...</div></div>
     </div>
   </div>
@@ -1592,6 +1605,68 @@ async function clearAnnouncement() {
 /* ─── 공지 내역 관리 ─── */
 var _editAnnId = null;
 
+/* ─── 공지 다중선택 삭제 ─── */
+var _annSelectMode = false;
+window._annSelectMode = false;
+
+function toggleAnnSelectMode() {
+    _annSelectMode = !_annSelectMode;
+    window._annSelectMode = _annSelectMode;
+    var btn = document.getElementById('ann-select-mode-btn');
+    var toolbar = document.getElementById('ann-bulk-toolbar');
+    var allRow = document.getElementById('ann-select-all-row');
+    var checks = document.querySelectorAll('.ann-check');
+    var arrows = document.querySelectorAll('.ann-arrow');
+    if (_annSelectMode) {
+        btn.textContent = '취소';
+        btn.style.color = 'var(--ink)';
+        toolbar.style.display = 'flex';
+        allRow.style.display = 'block';
+        checks.forEach(function(c){ c.style.display = 'block'; c.checked = false; });
+        arrows.forEach(function(a){ a.style.display = 'none'; });
+    } else {
+        btn.textContent = '선택';
+        btn.style.color = 'var(--muted)';
+        toolbar.style.display = 'none';
+        allRow.style.display = 'none';
+        checks.forEach(function(c){ c.style.display = 'none'; c.checked = false; });
+        arrows.forEach(function(a){ a.style.display = ''; });
+        document.getElementById('ann-check-all').checked = false;
+        document.getElementById('ann-sel-count').textContent = '0개 선택';
+    }
+}
+
+function annCheckAll(checked) {
+    document.querySelectorAll('.ann-check').forEach(function(c){ c.checked = checked; });
+    annCheckChange();
+}
+
+function annCheckChange() {
+    var total = document.querySelectorAll('.ann-check:checked').length;
+    document.getElementById('ann-sel-count').textContent = total + '개 선택';
+    var allChecks = document.querySelectorAll('.ann-check');
+    var allEl = document.getElementById('ann-check-all');
+    if(allEl) allEl.checked = total === allChecks.length && total > 0;
+}
+
+async function annBulkDelete() {
+    var ids = [];
+    document.querySelectorAll('.ann-check:checked').forEach(function(c){ ids.push(c.dataset.id); });
+    if (!ids.length) { showToast('선택된 공지가 없습니다'); return; }
+    if (!confirm(ids.length + '개 공지를 삭제할까요?')) return;
+    try {
+        for (var i = 0; i < ids.length; i++) {
+            await window.sb.from('system_announcements').delete().eq('id', ids[i]);
+        }
+        showToast(ids.length + '개 삭제됐어요');
+        toggleAnnSelectMode();
+        loadAdminAnnouncements();
+    } catch(e) {
+        showToast('삭제 중 오류가 발생했어요');
+        console.error('annBulkDelete 오류:', e);
+    }
+}
+
 function _annEsc(str) {
     return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -1619,12 +1694,17 @@ async function loadAdminAnnouncements() {
             var item = document.createElement('div');
             item.className = 'ann-item';
             item.style.cursor = 'pointer';
+            item.dataset.annId = safeId;
             item.innerHTML =
+                '<input type="checkbox" class="ann-check" data-id="'+safeId+'" onclick="event.stopPropagation();annCheckChange()" style="display:none;width:15px;height:15px;flex-shrink:0;cursor:pointer;accent-color:var(--badge-ok)">'+
                 '<span class="ann-badge '+badgeClass+'">'+badgeText+'</span>'+
                 '<span class="ann-preview">'+_annEsc(preview)+'</span>'+
                 '<span class="ann-date">'+ds+'</span>'+
-                '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="var(--muted2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>';
-            item.onclick = function() { openAnnSheet(safeId, badgeClass, badgeText, ann.message||'', ds, ann.scheduled_at, ann.ends_at); };
+                '<svg class="ann-arrow" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="var(--muted2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>';
+            item.onclick = function() {
+                if(window._annSelectMode) return;
+                openAnnSheet(safeId, badgeClass, badgeText, ann.message||'', ds, ann.scheduled_at, ann.ends_at);
+            };
             el.appendChild(item);
         });
     } catch(e) {
