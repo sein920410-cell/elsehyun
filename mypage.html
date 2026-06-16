@@ -1592,6 +1592,9 @@ async function clearAnnouncement() {
 /* ─── 공지 내역 관리 ─── */
 var _editAnnId = null;
 
+function _annEsc(str) {
+    return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 async function loadAdminAnnouncements() {
     const el = document.getElementById('admin-ann-list');
     if (!el) return;
@@ -1613,7 +1616,6 @@ async function loadAdminAnnouncements() {
             var badgeClass = isScheduled ? 'sched' : isActive ? 'on' : 'off';
             var badgeText = isScheduled ? '예약중' : isActive ? '게시중' : '종료';
             var safeId = ann.id;
-            var safeMsg = _annEsc(ann.message||'').replace(/'/g,"&#39;").replace(/\n/g,'\\n');
             var item = document.createElement('div');
             item.className = 'ann-item';
             item.style.cursor = 'pointer';
@@ -1626,6 +1628,7 @@ async function loadAdminAnnouncements() {
             el.appendChild(item);
         });
     } catch(e) {
+        console.error('loadAdminAnnouncements 실패:', e);
         el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">불러오기 실패</div>';
     }
 }
