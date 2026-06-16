@@ -1578,13 +1578,21 @@ async function postAnnouncement() {
         const label = (_annCalStart.m+1)+'월 '+_annCalStart.d+'일 '+sh+':'+sm;
         showToast('예약 등록됐어요 ('+label+')');
     } else {
-        await window.sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
-        var insRes = await window.sb.from('system_announcements').insert({
-            active: true, type: 'announcement', title: '공지사항', message: msg
-        }).select().limit(1);
-        var newId = insRes.data && insRes.data[0] ? insRes.data[0].id : '';
-        _showAnnounceBanner(msg, newId);
-        showToast('공지가 게시됐어요');
+        try {
+            // 기존 활성 공지 먼저 끄고
+            await window.sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
+            // 새 공지 INSERT
+            var insRes = await window.sb.from('system_announcements').insert({
+                active: true, type: 'announcement', title: '공지사항', message: msg
+            }).select().limit(1);
+            var newId = insRes.data && insRes.data[0] ? insRes.data[0].id : '';
+            _showAnnounceBanner(msg, newId);
+            showToast('공지가 게시됐어요');
+        } catch(e) {
+            console.error('postAnnouncement 즉시게시 오류:', e);
+            showToast('게시 중 오류가 발생했어요');
+            return;
+        }
     }
     document.getElementById('announce-input').value = '';
     document.getElementById('ann-schedule-toggle').checked = false;
@@ -1741,34 +1749,40 @@ async function saveAnnouncement() {
     const msg = document.getElementById('announce-input').value.trim();
     if (!msg) { showToast('내용을 입력해주세요'); return; }
     const isScheduled = document.getElementById('ann-schedule-toggle').checked;
-    // 기존 row 비활성화 (재공지 버그 방지)
-    await window.sb.from('system_announcements').update({ active: false }).eq('id', _editAnnId);
-    if (isScheduled) {
-        if (!_annCalStart) { showToast('시작 날짜를 선택해주세요'); return; }
-        var sh = document.getElementById('ann-sh').value;
-        var sm = document.getElementById('ann-sm').value;
-        var startDt = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d, parseInt(sh), parseInt(sm));
-        var scheduledAt = startDt.toISOString();
-        var endsAt = null;
-        if (_annCalEnd) {
-            var eh = document.getElementById('ann-eh').value;
-            var em = document.getElementById('ann-em').value;
-            endsAt = new Date(_annCalEnd.y, _annCalEnd.m, _annCalEnd.d, parseInt(eh), parseInt(em)).toISOString();
+    try {
+        if (isScheduled) {
+            if (!_annCalStart) { showToast('시작 날짜를 선택해주세요'); return; }
+            var sh = document.getElementById('ann-sh').value;
+            var sm = document.getElementById('ann-sm').value;
+            var startDt = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d, parseInt(sh), parseInt(sm));
+            var scheduledAt = startDt.toISOString();
+            var endsAt = null;
+            if (_annCalEnd) {
+                var eh = document.getElementById('ann-eh').value;
+                var em = document.getElementById('ann-em').value;
+                endsAt = new Date(_annCalEnd.y, _annCalEnd.m, _annCalEnd.d, parseInt(eh), parseInt(em)).toISOString();
+            }
+            // 같은 row에서 UPDATE (INSERT 하지 않음 → row 중복 생성 방지)
+            await window.sb.from('system_announcements').update({
+                active: false, message: msg,
+                scheduled_at: scheduledAt, ends_at: endsAt
+            }).eq('id', _editAnnId);
+            _hideAnnounceBanner();
+            var label = (_annCalStart.m+1)+'월 '+_annCalStart.d+'일 '+sh+':'+sm;
+            showToast('예약 수정됐어요 ('+label+')');
+        } else {
+            // 즉시게시: 기존 활성 공지 모두 끄고, 같은 row를 active:true로 UPDATE
+            await window.sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
+            await window.sb.from('system_announcements').update({
+                active: true, message: msg, scheduled_at: null, ends_at: null
+            }).eq('id', _editAnnId);
+            _showAnnounceBanner(msg, _editAnnId);
+            showToast('공지가 수정됐어요');
         }
-        await window.sb.from('system_announcements').insert({
-            active: false, type: 'announcement', title: '공지사항',
-            message: msg, scheduled_at: scheduledAt, ends_at: endsAt
-        });
-        _hideAnnounceBanner();
-        var label = (_annCalStart.m+1)+'월 '+_annCalStart.d+'일 '+sh+':'+sm;
-        showToast('예약 수정됐어요 ('+label+')');
-    } else {
-        var insRes = await window.sb.from('system_announcements').insert({
-            active: true, type: 'announcement', title: '공지사항', message: msg
-        }).select().limit(1);
-        var newId = insRes.data && insRes.data[0] ? insRes.data[0].id : '';
-        _showAnnounceBanner(msg, newId);
-        showToast('공지가 수정·재게시됐어요');
+    } catch(e) {
+        console.error('saveAnnouncement 오류:', e);
+        showToast('저장 중 오류가 발생했어요');
+        return;
     }
     cancelEditAnnouncement();
     loadAdminAnnouncements();
@@ -1937,6 +1951,7 @@ function resetAnnCal() {
 
 /* ─── 공지 바텀시트 ─── */
 var _annSheetId = null;
+var _annSheetScheduledAt = null;
 
 function _makeAnnBtn(icoClass, icoSvg, txtClass, label, onclick) {
     return '<button class="asbt" onclick="'+onclick+'">' +
@@ -1947,6 +1962,7 @@ function _makeAnnBtn(icoClass, icoSvg, txtClass, label, onclick) {
 
 function openAnnSheet(id, badgeClass, badgeText, msg, date, scheduledAt, endsAt) {
     _annSheetId = id;
+    _annSheetScheduledAt = scheduledAt || null;
     var badge = document.getElementById('ann-sheet-badge');
     badge.textContent = badgeText; badge.className = 'ann-badge ' + badgeClass;
     document.getElementById('ann-sheet-date').textContent = date;
@@ -1981,21 +1997,48 @@ function closeAnnSheet() {
 
 async function annSheetStop() {
     if (!_annSheetId) return;
-    if (!confirm('이 공지를 중단하시겠습니까?')) return;
-    await window.sb.from('system_announcements').update({ active: false, scheduled_at: null }).eq('id', _annSheetId);
-    _hideAnnounceBanner();
-    closeAnnSheet(); showToast('공지가 중단됐어요'); loadAdminAnnouncements();
+    var badge = document.getElementById('ann-sheet-badge');
+    var isSched = badge && badge.classList.contains('sched');
+    if (isSched) {
+        // 예약 공지 취소 → row 삭제 (confirm 없이 즉시)
+        await window.sb.from('system_announcements').delete().eq('id', _annSheetId);
+        closeAnnSheet(); showToast('예약이 취소됐어요'); loadAdminAnnouncements();
+    } else {
+        // 게시 중인 공지 중단 → confirm 후 active:false
+        if (!confirm('이 공지를 중단하시겠습니까?')) return;
+        await window.sb.from('system_announcements').update({ active: false }).eq('id', _annSheetId);
+        _hideAnnounceBanner();
+        closeAnnSheet(); showToast('공지가 중단됐어요'); loadAdminAnnouncements();
+    }
 }
 
 function annSheetEdit() {
     var id = _annSheetId;
     var msg = document.getElementById('ann-sheet-msg').textContent;
+    var badge = document.getElementById('ann-sheet-badge');
+    var isSched = badge && badge.classList.contains('sched');
     closeAnnSheet();
     _editAnnId = id;
     document.getElementById('announce-input').value = msg;
     document.getElementById('ann-post-btn').style.display = 'none';
     document.getElementById('ann-save-btn').style.display = 'flex';
     document.getElementById('ann-cancel-btn').style.display = 'flex';
+    // 예약 공지 편집 시: 예약 토글 켜고 저장된 날짜/시간 복원
+    if (isSched && _annSheetScheduledAt) {
+        var sd = new Date(_annSheetScheduledAt);
+        document.getElementById('ann-schedule-toggle').checked = true;
+        document.getElementById('ann-schedule-wrap').style.display = 'block';
+        _annCalStart = { y: sd.getFullYear(), m: sd.getMonth(), d: sd.getDate() };
+        _annCalEnd = null;
+        _annCalStep = 1;
+        _annCalY = sd.getFullYear();
+        _annCalM = sd.getMonth();
+        document.getElementById('ann-sh').value = String(sd.getHours()).padStart(2,'0');
+        document.getElementById('ann-sm').value = String(sd.getMinutes()).padStart(2,'0');
+        var tw = document.getElementById('ann-time-wrap'); if (tw) tw.style.display = 'flex';
+        annCalRender();
+        annCalUpdateSelDisplay();
+    }
     document.getElementById('announce-input').focus();
     document.getElementById('announce-input').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
