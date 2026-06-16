@@ -23,6 +23,7 @@
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc',
         { auth: { storage: window.localStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
     );
+    window.sb = _sb;
     const { data: { session } } = await _sb.auth.getSession();
     if (!session) { window.location.replace('login.html'); return; }
     const { data: serialRows } = await _sb.from('serials').select('id').eq('used_by', session.user.email).limit(1);
@@ -1152,11 +1153,7 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
-var sb = supabase.createClient(
-    'https://tqhtggusphhcsygiitrv.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc',
-    { auth: { storage: window.localStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
-);
+var sb = window.sb;
 
 var FOUNDER_EMAILS = ['gngn5803@nate.com'];
 var MAX_CREDITS = 50;
