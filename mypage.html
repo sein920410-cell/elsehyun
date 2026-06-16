@@ -1705,6 +1705,12 @@ var _annCalEnd = null;
 var _annCalStep = 0;
 
 function openAnnCalModal() {
+    // 현재 시각으로 시작 시간 초기화
+    var now = new Date();
+    var sh = document.getElementById('ann-sh');
+    var sm = document.getElementById('ann-sm');
+    if (sh && !_annCalStart) sh.value = String(now.getHours()).padStart(2,'0');
+    if (sm && !_annCalStart) sm.value = String(now.getMinutes()).padStart(2,'0');
     annCalRender();
     document.getElementById('ann-cal-modal-ov').classList.add('open');
     history.pushState(null, '', location.href);
