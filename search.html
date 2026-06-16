@@ -34,8 +34,13 @@
     // 방문 기록 (운영자 제외)
     try { if(session.user.email!=='gngn5803@nate.com') _authClient.from('page_views').insert({page:'index',user_email:session.user.email}); } catch(e){}
     checkSystemAnnouncement();
-    // 30초마다 새 공지 체크 (새로고침 없이 빨간점 표시)
-    setInterval(checkSystemAnnouncement, 30000);
+    // Realtime 구독: system_announcements 변경 즉시 반영
+    _authClient
+      .channel('ann_search')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'system_announcements' }, function() {
+        checkSystemAnnouncement();
+      })
+      .subscribe();
     // drawers 테이블에서 이 사용자의 모든 수납장을 localStorage로 복원 (방문기록 지워도 유지)
     try {
         const { data: rows } = await _authClient
@@ -760,10 +765,10 @@ async function checkSystemAnnouncement(){
       document.getElementById('maintenance-ov').classList.add('show');
     }else{
       // 검색 화면에서는 배너 표시 안 함 — 공지함(🔔)에서만 확인
-      if(!localStorage.getItem('gyeol_ann_seen_'+ann.id)){
+      if(!localStorage.getItem('gyeol_ann_seen_'+ann.created_at)){
         var dot=document.getElementById('bell-dot');
         if(dot)dot.style.display='block';
-        window._pendingAnnId=ann.id;
+        window._pendingAnnId=ann.created_at;
       }
     }
   }catch(e){console.log('공지 체크 실패',e.message);}
@@ -846,5 +851,4 @@ function closeAnnounce(){
   <div class="thumb-fs-content" id="thumb-fs-content"></div>
 </div>
 </body>
-</html> 
- 
+</html>
