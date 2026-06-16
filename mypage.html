@@ -554,8 +554,9 @@ body {
 .ann-min-wrap input { width: 100%; background: var(--bg); border: 1.5px solid var(--border2); border-radius: 8px; padding: 6px 18px 6px 4px; font-size: 11px; font-family: var(--font); color: var(--ink); outline: none; text-align: center; box-shadow: var(--nm-inset-sm); box-sizing: border-box; -webkit-appearance: none; -moz-appearance: textfield; appearance: none; }
 .ann-min-wrap input::-webkit-inner-spin-button,
 .ann-min-wrap input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.ann-min-arrow { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); pointer-events: none; display: flex; flex-direction: column; gap: 1px; }
-.ann-min-arrow svg { display: block; }
+.ann-min-arrow { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 1px; }
+.ann-min-arrow button { background: none; border: none; padding: 1px 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.ann-min-wrap svg { display: block; }
 .ann-cal-confirm { width: 100%; padding: 10px; background: var(--badge-ok); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: var(--font); cursor: pointer; }
 [data-theme="dark"] .ann-cal-confirm { color: #1A1917; }
 
@@ -995,8 +996,12 @@ body {
                 <div class="ann-min-wrap">
                   <input type="text" id="ann-sm" inputmode="numeric" maxlength="2" value="00" placeholder="분" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onblur="var v=parseInt(this.value||0);if(isNaN(v)||v<0)v=0;if(v>59)v=59;this.value=String(v).padStart(2,'0')">
                   <div class="ann-min-arrow">
-                    <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 4L4 1L7 4" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1L4 4L7 1" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <button type="button" onclick="var el=document.getElementById('ann-sm');var v=parseInt(el.value||0);if(v<59)v++;el.value=String(v).padStart(2,'0')">
+                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 4L4 1L7 4" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button type="button" onclick="var el=document.getElementById('ann-sm');var v=parseInt(el.value||0);if(v>0)v--;el.value=String(v).padStart(2,'0')">
+                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1L4 4L7 1" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1008,8 +1013,12 @@ body {
                 <div class="ann-min-wrap">
                   <input type="text" id="ann-em" inputmode="numeric" maxlength="2" value="50" placeholder="분" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onblur="var v=parseInt(this.value||0);if(isNaN(v)||v<0)v=0;if(v>59)v=59;this.value=String(v).padStart(2,'0')">
                   <div class="ann-min-arrow">
-                    <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 4L4 1L7 4" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1L4 4L7 1" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <button type="button" onclick="var el=document.getElementById('ann-em');var v=parseInt(el.value||0);if(v<59)v++;el.value=String(v).padStart(2,'0')">
+                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 4L4 1L7 4" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button type="button" onclick="var el=document.getElementById('ann-em');var v=parseInt(el.value||0);if(v>0)v--;el.value=String(v).padStart(2,'0')">
+                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1L4 4L7 1" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
                   </div>
                 </div>
               </div>
