@@ -1727,12 +1727,37 @@ async function saveAnnouncement() {
     if (!_editAnnId) return;
     const msg = document.getElementById('announce-input').value.trim();
     if (!msg) { showToast('내용을 입력해주세요'); return; }
+    const isScheduled = document.getElementById('ann-schedule-toggle').checked;
+    // 기존 row 비활성화 (재공지 버그 방지)
     await window.sb.from('system_announcements').update({ active: false }).eq('id', _editAnnId);
-    var insRes = await window.sb.from('system_announcements').insert({ active: true, type: 'announcement', title: '공지사항', message: msg }).select().limit(1);
-    var newId = insRes.data && insRes.data[0] ? insRes.data[0].id : '';
-    _showAnnounceBanner(msg, newId);
+    if (isScheduled) {
+        if (!_annCalStart) { showToast('시작 날짜를 선택해주세요'); return; }
+        var sh = document.getElementById('ann-sh').value;
+        var sm = document.getElementById('ann-sm').value;
+        var startDt = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d, parseInt(sh), parseInt(sm));
+        var scheduledAt = startDt.toISOString();
+        var endsAt = null;
+        if (_annCalEnd) {
+            var eh = document.getElementById('ann-eh').value;
+            var em = document.getElementById('ann-em').value;
+            endsAt = new Date(_annCalEnd.y, _annCalEnd.m, _annCalEnd.d, parseInt(eh), parseInt(em)).toISOString();
+        }
+        await window.sb.from('system_announcements').insert({
+            active: false, type: 'announcement', title: '공지사항',
+            message: msg, scheduled_at: scheduledAt, ends_at: endsAt
+        });
+        _hideAnnounceBanner();
+        var label = (_annCalStart.m+1)+'월 '+_annCalStart.d+'일 '+sh+':'+sm;
+        showToast('예약 수정됐어요 ('+label+')');
+    } else {
+        var insRes = await window.sb.from('system_announcements').insert({
+            active: true, type: 'announcement', title: '공지사항', message: msg
+        }).select().limit(1);
+        var newId = insRes.data && insRes.data[0] ? insRes.data[0].id : '';
+        _showAnnounceBanner(msg, newId);
+        showToast('공지가 수정·재게시됐어요');
+    }
     cancelEditAnnouncement();
-    showToast('공지가 수정·재게시됐어요');
     loadAdminAnnouncements();
 }
 
@@ -1748,8 +1773,12 @@ function cancelEditAnnouncement() {
     _editAnnId = null;
     document.getElementById('announce-input').value = '';
     document.getElementById('ann-post-btn').style.display = '';
+    document.getElementById('ann-post-btn').textContent = '공지 게시';
     document.getElementById('ann-save-btn').style.display = 'none';
     document.getElementById('ann-cancel-btn').style.display = 'none';
+    document.getElementById('ann-schedule-toggle').checked = false;
+    document.getElementById('ann-schedule-wrap').style.display = 'none';
+    resetAnnCal();
 }
 
 /* ─── 공지 배너 즉시 반영 헬퍼 ─── */
