@@ -996,10 +996,10 @@ body {
                 <div class="ann-min-wrap">
                   <input type="text" id="ann-sm" inputmode="numeric" maxlength="2" value="00" placeholder="분" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onblur="var v=parseInt(this.value||0);if(isNaN(v)||v<0)v=0;if(v>59)v=59;this.value=String(v).padStart(2,'0')">
                   <div class="ann-min-arrow">
-                    <button type="button" onclick="var el=document.getElementById('ann-sm');var v=parseInt(el.value||0);if(v<59)v++;el.value=String(v).padStart(2,'0')">
+                    <button type="button" onclick="var el=document.getElementById('ann-sm');var v=parseInt(el.value||0);v=v>=59?0:v+1;el.value=String(v).padStart(2,'0')">
                       <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 4L4 1L7 4" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
-                    <button type="button" onclick="var el=document.getElementById('ann-sm');var v=parseInt(el.value||0);if(v>0)v--;el.value=String(v).padStart(2,'0')">
+                    <button type="button" onclick="var el=document.getElementById('ann-sm');var v=parseInt(el.value||0);v=v<=0?59:v-1;el.value=String(v).padStart(2,'0')">
                       <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1L4 4L7 1" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                   </div>
@@ -1013,10 +1013,10 @@ body {
                 <div class="ann-min-wrap">
                   <input type="text" id="ann-em" inputmode="numeric" maxlength="2" value="50" placeholder="분" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onblur="var v=parseInt(this.value||0);if(isNaN(v)||v<0)v=0;if(v>59)v=59;this.value=String(v).padStart(2,'0')">
                   <div class="ann-min-arrow">
-                    <button type="button" onclick="var el=document.getElementById('ann-em');var v=parseInt(el.value||0);if(v<59)v++;el.value=String(v).padStart(2,'0')">
+                    <button type="button" onclick="var el=document.getElementById('ann-em');var v=parseInt(el.value||0);v=v>=59?0:v+1;el.value=String(v).padStart(2,'0')">
                       <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 4L4 1L7 4" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
-                    <button type="button" onclick="var el=document.getElementById('ann-em');var v=parseInt(el.value||0);if(v>0)v--;el.value=String(v).padStart(2,'0')">
+                    <button type="button" onclick="var el=document.getElementById('ann-em');var v=parseInt(el.value||0);v=v<=0?59:v-1;el.value=String(v).padStart(2,'0')">
                       <svg width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1L4 4L7 1" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                   </div>
