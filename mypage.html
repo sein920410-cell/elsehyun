@@ -550,9 +550,11 @@ body {
 .ann-cal-day.today { font-weight: 800; color: var(--accent); }
 .ann-cal-day.sel-start { background: var(--badge-ok); color: #fff; font-weight: 700; }
 .ann-cal-day.sel-end { background: var(--accent); color: #fff; font-weight: 700; }
+.ann-cal-day.sel-start.sel-end { background: linear-gradient(135deg, var(--badge-ok) 50%, var(--accent) 50%); color: #fff; font-weight: 700; }
 .ann-cal-day.in-range { background: rgba(180,148,100,.15); }
 [data-theme="dark"] .ann-cal-day.sel-start { color: #1A1917; }
 [data-theme="dark"] .ann-cal-day.sel-end { color: #1A1917; }
+[data-theme="dark"] .ann-cal-day.sel-start.sel-end { color: #1A1917; }
 [data-theme="dark"] .ann-cal-day.in-range { background: rgba(200,168,112,.12); }
 /* 시간 선택 */
 .ann-time-wrap { display: flex; gap: 10px; margin-bottom: 10px; }
@@ -1562,12 +1564,16 @@ async function postAnnouncement() {
         var sh = document.getElementById('ann-sh').value;
         var sm = document.getElementById('ann-sm').value;
         var startDt = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d, parseInt(sh), parseInt(sm));
+        // 과거 시간 예약 방지
+        if (startDt <= new Date()) { showToast('예약 시간은 현재보다 이후여야 해요'); return; }
         var scheduledAt = startDt.toISOString();
         var endsAt = null;
         if (_annCalEnd) {
             var eh = document.getElementById('ann-eh').value;
             var em = document.getElementById('ann-em').value;
             var endDt = new Date(_annCalEnd.y, _annCalEnd.m, _annCalEnd.d, parseInt(eh), parseInt(em));
+            // 종료 시간이 시작 시간보다 이전/같으면 막기
+            if (endDt <= startDt) { showToast('종료 시간은 시작 시간보다 이후여야 해요'); return; }
             endsAt = endDt.toISOString();
         }
         await window.sb.from('system_announcements').insert({
@@ -1755,12 +1761,15 @@ async function saveAnnouncement() {
             var sh = document.getElementById('ann-sh').value;
             var sm = document.getElementById('ann-sm').value;
             var startDt = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d, parseInt(sh), parseInt(sm));
+            if (startDt <= new Date()) { showToast('예약 시간은 현재보다 이후여야 해요'); return; }
             var scheduledAt = startDt.toISOString();
             var endsAt = null;
             if (_annCalEnd) {
                 var eh = document.getElementById('ann-eh').value;
                 var em = document.getElementById('ann-em').value;
-                endsAt = new Date(_annCalEnd.y, _annCalEnd.m, _annCalEnd.d, parseInt(eh), parseInt(em)).toISOString();
+                var endDt = new Date(_annCalEnd.y, _annCalEnd.m, _annCalEnd.d, parseInt(eh), parseInt(em));
+                if (endDt <= startDt) { showToast('종료 시간은 시작 시간보다 이후여야 해요'); return; }
+                endsAt = endDt.toISOString();
             }
             // 같은 row에서 UPDATE (INSERT 하지 않음 → row 중복 생성 방지)
             await window.sb.from('system_announcements').update({
@@ -1908,8 +1917,13 @@ function annCalPickDay(d) {
     } else {
         var picked = new Date(_annCalY, _annCalM, d);
         var start = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d);
-        if (picked <= start) { _annCalStart = { y: _annCalY, m: _annCalM, d: d }; _annCalEnd = null; _annCalStep = 1; }
-        else { _annCalEnd = { y: _annCalY, m: _annCalM, d: d }; _annCalStep = 2; }
+        if (picked < start) {
+            // 시작일보다 이전 날짜 → 시작일 재설정
+            _annCalStart = { y: _annCalY, m: _annCalM, d: d }; _annCalEnd = null; _annCalStep = 1;
+        } else {
+            // 당일 포함 이후 날짜 → 종료일로 설정
+            _annCalEnd = { y: _annCalY, m: _annCalM, d: d }; _annCalStep = 2;
+        }
     }
     annCalUpdateSelDisplay();
     annCalRender();
@@ -2345,4 +2359,3 @@ function obClose(){
 </script>
 </body>
 </html>
- 
