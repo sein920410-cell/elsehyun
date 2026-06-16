@@ -29,18 +29,15 @@
     const { data: serialRows } = await _sb.from('serials').select('id').eq('used_by', session.user.email).limit(1);
     if (!serialRows?.[0]) { window.location.replace('serial.html'); return; }
     document.body.style.visibility = 'visible';
-    // async IIFE 완료 시점에 sb 확정 → 이후 모든 함수 정상 동작
-    sb = window.sb;
-    checkSystemAnnouncement();
-    loadAdminAnnouncements();
-    annCalRender();
-    // Realtime 구독: 예약공지 자동활성화(pg_cron) 포함 모든 변경 즉시 반영
     _sb.channel('ann_mypage')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'system_announcements' }, function() {
         checkSystemAnnouncement();
         loadAdminAnnouncements();
       })
       .subscribe();
+    checkSystemAnnouncement();
+    loadAdminAnnouncements();
+    annCalRender();
     setTimeout(function(){ startOnboarding(); }, 1000);
     })();
 </script>
@@ -1165,7 +1162,8 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
-var sb; // async IIFE 완료 후 할당 (페이지 로드 순서 문제 방지)
+// sb는 window.sb 직접 참조 (타이밍 문제 제거)
+
 
 var FOUNDER_EMAILS = ['gngn5803@nate.com'];
 var MAX_CREDITS = 50;
@@ -1226,7 +1224,7 @@ window.addEventListener('pageshow', function(){ try{ if(localStorage.getItem('gy
 document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible'){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); } else { document.documentElement.removeAttribute('data-theme'); } }catch(e){} } });
 
 /* 페이지 초기화 */
-sb.auth.getSession().then(function(res) {
+window.sb.auth.getSession().then(function(res) {
     var session = res.data.session;
     if (!session) { window.location.replace('login.html'); return; }
     currentSession = session;
@@ -1259,8 +1257,8 @@ sb.auth.getSession().then(function(res) {
 
     /* 등록 정보 */
     Promise.all([
-        sb.from('serials').select('set_number, used_at').eq('used_by', email),
-        sb.from('single_serials').select('item_number, used_at').eq('used_by', email)
+        window.sb.from('serials').select('set_number, used_at').eq('used_by', email),
+        window.sb.from('single_serials').select('item_number, used_at').eq('used_by', email)
     ]).then(function(results) {
         var pkgData = results[0].data || [];
         var singleData = results[1].data || [];
@@ -1293,7 +1291,7 @@ sb.auth.getSession().then(function(res) {
     });
 
     /* 이용권 사용량 */
-    sb.from('serials').select('ai_credits').eq('used_by', email).limit(1).then(function(r) {
+    window.sb.from('serials').select('ai_credits').eq('used_by', email).limit(1).then(function(r) {
         var credits = (r.data && r.data[0] != null) ? r.data[0].ai_credits : MAX_CREDITS;
         var used = MAX_CREDITS - credits;
         var pct = Math.min(100, Math.round(used / MAX_CREDITS * 100));
@@ -1421,7 +1419,7 @@ function showToast(msg) {
 }
 function handleLogout() {
     if (!confirm('로그아웃 하시겠습니까?')) return;
-    sb.auth.signOut().then(function() { window.location.replace('login.html'); });
+    window.sb.auth.signOut().then(function() { window.location.replace('login.html'); });
 }
 
 function showInviteCode() {
@@ -1476,7 +1474,7 @@ async function loadAdminStatus() {
     // 운영 현황 통계 로드
     loadAdminStats();
     // 점검/공지 상태 로드
-    const { data } = await sb.from('system_announcements').select('*').eq('active', true).order('created_at', { ascending: false }).limit(1);
+    const { data } = await window.sb.from('system_announcements').select('*').eq('active', true).order('created_at', { ascending: false }).limit(1);
     if (!data || !data.length) {
         document.getElementById('maintenance-status-txt').textContent = '꺼짐 — 고객 정상 이용 중';
         loadAdminAnnouncements();
@@ -1508,9 +1506,9 @@ async function loadAdminStats() {
         today.setHours(0,0,0,0);
         const todayISO = today.toISOString();
         const [custRes, drawerRes, todayRes] = await Promise.all([
-            sb.from('serials').select('id', { count: 'exact', head: true }).not('used_by', 'is', null).neq('used_by','gngn5803@nate.com'),
-            sb.from('drawers').select('id', { count: 'exact', head: true }),
-            sb.from('serials').select('id', { count: 'exact', head: true }).gte('used_at', todayISO).not('used_by', 'is', null).neq('used_by','gngn5803@nate.com')
+            window.sb.from('serials').select('id', { count: 'exact', head: true }).not('used_by', 'is', null).neq('used_by','gngn5803@nate.com'),
+            window.sb.from('drawers').select('id', { count: 'exact', head: true }),
+            window.sb.from('serials').select('id', { count: 'exact', head: true }).gte('used_at', todayISO).not('used_by', 'is', null).neq('used_by','gngn5803@nate.com')
         ]);
         const setVal = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = (v==null||v===undefined) ? '–' : v; };
         setVal('stat-customers', custRes.count ?? '–');
@@ -1527,11 +1525,11 @@ async function toggleMaintenance() {
     const msg = document.getElementById('announce-input').value.trim() || '서비스 점검 중입니다. 잠시 후 다시 이용해주세요.';
     const tw = document.getElementById('maintenance-time-wrap');
     if(tw) tw.style.display = on ? 'block' : 'none';
-    await sb.from('system_announcements').update({ active: false }).eq('active', true);
+    await window.sb.from('system_announcements').update({ active: false }).eq('active', true);
     if (on) {
         const endsAtVal = document.getElementById('maintenance-ends-at')?.value;
         const endsAt = endsAtVal ? new Date(endsAtVal).toISOString() : null;
-        await sb.from('system_announcements').insert({ active: true, type: 'maintenance', message: msg, ends_at: endsAt });
+        await window.sb.from('system_announcements').insert({ active: true, type: 'maintenance', message: msg, ends_at: endsAt });
         document.getElementById('maintenance-status-txt').textContent = '켜짐 — 점검 중 (고객 접근 차단됨)';
         showToast('점검 모드 시작됨');
     } else {
@@ -1557,7 +1555,7 @@ async function postAnnouncement() {
             var endDt = new Date(_annCalEnd.y, _annCalEnd.m, _annCalEnd.d, parseInt(eh), parseInt(em));
             endsAt = endDt.toISOString();
         }
-        await sb.from('system_announcements').insert({
+        await window.sb.from('system_announcements').insert({
             active: false, type: 'announcement', title: '공지사항',
             message: msg, scheduled_at: scheduledAt, ends_at: endsAt
         });
@@ -1565,8 +1563,8 @@ async function postAnnouncement() {
         const label = (_annCalStart.m+1)+'월 '+_annCalStart.d+'일 '+sh+':'+sm;
         showToast('예약 등록됐어요 ('+label+')');
     } else {
-        await sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
-        var insRes = await sb.from('system_announcements').insert({
+        await window.sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
+        var insRes = await window.sb.from('system_announcements').insert({
             active: true, type: 'announcement', title: '공지사항', message: msg
         }).select().limit(1);
         var newId = insRes.data && insRes.data[0] ? insRes.data[0].id : '';
@@ -1581,7 +1579,7 @@ async function postAnnouncement() {
     loadAdminAnnouncements();
 }
 async function clearAnnouncement() {
-    await sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
+    await window.sb.from('system_announcements').update({ active: false }).eq('active', true).eq('type', 'announcement');
     document.getElementById('announce-input').value = '';
     // 배너 실시간 숨김
     var bar = document.getElementById('announce-bar');
@@ -1598,7 +1596,7 @@ async function loadAdminAnnouncements() {
     const el = document.getElementById('admin-ann-list');
     if (!el) return;
     try {
-        const { data, error } = await sb.from('system_announcements')
+        const { data, error } = await window.sb.from('system_announcements')
             .select('*').neq('type','maintenance')
             .order('created_at', { ascending: false }).limit(30);
         if (error || !data?.length) {
@@ -1646,8 +1644,8 @@ async function saveAnnouncement() {
     if (!_editAnnId) return;
     const msg = document.getElementById('announce-input').value.trim();
     if (!msg) { showToast('내용을 입력해주세요'); return; }
-    await sb.from('system_announcements').update({ active: false }).eq('id', _editAnnId);
-    var insRes = await sb.from('system_announcements').insert({ active: true, type: 'announcement', title: '공지사항', message: msg }).select().limit(1);
+    await window.sb.from('system_announcements').update({ active: false }).eq('id', _editAnnId);
+    var insRes = await window.sb.from('system_announcements').insert({ active: true, type: 'announcement', title: '공지사항', message: msg }).select().limit(1);
     var newId = insRes.data && insRes.data[0] ? insRes.data[0].id : '';
     _showAnnounceBanner(msg, newId);
     cancelEditAnnouncement();
@@ -1657,7 +1655,7 @@ async function saveAnnouncement() {
 
 async function deleteAnnouncement(id) {
     if (!confirm('이 공지를 완전히 삭제하시겠습니까?')) return;
-    await sb.from('system_announcements').delete().eq('id', id);
+    await window.sb.from('system_announcements').delete().eq('id', id);
     if (_editAnnId === id) cancelEditAnnouncement();
     showToast('공지가 삭제됐어요');
     loadAdminAnnouncements();
@@ -1859,7 +1857,7 @@ function closeAnnSheet() {
 async function annSheetStop() {
     if (!_annSheetId) return;
     if (!confirm('이 공지를 중단하시겠습니까?')) return;
-    await sb.from('system_announcements').update({ active: false, scheduled_at: null }).eq('id', _annSheetId);
+    await window.sb.from('system_announcements').update({ active: false, scheduled_at: null }).eq('id', _annSheetId);
     _hideAnnounceBanner();
     closeAnnSheet(); showToast('공지가 중단됐어요'); loadAdminAnnouncements();
 }
@@ -1880,7 +1878,7 @@ function annSheetEdit() {
 async function annSheetDelete() {
     if (!_annSheetId) return;
     if (!confirm('이 공지를 완전히 삭제하시겠습니까?')) return;
-    await sb.from('system_announcements').delete().eq('id', _annSheetId);
+    await window.sb.from('system_announcements').delete().eq('id', _annSheetId);
     if (_editAnnId === _annSheetId) cancelEditAnnouncement();
     closeAnnSheet(); showToast('공지가 삭제됐어요'); loadAdminAnnouncements();
 }
@@ -1935,7 +1933,7 @@ async function renderVisitorStats(tab) {
     else if (tab === 'month') { from = new Date(now); from.setDate(now.getDate()-29); from.setHours(0,0,0,0); }
     else { from = new Date(now); from.setDate(now.getDate()-89); from.setHours(0,0,0,0); }
 
-    const { data } = await sb.from('page_views').select('visited_at, page').gte('visited_at', from.toISOString()).order('visited_at', { ascending: true });
+    const { data } = await window.sb.from('page_views').select('visited_at, page').gte('visited_at', from.toISOString()).order('visited_at', { ascending: true });
     const rows = data || [];
 
     if (tab === 'today') {
@@ -1990,9 +1988,9 @@ async function renderVisitorStats(tab) {
 async function renderDrawerStats() {
     const body = document.getElementById('stats-body');
     const [sRes, ssRes, dRes] = await Promise.all([
-        sb.from('serials').select('used_by, code').not('used_by','is',null).neq('used_by','gngn5803@nate.com'),
-        sb.from('single_serials').select('used_by, serial_code').not('used_by','is',null),
-        sb.from('drawers').select('user_email, tag')
+        window.sb.from('serials').select('used_by, code').not('used_by','is',null).neq('used_by','gngn5803@nate.com'),
+        window.sb.from('single_serials').select('used_by, serial_code').not('used_by','is',null),
+        window.sb.from('drawers').select('user_email, tag')
     ]);
     const serials = sRes.data || [];
     const singles = ssRes.data || [];
@@ -2026,8 +2024,8 @@ async function renderDrawerStats() {
 async function renderOrderStats() {
     const body = document.getElementById('stats-body');
     const [sRes, ssRes] = await Promise.all([
-        sb.from('serials').select('code, used_at, used_by').not('used_at','is',null).neq('used_by','gngn5803@nate.com').order('used_at',{ascending:false}),
-        sb.from('single_serials').select('serial_code, used_at, used_by').not('used_at','is',null).order('used_at',{ascending:false})
+        window.sb.from('serials').select('code, used_at, used_by').not('used_at','is',null).neq('used_by','gngn5803@nate.com').order('used_at',{ascending:false}),
+        window.sb.from('single_serials').select('serial_code, used_at, used_by').not('used_at','is',null).order('used_at',{ascending:false})
     ]);
     const serials = sRes.data || [];
     const singles = ssRes.data || [];
