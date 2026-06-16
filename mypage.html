@@ -1568,14 +1568,13 @@ async function postAnnouncement() {
         if (startDt <= new Date()) { showToast('예약 시간은 현재보다 이후여야 해요'); return; }
         var scheduledAt = startDt.toISOString();
         var endsAt = null;
-        if (_annCalEnd) {
-            var eh = document.getElementById('ann-eh').value;
-            var em = document.getElementById('ann-em').value;
-            var endDt = new Date(_annCalEnd.y, _annCalEnd.m, _annCalEnd.d, parseInt(eh), parseInt(em));
-            // 종료 시간이 시작 시간보다 이전/같으면 막기
-            if (endDt <= startDt) { showToast('종료 시간은 시작 시간보다 이후여야 해요'); return; }
-            endsAt = endDt.toISOString();
-        }
+        var eh = document.getElementById('ann-eh').value;
+        var em = document.getElementById('ann-em').value;
+        // 종료일 선택 여부와 무관하게 종료 시간 블록 입력값 사용 (미선택 시 당일 기준)
+        var endBase = _annCalEnd || _annCalStart;
+        var endDt = new Date(endBase.y, endBase.m, endBase.d, parseInt(eh), parseInt(em));
+        if (endDt <= startDt) { showToast('종료 시간은 시작 시간보다 이후여야 해요'); return; }
+        endsAt = endDt.toISOString();
         await window.sb.from('system_announcements').insert({
             active: false, type: 'announcement', title: '공지사항',
             message: msg, scheduled_at: scheduledAt, ends_at: endsAt
@@ -1764,13 +1763,12 @@ async function saveAnnouncement() {
             if (startDt <= new Date()) { showToast('예약 시간은 현재보다 이후여야 해요'); return; }
             var scheduledAt = startDt.toISOString();
             var endsAt = null;
-            if (_annCalEnd) {
-                var eh = document.getElementById('ann-eh').value;
-                var em = document.getElementById('ann-em').value;
-                var endDt = new Date(_annCalEnd.y, _annCalEnd.m, _annCalEnd.d, parseInt(eh), parseInt(em));
-                if (endDt <= startDt) { showToast('종료 시간은 시작 시간보다 이후여야 해요'); return; }
-                endsAt = endDt.toISOString();
-            }
+            var eh = document.getElementById('ann-eh').value;
+            var em = document.getElementById('ann-em').value;
+            var endBase = _annCalEnd || _annCalStart;
+            var endDt = new Date(endBase.y, endBase.m, endBase.d, parseInt(eh), parseInt(em));
+            if (endDt <= startDt) { showToast('종료 시간은 시작 시간보다 이후여야 해요'); return; }
+            endsAt = endDt.toISOString();
             // 같은 row에서 UPDATE (INSERT 하지 않음 → row 중복 생성 방지)
             await window.sb.from('system_announcements').update({
                 active: false, message: msg,
@@ -1918,10 +1916,10 @@ function annCalPickDay(d) {
         var picked = new Date(_annCalY, _annCalM, d);
         var start = new Date(_annCalStart.y, _annCalStart.m, _annCalStart.d);
         if (picked < start) {
-            // 시작일보다 이전 날짜 → 시작일 재설정
+            // 시작일보다 이전 → 시작일 재설정
             _annCalStart = { y: _annCalY, m: _annCalM, d: d }; _annCalEnd = null; _annCalStep = 1;
         } else {
-            // 당일 포함 이후 날짜 → 종료일로 설정
+            // 당일 포함 이후 → 종료일 설정
             _annCalEnd = { y: _annCalY, m: _annCalM, d: d }; _annCalStep = 2;
         }
     }
@@ -1930,7 +1928,8 @@ function annCalPickDay(d) {
     var tw = document.getElementById('ann-time-wrap');
     var etb = document.getElementById('ann-end-time-block');
     if (tw) tw.style.display = _annCalStart ? 'block' : 'none';
-    if (etb) etb.style.display = _annCalEnd ? 'block' : 'none';
+    // 시작일 선택 시에도 종료 시간 블록 표시 (당일 종료 포함)
+    if (etb) etb.style.display = _annCalStart ? 'block' : 'none';
 }
 
 function annCalUpdateSelDisplay() {
@@ -1946,8 +1945,11 @@ function confirmAnnCal() {
     if (!_annCalStart) return;
     var sh = document.getElementById('ann-sh').value;
     var sm = document.getElementById('ann-sm').value;
+    var eh = document.getElementById('ann-eh').value;
+    var em = document.getElementById('ann-em').value;
     var txt = (_annCalStart.m+1)+'월 '+_annCalStart.d+'일 '+sh+':'+sm;
-    if (_annCalEnd) { var eh = document.getElementById('ann-eh').value; var em = document.getElementById('ann-em').value; txt += ' ~ '+(_annCalEnd.m+1)+'월 '+_annCalEnd.d+'일 '+eh+':'+em; }
+    var endBase = _annCalEnd || _annCalStart;
+    txt += ' ~ '+( endBase.m+1)+'월 '+endBase.d+'일 '+eh+':'+em;
     var title = document.getElementById('ann-cal-title'); if (title) title.textContent = '예약 설정 완료';
     var sub = document.getElementById('ann-cal-sub'); if (sub) sub.textContent = txt;
     closeAnnCalModal();
