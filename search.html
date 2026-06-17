@@ -41,6 +41,12 @@
         checkSystemAnnouncement();
       })
       .subscribe();
+    // 로그아웃 동기화: 다른 탭/창에서 로그아웃되면 이 창도 즉시 로그인 화면으로
+    _authClient.auth.onAuthStateChange(function(event, sess) {
+        if (event === 'SIGNED_OUT' || !sess) {
+            window.location.replace('login.html');
+        }
+    });
     // drawers 테이블에서 이 사용자의 모든 수납장을 localStorage로 복원 (방문기록 지워도 유지)
     try {
         const { data: rows } = await _authClient
