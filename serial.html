@@ -42,13 +42,12 @@
             background: linear-gradient(170deg,#F4E098 0%,#D4A828 28%,#A07018 52%,#C09028 75%,#ECC858 100%);
             background-size: 220% auto;
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-            filter: drop-shadow(0 3px 5px rgba(90,50,0,0.42)) drop-shadow(0 0 12px rgba(200,150,20,0.5));
             animation: gyeol-shimmer 7s ease-in-out infinite;
         }
         @keyframes gyeol-shimmer {
-            0%   { background-position: 0% center;   filter: drop-shadow(0 3px 5px rgba(90,50,0,0.38)) drop-shadow(0 0 10px rgba(200,150,20,0.38)); }
-            50%  { background-position: 100% center; filter: drop-shadow(0 3px 5px rgba(90,50,0,0.38)) drop-shadow(0 0 22px rgba(225,175,35,0.82)); }
-            100% { background-position: 0% center;   filter: drop-shadow(0 3px 5px rgba(90,50,0,0.38)) drop-shadow(0 0 10px rgba(200,150,20,0.38)); }
+            0%   { background-position: 0% center; }
+            50%  { background-position: 100% center; }
+            100% { background-position: 0% center; }
         }
         .logo-sub { font-size: 13px; color: var(--sub); margin-top: 6px; }
         .nm-card {
@@ -160,10 +159,25 @@
             if (urlCode && urlCode.toUpperCase().startsWith('GYEOL-S-')) {
                 document.getElementById('serial').value = urlCode.toUpperCase();
             }
-            // isAdd(추가 등록) 또는 그 외의 경우: 폼을 그대로 표시하고 시리얼 입력을 받는다.
-            // ⚠️ 진입 시 자동 통과(gyeol_after_login 리다이렉트 / 등록이력 기반 통과)는
-            //    제거됨 — 시리얼 입력 없이 미등록 세트로 진입되는 보안 구멍이었음.
-            //    모든 진입 검증은 tag.html이 serial_codes(태그 단위)로 처리한다.
+
+            // ── 소유 검증된 자동 입장 (로그인 방식 무관: 구글/카카오/이메일 공통) ──
+            // 추가 등록(add=true)·단품 진입이 아니고, 이 계정이 이미 정당하게 등록한
+            // 패키지 세트(serials.used_by=본인)가 있으면 시리얼 재입력 없이 수납장으로 보낸다.
+            // ⚠️ used_by가 본인인 세트가 있을 때만 통과 — 무검증 통과(과거 보안 구멍)와 다름.
+            //    미등록·남의 세트는 통과 안 됨(아래 폼에서 시리얼 입력 강제).
+            if (!isAdd && !(urlCode && urlCode.toUpperCase().startsWith('GYEOL-S-'))) {
+                const { data: owned } = await supabase
+                    .from('serials')
+                    .select('serial_code')
+                    .eq('used_by', session.user.email)
+                    .limit(1);
+                if (owned && owned.length > 0) {
+                    localStorage.removeItem('gyeol_after_login');
+                    window.location.replace('search.html');
+                }
+            }
+            // 그 외(본인 세트 없음): 폼을 그대로 표시하고 시리얼 입력을 받는다.
+            // 진입 자동통과(무검증)는 여전히 제거된 상태 — tag.html이 serial_codes로 진입 검증.
         }
 
         document.getElementById('submit-btn').addEventListener('click', async () => {
