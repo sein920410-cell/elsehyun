@@ -1,327 +1,860 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>공간:결 - 시리얼 번호 등록</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        :root {
-            --bg: #1A1917;
-            --surface2: #252320;
-            --accent: #C8A870;
-            --text: #E8E5DF;
-            --sub: #8C8880;
-            --nm-raise-sm: 4px 4px 10px rgba(0,0,0,0.62), -4px -4px 10px rgba(255,255,255,0.035);
-            --nm-inset-sm: inset 3px 3px 8px rgba(0,0,0,0.62), inset -3px -3px 8px rgba(255,255,255,0.035);
-            --nm-inset: inset 5px 5px 12px rgba(0,0,0,0.68), inset -5px -5px 12px rgba(255,255,255,0.04);
+<title>공간:결 - 검색</title>
+<script src="lib/supabase.umd.min.js"></script>
+<style>body { visibility: hidden; }</style>
+<script>
+  (function(){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); } }catch(e){} })();
+  window.addEventListener('pageshow', function(){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); } else { document.documentElement.removeAttribute('data-theme'); } }catch(e){} });
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible'){ try{ if(localStorage.getItem('gyeol_theme')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); } else { document.documentElement.removeAttribute('data-theme'); } }catch(e){} } });
+</script>
+<script>
+(async () => {
+    const _authClient = supabase.createClient(
+        'https://tqhtggusphhcsygiitrv.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc',
+        { auth: { storage: window.localStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
+    );
+    const { data: { session } } = await _authClient.auth.getSession();
+    if (!session) { window.location.replace('login.html'); return; }
+    window._searchSb = _authClient;  // 검색 결과 썸네일 signedUrl 생성에 재사용
+    const { data: serialRows } = await _authClient
+        .from('serials')
+        .select('id')
+        .eq('used_by', session.user.email)
+        .limit(1);
+    if (!serialRows?.[0]) { window.location.replace('serial.html'); return; }
+    // 인증 통과 → 화면 표시
+    document.body.style.visibility = 'visible';
+    // 방문 기록 (운영자 제외)
+    try { if(session.user.email!=='gngn5803@nate.com') _authClient.from('page_views').insert({page:'index',user_email:session.user.email}); } catch(e){}
+    checkSystemAnnouncement();
+    // Realtime 구독: system_announcements 변경 즉시 반영
+    _authClient
+      .channel('ann_search')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'system_announcements' }, function() {
+        checkSystemAnnouncement();
+      })
+      .subscribe();
+    // 로그아웃 동기화: 다른 탭/창에서 로그아웃되면 이 창도 즉시 로그인 화면으로
+    _authClient.auth.onAuthStateChange(function(event, sess) {
+        if (event === 'SIGNED_OUT' || !sess) {
+            window.location.replace('login.html');
         }
-        body {
-            font-family: 'Pretendard', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 24px 20px;
+    });
+    // drawers 테이블에서 이 사용자의 모든 수납장을 localStorage로 복원 (방문기록 지워도 유지)
+    try {
+        const { data: rows } = await _authClient
+            .from('drawers')
+            .select('tag,name,items,media_path,media_rot,color_theme,corrections')
+            .eq('user_email', session.user.email);
+        if (rows && rows.length) {
+            rows.forEach(function(d){
+                if(!d.tag)return;
+                try{
+                    localStorage.setItem('gyeol_'+d.tag, JSON.stringify(Array.isArray(d.items)?d.items:[]));
+                    if(d.name) localStorage.setItem('name_'+d.tag, d.name);
+                    if(d.media_path){ localStorage.setItem('mediaPath_'+d.tag, d.media_path); localStorage.setItem('rot_'+d.tag, d.media_rot||0); }
+                    if(d.color_theme) localStorage.setItem('gyeol_color_theme_'+d.tag, d.color_theme);
+                    if(Array.isArray(d.corrections)) localStorage.setItem('corrections_'+d.tag, JSON.stringify(d.corrections));
+                }catch(e){}
+            });
         }
-        .container { width: 100%; max-width: 380px; }
-        .logo-area { text-align: center; margin-bottom: 28px; }
-        .logo-title {
-            font-family: 'Noto Serif KR', Georgia, serif;
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            background: linear-gradient(170deg,#F4E098 0%,#D4A828 28%,#A07018 52%,#C09028 75%,#ECC858 100%);
-            background-size: 220% auto;
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-            filter: drop-shadow(0 3px 5px rgba(90,50,0,0.42)) drop-shadow(0 0 12px rgba(200,150,20,0.5));
-            animation: gyeol-shimmer 7s ease-in-out infinite;
-        }
-        @keyframes gyeol-shimmer {
-            0%   { background-position: 0% center;   filter: drop-shadow(0 3px 5px rgba(90,50,0,0.38)) drop-shadow(0 0 10px rgba(200,150,20,0.38)); }
-            50%  { background-position: 100% center; filter: drop-shadow(0 3px 5px rgba(90,50,0,0.38)) drop-shadow(0 0 22px rgba(225,175,35,0.82)); }
-            100% { background-position: 0% center;   filter: drop-shadow(0 3px 5px rgba(90,50,0,0.38)) drop-shadow(0 0 10px rgba(200,150,20,0.38)); }
-        }
-        .logo-sub { font-size: 13px; color: var(--sub); margin-top: 6px; }
-        .nm-card {
-            background: var(--surface2);
-            border-radius: 24px;
-            padding: 24px 20px;
-            box-shadow: var(--nm-raise-sm);
-        }
-        .field-wrap { margin-bottom: 16px; }
-        .field-label {
-            display: block;
-            font-size: 12px;
-            color: var(--sub);
-            margin-bottom: 6px;
-            padding-left: 2px;
-        }
-        .nm-input {
-            width: 100%;
-            background: var(--bg);
-            border: none;
-            border-radius: 12px;
-            box-shadow: var(--nm-inset-sm);
-            padding: 13px 14px;
-            font-size: 14px;
-            color: var(--text);
-            font-family: 'Pretendard', sans-serif;
-            outline: none;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            transition: box-shadow .2s;
-        }
-        .nm-input::placeholder { color: var(--sub); opacity: 0.5; letter-spacing: 0; text-transform: none; }
-        .nm-input:focus { box-shadow: var(--nm-inset), 0 0 0 2px rgba(200,168,112,0.25); }
-        .msg { font-size: 12px; text-align: center; margin-bottom: 12px; }
-        .error-msg { color: #E07070; }
-        .success-msg { color: #7EC87E; }
-        .submit-btn {
-            width: 100%;
-            background: var(--text);
-            color: var(--bg);
-            border: none;
-            border-radius: 14px;
-            padding: 14px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: 'Pretendard', sans-serif;
-            box-shadow: 4px 4px 10px rgba(0,0,0,0.5), -1px -1px 4px rgba(255,255,255,0.06);
-            transition: opacity .15s;
-            margin-bottom: 12px;
-        }
-        .submit-btn:active { opacity: 0.85; }
-        .submit-btn:disabled { opacity: 0.4; cursor: default; }
-        .logout-btn {
-            width: 100%;
-            background: none;
-            border: none;
-            color: var(--sub);
-            font-size: 12px;
-            cursor: pointer;
-            font-family: 'Pretendard', sans-serif;
-            padding: 6px;
-            opacity: 0.6;
-            transition: opacity .15s;
-        }
-        .logout-btn:hover { opacity: 1; }
-    </style>
+    } catch(e) { console.warn('수납장 복원 오류', e); }
+    // 온보딩 자동 실행
+    setTimeout(function(){ startOnboarding(); }, 1000);
+        })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+input { -webkit-user-select: text; user-select: text; }
+
+:root {
+  --bg: #E8E5DF;
+  --surface: #EFECE6;
+  --surface2: #F4F1EB;
+  --ink: #2B2722;
+  --ink-soft: #3A352E;
+  --muted: #9A9186;
+  --muted2: #B5ACA0;
+  --line: rgba(163,154,140,0.25);
+  --field-border: rgba(163,154,140,0.3);
+  --accent: #B49464;
+  --divider: rgba(163,154,140,0.2);
+  /* 뉴모피즘 그림자 */
+  --nm-raise: 8px 8px 18px rgba(163,154,140,0.52), -8px -8px 18px rgba(255,255,255,0.88);
+  --nm-raise-sm: 5px 5px 12px rgba(163,154,140,0.44), -5px -5px 12px rgba(255,255,255,0.84);
+  --nm-raise-xs: 3px 3px 8px rgba(163,154,140,0.38), -3px -3px 8px rgba(255,255,255,0.78);
+  --nm-inset: inset 5px 5px 12px rgba(163,154,140,0.48), inset -5px -5px 12px rgba(255,255,255,0.86);
+  --nm-inset-sm: inset 3px 3px 8px rgba(163,154,140,0.4), inset -3px -3px 8px rgba(255,255,255,0.82);
+}
+html[data-theme="dark"] {
+  --bg: #1A1917;
+  --surface: #201E1B;
+  --surface2: #252320;
+  --ink: #F0EBE2;
+  --ink-soft: #D8D1C5;
+  --muted: #8E867A;
+  --muted2: #6B645A;
+  --line: rgba(255,255,255,0.07);
+  --field-border: rgba(255,255,255,0.1);
+  --accent: #C8A870;
+  --divider: rgba(255,255,255,0.07);
+  /* 뉴모피즘 다크 그림자 */
+  --nm-raise: 7px 7px 16px rgba(0,0,0,0.68), -7px -7px 16px rgba(255,255,255,0.04);
+  --nm-raise-sm: 4px 4px 10px rgba(0,0,0,0.62), -4px -4px 10px rgba(255,255,255,0.035);
+  --nm-raise-xs: 3px 3px 7px rgba(0,0,0,0.58), -3px -3px 7px rgba(255,255,255,0.03);
+  --nm-inset: inset 5px 5px 12px rgba(0,0,0,0.68), inset -5px -5px 12px rgba(255,255,255,0.04);
+  --nm-inset-sm: inset 3px 3px 8px rgba(0,0,0,0.62), inset -3px -3px 8px rgba(255,255,255,0.035);
+}
+
+body {
+  font-family: 'DM Sans','Noto Sans KR',sans-serif;
+  background: var(--bg);
+  min-height: 100dvh;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.3s, color 0.3s;
+}
+
+.logo-en {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.header {
+  padding: 20px 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  transition: background 0.3s;
+}
+.brand { 
+  flex: 1;
+  font-size: 26px;
+  line-height: 1.25;
+  background: linear-gradient(105deg,#5C6E7A 0%,#8AA0AE 28%,#C0D0D8 50%,#8AA0AE 72%,#5C6E7A 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: gyeol-shimmer 7s ease-in-out infinite;
+}
+.brand .sp { letter-spacing: 0.08em; }
+.brand .gy { letter-spacing: 0.04em; margin-left: 2px; }
+html[data-theme="dark"] .brand {
+  background: linear-gradient(105deg,#8A6830 0%,#C8A870 28%,#F4E0A8 50%,#C8A870 72%,#8A6830 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+@keyframes gyeol-shimmer {
+  0% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+  100% { background-position: 0% center; }
+}
+.header-divider {
+  height: 0.5px; background: var(--divider);
+  margin: 16px 20px 0; transition: background 0.3s;
+}
+
+.search-area { padding: 28px 20px 0; }
+
+.search-hero-card {
+  background: var(--surface2);
+  border-radius: 28px;
+  padding: 32px 28px 28px;
+  margin-bottom: 0;
+  box-shadow: var(--nm-raise);
+  transition: box-shadow 0.3s, background 0.3s;
+}
+
+.hero-text { margin-bottom: 24px; }
+.hero-title {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.hero-sub {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+.search-wrap { position: relative; }
+.search-icon {
+  position: absolute; left: 18px; top: 50%;
+  transform: translateY(-50%);
+  width: 16px; height: 16px;
+  stroke: var(--muted2);
+  stroke-width: 2; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  background: var(--bg);
+  border: none;
+  border-radius: 50px;
+  padding: 16px 44px 16px 48px;
+  font-size: 14.5px;
+  font-family: inherit;
+  color: var(--ink);
+  outline: none;
+  box-shadow: var(--nm-inset);
+  transition: box-shadow 0.2s, background 0.3s;
+  -webkit-appearance: none;
+}
+.search-input:focus {
+  box-shadow: var(--nm-inset), 0 0 0 2px rgba(180,148,100,0.25);
+}
+.search-input::placeholder { color: var(--muted2); }
+.clear-btn {
+  position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%);
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--surface2); border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px; display: none;
+  align-items: center; justify-content: center;
+  box-shadow: var(--nm-raise-xs);
+  transition: box-shadow 0.15s;
+}
+.clear-btn.vis { display: flex; }
+
+.search-hint {
+  text-align: center;
+  padding: 48px 20px;
+  font-size: 12.5px;
+  color: var(--muted2);
+  line-height: 1.7;
+}
+
+.result-area { padding: 24px 20px 0; }
+.result-label {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+  padding-left: 2px;
+}
+
+.result-item {
+  background: var(--surface2);
+  border: none;
+  border-radius: 20px;
+  padding: 14px 14px;
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 12px; cursor: pointer;
+  box-shadow: var(--nm-raise-sm);
+  transition: box-shadow 0.15s, transform 0.1s, background 0.3s;
+}
+.result-item:active { transform: scale(0.985); box-shadow: var(--nm-inset-sm); }
+
+.result-ico {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--nm-inset-sm);
+}
+.result-ico svg {
+  width: 22px; height: 22px;
+  stroke: var(--accent);
+  stroke-width: 1.6; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.result-info { flex: 1; min-width: 0; }
+.result-name {
+  font-size: 16px; font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.result-name mark { 
+  background: none; 
+  color: var(--accent);
+  font-weight: 700; 
+}
+.result-meta { font-size: 14px; color: var(--muted); margin-top: 3px; }
+
+/* 검색 결과 수납장 썸네일 */
+.result-thumb { overflow: hidden; padding: 0; cursor: zoom-in; position: relative; border-radius: 14px; box-shadow: var(--nm-inset-sm); }
+.result-thumb img, .result-thumb video {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.thumb-skel {
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, rgba(180,148,100,0.08) 25%, rgba(180,148,100,0.16) 50%, rgba(180,148,100,0.08) 75%);
+  background-size: 200% 100%;
+  animation: thumbShimmer 1.2s infinite;
+}
+@keyframes thumbShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* 썸네일 전체화면 보기 */
+.thumb-fs-ov {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.92);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.thumb-fs-ov.open { display: flex; }
+.thumb-fs-content { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.thumb-fs-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); border: none; color: #fff;
+  font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.result-meta b { color: var(--ink-soft); font-weight: 600; }
+
+.go-btn {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--surface2);
+  border: none;
+  color: var(--accent); font-size: 18px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: var(--nm-raise-sm);
+  display: flex; align-items: center; justify-content: center;
+  transition: box-shadow 0.15s;
+}
+.go-btn:active { box-shadow: var(--nm-inset-sm); }
+.go-btn::after { content: '›'; font-size: 22px; line-height: 1; }
+
+.empty-state {
+  text-align: center; padding: 56px 20px;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+.bottom-safe { height: 40px; }
+
+/* 내 수납장 섹션 */
+.drawers-area { padding: 28px 20px 0; }
+.drawers-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.mypage-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--surface2);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: var(--ink-soft);
+  box-shadow: var(--nm-raise-xs);
+  transition: box-shadow 0.15s;
+}
+.mypage-btn:active { box-shadow: var(--nm-inset-sm); }
+.mypage-btn svg {
+  width: 17px; height: 17px;
+  stroke: currentColor;
+  stroke-width: 1.8; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+  display: block;
+}
+.bell-btn-wrap {
+  position: relative; width: 38px; height: 38px; flex-shrink: 0;
+}
+.bell-btn-idx {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--surface2);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-soft);
+  box-shadow: var(--nm-raise-xs);
+  transition: box-shadow 0.15s;
+}
+.bell-btn-idx:active { box-shadow: var(--nm-inset-sm); }
+.bell-btn-idx svg { width: 17px; height: 17px; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; display: block; }
+.bell-dot-idx {
+  position: absolute; top: 2px; right: 2px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ef4444; border: 1.5px solid var(--bg);
+  display: none;
+}
+
+
+
+
+/* 온보딩 */
+.ob-ov{display:none;position:fixed;inset:0;background:transparent;z-index:9000}
+.ob-ov.on{display:block}
+.ob-hl{position:fixed;width:0;height:0;border-radius:12px;box-shadow:0 0 0 3px rgba(212,168,64,.95),0 0 0 9999px rgba(26,22,18,.62),0 0 24px 5px rgba(212,168,64,.32);z-index:9001;pointer-events:none;transition:all .32s cubic-bezier(.22,.61,.36,1)}
+.ob-box{position:fixed;bottom:104px;left:16px;right:16px;max-width:380px;margin:0 auto;background:#FBF8F3;border-radius:20px;padding:20px;z-index:9002;box-shadow:0 16px 50px rgba(40,32,24,.32);border:1px solid rgba(176,162,140,.16)}
+.ob-nn{display:inline-block;font-size:11px;color:#B08D4E;font-weight:800;letter-spacing:.04em;background:rgba(212,168,64,.12);padding:3px 10px;border-radius:20px;margin-bottom:9px}
+.ob-tt{font-size:16px;font-weight:800;color:#3A322A;margin-bottom:7px;letter-spacing:-.02em}
+.ob-dd{font-size:13px;line-height:1.7;color:#7A6E60;white-space:pre-line}
+.ob-ww{margin-top:11px;padding:10px 12px;background:rgba(192,54,44,.06);border:1px solid rgba(192,54,44,.14);border-radius:10px;font-size:12px;color:#B5403A;font-weight:600;line-height:1.55}
+.ob-row{display:flex;gap:8px;margin-top:16px}
+.ob-close{padding:11px 15px;background:#EFEAE2;border:none;border-radius:11px;font-size:12.5px;font-weight:700;color:#8A7E6E;cursor:pointer;font-family:inherit}
+.ob-prev{padding:11px 15px;background:#EFEAE2;border:none;border-radius:11px;font-size:12.5px;font-weight:700;color:#6A5F52;cursor:pointer;font-family:inherit}
+.ob-nxt{flex:1;padding:12px;background:linear-gradient(135deg,#3A322A,#2A2218);border:none;border-radius:11px;font-size:13.5px;font-weight:800;color:#F0D888;cursor:pointer;font-family:inherit;letter-spacing:-.01em}
+/* 점검/공지 배너 */
+/* ─── 공지함 ─── */
+.notice-ov{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.45);display:none;align-items:flex-end;}
+.notice-ov.open{display:flex;}
+.notice-box{width:100%;max-height:78vh;background:var(--bg);border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;}
+.notice-hd{display:flex;align-items:center;gap:4px;padding:16px 16px 12px;border-bottom:1px solid var(--divider);flex-shrink:0;}
+.notice-back-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;display:none;}
+.notice-back-btn svg{width:18px;height:18px;stroke:var(--ink-soft);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.notice-hd-title{flex:1;font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.02em;}
+.notice-x{width:30px;height:30px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.notice-x svg{width:18px;height:18px;stroke:var(--muted);stroke-width:2;fill:none;stroke-linecap:round;}
+.notice-list{flex:1;overflow-y:auto;}
+.notice-item{display:flex;align-items:center;padding:15px 16px;border-bottom:1px solid var(--divider);cursor:pointer;gap:10px;transition:background 0.12s;}
+.notice-item:active{background:rgba(0,0,0,0.04);}
+.notice-item-title{flex:1;font-size:14px;font-weight:600;color:var(--ink);line-height:1.4;letter-spacing:-.01em;}
+.notice-item-date{font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+.notice-item-arr svg{width:14px;height:14px;stroke:var(--muted);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.notice-empty{padding:52px 16px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6;}
+.notice-detail{flex:1;overflow-y:auto;padding:20px 16px;display:none;}
+.notice-detail-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;letter-spacing:-.02em;line-height:1.4;}
+.notice-detail-date{font-size:12px;color:var(--muted);margin-bottom:18px;}
+.notice-detail-body{font-size:14px;color:var(--ink-soft);line-height:1.8;white-space:pre-wrap;}
+.announce-bar{position:fixed;top:0;left:0;right:0;z-index:1000;background:#111318;color:#fff;padding:12px 16px;display:none;align-items:flex-start;gap:10px}
+.announce-bar.show{display:flex}
+.announce-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.announce-body{flex:1;min-width:0}
+.announce-title{font-size:13px;font-weight:700;line-height:1.4}
+.announce-msg{font-size:12px;opacity:.75;margin-top:2px;line-height:1.5;white-space:nowrap;overflow:hidden}
+.announce-msg .mq{display:inline-block;animation:ann-mq 14s linear infinite}
+@keyframes ann-mq{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+.announce-close{width:28px;height:28px;border-radius:5px;background:rgba(255,255,255,.12);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.announce-close svg{width:12px;height:12px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
+.maintenance-ov{display:none;position:fixed;inset:0;background:radial-gradient(125% 120% at 50% 0%,#F5F1EA 0%,#EBE4D8 100%);z-index:2000;flex-direction:column;align-items:center;justify-content:center;padding:32px;box-sizing:border-box}
+.maintenance-ov.show{display:flex}
+.maintenance-brand{font-family:Georgia,serif;font-size:15px;font-weight:700;letter-spacing:.04em;margin-bottom:34px;background:linear-gradient(110deg,#A87828,#D4A840,#F0D888,#C89830,#A07020);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% auto;animation:mtShimmer 8s linear infinite}
+@keyframes mtShimmer{to{background-position:200% center}}
+.maintenance-icon{width:92px;height:92px;border-radius:50%;background:#F1ECE3;box-shadow:7px 7px 18px rgba(176,162,140,0.45),-7px -7px 18px rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;margin-bottom:26px}
+.maintenance-title{font-size:21px;font-weight:800;color:#463D32;letter-spacing:-.02em;margin-bottom:10px;text-align:center}
+.maintenance-msg{font-size:14px;color:#9A8E80;text-align:center;line-height:1.8;max-width:280px}
+.maintenance-time{margin-top:26px;padding:14px 26px;background:#F1ECE3;box-shadow:inset 3px 3px 8px rgba(176,162,140,0.32),inset -3px -3px 8px rgba(255,255,255,0.85);border-radius:18px;text-align:center}
+.maintenance-time-label{font-size:10px;color:#B5A99A;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+.maintenance-time-val{font-size:16px;font-weight:700;color:#B08D4E;letter-spacing:-.01em;line-height:1.55}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo-area">
-            <div class="logo-title">공간:결</div>
-            <p class="logo-sub">제품 시리얼 번호를 등록해주세요</p>
-        </div>
-        <div class="nm-card">
-            <div class="field-wrap">
-                <label class="field-label" for="serial">시리얼 번호</label>
-                <input id="serial" type="text" class="nm-input" placeholder="시리얼 번호를 입력하세요">
-            </div>
-            <div id="error-msg" class="msg error-msg" style="display:none"></div>
-            <div id="success-msg" class="msg success-msg" style="display:none"></div>
-            <button id="submit-btn" type="button" class="submit-btn">등록하기</button>
-            <button id="logout-btn" type="button" class="logout-btn">로그아웃</button>
-        </div>
+
+<!-- 점검/공지 -->
+<div class="maintenance-ov" id="maintenance-ov">
+  <div class="maintenance-brand">공간:결</div>
+  <div class="maintenance-icon"><svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="#C8A870" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+  <div class="maintenance-title">서비스 점검 중</div>
+  <div class="maintenance-msg" id="maintenance-msg">더 나은 서비스를 위해 점검 중입니다.<br>잠시 후 다시 이용해 주세요.</div>
+  <div class="maintenance-time" id="maintenance-time" style="display:none">
+    <div class="maintenance-time-label">ESTIMATED COMPLETION</div>
+    <div class="maintenance-time-val" id="maintenance-time-val"></div>
+  </div>
+</div>
+<div class="announce-bar" id="announce-bar">
+  <div class="announce-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;stroke:#fff"><path d="M3 11v2"/><path d="M5 9v6"/><path d="M19 4v16l-7-4H5V8h7L19 4z"/><path d="M19 8a4 4 0 0 1 0 8"/></svg></div>
+  <div class="announce-body">
+    <div class="announce-title" id="announce-title">공지사항</div>
+    <div class="announce-msg" id="announce-msg"></div>
+  </div>
+  <button class="announce-close" onclick="closeAnnounce()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+</div>
+
+<div class="notice-ov" id="notice-ov" onclick="if(event.target===this)closeNoticeBox()">
+  <div class="notice-box">
+    <div class="notice-hd">
+      <div class="notice-back-btn" id="notice-back-btn" onclick="noticeGoBack()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div class="notice-hd-title" id="notice-hd-title">공지사항</div>
+      <button class="notice-x" onclick="closeNoticeBox()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
+    <div class="notice-list" id="notice-list"></div>
+    <div class="notice-detail" id="notice-detail"></div>
+  </div>
+</div>
 
-    <script src="lib/supabase.umd.min.js"></script>
-    <script type="module">
-        const { createClient } = window.supabase;
-        const supabase = createClient(
-            'https://tqhtggusphhcsygiitrv.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxaHRnZ3VzcGhoY3N5Z2lpdHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNDMxMTMsImV4cCI6MjA4NjYxOTExM30.HXA2GbucJPkt3LFl9_JpLiwUQvI95QNEDeQWzQ9i-pc',
-            { auth: { storage: window.localStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
-        );
+<div class="ob-ov" id="ob-ov" onclick="obClose()">
+  <div class="ob-hl" id="ob-hl"></div>
+  <div class="ob-box" id="ob-box" onclick="event.stopPropagation()">
+    <div class="ob-nn" id="ob-nn"></div>
+    <div class="ob-tt" id="ob-tt"></div>
+    <div class="ob-dd" id="ob-dd"></div>
+    <div class="ob-ww" id="ob-ww" style="display:none"></div>
+    <div class="ob-row">
+      <button class="ob-close" id="ob-close" onclick="obClose()">닫기</button>
+      <button class="ob-prev" id="ob-prev" onclick="obPrev()" style="display:none">이전</button>
+      <button class="ob-nxt" id="ob-nxt" onclick="obNext()">다음</button>
+    </div>
+  </div>
+</div>
 
-        let currentSession = null;
 
-        const { data: { session } } = await supabase.auth.getSession();
 
-        if (!session) {
-            window.location.replace('login.html');
-        } else {
-            currentSession = session;
-            const params = new URLSearchParams(window.location.search);
-            const urlCode = params.get('code');
-            const isAdd = params.get('add') === 'true';
+<div class="header">
+  <div class="brand"><span class="logo-en"><span class="sp">SPACE·</span><span class="gy">GYEOL</span></span></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="bell-btn-wrap">
+      <button class="bell-btn-idx" id="bell-btn" onclick="openNoticeBox()" title="공지사항">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+      <span class="bell-dot-idx" id="bell-dot"></span>
+    </div>
+    <button class="mypage-btn" onclick="location.href='mypage.html'" title="마이페이지">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke="currentColor" fill="none"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" fill="none"/></svg>
+    </button>
+  </div>
+</div>
+<div class="header-divider"></div>
 
-            // 단품 코드가 URL에 있으면 입력창에 자동 채움 (편의)
-            if (urlCode && urlCode.toUpperCase().startsWith('GYEOL-S-')) {
-                document.getElementById('serial').value = urlCode.toUpperCase();
-            }
-            // isAdd(추가 등록) 또는 그 외의 경우: 폼을 그대로 표시하고 시리얼 입력을 받는다.
-            // ⚠️ 진입 시 자동 통과(gyeol_after_login 리다이렉트 / 등록이력 기반 통과)는
-            //    제거됨 — 시리얼 입력 없이 미등록 세트로 진입되는 보안 구멍이었음.
-            //    모든 진입 검증은 tag.html이 serial_codes(태그 단위)로 처리한다.
-        }
+<div class="search-area">
+  <div class="search-hero-card">
+    <div class="hero-text" id="hero-text">
+      <div class="hero-title">무엇을<br>찾으시나요?</div>
+      <div class="hero-sub">찾으시는 물품의 위치를 안내해드려요</div>
+    </div>
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search-input" class="search-input" type="text" placeholder="물품명 검색" autocomplete="off" autocorrect="off" spellcheck="false" oninput="onSearch()">
+      <button class="clear-btn" id="clear-btn" onclick="clearSearch()">✕</button>
+    </div>
+  </div>
+</div>
 
-        document.getElementById('submit-btn').addEventListener('click', async () => {
-            const session = currentSession;
-            const code = document.getElementById('serial').value.trim().toUpperCase();
-            const errEl = document.getElementById('error-msg');
-            const sucEl = document.getElementById('success-msg');
-            const btn = document.getElementById('submit-btn');
+<div id="result-area" style="display:none" class="result-area">
+  <div class="result-label" id="result-label"></div>
+  <div id="result-list"></div>
+</div>
 
-            errEl.style.display = 'none';
-            sucEl.style.display = 'none';
+<div class="bottom-safe"></div>
 
-            if (!code) {
-                errEl.textContent = '시리얼 번호를 입력해주세요.';
-                errEl.style.display = 'block';
-                return;
-            }
-            if (!session) {
-                window.location.replace('login.html');
-                return;
-            }
+<script>
+function getAllDrawers() {
+  const drawers = [];
+  const SETTING_KEYS = ['gyeol_theme','gyeol_size','gyeol_lang'];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith('gyeol_')) continue;
+    if (SETTING_KEYS.indexOf(key) !== -1) continue;
+    const tag = key.replace('gyeol_', '');
+    if (!/^GYEOL-/i.test(tag)) continue;
+    const raw = localStorage.getItem(key);
+    let items = [];
+    try { items = JSON.parse(raw) || []; } catch(e) {}
+    if (!Array.isArray(items)) continue;
+    const name = localStorage.getItem('name_' + tag) || formatTag(tag);
+    const mediaPath = localStorage.getItem('mediaPath_' + tag) || null;
+    drawers.push({ tag, name, items, mediaPath });
+  }
+  return drawers;
+}
 
-            btn.textContent = '확인 중...';
-            btn.disabled = true;
+function formatTag(tag) {
+  // 신규 시리얼: GYEOL-1-DR1 → 서랍 1, GYEOL-1-MAIN → 메인
+  const mNew = tag.match(/GYEOL-(\d+)-(DR(\d+)|MAIN)/i);
+  if (mNew) {
+    if (mNew[2].toUpperCase() === 'MAIN') return '메인';
+    return '서랍 ' + mNew[3];
+  }
+  const m = tag.match(/DRAWER0*(\d+)/i);
+  if (m) return '서랍 ' + parseInt(m[1]);
+  return tag;
+}
 
-            const now = new Date().toISOString();
+function highlight(text, query) {
+  if (!query) return text;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text;
+  return text.slice(0, idx)
+    + '<mark>' + text.slice(idx, idx + query.length) + '</mark>'
+    + text.slice(idx + query.length);
+}
 
-            // ── 단품 코드 (GYEOL-S-) ──────────────────────────────
-            if (code.startsWith('GYEOL-S-')) {
-                const { data: rows, error: sErr } = await supabase
-                    .from('single_serials')
-                    .select('*')
-                    .eq('serial_code', code)
-                    .is('used_by', null)
-                    .limit(1);
+function onSearch() {
+  const query = document.getElementById('search-input').value.trim();
+  const clearBtn = document.getElementById('clear-btn');
+  const heroText = document.getElementById('hero-text');
+  const searchHint = document.getElementById('search-hint');
+  const resultArea = document.getElementById('result-area');
+  const resultLabel = document.getElementById('result-label');
+  const resultList = document.getElementById('result-list');
 
-                const single = rows?.[0];
+  clearBtn.classList.toggle('vis', query.length > 0);
 
-                if (sErr || !single) {
-                    errEl.textContent = '유효하지 않은 시리얼 번호예요. 다시 확인해주세요.';
-                    errEl.style.display = 'block';
-                    btn.textContent = '등록하기';
-                    btn.disabled = false;
-                    return;
-                }
+  if (!query) {
+    heroText.style.display = '';
+    if (searchHint) searchHint.style.display = '';
+    resultArea.style.display = 'none';
+    resultList.innerHTML = '';
+    return;
+  }
 
-                const { error: upErr } = await supabase
-                    .from('single_serials')
-                    .update({ used_by: session.user.email, used_at: now })
-                    .eq('serial_code', code);
+  heroText.style.display = 'none';
+  if (searchHint) searchHint.style.display = 'none';
+  resultArea.style.display = 'block';
 
-                if (upErr) {
-                    errEl.textContent = '등록 중 오류가 발생했어요. 다시 시도해주세요.';
-                    errEl.style.display = 'block';
-                    btn.textContent = '등록하기';
-                    btn.disabled = false;
-                    return;
-                }
+  const drawers = getAllDrawers();
+  const results = [];
+  drawers.forEach(d => {
+    d.items.forEach(it => {
+      if (!it || !it.n) return;
+      let cat = '기타', name = it.n;
+      if (it.n.includes(':')) {
+        const p = it.n.split(':');
+        cat = p[0].trim() || '기타';
+        name = p.slice(1).join(':').trim() || p[0];
+      }
+      if (name.toLowerCase().includes(query.toLowerCase())) {
+        results.push({ name, cat, qty: it.q || 1, tag: d.tag, drawerName: d.name, mediaPath: d.mediaPath });
+      }
+    });
+  });
 
-                sucEl.textContent = '등록 완료! 잠시 후 이동합니다.';
-                sucEl.style.display = 'block';
-                btn.textContent = '완료';
-                setTimeout(() => { window.location.replace(`drawer.html?tag=GYEOL-S-${single.item_number}`); }, 1500);
-                return;
-            }
+  resultLabel.textContent = '검색결과 ' + results.length + '건';
 
-            // ── 패키지 코드 ───────────────────────────────────────
-            const { data: rows2, error } = await supabase
-                .from('serials')
-                .select('*')
-                .eq('serial_code', code)
-                .limit(1);
+  if (!results.length) {
+    resultList.innerHTML = '<div class="empty-state"><div style="width:52px;height:52px;border-radius:16px;background:rgba(180,148,100,.08);display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>"' + query + '"에 대한 결과가 없어요</div>';
+    return;
+  }
 
-            const serial = rows2?.[0];
+  resultList.innerHTML = results.map((r, i) => {
+    const thumb = r.mediaPath
+      ? `<div class="result-ico result-thumb" data-thumb="${i}" data-path="${encodeURIComponent(r.mediaPath)}" onclick="event.stopPropagation();openThumbFull(${i})"><div class="thumb-skel"></div></div>`
+      : `<div class="result-ico">\n        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>\n      </div>`;
+    return `\n    <div class="result-item" onclick="location.href='drawer.html?tag=${r.tag}'">\n      ${thumb}\n      <div class="result-info">\n        <div class="result-name">${highlight(r.name, query)}</div>\n        <div class="result-meta"><b>${r.drawerName}</b> · ${r.cat} · ${r.qty}개</div>\n      </div>\n      <button class="go-btn" onclick="event.stopPropagation();location.href='drawer.html?tag=${r.tag}'"></button>\n    </div>\n  `;
+  }).join('');
+  loadThumbnails();
+}
 
-            if (error || !serial) {
-                errEl.textContent = '유효하지 않은 시리얼 번호예요. 다시 확인해주세요.';
-                errEl.style.display = 'block';
-                btn.textContent = '등록하기';
-                btn.disabled = false;
-                return;
-            }
+// 검색 결과 썸네일을 비동기로 채움 (user_uploads는 비공개 버킷 → createSignedUrl 사용)
+window._thumbUrls = {};
+async function loadThumbnails() {
+  const els = document.querySelectorAll('.result-thumb[data-path]');
+  for (const el of els) {
+    const idx = el.getAttribute('data-thumb');
+    const path = decodeURIComponent(el.getAttribute('data-path'));
+    try {
+      const { data: sd, error } = await _searchSb.storage.from('user_uploads').createSignedUrl(path, 3600);
+      if (error || !sd) { el.classList.remove('result-thumb'); continue; }
+      const isV = /\.(mp4|mov|webm)/i.test(path) || path.includes('video');
+      window._thumbUrls[idx] = { url: sd.signedUrl, isVideo: isV };
+      el.innerHTML = isV
+        ? `<video src="${sd.signedUrl}#t=0.1" muted playsinline preload="metadata"></video>`
+        : `<img src="${sd.signedUrl}" alt="">`;
+    } catch (e) {
+      el.classList.remove('result-thumb');
+    }
+  }
+}
 
-            // ── 14일 유예 / 잠금 체크 ────────────────────────────
-            if (serial.deleted_at) {
-                const deletedAt = new Date(serial.deleted_at);
-                const daysPassed = (new Date() - deletedAt) / (1000 * 60 * 60 * 24);
-                if (daysPassed >= 14) {
-                    errEl.textContent = '이미 사용 이력이 있는 시리얼 번호예요. 고객센터로 문의해주세요.';
-                    errEl.style.display = 'block';
-                    btn.textContent = '등록하기';
-                    btn.disabled = false;
-                    return;
-                }
-                if (serial.original_owner !== session.user.email) {
-                    errEl.textContent = '이미 사용 이력이 있는 시리얼 번호예요. 본인 계정으로 로그인 후 다시 시도해주세요.';
-                    errEl.style.display = 'block';
-                    btn.textContent = '등록하기';
-                    btn.disabled = false;
-                    return;
-                }
-                // 14일 이내 + 본인 이메일 → 복구 허용 (아래로 계속)
-            } else if (serial.used_by) {
-                errEl.textContent = '이미 등록된 시리얼 번호예요.';
-                errEl.style.display = 'block';
-                btn.textContent = '등록하기';
-                btn.disabled = false;
-                return;
-            }
+// 썸네일 탭 시 전체화면 확대 (색상으로 못 집는 물건을 눈으로 확인)
+function openThumbFull(idx) {
+  const t = window._thumbUrls[idx];
+  if (!t) return;
+  const ov = document.getElementById('thumb-fs-ov');
+  const c = document.getElementById('thumb-fs-content');
+  c.innerHTML = t.isVideo
+    ? `<video src="${t.url}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`
+    : `<img src="${t.url}" style="max-width:100%;max-height:100%;object-fit:contain">`;
+  ov.classList.add('open');
+}
+function closeThumbFull() {
+  const ov = document.getElementById('thumb-fs-ov');
+  ov.classList.remove('open');
+  document.getElementById('thumb-fs-content').innerHTML = '';
+}
 
-            const setNum = serial.set_number;
-            const tagCodes = [
-                `GYEOL-${setNum}-MAIN`,
-                `GYEOL-${setNum}-DR1`,
-                `GYEOL-${setNum}-DR2`
-            ];
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  onSearch();
+  document.getElementById('search-input').focus();
+}
+async function handleLogout() {
+await window.sb.auth.signOut();
+window.location.replace('login.html');
+}
 
-            const { error: tagError } = await supabase
-                .from('serial_codes')
-                .update({ used_by: session.user.email, used_at: now })
-                .in('code', tagCodes);
 
-            if (tagError) {
-                errEl.textContent = '등록 중 오류가 발생했어요. 다시 시도해주세요.';
-                errEl.style.display = 'block';
-                btn.textContent = '등록하기';
-                btn.disabled = false;
-                return;
-            }
 
-            await supabase
-                .from('serials')
-                .update({ used_by: session.user.email, used_at: now, deleted_at: null, original_owner: null })
-                .eq('serial_code', code);
-
-            sucEl.textContent = '등록 완료! 잠시 후 이동합니다.';
-            sucEl.style.display = 'block';
-            btn.textContent = '완료';
-            const afterLogin = localStorage.getItem('gyeol_after_login');
-            if (afterLogin) {
-                localStorage.removeItem('gyeol_after_login');
-                setTimeout(() => { window.location.replace(afterLogin); }, 1500);
-            } else {
-                setTimeout(() => { window.location.replace('search.html'); }, 1500);
-            }
-        });
-
-        document.getElementById('logout-btn').addEventListener('click', async () => {
-            await supabase.auth.signOut();
-            window.location.replace('login.html');
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('submit-btn').click();
-            }
-        });
-    </script>
+var _OB_I=0, _OB_S=[], _OB_KEY='';
+function obStart(steps, key){
+  if(localStorage.getItem(key)==='1') return;
+  _OB_I=0; _OB_S=steps; _OB_KEY=key;
+  document.getElementById('ob-ov').classList.add('on');
+  document.getElementById('ob-ov').onclick=function(){obClose();};
+  obShow(0);
+}
+function obPlace(el){
+  if(!el) return;
+  var r=el.getBoundingClientRect();
+  var hl=document.getElementById('ob-hl');
+  if(hl){
+    hl.style.left=(r.left-6)+'px';
+    hl.style.top=(r.top-6)+'px';
+    hl.style.width=(r.width+12)+'px';
+    hl.style.height=(r.height+12)+'px';
+  }
+  var box=document.getElementById('ob-box');
+  if(box){
+    var center=r.top + r.height/2;
+    if(center > window.innerHeight*0.55){
+      box.style.bottom='auto';box.style.top='calc(env(safe-area-inset-top, 0px) + 20px)';
+    } else {
+      box.style.top='auto';box.style.bottom='104px';
+    }
+  }
+}
+function obShow(i){
+  var s=_OB_S[i]; if(!s){obDone();return;}
+  var el=document.querySelector(s.sel);
+  if(!el){_OB_I++;obShow(_OB_I);return;}
+  document.getElementById('ob-nn').textContent=(i+1)+' / '+_OB_S.length;
+  document.getElementById('ob-tt').textContent=s.title;
+  document.getElementById('ob-dd').textContent=s.desc;
+  var ww=document.getElementById('ob-ww');
+  if(s.warn){ww.textContent=s.warn;ww.style.display='block';}else{ww.style.display='none';}
+  document.getElementById('ob-nxt').textContent=i===_OB_S.length-1?'완료':'다음';
+  document.getElementById('ob-prev').style.display=i>0?'':'none';
+  document.getElementById('ob-close').style.display=i===_OB_S.length-1?'none':'';
+  el.scrollIntoView({block:'center',behavior:'smooth'});
+  clearTimeout(window._obT1);clearTimeout(window._obT2);
+  window._obT1=setTimeout(function(){obPlace(el);},420);
+  window._obT2=setTimeout(function(){obPlace(el);},820);
+}
+function obNext(){_OB_I++;obShow(_OB_I);}
+function obPrev(){if(_OB_I>0){_OB_I--;obShow(_OB_I);}}
+function obDone(){localStorage.setItem(_OB_KEY,'1');obClose();}
+function obClose(){
+  document.getElementById('ob-ov').classList.remove('on');
+  document.getElementById('ob-hl').style.width='0';
+  localStorage.setItem(_OB_KEY,'1');
+}
+function startOnboarding(){
+  obStart([
+    {sel:'.mypage-btn',title:'마이페이지',desc:'우측 상단 아이콘을 클릭하시면 마이페이지로 이동합니다.\nAI 이용권 확인, 테마 설정, 계정 관리 등 다양한 기능을 이용하실 수 있습니다.',warn:null},
+    {sel:'.search-wrap',title:'통합 검색',desc:'수납장 목록을 등록한 뒤 물품명을 검색하시면, 해당 물품이 보관된 수납장을 손쉽게 확인하실 수 있습니다.',warn:null}
+  ], 'ob_index_done');
+}
+async function checkSystemAnnouncement(){
+  try{
+    var _annSb=(typeof window!=='undefined'&&window._searchSb)?window._searchSb:(typeof sb!=='undefined'?sb:null);
+    if(!_annSb)return;
+    var r=await _annSb.from('system_announcements').select('*').eq('active',true).order('created_at',{ascending:false}).limit(1);
+    if(r.error||!r.data||!r.data.length){
+      // 활성 공지 없음 → 점검화면 숨김
+      var _mov=document.getElementById('maintenance-ov');
+      if(_mov&&_mov.classList.contains('show'))_mov.classList.remove('show');
+      return;
+    }
+    var ann=r.data[0];
+    if(ann.ends_at&&new Date(ann.ends_at)<new Date())return;
+    if(ann.type==='maintenance'){
+      document.getElementById('maintenance-msg').innerHTML=ann.message.replace(/\n/g,'<br>');
+      if(ann.ends_at){
+        var d=new Date(ann.ends_at);
+        var fmt=(d.getMonth()+1)+'월 '+d.getDate()+'일 '+d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')+'<br><span style="font-size:12px;color:#9A8E80;font-weight:600">완료 예정</span>';
+        var tv=document.getElementById('maintenance-time-val');
+        var tw=document.getElementById('maintenance-time');
+        if(tv)tv.innerHTML=fmt;
+        if(tw)tw.style.display='block';
+      }
+      document.getElementById('maintenance-ov').classList.add('show');
+    }else{
+      // 검색 화면에서는 배너 표시 안 함 — 공지함(🔔)에서만 확인
+      if(!localStorage.getItem('gyeol_ann_seen_'+ann.created_at)){
+        var dot=document.getElementById('bell-dot');
+        if(dot)dot.style.display='block';
+        window._pendingAnnId=ann.created_at;
+      }
+    }
+  }catch(e){console.log('공지 체크 실패',e.message);}
+}
+var _noticeData=[];
+async function openNoticeBox(){
+  if(window._pendingAnnId){localStorage.setItem('gyeol_ann_seen_'+window._pendingAnnId,'1');window._pendingAnnId=null;}
+  var dot=document.getElementById('bell-dot');if(dot)dot.style.display='none';
+  var ov=document.getElementById('notice-ov');if(ov)ov.classList.add('open');
+  await loadNotices();
+}
+function closeNoticeBox(){var ov=document.getElementById('notice-ov');if(ov)ov.classList.remove('open');}
+async function loadNotices(){
+  var list=document.getElementById('notice-list');
+  var detail=document.getElementById('notice-detail');
+  var backBtn=document.getElementById('notice-back-btn');
+  var hdTitle=document.getElementById('notice-hd-title');
+  list.style.display='block';detail.style.display='none';
+  if(backBtn)backBtn.style.display='none';
+  if(hdTitle)hdTitle.textContent='공지사항';
+  list.innerHTML='<div class="notice-empty">불러오는 중...</div>';
+  try{
+    var _annSb=(typeof window._searchSb!=='undefined'&&window._searchSb)?window._searchSb:(typeof sb!=='undefined'?sb:null);
+    if(!_annSb){list.innerHTML='<div class="notice-empty">불러올 수 없습니다</div>';return;}
+    var r=await _annSb.from('system_announcements').select('*').neq('type','maintenance').order('created_at',{ascending:false}).limit(20);
+    if(r.error||!r.data){list.innerHTML='<div class="notice-empty">불러올 수 없습니다</div>';return;}
+    _noticeData=r.data;
+    if(!r.data.length){list.innerHTML='<div class="notice-empty">등록된 공지사항이 없습니다</div>';return;}
+    list.innerHTML='';
+    r.data.forEach(function(ann,i){
+      var d=new Date(ann.created_at);
+      var ds=(d.getFullYear()+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getDate().toString().padStart(2,'0'));
+      var el=document.createElement('div');el.className='notice-item';
+      el.innerHTML='<div class="notice-item-title">'+_esc(ann.title||'공지사항')+'</div><div class="notice-item-date">'+ds+'</div><div class="notice-item-arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>';
+      el.onclick=function(){showNoticeDetail(i);};
+      list.appendChild(el);
+    });
+  }catch(e){list.innerHTML='<div class="notice-empty">불러올 수 없습니다</div>';}
+}
+function showNoticeDetail(idx){
+  var ann=_noticeData[idx];if(!ann)return;
+  var list=document.getElementById('notice-list');
+  var detail=document.getElementById('notice-detail');
+  var backBtn=document.getElementById('notice-back-btn');
+  var hdTitle=document.getElementById('notice-hd-title');
+  list.style.display='none';detail.style.display='block';
+  if(backBtn)backBtn.style.display='flex';
+  if(hdTitle)hdTitle.textContent=ann.title||'공지사항';
+  var d=new Date(ann.created_at);
+  var ds=(d.getFullYear()+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getDate().toString().padStart(2,'0'));
+  detail.innerHTML='<div class="notice-detail-title">'+_esc(ann.title||'공지사항')+'</div><div class="notice-detail-date">'+ds+'</div><div class="notice-detail-body">'+_esc(ann.message||'')+'</div>';
+}
+function noticeGoBack(){
+  var list=document.getElementById('notice-list');
+  var detail=document.getElementById('notice-detail');
+  var backBtn=document.getElementById('notice-back-btn');
+  var hdTitle=document.getElementById('notice-hd-title');
+  list.style.display='block';detail.style.display='none';
+  if(backBtn)backBtn.style.display='none';
+  if(hdTitle)hdTitle.textContent='공지사항';
+}
+function _esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function closeAnnounce(){
+  var bar=document.getElementById('announce-bar');
+  bar.classList.remove('show');
+  var hd=document.querySelector('.header');if(hd)hd.style.marginTop='';
+  var id=bar.dataset.annId;
+  if(id){
+    localStorage.setItem('gyeol_ann_dismissed_'+id,'1');
+    localStorage.setItem('gyeol_ann_seen_'+id,'1');
+  }
+  var dot=document.getElementById('bell-dot');
+  if(dot)dot.style.display='none';
+  window._pendingAnnId=null;
+}
+</script>
+<!-- 검색 썸네일 전체화면 보기 -->
+<div class="thumb-fs-ov" id="thumb-fs-ov" onclick="if(event.target===this)closeThumbFull()">
+  <button class="thumb-fs-close" onclick="closeThumbFull()" aria-label="닫기">✕</button>
+  <div class="thumb-fs-content" id="thumb-fs-content"></div>
+</div>
 </body>
 </html>
