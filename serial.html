@@ -42,13 +42,12 @@
             background: linear-gradient(170deg,#F4E098 0%,#D4A828 28%,#A07018 52%,#C09028 75%,#ECC858 100%);
             background-size: 220% auto;
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-            filter: drop-shadow(0 3px 5px rgba(90,50,0,0.42)) drop-shadow(0 0 12px rgba(200,150,20,0.5));
             animation: gyeol-shimmer 7s ease-in-out infinite;
         }
         @keyframes gyeol-shimmer {
-            0%   { background-position: 0% center;   filter: drop-shadow(0 3px 5px rgba(90,50,0,0.38)) drop-shadow(0 0 10px rgba(200,150,20,0.38)); }
-            50%  { background-position: 100% center; filter: drop-shadow(0 3px 5px rgba(90,50,0,0.38)) drop-shadow(0 0 22px rgba(225,175,35,0.82)); }
-            100% { background-position: 0% center;   filter: drop-shadow(0 3px 5px rgba(90,50,0,0.38)) drop-shadow(0 0 10px rgba(200,150,20,0.38)); }
+            0%   { background-position: 0% center; }
+            50%  { background-position: 100% center; }
+            100% { background-position: 0% center; }
         }
         .logo-sub { font-size: 13px; color: var(--sub); margin-top: 6px; }
         .nm-card {
@@ -160,10 +159,31 @@
             if (urlCode && urlCode.toUpperCase().startsWith('GYEOL-S-')) {
                 document.getElementById('serial').value = urlCode.toUpperCase();
             }
-            // isAdd(추가 등록) 또는 그 외의 경우: 폼을 그대로 표시하고 시리얼 입력을 받는다.
-            // ⚠️ 진입 시 자동 통과(gyeol_after_login 리다이렉트 / 등록이력 기반 통과)는
-            //    제거됨 — 시리얼 입력 없이 미등록 세트로 진입되는 보안 구멍이었음.
-            //    모든 진입 검증은 tag.html이 serial_codes(태그 단위)로 처리한다.
+            // 추가 등록(isAdd) 또는 단품 코드 진입이면 폼을 그대로 표시하고 시리얼 입력 받음.
+            else if (!isAdd) {
+                // ── 재로그인/소셜로그인 후 도착한 경우: 시리얼 재입력 없이 통과 ──
+                // ⚠️ 통과 목적지는 반드시 재검증되는 경로여야 함:
+                //   · gyeol_after_login(원래 가려던 태그) → tag.html이 serial_codes로 재검증
+                //     → 미등록 태그면 거기서 막힘. 따라서 무단 진입 불가.
+                //   · 등록 이력자 → search.html (본인 수납장만 user_email로 조회)
+                // 시리얼은 최초 1회만 등록. 이미 등록한 사람이 매번 입력하지 않도록 한다.
+                const afterLogin = localStorage.getItem('gyeol_after_login');
+                if (afterLogin) {
+                    localStorage.removeItem('gyeol_after_login');
+                    window.location.replace(afterLogin);
+                    return;
+                }
+                // 등록 이력이 있으면(패키지 또는 단품) 시리얼 화면 건너뛰고 검색으로
+                const { data: pkgRows } = await supabase
+                    .from('serials').select('id').eq('used_by', session.user.email).limit(1);
+                const { data: snglRows } = await supabase
+                    .from('single_serials').select('id').eq('used_by', session.user.email).limit(1);
+                if ((pkgRows && pkgRows.length) || (snglRows && snglRows.length)) {
+                    window.location.replace('search.html');
+                    return;
+                }
+                // 등록 이력 없음 → 폼 그대로 표시 (시리얼 입력 강제, 신규 등록)
+            }
         }
 
         document.getElementById('submit-btn').addEventListener('click', async () => {
