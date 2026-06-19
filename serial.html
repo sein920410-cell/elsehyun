@@ -34,26 +34,19 @@
         }
         .container { width: 100%; max-width: 380px; }
         .logo-area { text-align: center; margin-bottom: 28px; }
-        .logo-title {
-            font-family: 'Pretendard', sans-serif;
-            font-size: 27px;
-            font-weight: 300;
-            letter-spacing: 0.30em;
-            padding-left: 0.30em;
-            background: linear-gradient(135deg,#B8860B 0%,#9A6E12 25%,#C9A227 50%,#8A5E14 72%,#BF953F 100%);
-            background-size: 220% auto;
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-            animation: gyeol-shimmer 7s ease-in-out infinite;
+                .logo-title-img {
+            position: relative;
+            display: inline-block;
+            width: 190px;
         }
-        .logo-eng {
-            font-family: 'Noto Serif KR', serif;
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.40em;
-            padding-left: 0.40em;
-            margin-top: 7px;
-            background: linear-gradient(135deg,#B8860B,#C9A227,#8A5E14);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        .logo-title-img img { width: 100%; display: block; }
+        .logo-title-img::after {
+            content: ''; position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,0.55) 50%, transparent 58%);
+            background-size: 250% 100%; background-repeat: no-repeat;
+            -webkit-mask: url('lib/logo-title.png') center/contain no-repeat;
+            mask: url('lib/logo-title.png') center/contain no-repeat;
+            animation: logo-shine 7s ease-in-out infinite;
         }
         @keyframes gyeol-shimmer {
             0%   { background-position: 0% center; }
@@ -126,8 +119,8 @@
         }
         .logout-btn:hover { opacity: 1; }
         .site-footer { text-align: center; margin-top: 38px; padding-top: 22px; border-top: 1px solid rgba(180,160,120,0.28); }
-        .footer-logo { position: relative; display: inline-block; width: 44px; }
-        .footer-logo img { width: 100%; display: block; opacity: 0.70; filter: saturate(0.78) brightness(1.04); }
+        .footer-logo { position: relative; display: inline-block; width: 36px; }
+        .footer-logo img { width: 100%; display: block; opacity: 0.92; filter: saturate(1.0) brightness(1.0); }
         .footer-logo::after {
             content: ''; position: absolute; inset: 0; pointer-events: none;
             background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.38) 50%, transparent 60%);
@@ -141,20 +134,14 @@
             55% { background-position: -65% 0; }
             100% { background-position: -65% 0; }
         }
-        .footer-brand {
-            font-size: 14px; letter-spacing: 0.16em; padding-left: 0.16em; margin-top: 7px;
-            background: linear-gradient(135deg,#B8860B,#9A6E12,#C9A227,#8A5E14,#BF953F);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-        }
-        .footer-meta { font-size: 12px; color: var(--sub); margin-top: 9px; }
+        .footer-meta { font-size: 12px; color: var(--sub); margin-top: 14px; }
         .footer-copy { font-size: 11px; color: var(--sub); opacity: 0.8; margin-top: 3px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo-area">
-            <div class="logo-title">공간:결</div>
-            <div class="logo-eng">ELSEHYUN</div>
+            <span class="logo-title-img"><img src="lib/logo-title.png" alt="공간:결 ELSEHYUN"></span>
             <p class="logo-sub">제품 시리얼 번호를 등록해주세요</p>
         </div>
         <div class="nm-card">
@@ -170,7 +157,6 @@
     </div>
     <footer class="site-footer">
         <span class="footer-logo"><img src="lib/logo-es-gold.png" alt="ELSEHYUN"></span>
-        <div class="footer-brand">공간:결</div>
         <p class="footer-meta">문의 on@elsehyun.com</p>
         <p class="footer-copy">© 2026 엘세현 (ELSEHYUN). All rights reserved.</p>
     </footer>
