@@ -12,14 +12,14 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --bg: #1A1917;
-            --surface2: #252320;
-            --accent: #C8A870;
-            --text: #E8E5DF;
-            --sub: #8C8880;
-            --nm-raise-sm: 4px 4px 10px rgba(0,0,0,0.62), -4px -4px 10px rgba(255,255,255,0.035);
-            --nm-inset-sm: inset 3px 3px 8px rgba(0,0,0,0.62), inset -3px -3px 8px rgba(255,255,255,0.035);
-            --nm-inset: inset 5px 5px 12px rgba(0,0,0,0.68), inset -5px -5px 12px rgba(255,255,255,0.04);
+            --bg: #F0E8D6;
+            --surface2: #F5F0E5;
+            --accent: #A8780C;
+            --text: #3A3024;
+            --sub: #9A8A6A;
+            --nm-raise-sm: 5px 5px 12px rgba(180,160,120,0.40), -5px -5px 12px rgba(255,255,255,0.90);
+            --nm-inset-sm: inset 2px 2px 5px rgba(175,150,105,0.45), inset -2px -2px 5px rgba(255,255,255,0.90);
+            --nm-inset: inset 4px 4px 9px rgba(175,150,105,0.50), inset -4px -4px 9px rgba(255,255,255,0.92);
         }
         body {
             font-family: 'Pretendard', sans-serif;
@@ -35,14 +35,25 @@
         .container { width: 100%; max-width: 380px; }
         .logo-area { text-align: center; margin-bottom: 28px; }
         .logo-title {
-            font-family: 'Noto Serif KR', Georgia, serif;
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            background: linear-gradient(170deg,#F4E098 0%,#D4A828 28%,#A07018 52%,#C09028 75%,#ECC858 100%);
+            font-family: 'Pretendard', sans-serif;
+            font-size: 27px;
+            font-weight: 300;
+            letter-spacing: 0.30em;
+            padding-left: 0.30em;
+            background: linear-gradient(135deg,#B8860B 0%,#9A6E12 25%,#C9A227 50%,#8A5E14 72%,#BF953F 100%);
             background-size: 220% auto;
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
             animation: gyeol-shimmer 7s ease-in-out infinite;
+        }
+        .logo-eng {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.40em;
+            padding-left: 0.40em;
+            margin-top: 7px;
+            background: linear-gradient(135deg,#B8860B,#C9A227,#8A5E14);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
         @keyframes gyeol-shimmer {
             0%   { background-position: 0% center; }
@@ -86,16 +97,16 @@
         .success-msg { color: #7EC87E; }
         .submit-btn {
             width: 100%;
-            background: var(--text);
-            color: var(--bg);
+            background: #2A2620;
+            color: #EAD9A8;
             border: none;
             border-radius: 14px;
             padding: 14px;
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
             font-family: 'Pretendard', sans-serif;
-            box-shadow: 4px 4px 10px rgba(0,0,0,0.5), -1px -1px 4px rgba(255,255,255,0.06);
+            box-shadow: 5px 5px 12px rgba(160,140,100,0.40), -4px -4px 10px rgba(255,255,255,0.85);
             transition: opacity .15s;
             margin-bottom: 12px;
         }
@@ -114,12 +125,36 @@
             transition: opacity .15s;
         }
         .logout-btn:hover { opacity: 1; }
+        .site-footer { text-align: center; margin-top: 38px; padding-top: 22px; border-top: 1px solid rgba(180,160,120,0.28); }
+        .footer-logo { position: relative; display: inline-block; width: 44px; }
+        .footer-logo img { width: 100%; display: block; opacity: 0.70; filter: saturate(0.78) brightness(1.04); }
+        .footer-logo::after {
+            content: ''; position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.38) 50%, transparent 60%);
+            background-size: 250% 100%; background-repeat: no-repeat;
+            -webkit-mask: url('lib/logo-es-gold.png') center/contain no-repeat;
+            mask: url('lib/logo-es-gold.png') center/contain no-repeat;
+            animation: logo-shine 7s ease-in-out infinite;
+        }
+        @keyframes logo-shine {
+            0% { background-position: 165% 0; }
+            55% { background-position: -65% 0; }
+            100% { background-position: -65% 0; }
+        }
+        .footer-brand {
+            font-size: 14px; letter-spacing: 0.16em; padding-left: 0.16em; margin-top: 7px;
+            background: linear-gradient(135deg,#B8860B,#9A6E12,#C9A227,#8A5E14,#BF953F);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .footer-meta { font-size: 12px; color: var(--sub); margin-top: 9px; }
+        .footer-copy { font-size: 11px; color: var(--sub); opacity: 0.8; margin-top: 3px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo-area">
             <div class="logo-title">공간:결</div>
+            <div class="logo-eng">ELSEHYUN</div>
             <p class="logo-sub">제품 시리얼 번호를 등록해주세요</p>
         </div>
         <div class="nm-card">
@@ -133,6 +168,12 @@
             <button id="logout-btn" type="button" class="logout-btn">로그아웃</button>
         </div>
     </div>
+    <footer class="site-footer">
+        <span class="footer-logo"><img src="lib/logo-es-gold.png" alt="ELSEHYUN"></span>
+        <div class="footer-brand">공간:결</div>
+        <p class="footer-meta">문의 on@elsehyun.com</p>
+        <p class="footer-copy">© 2026 엘세현 (ELSEHYUN). All rights reserved.</p>
+    </footer>
 
     <script src="lib/supabase.umd.min.js"></script>
     <script type="module">
