@@ -18,18 +18,18 @@
     <style>
         /* ── 뉴모피즘 변수 ── */
         :root {
-            --bg: #F0E8D6;
-            --surface: #F2ECDF;
-            --surface2: #F5F0E5;
-            --text: #3A3024;
-            --muted: #9A8A6A;
-            --muted2: #BCAE92;
-            --accent: #A8780C;
+            --bg: #f0efeb;
+            --surface: #F4F2EE;
+            --surface2: #FFFFFF;
+            --text: #333333;
+            --muted: #91857c;
+            --muted2: #A8A092;
+            --accent: #a89275;
             --danger: #B85A44;
-            --nm-raise:    8px 8px 18px rgba(180,160,120,0.46), -8px -8px 18px rgba(255,255,255,0.90);
-            --nm-raise-sm: 5px 5px 12px rgba(180,160,120,0.40), -5px -5px 12px rgba(255,255,255,0.88);
-            --nm-raise-xs: 3px 3px 8px  rgba(180,160,120,0.34), -3px -3px 8px  rgba(255,255,255,0.82);
-            --nm-inset-sm: inset 2px 2px 5px rgba(175,150,105,0.45), inset -2px -2px 5px rgba(255,255,255,0.90);
+            --nm-raise:    8px 8px 18px rgba(170,165,155,0.40), -8px -8px 18px rgba(255,255,255,0.95);
+            --nm-raise-sm: 5px 5px 12px rgba(170,165,155,0.36), -5px -5px 12px rgba(255,255,255,0.95);
+            --nm-raise-xs: 3px 3px 8px  rgba(170,165,155,0.32), -3px -3px 8px  rgba(255,255,255,0.90);
+            --nm-inset-sm: inset 2px 2px 5px rgba(170,165,155,0.42), inset -2px -2px 5px rgba(255,255,255,0.95);
             --font: 'Pretendard', sans-serif;
             --radius: 18px;
         }
@@ -99,8 +99,8 @@
         /* ── 상태 카드 ── */
         .state-card {
             background: var(--surface2);
-            box-shadow: var(--nm-raise-sm);
-            border-radius: var(--radius);
+            box-shadow: -3px -3px 8px rgba(255,255,255,0.92), 0 12px 30px rgba(150,145,135,0.20);
+            border-radius: 24px;
             padding: 32px 24px 28px;
             text-align: center;
         }
@@ -144,8 +144,8 @@
         /* ── 버튼 ── */
         .btn {
             width: 100%;
-            padding: 14px;
-            border-radius: 14px;
+            padding: 15px;
+            border-radius: 18px;
             border: none;
             font-family: var(--font);
             font-size: 14px;
@@ -160,8 +160,8 @@
         }
         .btn:active { box-shadow: var(--nm-inset-sm); transform: scale(.98); }
         .btn-accent {
-            background: #2A2620;
-            color: #EAD9A8;
+            background: #1f2521;
+            color: #d8d0b6;
         }
 
         /* ── 코드 인라인 태그 ── */
