@@ -12,16 +12,19 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --bg: #F0E8D6;
-            --surface: #F5F0E5;
-            --surface2: #F5F0E5;
-            --accent: #A8780C;
-            --text: #3A3024;
-            --sub: #9A8A6A;
-            --nm-raise-sm: 5px 5px 12px rgba(180,160,120,0.40), -5px -5px 12px rgba(255,255,255,0.90);
-            --nm-raise-xs: 3px 3px 7px rgba(180,160,120,0.35), -3px -3px 7px rgba(255,255,255,0.85);
-            --nm-inset-sm: inset 2px 2px 5px rgba(175,150,105,0.45), inset -2px -2px 5px rgba(255,255,255,0.90);
-            --nm-inset: inset 4px 4px 9px rgba(175,150,105,0.50), inset -4px -4px 9px rgba(255,255,255,0.92);
+            --bg: #f0efeb;
+            --card: #FFFFFF;
+            --field: #f6f4f0;
+            --surface: #FFFFFF;
+            --surface2: #FFFFFF;
+            --accent: #a89275;
+            --text: #333333;
+            --sub: #91857c;
+            --muted: #826f5b;
+            --nm-raise-sm: 5px 5px 12px rgba(170,165,155,0.36), -5px -5px 12px rgba(255,255,255,0.95);
+            --nm-raise-xs: 3px 3px 7px rgba(170,165,155,0.32), -3px -3px 7px rgba(255,255,255,0.90);
+            --nm-inset-sm: inset 2px 2px 5px rgba(170,165,155,0.42), inset -2px -2px 5px rgba(255,255,255,0.95);
+            --nm-inset: inset 4px 4px 9px rgba(170,165,155,0.48), inset -4px -4px 9px rgba(255,255,255,0.95);
         }
         body {
             font-family: 'Pretendard', sans-serif;
@@ -38,33 +41,47 @@
 
         /* 로고 */
         .logo-area { text-align: center; margin-bottom: 28px; }
-                .logo-title-img {
-            position: relative;
+        /* 로고 글자: '공간:결' 텍스트 + 골드 그라데이션 + shimmer (이미지 X → 잘림 없음) */
+        .logo-gyeol {
+            font-family: 'Noto Serif KR', serif;
+            font-weight: 600;
+            font-size: 38px;
+            line-height: 1.32;
             display: inline-block;
-            width: 212px;
-        }
-        .logo-title-img img { width: 100%; display: block; }
-        .logo-title-img::after {
-            content: ''; position: absolute; inset: 0; pointer-events: none;
-            background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,0.55) 50%, transparent 58%);
-            background-size: 250% 100%; background-repeat: no-repeat;
-            -webkit-mask: url('lib/logo-title.png') center/contain no-repeat;
-            mask: url('lib/logo-title.png') center/contain no-repeat;
-            animation: logo-shine 7s ease-in-out infinite;
+            padding-bottom: 6px;
+            background: linear-gradient(105deg,#6E4E1C,#A8863E 28%,#D8B868 50%,#A8863E 72%,#6E4E1C);
+            background-size: 220% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            animation: gyeol-shimmer 7s ease-in-out infinite;
         }
         @keyframes gyeol-shimmer {
             0%   { background-position: 0% center; }
             50%  { background-position: 100% center; }
             100% { background-position: 0% center; }
         }
-        .logo-sub { font-size: 13px; color: var(--sub); margin-top: 6px; }
+        .logo-brand {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 13px;
+            letter-spacing: 0.24em;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+        .logo-divider {
+            width: 36px; height: 1px;
+            background: rgba(168,138,62,0.45);
+            margin: 12px auto 0;
+        }
+        .logo-sub { font-size: 14px; color: var(--sub); margin-top: 14px; font-family: 'Noto Serif KR', serif; }
 
         /* 카드 */
         .nm-card {
-            background: var(--surface2);
+            background: var(--card);
             border-radius: 24px;
             padding: 24px 20px;
-            box-shadow: var(--nm-raise-sm);
+            box-shadow: -3px -3px 8px rgba(255,255,255,0.92), 0 12px 30px rgba(150,145,135,0.20);
         }
 
         /* 동의 섹션 */
@@ -90,7 +107,7 @@
             width: 20px; height: 20px;
             margin-top: 1px;
             border-radius: 6px;
-            background: var(--bg);
+            background: var(--field);
             box-shadow: var(--nm-inset-sm);
             display: flex;
             align-items: center;
@@ -118,7 +135,7 @@
         }
         .divider {
             height: 1px;
-            background: rgba(120,100,60,0.18);
+            background: rgba(150,145,135,0.16);
             margin: 16px 0;
         }
 
@@ -172,9 +189,9 @@
         }
         .nm-input {
             width: 100%;
-            background: var(--bg);
+            background: var(--field);
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             box-shadow: var(--nm-inset-sm);
             padding: 13px 14px;
             font-size: 14px;
@@ -184,7 +201,7 @@
             transition: box-shadow .2s;
         }
         .nm-input::placeholder { color: var(--sub); opacity: 0.5; }
-        .nm-input:focus { box-shadow: var(--nm-inset), 0 0 0 2px rgba(200,168,112,0.25); }
+        .nm-input:focus { box-shadow: var(--nm-inset), 0 0 0 2px rgba(168,146,117,0.25); }
         .pw-wrap { position: relative; }
         .pw-wrap .nm-input { padding-right: 44px; }
         .eye-btn {
@@ -211,16 +228,16 @@
         /* 로그인 버튼 */
         .login-btn {
             width: 100%;
-            background: #2A2620;
-            color: #EAD9A8;
+            background: #1f2521;
+            color: #d8d0b6;
             border: none;
-            border-radius: 14px;
-            padding: 14px;
+            border-radius: 18px;
+            padding: 15px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             font-family: 'Pretendard', sans-serif;
-            box-shadow: 5px 5px 12px rgba(160,140,100,0.40), -4px -4px 10px rgba(255,255,255,0.85);
+            box-shadow: 5px 5px 12px rgba(170,165,155,0.36), -5px -5px 12px rgba(255,255,255,0.95);
             transition: opacity .15s;
             margin-top: 4px;
         }
@@ -244,7 +261,7 @@
             width: 100%;
             max-width: 420px;
             background: var(--surface2);
-            box-shadow: 0 -8px 24px rgba(120,100,60,0.20);
+            box-shadow: 0 -8px 24px rgba(150,145,135,0.20);
             border-radius: 24px 24px 0 0;
             padding: 0 0 env(safe-area-inset-bottom, 0);
             max-height: 80vh;
@@ -258,7 +275,7 @@
         }
         .modal-handle {
             width: 36px; height: 4px;
-            background: rgba(120,100,60,0.25);
+            background: rgba(150,145,135,0.25);
             border-radius: 2px;
             margin: 12px auto 0;
         }
@@ -267,7 +284,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 16px 20px 12px;
-            border-bottom: 1px solid rgba(120,100,60,0.15);
+            border-bottom: 1px solid rgba(150,145,135,0.15);
             flex-shrink: 0;
         }
         .modal-title { font-size: 15px; font-weight: 700; color: var(--text); }
@@ -296,30 +313,27 @@
         .modal-body p { margin-bottom: 6px; }
         .modal-body ul { padding-left: 14px; margin-bottom: 8px; }
         .modal-body ul li { margin-bottom: 3px; list-style: disc; }
-        .modal-body .em { color: rgba(90,80,60,0.85); }
+        .modal-body .em { color: rgba(80,74,66,0.85); }
         .modal-agree-btn {
             margin: 0 20px 20px;
-            background: #2A2620;
-            color: #EAD9A8;
+            background: #1f2521;
+            color: #d8d0b6;
             border: none;
-            border-radius: 14px;
-            padding: 13px;
+            border-radius: 18px;
+            padding: 14px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             width: calc(100% - 40px);
             font-family: 'Pretendard', sans-serif;
             flex-shrink: 0;
-            box-shadow: 5px 5px 12px rgba(160,140,100,0.40), -4px -4px 10px rgba(255,255,255,0.85);
+            box-shadow: 5px 5px 12px rgba(170,165,155,0.36), -5px -5px 12px rgba(255,255,255,0.95);
         }
-        .site-footer { text-align: center; margin-top: 32px; padding-top: 22px; border-top: 1px solid rgba(180,160,120,0.28); }
-        .footer-logo { position: relative; display: inline-block; width: 36px; }
-        .footer-logo img { width: 100%; display: block; opacity: 0.92; filter: saturate(1.0) brightness(1.0); }
-        @keyframes logo-shine {
-            0% { background-position: 165% 0; }
-            55% { background-position: -65% 0; }
-            100% { background-position: -65% 0; }
-        }
+        .site-footer { text-align: center; margin-top: 32px; padding-top: 22px; border-top: 1px solid rgba(168,138,62,0.20); }
+        .footer-brand { display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
+        .footer-logo { display: inline-block; width: 22px; }
+        .footer-logo img { width: 100%; display: block; opacity: 0.92; }
+        .footer-brand-name { font-family: 'Pretendard', sans-serif; font-size: 13px; letter-spacing: 0.2em; color: var(--muted); }
         .footer-meta { font-size: 12px; color: var(--sub); margin-top: 14px; }
         .footer-copy { font-size: 11px; color: var(--sub); opacity: 0.8; margin-top: 3px; }
     </style>
@@ -327,7 +341,9 @@
 <body>
 <div class="container">
     <div class="logo-area">
-        <span class="logo-title-img"><img src="lib/logo-title.png" alt="공간:결 ELSEHYUN"></span>
+        <span class="logo-gyeol">공간:결</span>
+        <p class="logo-brand">ELSEHYUN</p>
+        <div class="logo-divider"></div>
         <p class="logo-sub">공간의 결을 더하다</p>
     </div>
     <div class="nm-card">
@@ -338,7 +354,7 @@
                 <label for="chk-terms" class="gyeol-check-label">
                     <div class="gyeol-check-box">
                         <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
-                            <path d="M1 4.5L4 7.5L10 1" stroke="#1A1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M1 4.5L4 7.5L10 1" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
                     <span class="gyeol-check-text"><span class="badge">[필수]</span>이용약관에 동의합니다.</span>
@@ -350,7 +366,7 @@
                 <label for="chk-privacy" class="gyeol-check-label">
                     <div class="gyeol-check-box">
                         <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
-                            <path d="M1 4.5L4 7.5L10 1" stroke="#1A1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M1 4.5L4 7.5L10 1" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
                     <span class="gyeol-check-text"><span class="badge">[필수]</span>개인정보 수집·이용에 동의합니다.</span>
@@ -362,7 +378,7 @@
                 <label for="chk-age" class="gyeol-check-label">
                     <div class="gyeol-check-box">
                         <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
-                            <path d="M1 4.5L4 7.5L10 1" stroke="#1A1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M1 4.5L4 7.5L10 1" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
                     <span class="gyeol-check-text"><span class="badge">[필수]</span>만 14세 이상입니다.</span>
@@ -421,7 +437,10 @@
     </div>
 </div>
 <footer class="site-footer">
-    <span class="footer-logo"><img src="lib/logo-es-gold.png" alt="ELSEHYUN"></span>
+    <span class="footer-brand">
+        <span class="footer-logo"><img src="lib/logo-es-gold.png" alt="ELSEHYUN"></span>
+        <span class="footer-brand-name">ELSEHYUN</span>
+    </span>
     <p class="footer-meta">문의 on@elsehyun.com</p>
     <p class="footer-copy">© 2026 엘세현 (ELSEHYUN). All rights reserved.</p>
 </footer>
