@@ -126,7 +126,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
 .header-left{display:flex;align-items:center;flex-shrink:0;padding-left:14px;z-index:1}
 /* 헤더 네비 버튼 (홈/마이페이지) — 테마변수 기반, 모든 테마 자동 대응 + 입체감 */
 .hdr-nav-btn{
-  width:38px;height:38px;border-radius:12px;flex-shrink:0;
+  width:42px;height:42px;border-radius:13px;flex-shrink:0;
   background:var(--h-btn);
   border:1px solid var(--h-border);
   box-shadow:0 2px 6px rgba(0,0,0,0.12),inset 0 1px 0 rgba(255,255,255,0.16);
@@ -134,7 +134,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
   transition:transform .15s,box-shadow .15s,background .4s;
 }
 .hdr-nav-btn:active{transform:scale(0.94);box-shadow:inset 0 2px 5px rgba(0,0,0,0.18)}
-.hdr-nav-btn svg{width:19px;height:19px;stroke:var(--h-txt);stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.92}
+.hdr-nav-btn svg{width:24px;height:24px;stroke:var(--h-txt);stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.92}
 html[data-mode="dark"] .hdr-nav-btn{
   box-shadow:0 2px 8px rgba(0,0,0,0.30),inset 0 1px 0 rgba(255,255,255,0.08);
 }
@@ -147,19 +147,34 @@ html[data-mode="dark"] .hdr-nav-btn{
 .chat-fab{
   position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0));
   width:54px;height:54px;border-radius:50%;
-  background:linear-gradient(145deg,#3A3631,#25221E);
-  box-shadow:0 6px 18px rgba(0,0,0,0.28),inset 0 1px 1.5px rgba(255,255,255,0.14);
+  /* 라이트모드: 크림 유광 + 골드 테두리 */
+  background:
+    radial-gradient(circle at 33% 26%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.3) 20%, transparent 44%),
+    linear-gradient(150deg,#FBF8F2 0%,#EDE6D8 55%,#E0D8C8 100%);
+  box-shadow:6px 6px 14px rgba(150,140,120,0.42),-5px -5px 12px rgba(255,255,255,0.95),inset 0 1px 2px rgba(255,255,255,0.7);
   display:flex;align-items:center;justify-content:center;cursor:pointer;
   border:none;z-index:90;padding:0;
   transition:transform .15s,box-shadow .15s;
 }
-.chat-fab:active{transform:scale(0.93);box-shadow:0 3px 10px rgba(0,0,0,0.32),inset 0 2px 4px rgba(0,0,0,0.2)}
-.chat-fab svg{width:24px;height:24px;stroke:#E8D8B0;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
-html[data-mode="dark"] .chat-fab{
-  background:linear-gradient(145deg,#DBC08C,#C8A870 55%,#B28F57);
-  box-shadow:0 6px 18px rgba(0,0,0,0.42),inset 0 1px 1.5px rgba(255,255,255,0.4);
+.chat-fab::before{
+  content:'';position:absolute;inset:0;border-radius:50%;padding:2.5px;
+  background:linear-gradient(140deg,#E8C878 0%,#C8A24E 45%,#A07A2E 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
 }
-html[data-mode="dark"] .chat-fab svg{stroke:#3A2E18}
+.chat-fab:active{transform:scale(0.93)}
+.chat-fab svg{width:25px;height:25px;stroke:#A0814A;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:2}
+/* 다크모드: 차콜 유광 + 골드 테두리 */
+html[data-mode="dark"] .chat-fab{
+  background:
+    radial-gradient(circle at 33% 26%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.08) 16%, transparent 36%),
+    linear-gradient(150deg,#3A3631 0%,#221F1B 50%,#141210 100%);
+  box-shadow:0 8px 20px rgba(0,0,0,0.45),inset 0 -3px 7px rgba(0,0,0,0.5),inset 0 2px 4px rgba(255,255,255,0.18);
+}
+html[data-mode="dark"] .chat-fab::before{
+  background:linear-gradient(140deg,#F2DCA0 0%,#D4A840 45%,#9C7428 100%);
+}
+html[data-mode="dark"] .chat-fab svg{stroke:#E8C878}
 .header-title-wrap{position:absolute;left:50%;top:0;bottom:0;transform:translateX(-50%);display:flex;align-items:center;pointer-events:none}
 .header-title-wrap .drawer-btn{pointer-events:all}
 .drawer-btn{display:flex;align-items:center;padding:6px 14px;border-radius:20px;background:transparent;border:none;cursor:pointer;font-family:var(--font);transition:background .15s}
@@ -749,7 +764,7 @@ html[data-mode="dark"] .hl{background:rgba(210,160,25,0.32);color:var(--ink)}
   </div>
   <div class="header-right">
     <button class="hdr-nav-btn" onclick="goMypage()" title="마이페이지">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/><path d="M4 21h16"/></svg>
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5.5 20a6.5 6.5 0 0113 0"/></svg>
     </button>
   </div>
 </header>
@@ -939,7 +954,7 @@ html[data-mode="dark"] .hl{background:rgba(210,160,25,0.32);color:var(--ink)}
 <!-- 채팅 -->
 <!-- 좌하단 플로팅 채팅 버튼 (목록 위에 고정, 스크롤 무관) -->
 <button class="chat-fab" id="chat-fab" onclick="openChat()" title="1:1 채팅상담" aria-label="채팅상담">
-  <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+  <svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="11" rx="3.2"/><circle cx="9" cy="13.5" r="1"/><circle cx="15" cy="13.5" r="1"/><path d="M12 4.4v3.6"/><circle cx="12" cy="3.6" r="1"/></svg>
 </button>
 
 <div class="chat-ov" id="chat-ov" onclick="if(event.target===this)closeChat()">
