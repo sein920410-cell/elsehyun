@@ -23,12 +23,13 @@
     const { data: { session } } = await _authClient.auth.getSession();
     if (!session) { window.location.replace('login.html'); return; }
     window._searchSb = _authClient;  // 검색 결과 썸네일 signedUrl 생성에 재사용
-    const { data: serialRows } = await _authClient
-        .from('serials')
-        .select('id')
-        .eq('used_by', session.user.email)
-        .limit(1);
-    if (!serialRows?.[0]) { window.location.replace('serial.html'); return; }
+    // 진입 자격: 패키지(serials) 또는 단품(single_serials) 중 하나라도 등록 이력이 있으면 통과.
+    // (단품만 등록한 사용자가 패키지 미보유로 serial.html로 튕겨 무한루프 도는 것을 방지)
+    const [{ data: serialRows }, { data: singleRows }] = await Promise.all([
+        _authClient.from('serials').select('id').eq('used_by', session.user.email).limit(1),
+        _authClient.from('single_serials').select('id').eq('used_by', session.user.email).limit(1)
+    ]);
+    if (!serialRows?.[0] && !singleRows?.[0]) { window.location.replace('serial.html'); return; }
     // 인증 통과 → 화면 표시
     document.body.style.visibility = 'visible';
     // 방문 기록 (운영자 제외)
