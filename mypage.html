@@ -27,13 +27,7 @@
     const { data: { session } } = await _sb.auth.getSession();
     if (!session) { window.location.replace('login.html'); return; }
     const { data: serialRows } = await _sb.from('serials').select('id').eq('used_by', session.user.email).limit(1);
-    let _hasEntry = !!(serialRows && serialRows[0]);
-    if (!_hasEntry) {
-        // 단품(single_serials)만 등록한 사용자도 진입 허용 (serial.html과 동일 기준)
-        const { data: singleRows } = await _sb.from('single_serials').select('id').eq('used_by', session.user.email).limit(1);
-        _hasEntry = !!(singleRows && singleRows[0]);
-    }
-    if (!_hasEntry) { window.location.replace('serial.html'); return; }
+    if (!serialRows?.[0]) { window.location.replace('serial.html'); return; }
     document.body.style.visibility = 'visible';
     _sb.channel('ann_mypage')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'system_announcements' }, function() {
