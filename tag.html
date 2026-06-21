@@ -345,7 +345,7 @@
                     show('state-invalid');
                 } else if (!single.used_by) {
                     document.getElementById('btn-register').onclick = () => {
-                        window.location.replace(`serial.html?code=${encodeURIComponent(code)}`);
+                        window.location.replace(`serial.html?code=${encodeURIComponent(code)}&register=1`);
                     };
                     show('state-unregistered');
                 } else if (single.used_by === session.user.email) {
@@ -375,7 +375,7 @@
                 } else if (!tagRow.used_by) {
                     // 미등록 태그 → 시리얼 등록 화면 (입력 강제)
                     document.getElementById('btn-register').onclick = () => {
-                        window.location.replace('serial.html');
+                        window.location.replace('serial.html?register=1');
                     };
                     show('state-unregistered');
                 } else {
