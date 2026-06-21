@@ -199,6 +199,7 @@
             const params = new URLSearchParams(window.location.search);
             const urlCode = params.get('code');
             const isAdd = params.get('add') === 'true';
+            const isRegister = params.get('register') === '1';
 
             // 단품 코드가 URL에 있으면 입력창에 자동 채움 (편의)
             if (urlCode && urlCode.toUpperCase().startsWith('GYEOL-S-')) {
@@ -206,6 +207,11 @@
                 return;
             }
             if (isAdd) return; // 추가 등록이면 폼 그대로
+            // tag.html에서 "미등록 태그를 등록하러" 넘어온 경우(register=1):
+            // 과거 등록 이력이 있어도 자동 통과(search)시키지 않고 시리얼 입력을 강제한다.
+            // (이 가드가 없으면 기존 등록자가 새 태그를 찍었을 때 입력 화면을 건너뛰고
+            //  검색창으로 튕겨, 신규 태그 등록 자체가 불가능해진다.)
+            if (isRegister) return;
 
             // ── 재로그인/소셜로그인 후 도착한 경우: 시리얼 재입력 없이 통과 ──
             // ⚠️ 통과 목적지는 반드시 재검증되는 경로여야 함:
