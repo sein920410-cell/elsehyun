@@ -189,6 +189,13 @@
             window.location.replace('login.html');
         } else {
             currentSession = session;
+        }
+
+        // ── 진입 자동처리 (재로그인 패스 등)는 별도로 실행 ──
+        // ⚠️ 버튼/로그아웃/Enter 리스너는 이 함수보다 "먼저" 등록되어,
+        //    진입 조회가 느리거나 막혀도 등록 버튼은 항상 동작한다. (버튼 먹통 방지)
+        async function handleEntry() {
+            if (!session) return;
             const params = new URLSearchParams(window.location.search);
             const urlCode = params.get('code');
             const isAdd = params.get('add') === 'true';
@@ -196,22 +203,24 @@
             // 단품 코드가 URL에 있으면 입력창에 자동 채움 (편의)
             if (urlCode && urlCode.toUpperCase().startsWith('GYEOL-S-')) {
                 document.getElementById('serial').value = urlCode.toUpperCase();
+                return;
             }
-            // 추가 등록(isAdd) 또는 단품 코드 진입이면 폼을 그대로 표시하고 시리얼 입력 받음.
-            else if (!isAdd) {
-                // ── 재로그인/소셜로그인 후 도착한 경우: 시리얼 재입력 없이 통과 ──
-                // ⚠️ 통과 목적지는 반드시 재검증되는 경로여야 함:
-                //   · gyeol_after_login(원래 가려던 태그) → tag.html이 serial_codes로 재검증
-                //     → 미등록 태그면 거기서 막힘. 따라서 무단 진입 불가.
-                //   · 등록 이력자 → search.html (본인 수납장만 user_email로 조회)
-                // 시리얼은 최초 1회만 등록. 이미 등록한 사람이 매번 입력하지 않도록 한다.
-                const afterLogin = localStorage.getItem('gyeol_after_login');
-                if (afterLogin) {
-                    localStorage.removeItem('gyeol_after_login');
-                    window.location.replace(afterLogin);
-                    return;
-                }
-                // 등록 이력이 있으면(패키지 또는 단품) 시리얼 화면 건너뛰고 검색으로
+            if (isAdd) return; // 추가 등록이면 폼 그대로
+
+            // ── 재로그인/소셜로그인 후 도착한 경우: 시리얼 재입력 없이 통과 ──
+            // ⚠️ 통과 목적지는 반드시 재검증되는 경로여야 함:
+            //   · gyeol_after_login(원래 가려던 태그) → tag.html이 serial_codes로 재검증
+            //     → 미등록 태그면 거기서 막힘. 따라서 무단 진입 불가.
+            //   · 등록 이력자 → search.html (본인 수납장만 user_email로 조회)
+            // 시리얼은 최초 1회만 등록. 이미 등록한 사람이 매번 입력하지 않도록 한다.
+            const afterLogin = localStorage.getItem('gyeol_after_login');
+            if (afterLogin) {
+                localStorage.removeItem('gyeol_after_login');
+                window.location.replace(afterLogin);
+                return;
+            }
+            // 등록 이력이 있으면(패키지 또는 단품) 시리얼 화면 건너뛰고 검색으로
+            try {
                 const { data: pkgRows } = await supabase
                     .from('serials').select('id').eq('used_by', session.user.email).limit(1);
                 const { data: snglRows } = await supabase
@@ -220,8 +229,11 @@
                     window.location.replace('search.html');
                     return;
                 }
-                // 등록 이력 없음 → 폼 그대로 표시 (시리얼 입력 강제, 신규 등록)
+            } catch (e) {
+                // 진입 조회 실패해도 폼은 그대로 노출 → 사용자가 직접 등록 가능
+                console.warn('진입 자동처리 조회 실패(무시):', e);
             }
+            // 등록 이력 없음 → 폼 그대로 표시 (시리얼 입력 강제, 신규 등록)
         }
 
         document.getElementById('submit-btn').addEventListener('click', async () => {
@@ -380,6 +392,9 @@
                 document.getElementById('submit-btn').click();
             }
         });
+
+        // 리스너 등록이 끝난 뒤 진입 자동처리 실행 (버튼은 이미 살아있음)
+        handleEntry();
     </script>
 </body>
 </html>
