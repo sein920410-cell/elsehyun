@@ -236,6 +236,7 @@ html[data-mode="dark"] .chat-fab svg{stroke:#E8C878}
 .media-section{background:var(--h-bg);padding:10px 14px 14px;flex-shrink:0;transition:background .4s;overflow:visible;position:relative}
 /* ─── 미디어 프레임 (gradient border 담당 — overflow:hidden 없는 래퍼) ─── */
 .media-frame{border-radius:19px;padding:1.5px;background:rgba(255,253,250,0.62);box-shadow:0 5px 13px rgba(0,0,0,0.10),0 -1px 0 rgba(255,255,255,0.4)}
+[data-theme="stone"] .media-frame,[data-theme="champagne"] .media-frame,[data-theme="butter"] .media-frame{background:rgba(70,58,44,0.26)}
 /* ─── 미디어 박스 (overflow:hidden만 — gradient border 없음) ─── */
 .media-box{height:220px;border-radius:16px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;transition:.2s;background:var(--h-bg)}
 .media-box.empty{}
@@ -266,7 +267,7 @@ html[data-mode="dark"] .chat-fab svg{stroke:#E8C878}
 .media-empty-inner{display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none}
 .media-empty-sq-frame{border-radius:18px;padding:1.5px;background:linear-gradient(105deg,#B6B6B6 0%,#DEDEDE 28%,#FFFFFF 50%,#DEDEDE 72%,#B6B6B6 100%);background-size:220% auto;animation:media-sq-shimmer 8s ease-in-out infinite;box-shadow:4px 4px 9px rgba(0,0,0,0.12),-3px -3px 7px rgba(255,255,255,0.42)}
 .media-empty-sq{width:60px;height:60px;border-radius:16px;background:var(--h-bg);display:flex;align-items:center;justify-content:center}
-.media-empty-sq svg{width:27px;height:27px;stroke:var(--h-txt);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
+.media-empty-sq svg{width:36px;height:36px;stroke:var(--h-txt);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
 @keyframes media-sq-shimmer{0%{background-position:0% 0%,0% center}50%{background-position:0% 0%,100% center}100%{background-position:0% 0%,0% center}}
 .media-empty-lbl{font-size:15px;font-weight:700;color:var(--h-txt);opacity:.72;letter-spacing:-.01em}
 .media-empty-sub{font-size:13px;color:var(--h-sub);text-align:center;line-height:1.5;letter-spacing:-.01em}
@@ -338,7 +339,7 @@ html[data-mode="dark"] .hl{background:rgba(210,160,25,0.32);color:var(--ink)}
 .empty-state .empty-ico{width:68px;height:68px;border-radius:20px;background:var(--bg);display:flex;align-items:center;justify-content:center;box-shadow:var(--nm-raise-sm);animation:icoPopUp 1.1s cubic-bezier(.22,.61,.36,1) both}
 .empty-state .empty-ico svg{width:30px;height:30px;stroke:var(--muted2);stroke-width:1.3;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .empty-state .empty-ico.empty-ico-flat{background:transparent;box-shadow:none}
-.empty-state .empty-ico.empty-ico-flat svg{width:48px;height:48px;stroke-width:1.4}
+.empty-state .empty-ico.empty-ico-flat svg{width:48px;height:48px;stroke-width:1.2;stroke:var(--muted)}
 html[data-mode="dark"] .empty-state .empty-ico.empty-ico-flat{background:transparent;box-shadow:none}
 html[data-mode="dark"] .empty-state .empty-ico.empty-ico-flat svg{stroke:rgba(240,235,226,.66)}
 .empty-txt{font-size:15px;font-weight:600;color:var(--ink2);text-align:center;line-height:1.65}
