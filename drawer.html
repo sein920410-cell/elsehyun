@@ -116,7 +116,7 @@
 [data-theme="gray"]    {--h-bg:#4B5563;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.12);--h-btn:rgba(255,255,255,.1);--bom-bg:#1F2937;--a-color:#D1D5DB;--a-bg:rgba(209,213,219,.12);--a-border:rgba(209,213,219,.3)}
 [data-theme="stone"]   {--h-bg:#EDEBE5;--h-txt:#463F38;--h-sub:rgba(30,28,24,.46);--h-border:rgba(30,28,24,.1);--h-btn:rgba(30,28,24,.06);--bom-bg:#1E1C18;--a-color:#8A7D6A;--a-bg:rgba(138,125,106,.12);--a-border:rgba(138,125,106,.28)}
 [data-theme="butter"]  {--h-bg:#FBE8A6;--h-txt:#333;--h-sub:rgba(0,0,0,.55);--h-border:rgba(0,0,0,.15);--h-btn:rgba(0,0,0,.05);--bom-bg:#E0C988;--a-color:#E0C988;--a-bg:rgba(224,201,136,.12);--a-border:rgba(224,201,136,.3)}
-[data-theme="champagne"]{--h-bg:#E6D5C3;--h-txt:#483E34;--h-sub:rgba(42,33,24,.55);--h-border:rgba(42,33,24,.15);--h-btn:rgba(42,33,24,.08);--bom-bg:#2A2118;--a-color:#B49B7A;--a-bg:rgba(180,155,122,.12);--a-border:rgba(180,155,122,.3)}
+[data-theme="champagne"]{--h-bg:#E6D5C3;--h-txt:#564A3C;--ic:#fff;--h-sub:rgba(42,33,24,.55);--h-border:rgba(42,33,24,.15);--h-btn:rgba(42,33,24,.08);--bom-bg:#2A2118;--a-color:#B49B7A;--a-bg:rgba(180,155,122,.12);--a-border:rgba(180,155,122,.3)}
 [data-theme="mauve"]   {--h-bg:#7B6EA0;--h-txt:#fff;--h-sub:rgba(255,255,255,.58);--h-border:rgba(255,255,255,.15);--h-btn:rgba(255,255,255,.12);--bom-bg:#3D3060;--a-color:#D8B4FE;--a-bg:rgba(216,180,254,.13);--a-border:rgba(216,180,254,.3)}
 [data-theme="terra"]   {--h-bg:#C07055;--h-txt:#fff;--h-sub:rgba(255,255,255,.62);--h-border:rgba(255,255,255,.16);--h-btn:rgba(255,255,255,.12);--bom-bg:#7A3520;--a-color:#FECDBB;--a-bg:rgba(254,205,187,.13);--a-border:rgba(254,205,187,.3)}
 [data-theme="rose"]    {--h-bg:#C4909E;--h-txt:#fff;--h-sub:rgba(255,255,255,.65);--h-border:rgba(255,255,255,.18);--h-btn:rgba(255,255,255,.14);--bom-bg:#8B3A4A;--a-color:#FECDD3;--a-bg:rgba(254,205,211,.14);--a-border:rgba(254,205,211,.35)}
@@ -177,7 +177,7 @@ body{font-family:var(--font);background:var(--bg);height:100dvh;display:flex;fle
   transition:transform .15s,box-shadow .15s,background .4s;
 }
 .hdr-nav-btn:active{transform:scale(0.94);box-shadow:inset 0 2px 5px rgba(0,0,0,0.18)}
-.hdr-nav-btn svg{width:24px;height:24px;stroke:var(--h-txt);stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.92}
+.hdr-nav-btn svg{width:24px;height:24px;stroke:var(--ic,var(--h-txt));stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.92}
 html[data-mode="dark"] .hdr-nav-btn{
   box-shadow:0 2px 8px rgba(0,0,0,0.30),inset 0 1px 0 rgba(255,255,255,0.08);
 }
@@ -267,7 +267,7 @@ html[data-mode="dark"] .chat-fab svg{stroke:#E8C878}
 .media-empty-inner{display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none}
 .media-empty-sq-frame{border-radius:18px;padding:1.5px;background:linear-gradient(105deg,#B6B6B6 0%,#DEDEDE 28%,#FFFFFF 50%,#DEDEDE 72%,#B6B6B6 100%);background-size:220% auto;animation:media-sq-shimmer 8s ease-in-out infinite;box-shadow:4px 4px 9px rgba(0,0,0,0.12),-3px -3px 7px rgba(255,255,255,0.42)}
 .media-empty-sq{width:60px;height:60px;border-radius:16px;background:var(--h-bg);display:flex;align-items:center;justify-content:center}
-.media-empty-sq svg{width:36px;height:36px;stroke:var(--h-txt);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
+.media-empty-sq svg{width:36px;height:36px;stroke:var(--ic,var(--h-txt));stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
 @keyframes media-sq-shimmer{0%{background-position:0% 0%,0% center}50%{background-position:0% 0%,100% center}100%{background-position:0% 0%,0% center}}
 .media-empty-lbl{font-size:15px;font-weight:700;color:var(--h-txt);opacity:.72;letter-spacing:-.01em}
 .media-empty-sub{font-size:13px;color:var(--h-sub);text-align:center;line-height:1.5;letter-spacing:-.01em}
@@ -802,7 +802,7 @@ html[data-mode="dark"] .empty-state .empty-ico.empty-ico-flat svg{stroke:rgba(24
 <header class="header">
   <div class="header-left">
     <button class="hdr-nav-btn" onclick="goHome()" title="홈으로">
-      <svg viewBox="0 0 24 24"><line x1="4.8" y1="7.2" x2="19.2" y2="5.6"/><line x1="19.2" y1="5.6" x2="12" y2="20"/><line x1="12" y1="20" x2="4.8" y2="7.2"/><circle cx="4.8" cy="7.2" r="3.05" fill="var(--h-txt)" stroke="none"/><circle cx="19.2" cy="5.6" r="3.05" fill="var(--h-txt)" stroke="none"/><circle cx="12" cy="20" r="3.05" fill="var(--h-txt)" stroke="none"/></svg>
+      <svg viewBox="0 0 24 24"><line x1="4.8" y1="7.2" x2="19.2" y2="5.6"/><line x1="19.2" y1="5.6" x2="12" y2="20"/><line x1="12" y1="20" x2="4.8" y2="7.2"/><circle cx="4.8" cy="7.2" r="3.05" fill="var(--ic,var(--h-txt))" stroke="none"/><circle cx="19.2" cy="5.6" r="3.05" fill="var(--ic,var(--h-txt))" stroke="none"/><circle cx="12" cy="20" r="3.05" fill="var(--ic,var(--h-txt))" stroke="none"/></svg>
     </button>
   </div>
   <div class="header-title-wrap">
@@ -812,7 +812,7 @@ html[data-mode="dark"] .empty-state .empty-ico.empty-ico-flat svg{stroke:rgba(24
   </div>
   <div class="header-right">
     <button class="hdr-nav-btn" onclick="goMypage()" title="마이페이지">
-      <svg viewBox="0 0 24 24"><rect x="2" y="1.8" width="11.6" height="6.2" rx="2.2"/><rect x="10.4" y="10" width="11.6" height="12.4" rx="2.6"/><rect x="15.95" y="1.8" width="6.05" height="6.6" rx="2.2" fill="var(--h-txt)" stroke="none"/><rect x="2" y="10" width="6.5" height="12.4" rx="2.4" fill="var(--h-txt)" stroke="none"/></svg>
+      <svg viewBox="0 0 24 24"><rect x="2" y="1.8" width="11.6" height="6.2" rx="2.2"/><rect x="10.4" y="10" width="11.6" height="12.4" rx="2.6"/><rect x="15.95" y="1.8" width="6.05" height="6.6" rx="2.2" fill="var(--ic,var(--h-txt))" stroke="none"/><rect x="2" y="10" width="6.5" height="12.4" rx="2.4" fill="var(--ic,var(--h-txt))" stroke="none"/></svg>
     </button>
   </div>
 </header>
@@ -821,7 +821,7 @@ html[data-mode="dark"] .empty-state .empty-ico.empty-ico-flat svg{stroke:rgba(24
   <div class="media-frame" id="media-frame">
     <div class="media-box empty" id="media-box" onclick="if(this.classList.contains('empty'))showMediaPicker()">
       <div class="media-empty-inner" id="media-empty">
-        <div class="media-empty-sq-frame"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="var(--h-txt)" stroke="none"/><polygon points="14.2,8.19 16.4,12 14.2,15.81 9.8,15.81 7.6,12 9.8,8.19" fill="var(--h-bg)" stroke="none"/><line x1="14.2" y1="8.19" x2="20.25" y2="18" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="16.4" y1="12" x2="10.93" y2="22.15" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="14.2" y1="15.81" x2="2.68" y2="16.15" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="9.8" y1="15.81" x2="3.75" y2="6" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="7.6" y1="12" x2="13.07" y2="1.85" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="9.8" y1="8.19" x2="21.32" y2="7.85" stroke="var(--h-bg)" stroke-width="1.9"/></svg></div></div>
+        <div class="media-empty-sq-frame"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="var(--ic,var(--h-txt))" stroke="none"/><polygon points="14.2,8.19 16.4,12 14.2,15.81 9.8,15.81 7.6,12 9.8,8.19" fill="var(--h-bg)" stroke="none"/><line x1="14.2" y1="8.19" x2="20.25" y2="18" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="16.4" y1="12" x2="10.93" y2="22.15" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="14.2" y1="15.81" x2="2.68" y2="16.15" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="9.8" y1="15.81" x2="3.75" y2="6" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="7.6" y1="12" x2="13.07" y2="1.85" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="9.8" y1="8.19" x2="21.32" y2="7.85" stroke="var(--h-bg)" stroke-width="1.9"/></svg></div></div>
         <div class="media-empty-lbl" data-i18n="media_add">사진·영상 탭하여 등록</div>
         <div class="media-empty-sub" data-i18n="media_add_sub">물품 자동 인식</div>
       </div>
@@ -1682,7 +1682,7 @@ function _mediaDateLabel(){
 function showMedia(url,r){const box=document.getElementById('media-box');const badge=document.getElementById('media-cnt-badge');box.className='media-box filled';const isV=/\.(mp4|mov|webm)/i.test(url)||url.includes('video');box.innerHTML=isV?`<video src="${url}" class="rotate${r}" id="media-el" playsinline muted loop autoplay></video>`:`<img src="${url}" class="rotate${r}" id="media-el">`;if(badge){box.appendChild(badge);badge.textContent=`총 ${items.length}개`;badge.classList.toggle('vis',items.length>0);}_renderMediaDate();}
 // 사진 아래 줄에 촬영(업로드) 날짜 표시
 function _renderMediaDate(){var bar=document.getElementById('media-date-bar');if(!bar)return;var dl=_mediaDateLabel();if(dl){bar.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>${dl}</span>`;bar.style.display='flex';}else{bar.style.display='none';bar.innerHTML='';}}
-function resetMediaBox(){const box=document.getElementById('media-box');const badge=document.getElementById('media-cnt-badge');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq-frame"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="var(--h-txt)" stroke="none"/><polygon points="14.2,8.19 16.4,12 14.2,15.81 9.8,15.81 7.6,12 9.8,8.19" fill="var(--h-bg)" stroke="none"/><line x1="14.2" y1="8.19" x2="20.25" y2="18" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="16.4" y1="12" x2="10.93" y2="22.15" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="14.2" y1="15.81" x2="2.68" y2="16.15" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="9.8" y1="15.81" x2="3.75" y2="6" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="7.6" y1="12" x2="13.07" y2="1.85" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="9.8" y1="8.19" x2="21.32" y2="7.85" stroke="var(--h-bg)" stroke-width="1.9"/></svg></div></div><div class="media-empty-lbl" data-i18n="media_add">${window.t?t('media_add'):'사진·영상 탭하여 등록'}</div><div class="media-empty-sub" data-i18n="media_add_sub">${window.t?t('media_add_sub'):'물품 자동 인식'}</div></div>`;if(badge){badge.classList.remove('vis');box.appendChild(badge);}var _db=document.getElementById('media-date-bar');if(_db){_db.style.display='none';_db.innerHTML='';}}
+function resetMediaBox(){const box=document.getElementById('media-box');const badge=document.getElementById('media-cnt-badge');box.className='media-box empty';box.innerHTML=`<div class="media-empty-inner"><div class="media-empty-sq-frame"><div class="media-empty-sq"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="var(--ic,var(--h-txt))" stroke="none"/><polygon points="14.2,8.19 16.4,12 14.2,15.81 9.8,15.81 7.6,12 9.8,8.19" fill="var(--h-bg)" stroke="none"/><line x1="14.2" y1="8.19" x2="20.25" y2="18" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="16.4" y1="12" x2="10.93" y2="22.15" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="14.2" y1="15.81" x2="2.68" y2="16.15" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="9.8" y1="15.81" x2="3.75" y2="6" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="7.6" y1="12" x2="13.07" y2="1.85" stroke="var(--h-bg)" stroke-width="1.9"/><line x1="9.8" y1="8.19" x2="21.32" y2="7.85" stroke="var(--h-bg)" stroke-width="1.9"/></svg></div></div><div class="media-empty-lbl" data-i18n="media_add">${window.t?t('media_add'):'사진·영상 탭하여 등록'}</div><div class="media-empty-sub" data-i18n="media_add_sub">${window.t?t('media_add_sub'):'물품 자동 인식'}</div></div>`;if(badge){badge.classList.remove('vis');box.appendChild(badge);}var _db=document.getElementById('media-date-bar');if(_db){_db.style.display='none';_db.innerHTML='';}}
 function openFull(){const el=document.getElementById('media-el');if(!el)return;const fc=document.getElementById('fs-content');fc.innerHTML=el.tagName==='VIDEO'?`<video src="${el.src}" class="${el.className}" controls autoplay playsinline style="max-width:100%;max-height:100%;object-fit:contain"></video>`:`<img src="${el.src}" class="${el.className}" style="max-width:100%;max-height:100%;object-fit:contain">`;document.getElementById('fs-ov').classList.add('open');}
 function closeFull(){document.getElementById('fs-ov').classList.remove('open');}
 
