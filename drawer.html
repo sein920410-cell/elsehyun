@@ -116,7 +116,7 @@
 [data-theme="gray"]    {--h-bg:#4B5563;--h-txt:#fff;--h-sub:rgba(255,255,255,.55);--h-border:rgba(255,255,255,.12);--h-btn:rgba(255,255,255,.1);--bom-bg:#1F2937;--a-color:#D1D5DB;--a-bg:rgba(209,213,219,.12);--a-border:rgba(209,213,219,.3)}
 [data-theme="stone"]   {--h-bg:#EDEBE5;--h-txt:#463F38;--h-sub:rgba(30,28,24,.46);--h-border:rgba(30,28,24,.1);--h-btn:rgba(30,28,24,.06);--bom-bg:#1E1C18;--a-color:#8A7D6A;--a-bg:rgba(138,125,106,.12);--a-border:rgba(138,125,106,.28)}
 [data-theme="butter"]  {--h-bg:#FBE8A6;--h-txt:#333;--h-sub:rgba(0,0,0,.55);--h-border:rgba(0,0,0,.15);--h-btn:rgba(0,0,0,.05);--bom-bg:#E0C988;--a-color:#E0C988;--a-bg:rgba(224,201,136,.12);--a-border:rgba(224,201,136,.3)}
-[data-theme="champagne"]{--h-bg:#E6D5C3;--h-txt:#564A3C;--ic:#fff;--h-sub:rgba(42,33,24,.55);--h-border:rgba(42,33,24,.15);--h-btn:rgba(42,33,24,.08);--bom-bg:#2A2118;--a-color:#B49B7A;--a-bg:rgba(180,155,122,.12);--a-border:rgba(180,155,122,.3)}
+[data-theme="champagne"]{--h-bg:#E6D5C3;--h-txt:#483E34;--h-sub:rgba(42,33,24,.55);--h-border:rgba(42,33,24,.15);--h-btn:rgba(42,33,24,.08);--bom-bg:#2A2118;--a-color:#B49B7A;--a-bg:rgba(180,155,122,.12);--a-border:rgba(180,155,122,.3)}
 [data-theme="mauve"]   {--h-bg:#7B6EA0;--h-txt:#fff;--h-sub:rgba(255,255,255,.58);--h-border:rgba(255,255,255,.15);--h-btn:rgba(255,255,255,.12);--bom-bg:#3D3060;--a-color:#D8B4FE;--a-bg:rgba(216,180,254,.13);--a-border:rgba(216,180,254,.3)}
 [data-theme="terra"]   {--h-bg:#C07055;--h-txt:#fff;--h-sub:rgba(255,255,255,.62);--h-border:rgba(255,255,255,.16);--h-btn:rgba(255,255,255,.12);--bom-bg:#7A3520;--a-color:#FECDBB;--a-bg:rgba(254,205,187,.13);--a-border:rgba(254,205,187,.3)}
 [data-theme="rose"]    {--h-bg:#C4909E;--h-txt:#fff;--h-sub:rgba(255,255,255,.65);--h-border:rgba(255,255,255,.18);--h-btn:rgba(255,255,255,.14);--bom-bg:#8B3A4A;--a-color:#FECDD3;--a-bg:rgba(254,205,211,.14);--a-border:rgba(254,205,211,.35)}
@@ -228,7 +228,6 @@ html[data-mode="dark"] .chat-fab svg{stroke:#E8C878}
   letter-spacing:-.04em;
   text-shadow:0 1px 4px rgba(0,0,0,0.10);
 }
-[data-theme="champagne"] .drawer-btn-txt{color:#fff;text-shadow:0 1px 4px rgba(80,60,40,0.40)}
 .header-right{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-left:auto;z-index:1}
 .hdr-sq{width:38px;height:38px;border-radius:var(--r);background:var(--h-btn);border:1px solid var(--h-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--h-txt);font-size:22px;font-weight:300;flex-shrink:0}
 .hdr-sq:active{opacity:.7}
@@ -384,7 +383,8 @@ html[data-mode="dark"] .empty-state .empty-ico.empty-ico-flat svg{stroke:rgba(24
 .typing-bubble span{width:6px;height:6px;border-radius:50%;background:var(--muted);display:inline-block;animation:typingDot 1.1s infinite}
 .typing-bubble span:nth-child(2){animation-delay:.18s}
 .typing-bubble span:nth-child(3){animation-delay:.36s}
-.sheet{background:var(--surface2);border-radius:24px 24px 0 0;width:100%;max-height:92dvh;overflow-y:auto;padding:0 18px 44px;animation:sheetUp .28s cubic-bezier(.32,0,0,1)}
+.sheet{background:var(--surface2);border-radius:24px 24px 0 0;width:100%;max-height:92dvh;overflow-y:auto;padding:0 18px 0;animation:sheetUp .28s cubic-bezier(.32,0,0,1)}
+.sh-footer{position:sticky;bottom:0;background:var(--surface2);margin:0 -18px;padding:10px 18px calc(12px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 14px rgba(0,0,0,.07)}
 .sheet::-webkit-scrollbar{display:none}
 .sh-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:12px auto 14px}
 .sh-title{font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.01em;margin-bottom:14px}
@@ -898,7 +898,7 @@ html[data-mode="dark"] .empty-state .empty-ico.empty-ico-flat svg{stroke:rgba(24
       <div class="theme-cell" onclick="selectTheme('blue')"><div class="theme-sw" id="sw-blue" style="background:#3E72A8"></div><span class="theme-lbl">블루</span></div>
       <div class="theme-cell" onclick="selectTheme('charcoal')"><div class="theme-sw" id="sw-charcoal" style="background:#2C2F33"></div><span class="theme-lbl">차콜</span></div>
     </div>
-    <button class="dt-save" onclick="saveDrawerSettings()">저장</button>
+    <div class="sh-footer"><button class="dt-save" onclick="saveDrawerSettings()">저장</button></div>
   </div>
 </div>
 
