@@ -1556,7 +1556,7 @@ function initMediaEvents(){
 function showMediaPicker(){document.getElementById('media-picker-ov').classList.add('open');}
 function closeMediaPicker(e){if(e&&e.target!==document.getElementById('media-picker-ov'))return;document.getElementById('media-picker-ov').classList.remove('open');}
 function closeMctx(){document.getElementById('mctx-ov').classList.remove('open');}
-function confirmDelMedia(){closeMctx();if(!confirm('사진/영상을 삭제할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)window.sb.storage.from('user_uploads').remove([p]).catch(()=>{});localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();clearTimeout(_gyeolSyncTimer);_gyeolSyncToDB();}
+function confirmDelMedia(){closeMctx();if(!confirm('사진/영상을 삭제할까요?'))return;const p=localStorage.getItem('mediaPath_'+tag);if(p)window.sb.storage.from('user_uploads').remove([p]).catch(()=>{});localStorage.removeItem('mediaPath_'+tag);localStorage.removeItem('rot_'+tag);resetMediaBox();if(typeof items!=='undefined'&&Array.isArray(items)&&items.length>0){if(confirm('이 사진/영상으로 만든 목록도 함께 삭제할까요?\n취소를 누르면 목록은 그대로 보관됩니다.')){items=[];localStorage.setItem('gyeol_'+tag,'[]');renderItems();}}clearTimeout(_gyeolSyncTimer);_gyeolSyncToDB();}
 function pickPhoto(){closeMediaPicker();const f=document.getElementById('file-in');f.removeAttribute('capture');f.click();}
 
 async function extractVideoFrames(blob,numFrames=5){
