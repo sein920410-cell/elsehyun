@@ -362,6 +362,8 @@ export default async function handler(req, res) {
   if (!filePath) return res.status(400).json({ error: "filePath 누락" });
 
   const isVideo = mimeType?.startsWith("video/");
+  // ── 분석 비용(결): 영상은 8프레임이라 사진의 약 8배 비용 → 영상 5결, 사진 1결 ──
+  const COST = isVideo ? 5 : 1;
   const useFrames = isVideo && Array.isArray(videoFrames) && videoFrames.length > 0;
   console.log(`분석 시작: ${isVideo ? (useFrames ? `영상프레임(${videoFrames.length}장)` : "영상(FileAPI)") : "이미지"} / ${mimeType} / ${userEmail}`);
 
@@ -380,11 +382,12 @@ export default async function handler(req, res) {
     if (!serialRow) {
       return res.status(403).json({ error: "등록된 시리얼이 없습니다." });
     }
-    if (serialRow.ai_credits <= 0) {
+    if (serialRow.ai_credits < COST) {
       return res.status(402).json({
-        error: "이용권이 모두 소진되었습니다.",
-        credits: 0,
-        message: "마이페이지에서 이용권을 충전해주세요."
+        error: "이용권이 부족합니다.",
+        credits: serialRow.ai_credits,
+        needed: COST,
+        message: `이 분석에는 ${COST}결이 필요합니다. (현재 ${serialRow.ai_credits}결) 마이페이지에서 충전해주세요.`
       });
     }
 
@@ -501,7 +504,7 @@ export default async function handler(req, res) {
     // 조건부 차감: 읽은 시점의 크레딧 값과 동일할 때만 차감 (동시 요청 이중차감 방지)
     const { data: deducted, error: deductErr } = await supa
       .from("serials")
-      .update({ ai_credits: serialRow.ai_credits - 1 })
+      .update({ ai_credits: serialRow.ai_credits - COST })
       .eq("used_by", userEmail)
       .eq("ai_credits", serialRow.ai_credits)
       .select("ai_credits");
@@ -516,7 +519,7 @@ export default async function handler(req, res) {
       console.log(`크레딧 차감 완료: ${serialRow.ai_credits} → ${deducted[0].ai_credits}`);
     }
 
-    const creditsRemaining = deducted?.[0]?.ai_credits ?? (serialRow.ai_credits - 1);
+    const creditsRemaining = deducted?.[0]?.ai_credits ?? (serialRow.ai_credits - COST);
     console.log(`최종 도출된 물건 개수: ${items.length}개`);
     return res.status(200).json({
       items,
