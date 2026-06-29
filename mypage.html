@@ -740,7 +740,7 @@ body {
       <div class="usage-legend" style="text-align:center;font-size:11px;color:var(--muted);padding:2px 0 6px;letter-spacing:.01em">사진 1결 · 영상 5결 차감</div>
     </div>
     <div style="padding: 0 16px 14px">
-      <button class="charge-btn" onclick="openChargeModal()" data-i18n="charge_btn">+ 이용권 충전하기</button>
+      <div style="position:relative"><button class="charge-btn" id="charge-btn" onclick="openChargeModal()" data-i18n="charge_btn">+ 이용권 충전하기</button><span id="charge-soon-badge" style="position:absolute;top:50%;right:14px;transform:translateY(-50%);font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(255,255,255,0.22);color:#EFECE6;pointer-events:none">오픈 예정</span></div>
       <div style="text-align:center;padding-top:4px"><span class="detail-link" onclick="openDetail('credit')" data-i18n="detail_view">자세히 보기</span></div>
     </div>
   </div>
@@ -794,6 +794,7 @@ body {
         <div class="invite-row-title" data-i18n="invite_create">구성원 초대 코드 생성</div>
         <span class="detail-link" onclick="event.stopPropagation();openDetail('invite')" data-i18n="detail_view">자세히 보기</span>
       </div>
+      <span id="invite-soon-badge" style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(180,148,100,0.14);color:#9A7B43;margin-right:4px;white-space:nowrap">준비 중</span>
       <div class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
     </div>
   </div>
@@ -866,6 +867,25 @@ body {
           고객 화면 미리보기
         </button>
       </div>
+    </div>
+
+    <div class="admin-sep"></div>
+
+    <!-- 기능 공개 스위치 -->
+    <div class="admin-sub-label">기능 공개</div>
+    <div class="row" style="cursor:default">
+      <div class="row-ico" style="background:rgba(180,148,100,.12);border-color:rgba(180,148,100,.2)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#9A7B43" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </div>
+      <div class="row-info"><div class="row-title">충전 공개</div><div class="row-sub" id="charge-flag-txt">꺼짐 — 고객에게 '오픈 예정'</div></div>
+      <label class="toggle-wrap" onclick="event.stopPropagation()"><input type="checkbox" class="toggle-input" id="charge-flag-toggle" onchange="toggleFeature('charge_open',this.checked)"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="row" style="cursor:default">
+      <div class="row-ico" style="background:rgba(180,148,100,.12);border-color:rgba(180,148,100,.2)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#9A7B43" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 2v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      </div>
+      <div class="row-info"><div class="row-title">초대 공개</div><div class="row-sub" id="invite-flag-txt">꺼짐 — 고객에게 '준비 중'</div></div>
+      <label class="toggle-wrap" onclick="event.stopPropagation()"><input type="checkbox" class="toggle-input" id="invite-flag-toggle" onchange="toggleFeature('invite_open',this.checked)"><span class="toggle-slider"></span></label>
     </div>
 
     <div class="admin-sep"></div>
@@ -1158,6 +1178,8 @@ window.sb.auth.getSession().then(function(res) {
         badge.className = 'profile-badge member';
     }
 
+    loadFeatureFlags();
+
     /* 등록 정보 */
     Promise.all([
         window.sb.from('serials').select('set_number, used_at').eq('used_by', email),
@@ -1438,6 +1460,31 @@ async function toggleMaintenance() {
         document.getElementById('maintenance-ends-at').value = '';
         showToast('점검 모드 해제됨');
     }
+}
+/* ─── 기능 공개 플래그 (서버: feature_flags) ─── */
+window._featureFlags = { charge_open:false, invite_open:false };
+async function loadFeatureFlags(){
+  try{
+    var _sb = window.sb || (typeof sb!=='undefined'?sb:null);
+    if(_sb){ var r = await _sb.from('feature_flags').select('key,enabled'); if(!r.error && r.data){ r.data.forEach(function(f){ if(f && (f.key in window._featureFlags)) window._featureFlags[f.key]=!!f.enabled; }); } }
+  }catch(e){ /* 테이블 없음/오류 → 기본 OFF(준비중) 유지 */ }
+  applyFeatureFlag('charge_open', window._featureFlags.charge_open);
+  applyFeatureFlag('invite_open', window._featureFlags.invite_open);
+  try{ if(_isAdminNow()){ var ct=document.getElementById('charge-flag-toggle'); if(ct){ct.checked=window._featureFlags.charge_open; _setFlagTxt('charge',window._featureFlags.charge_open);} var it=document.getElementById('invite-flag-toggle'); if(it){it.checked=window._featureFlags.invite_open; _setFlagTxt('invite',window._featureFlags.invite_open);} } }catch(e){}
+}
+function _isAdminNow(){ try{ return !!(currentSession && currentSession.user && FOUNDER_EMAILS.indexOf(currentSession.user.email)!==-1); }catch(e){ return false; } }
+function applyFeatureFlag(key, enabled){
+  var showBadge = !enabled && !_isAdminNow();
+  if(key==='charge_open'){ var b=document.getElementById('charge-soon-badge'); var btn=document.getElementById('charge-btn'); if(b)b.style.display=showBadge?'inline-block':'none'; if(btn)btn.style.opacity=showBadge?'0.5':''; }
+  else if(key==='invite_open'){ var ib=document.getElementById('invite-soon-badge'); var row=document.querySelector('.invite-row'); if(ib)ib.style.display=showBadge?'inline-block':'none'; if(row)row.style.opacity=showBadge?'0.6':''; }
+}
+function _setFlagTxt(which,on){ var el=document.getElementById(which+'-flag-txt'); if(!el)return; if(which==='charge') el.textContent= on?'켜짐 — 고객 충전 가능':"꺼짐 — 고객에게 '오픈 예정'"; else el.textContent= on?'켜짐 — 고객 초대 가능':"꺼짐 — 고객에게 '준비 중'"; }
+async function toggleFeature(key,on){
+  try{
+    await window.sb.from('feature_flags').upsert({ key:key, enabled:on, updated_at:new Date().toISOString() }, { onConflict:'key' });
+    window._featureFlags[key]=on; applyFeatureFlag(key,on); _setFlagTxt(key==='charge_open'?'charge':'invite', on);
+    showToast(on?'공개로 전환됐어요':'준비중으로 전환됐어요');
+  }catch(e){ showToast('저장 실패 — feature_flags 테이블을 확인해주세요'); var t=document.getElementById(key==='charge_open'?'charge-flag-toggle':'invite-flag-toggle'); if(t)t.checked=!on; }
 }
 async function postAnnouncement() {
     const msg = document.getElementById('announce-input').value.trim();
