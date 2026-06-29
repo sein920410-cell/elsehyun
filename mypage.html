@@ -670,7 +670,7 @@ body {
       </div>
       <div class="help-section">
         <div class="help-section-title"><span class="help-ico"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8z"/><circle cx="18" cy="17" r="2.5"/></svg></span>AI 물품 인식</div>
-        <div class="help-section-body">수납장 페이지에서 사진이나 영상을 등록하시면 AI가 물건을 자동으로 인식하여 목록을 생성합니다. 새 목록 생성 시 이용권 1건이 차감되며, 단순 조회·검색·수량 변경은 무료로 이용하실 수 있습니다.</div>
+        <div class="help-section-body">수납장 페이지에서 사진이나 영상을 등록하시면 AI가 물건을 자동으로 인식하여 목록을 생성합니다. 새 목록 생성 시 사진은 1결, 영상은 5결이 차감되며, 단순 조회·검색·수량 변경은 무료로 이용하실 수 있습니다.</div>
       </div>
       <div class="help-section">
         <div class="help-section-title"><span class="help-ico"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><line x1="15" y1="15" x2="21" y2="21"/></svg></span>통합 검색</div>
@@ -690,7 +690,7 @@ body {
       </div>
       <div class="help-section">
         <div class="help-section-title"><span class="help-ico"><svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 000-4z"/><line x1="13" y1="6" x2="13" y2="18"/></svg></span>이용권 충전</div>
-        <div class="help-section-body">기본 50건이 무료로 제공됩니다. 소진하신 후에는 추가 구매하실 수 있습니다. 이용권이 0건이 되면 물품 인식 이용권은 이용하실 수 없으나, 직접 추가는 계속 가능합니다.</div>
+        <div class="help-section-body">기본 50결이 무료로 제공됩니다(사진 50장 또는 영상 10편 분량). 소진하신 후에는 추가 구매하실 수 있습니다. 이용권이 0결이 되면 물품 인식 이용권은 이용하실 수 없으나, 직접 추가는 계속 가능합니다.</div>
       </div>
     </div>
     <button class="detail-close" onclick="closeHelp()">확인</button>
@@ -728,15 +728,16 @@ body {
     <div class="usage-section">
       <div class="usage-header">
         <div class="usage-title" data-i18n="usage_title">물품 인식 사용량</div>
-        <div class="usage-count"><strong id="used-count">–</strong> / <span id="max-count">50</span>건</div>
+        <div class="usage-count"><strong id="used-count">–</strong> / <span id="max-count">50</span>결</div>
       </div>
       <div class="usage-bar-wrap">
         <div class="usage-bar-fill" id="usage-bar" style="width:0%"></div>
       </div>
       <div class="usage-meta">
-        <div class="usage-meta-item"><span data-i18n="used_label">사용</span> <b id="used-count2">–</b><span data-i18n="unit_count" data-i18n-allowempty="1">건</span></div>
-        <div class="usage-meta-item"><span data-i18n="remain_label">잔여</span> <b id="remain-count">–</b><span data-i18n="unit_count" data-i18n-allowempty="1">건</span></div>
+        <div class="usage-meta-item"><span data-i18n="used_label">사용</span> <b id="used-count2">–</b><span data-i18n="unit_count" data-i18n-allowempty="1">결</span></div>
+        <div class="usage-meta-item"><span data-i18n="remain_label">잔여</span> <b id="remain-count">–</b><span data-i18n="unit_count" data-i18n-allowempty="1">결</span></div>
       </div>
+      <div class="usage-legend" style="text-align:center;font-size:11px;color:var(--muted);padding:2px 0 6px;letter-spacing:.01em">사진 1결 · 영상 5결 차감</div>
     </div>
     <div style="padding: 0 16px 14px">
       <button class="charge-btn" onclick="openChargeModal()" data-i18n="charge_btn">+ 이용권 충전하기</button>
@@ -983,17 +984,17 @@ body {
     <div class="modal-title" data-i18n="charge_modal_title">이용권 충전</div>
     <div class="charge-plans">
       <div class="charge-plan">
-        <div class="charge-plan-main"><b>50<span class="charge-unit" data-i18n="unit_count" data-i18n-allowempty="1">건</span></b><span class="charge-price">4,900원</span></div>
-        <div class="charge-plan-per">건당 98원</div>
+        <div class="charge-plan-main"><b>50<span class="charge-unit" data-i18n="unit_count" data-i18n-allowempty="1">결</span></b><span class="charge-price">4,900원</span></div>
+        <div class="charge-plan-per">결당 98원</div>
       </div>
       <div class="charge-plan best">
         <div class="charge-badge" data-i18n="charge_popular">가장 인기</div>
-        <div class="charge-plan-main"><b>150<span class="charge-unit" data-i18n="unit_count" data-i18n-allowempty="1">건</span></b><span class="charge-price">9,900원</span></div>
-        <div class="charge-plan-per">건당 66원</div>
+        <div class="charge-plan-main"><b>150<span class="charge-unit" data-i18n="unit_count" data-i18n-allowempty="1">결</span></b><span class="charge-price">9,900원</span></div>
+        <div class="charge-plan-per">결당 66원</div>
       </div>
       <div class="charge-plan">
-        <div class="charge-plan-main"><b>400<span class="charge-unit" data-i18n="unit_count" data-i18n-allowempty="1">건</span></b><span class="charge-price">19,900원</span></div>
-        <div class="charge-plan-per">건당 50원</div>
+        <div class="charge-plan-main"><b>400<span class="charge-unit" data-i18n="unit_count" data-i18n-allowempty="1">결</span></b><span class="charge-price">19,900원</span></div>
+        <div class="charge-plan-per">결당 50원</div>
       </div>
     </div>
     <div class="modal-desc" data-i18n="charge_soon">결제 기능은 곧 오픈 예정이에요. 조금만 기다려주세요!</div>
@@ -1208,7 +1209,7 @@ window.sb.auth.getSession().then(function(res) {
                 localStorage.setItem(alertKey, '1');
                 var alertMsg = credits === 0
                     ? '이용권이 모두 소진되었습니다.\n이용권을 충전하시면 계속 이용하실 수 있어요.'
-                    : '이용권 잔여량이 ' + credits + '건 남았습니다.\n소진 전 미리 충전해 두시길 권장드려요.';
+                    : '이용권 잔여량이 ' + credits + '결 남았습니다.\n소진 전 미리 충전해 두시길 권장드려요.';
                 setTimeout(function() { showCreditAlert(alertMsg, credits); }, 800);
             }
         }
@@ -1219,7 +1220,7 @@ let _obStep=0;
 
 // ─── 자세히 보기 ───
 const DETAIL_DATA={
-  credit:{title:'물품 인식 이용권이란?',body:'AI가 사진을 분석하여 물품 목록을 자동으로 생성할 때 사용하는 이용권입니다.\n\n• 기본 제공: 50건 (무료)\n• 추가 구매: 50건 4,900원 · 150건 9,900원 · 400건 19,900원\n• 차감 시점: 새 목록 생성 시 1건\n• 단순 조회·검색·수량 변경은 차감되지 않습니다\n\n[개인정보 감지 안내]\n• 얼굴·신분증·통장 등 개인정보 감지 시 이용권이 차감되지 않습니다\n• 하루 5회 감지 시 당일 분석 기능이 제한되며, 다음날 자정에 자동 해제됩니다',warn:'이용권이 0건이 되면 물품 인식 자동 분석을 이용하실 수 없습니다.\n이용권 충전 후 계속 이용하실 수 있습니다.'},
+  credit:{title:'물품 인식 이용권이란?',body:'AI가 사진을 분석하여 물품 목록을 자동으로 생성할 때 사용하는 이용권입니다.\n\n• 기본 제공: 50결 (무료)\n• 추가 구매: 50결 4,900원 · 150결 9,900원 · 400결 19,900원\n• 차감 시점: 사진 1결 · 영상 5결\n• 단순 조회·검색·수량 변경은 차감되지 않습니다\n\n[개인정보 감지 안내]\n• 얼굴·신분증·통장 등 개인정보 감지 시 이용권이 차감되지 않습니다\n• 하루 5회 감지 시 당일 분석 기능이 제한되며, 다음날 자정에 자동 해제됩니다',warn:'이용권이 0결이 되면 물품 인식 자동 분석을 이용하실 수 없습니다.\n이용권 충전 후 계속 이용하실 수 있습니다.'},
   serial:{title:'시리얼 번호 추가 등록',body:'공간:결 태그를 추가로 구매하셨다면 이곳에서 등록해 주시기 바랍니다.\n\n• 박스 안 카드에 적힌 시리얼 코드를 입력합니다\n• 등록하시면 새 수납장이 자동으로 추가됩니다\n• 여러 세트를 하나의 계정으로 관리하실 수 있습니다',warn:null},
   invite:{title:'구성원 초대',body:'가족이나 지인께 초대 링크를 공유하시면\n같은 수납장을 함께 이용하실 수 있습니다.\n\n• 초대받으신 분은 링크로 가입 후 바로 이용하실 수 있습니다\n• 수납장 내용을 실시간으로 함께 관리하실 수 있습니다',warn:'현재 준비 중인 기능입니다. 곧 이용하실 수 있습니다.'}
 };
@@ -2114,16 +2115,16 @@ function previewMaintenance() {
 document.getElementById('name-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') saveName(); });
 
 var OB_STEPS=[
-  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석하여 목록을 생성할 때마다 1건이 차감됩니다.\n기본 50건은 무료로 제공됩니다.',warn:null,arrow:'down'},
-  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권이 소진되면 이곳에서 추가 구매하실 수 있습니다.\n50건 4,900원 · 150건 9,900원 · 400건 19,900원',warn:'이용권이 0건이 되면 물품 인식 이용권을 이용하실 수 없습니다.',arrow:'up'},
+  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석하여 목록을 생성할 때 사진 1결·영상 5결이 차감됩니다.\n기본 50결은 무료로 제공됩니다.',warn:null,arrow:'down'},
+  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권이 소진되면 이곳에서 추가 구매하실 수 있습니다.\n50결 4,900원 · 150결 9,900원 · 400결 19,900원',warn:'이용권이 0결이 되면 물품 인식 이용권을 이용하실 수 없습니다.',arrow:'up'},
   {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'공간:결 태그를 추가로 구매하셨다면 이곳에서 등록해 주십시오.\n박스 안 카드에 적힌 코드를 입력하시면 새 수납장이 추가됩니다.',arrow:'down'},
   {sel:'.invite-row',title:'구성원 초대',desc:'가족이나 지인께 초대 링크를 보내시면\n같은 수납장을 함께 이용하실 수 있습니다.',warn:'현재 준비 중인 기능입니다.',arrow:'down'},
   {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃하셔도 언제든 다시 로그인하실 수 있습니다.',warn:'계정 삭제 시 등록된 모든 데이터가 영구 삭제되며, 삭제 후에는 복구가 불가능합니다.',arrow:'up'}
 ];
 function startOnboarding(){
   obStart([
-  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석하여 목록을 생성할 때마다 1건이 차감됩니다.\n기본 50건은 무료로 제공됩니다.',warn:null},
-  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권 소진 후 이곳에서 추가 구매하실 수 있습니다.\n50건 4,900원부터 충전할 수 있습니다.',warn:'0건이 되면 물품 인식 이용권을 이용하실 수 없습니다.'},
+  {sel:'.usage-section',title:'물품 인식 사용량',desc:'AI가 사진을 분석하여 목록을 생성할 때 사진 1결·영상 5결이 차감됩니다.\n기본 50결은 무료로 제공됩니다.',warn:null},
+  {sel:'.charge-btn',title:'이용권 충전',desc:'이용권 소진 후 이곳에서 추가 구매하실 수 있습니다.\n50결 4,900원부터 충전할 수 있습니다.',warn:'0결이 되면 물품 인식 이용권을 이용하실 수 없습니다.'},
   {sel:'#serial-row',title:'시리얼 번호 추가 등록',desc:'태그를 추가로 구매하셨다면 이곳에서 등록해 주십시오.',warn:null},
   {sel:'.invite-row',title:'구성원 초대',desc:'초대 링크를 보내시면 같은 수납장을 함께 이용하실 수 있습니다.',warn:'현재 준비 중인 기능입니다.'},
   {sel:'.account-links',title:'로그아웃 · 계정 삭제',desc:'로그아웃하셔도 언제든 다시 로그인하실 수 있습니다.',warn:'계정 삭제 시 모든 데이터가 영구 삭제되며 복구가 불가능합니다.'}
