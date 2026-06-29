@@ -67,6 +67,7 @@
             });
         }
     } catch(e) { console.warn('수납장 복원 오류', e); }
+    try{ renderMyDrawers(); }catch(e){}
     // 온보딩 자동 실행
     setTimeout(function(){ startOnboarding(); }, 1000);
         })();
@@ -532,6 +533,8 @@ html[data-theme="dark"] .brand {
   </div>
 </div>
 
+<div class="drawers-area" id="my-drawers" style="display:none"></div>
+
 <div id="result-area" style="display:none" class="result-area">
   <div class="result-label" id="result-label"></div>
   <div id="result-list"></div>
@@ -560,6 +563,23 @@ function getAllDrawers() {
   return drawers;
 }
 
+function _escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function renderMyDrawers(){
+  var el=document.getElementById('my-drawers'); if(!el)return;
+  var list=getAllDrawers();
+  if(!list.length){el.style.display='none';el.innerHTML='';return;}
+  var html='<div class="drawers-head"><span style="font-size:13px;font-weight:700;color:var(--ink-soft);letter-spacing:.02em">내 수납장</span></div>';
+  list.forEach(function(d){
+    html+='<div class="my-drawer-card" data-tag="'+_escH(d.tag)+'" style="display:flex;align-items:center;gap:13px;padding:14px 16px;margin-bottom:10px;background:var(--surface2);border-radius:16px;box-shadow:var(--nm-raise-xs);cursor:pointer">'
+      +'<div style="width:38px;height:38px;border-radius:11px;background:rgba(180,148,100,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600;color:var(--ink,#3a332b);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_escH(d.name)+'</div>'
+      +'<div style="font-size:12px;color:var(--ink-soft);margin-top:2px">'+d.items.length+'개 항목</div></div>'
+      +'<div style="color:var(--ink-soft);font-size:20px;line-height:1">›</div></div>';
+  });
+  el.innerHTML=html;
+  Array.prototype.forEach.call(el.querySelectorAll('.my-drawer-card'),function(c){ c.addEventListener('click',function(){ location.href='drawer.html?tag='+encodeURIComponent(c.getAttribute('data-tag')); }); });
+  el.style.display='block';
+}
 function formatTag(tag) {
   // 신규 시리얼: GYEOL-1-DR1 → 서랍 1, GYEOL-1-MAIN → 메인
   const mNew = tag.match(/GYEOL-(\d+)-(DR(\d+)|MAIN)/i);
@@ -597,12 +617,14 @@ function onSearch() {
     if (searchHint) searchHint.style.display = '';
     resultArea.style.display = 'none';
     resultList.innerHTML = '';
+    try{ renderMyDrawers(); }catch(e){}
     return;
   }
 
   heroText.style.display = 'none';
   if (searchHint) searchHint.style.display = 'none';
   resultArea.style.display = 'block';
+  var _md=document.getElementById('my-drawers'); if(_md)_md.style.display='none';
 
   const drawers = getAllDrawers();
   const results = [];
