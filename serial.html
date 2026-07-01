@@ -183,6 +183,18 @@
 
         let currentSession = null;
 
+        // ── 시리얼 입력 정규화 (대시/공백 유무·대소문자 무관하게 통과) ──
+        // 로그인·라우팅과 무관: 고객이 어떻게 입력하든 DB의 표준 형식(대시 포함)으로 맞추기만 함.
+        // 형식 못 맞추면 기존 동작(trim+대문자) 그대로 폴백 → 안전.
+        function normalizeSerial(raw) {
+            const s = (raw || '').toUpperCase().replace(/[\s-]/g, '');
+            let m = s.match(/^GYEOLS(\d+)([A-Z]+)$/);   // 단품: GYEOL-S-{번호}-{코드}
+            if (m) return `GYEOL-S-${m[1]}-${m[2]}`;
+            m = s.match(/^GYEOL(\d+)([A-Z]+)$/);        // 패키지: GYEOL-{번호}-{코드}
+            if (m) return `GYEOL-${m[1]}-${m[2]}`;
+            return (raw || '').trim().toUpperCase();     // 폴백: 기존 동작 유지
+        }
+
         const { data: { session } } = await supabase.auth.getSession();
 
         if (!session) {
@@ -244,7 +256,7 @@
 
         document.getElementById('submit-btn').addEventListener('click', async () => {
             const session = currentSession;
-            const code = document.getElementById('serial').value.trim().toUpperCase();
+            const code = normalizeSerial(document.getElementById('serial').value);
             const errEl = document.getElementById('error-msg');
             const sucEl = document.getElementById('success-msg');
             const btn = document.getElementById('submit-btn');
