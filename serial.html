@@ -184,13 +184,18 @@
         let currentSession = null;
 
         // ── 시리얼 입력 정규화 (대시/공백 유무·대소문자 무관하게 통과) ──
-        // 로그인·라우팅과 무관: 고객이 어떻게 입력하든 DB의 표준 형식(대시 포함)으로 맞추기만 함.
-        // 형식 못 맞추면 기존 동작(trim+대문자) 그대로 폴백 → 안전.
+        // 로그인·라우팅과 무관: 고객이 어떻게 입력하든 DB의 표준 형식(GYEOL-…)으로 맞추기만 함.
+        // 인쇄 표기 = 짧은 형식(G{순번}-{코드} / S{순번}-{코드}), DB 저장 = 기존 GYEOL 형식.
+        // 아래는 입력→DB형식 변환만 하며, 단품/패키지 판별·조회·태그 로직은 기존 그대로 사용됨.
         function normalizeSerial(raw) {
             const s = (raw || '').toUpperCase().replace(/[\s-]/g, '');
-            let m = s.match(/^GYEOLS(\d+)([A-Z]+)$/);   // 단품: GYEOL-S-{번호}-{코드}
+            let m = s.match(/^S(\d+)([A-Z]+)$/);        // 신형 단품: S{번호}{코드}
             if (m) return `GYEOL-S-${m[1]}-${m[2]}`;
-            m = s.match(/^GYEOL(\d+)([A-Z]+)$/);        // 패키지: GYEOL-{번호}-{코드}
+            m = s.match(/^G(\d+)([A-Z]+)$/);            // 신형 패키지: G{번호}{코드}
+            if (m) return `GYEOL-${m[1]}-${m[2]}`;
+            m = s.match(/^GYEOLS(\d+)([A-Z]+)$/);       // 구형 단품 (호환)
+            if (m) return `GYEOL-S-${m[1]}-${m[2]}`;
+            m = s.match(/^GYEOL(\d+)([A-Z]+)$/);        // 구형 패키지 (호환)
             if (m) return `GYEOL-${m[1]}-${m[2]}`;
             return (raw || '').trim().toUpperCase();     // 폴백: 기존 동작 유지
         }
