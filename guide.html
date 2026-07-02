@@ -644,14 +644,23 @@
   var sections = Array.prototype.slice.call(document.querySelectorAll('section'));
   var tabs = {};
   document.querySelectorAll('.tab').forEach(function(t){ tabs[t.getAttribute('data-tab')] = t; });
-  function onScroll(){
-    var pos = window.scrollY + 120;
-    var cur = sections.length ? sections[0].id : null;
-    sections.forEach(function(s){ if(s.offsetTop <= pos) cur = s.id; });
+  function secId(s){ return s.getAttribute('id') || s.id || ''; }
+  function setActive(id){
     document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
-    if(cur && tabs[cur]) tabs[cur].classList.add('active');
+    var t = tabs[id] || tabs[Object.keys(tabs)[0]];
+    if(t) t.classList.add('active');
+  }
+  function onScroll(){
+    var pos = (window.scrollY || window.pageYOffset || 0) + 120;
+    var cur = sections.length ? secId(sections[0]) : null;
+    sections.forEach(function(s){ if(s.offsetTop <= pos) cur = secId(s); });
+    setActive(cur);
   }
   window.addEventListener('scroll', onScroll, {passive:true});
+  // 탭을 직접 눌렀을 때도 즉시 강조 + 부드러운 이동
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){ setActive(t.getAttribute('data-tab')); });
+  });
   onScroll();
   window.addEventListener('resize', recalcOpen);
 </script>
