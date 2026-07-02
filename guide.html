@@ -41,11 +41,12 @@
 
   /* 탭바 */
   .tabbar-outer{position:sticky;top:0;z-index:50;background:var(--bg);padding:12px 0;box-shadow:0 6px 12px -8px rgba(0,0,0,.08);}
-  .tabbar{display:flex;gap:9px;max-width:520px;margin:0 auto;padding:0 18px;justify-content:center;flex-wrap:wrap;}
+  .tabbar{display:flex;gap:6px;max-width:520px;margin:0 auto;padding:0 14px;justify-content:center;}
   .tab{
+    flex:1 1 0;min-width:0;text-align:center;
     color:var(--green);background:var(--card);
-    padding:11px 17px;border-radius:16px;
-    font-size:15px;font-weight:700;cursor:pointer;
+    padding:11px 6px;border-radius:14px;
+    font-size:14px;font-weight:700;cursor:pointer;
     transition:all .18s ease;white-space:nowrap;text-decoration:none;
     box-shadow:var(--shadow-out-sm);border:1px solid rgba(255,255,255,.5);
   }
@@ -59,15 +60,26 @@
 
   section{padding-top:30px;scroll-margin-top:80px;}
   .sec-title{font-size:13px;font-weight:700;color:var(--green-soft);letter-spacing:2px;margin-bottom:14px;}
+  .guide-tip{font-size:13px;color:var(--ink-soft);opacity:.85;margin:-6px 0 14px 2px;}
 
-  /* 소재 안심 배너 */
+  /* 소재 안심 배너 (주의사항 아님 - 소개 배너로 명확히 구분) */
   .safe{
-    background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-out);
-    padding:20px 22px;margin-bottom:16px;border-left:4px solid var(--gold2);
+    background:linear-gradient(180deg,#F6EFDD 0%,#F3F1EB 100%);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-out);
+    padding:18px 22px 20px;margin-bottom:22px;
+    border:1px solid rgba(212,168,40,.35);
+    position:relative;
+  }
+  .safe .badge{
+    display:inline-block;font-size:11px;font-weight:800;letter-spacing:1px;
+    color:var(--gold3);background:rgba(212,168,40,.14);
+    padding:4px 10px;border-radius:20px;margin-bottom:10px;
   }
   .safe h3{font-size:15px;color:var(--green);margin-bottom:8px;font-weight:800;}
-  .safe p{font-size:15px;color:var(--ink-soft);}
+  .safe p{font-size:14.5px;color:var(--ink-soft);}
   .safe b{color:var(--ink);font-weight:700;}
+  .safe-divider{height:1px;background:var(--line);margin:0 0 16px;}
 
   /* 아코디언 공통 */
   .acc{
@@ -159,10 +171,11 @@
 <div class="wrap">
 
   <!-- ===================== 사용방법 ===================== -->
-  <section id="use" data-mode="multi">
+  <section id="use" data-mode="single">
     <div class="sec-title">사용방법</div>
+    <p class="guide-tip">아래 항목을 눌러 자세히 볼 수 있어요</p>
 
-    <div class="acc open current">
+    <div class="acc">
       <div class="acc-head">
         <span class="acc-ico">1</span>
         <span class="acc-title">QR 태그 부착 · 깨끗한 면에</span>
@@ -265,8 +278,9 @@
   </section>
 
   <!-- ===================== 추가구매 ===================== -->
-  <section id="buy" data-mode="multi">
+  <section id="buy" data-mode="single">
     <div class="sec-title">추가구매</div>
+    <p class="guide-tip">아래 항목을 눌러 자세히 볼 수 있어요</p>
 
     <div class="acc">
       <div class="acc-head">
@@ -319,9 +333,13 @@
     <div class="sec-title">주의사항</div>
 
     <div class="safe">
+      <span class="badge">SAFE MATERIAL</span>
       <h3>소재 안심 안내</h3>
       <p>본 제품은 PVC·포름알데히드·페놀이 들어 있지 않은 <b>유해물질 제한(RoHS) 기준을 충족하는</b> 소재로 제작되어, 생활 공간 어디에나 안심하고 사용하실 수 있습니다.</p>
     </div>
+
+    <div class="safe-divider"></div>
+    <p class="guide-tip">아래 항목을 눌러 자세히 볼 수 있어요</p>
 
     <div class="acc">
       <div class="acc-head">
@@ -517,7 +535,6 @@
       </div></div>
     </div>
 
-    <p class="hint">항목을 눌러 자세히 볼 수 있어요 (한 번에 하나씩 열립니다)</p>
   </section>
 
   <!-- ===================== 고객문의 ===================== -->
@@ -617,21 +634,4 @@
   // 스크롤 위치에 따라 상단 탭 자동 강조
   var sections = Array.prototype.slice.call(document.querySelectorAll('section'));
   var tabs = {};
-  document.querySelectorAll('.tab').forEach(function(t){ tabs[t.getAttribute('data-tab')] = t; });
-  function onScroll(){
-    var pos = window.scrollY + 120;
-    var cur = sections[0].id;
-    sections.forEach(function(s){ if(s.offsetTop <= pos) cur = s.id; });
-    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
-    if(tabs[cur]) tabs[cur].classList.add('active');
-  }
-  window.addEventListener('scroll', onScroll, {passive:true});
-  onScroll();
-
-  // 열림/닫힘으로 높이 바뀔 때 열린 항목 maxHeight 재계산
-  window.addEventListener('resize', function(){
-    document.querySelectorAll('.acc.open').forEach(function(a){ setMax(a,true); });
-  });
-</script>
-</body>
-</html>
+  document.querySel
