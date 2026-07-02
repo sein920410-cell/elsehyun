@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>공간:결 QR 태그 사용 가이드</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root{
+    --bg:#EDEAE3; --card:#F3F1EB; --ink:#2F3A33; --ink-soft:#5A6560;
+    --line:#DCD8CF; --green:#2E4034; --green-soft:#5E7060;
+    --gold1:#F4E098; --gold2:#D4A828; --gold3:#A07018; --gold5:#ECC858;
+    --radius:20px;
+    --shadow-out: 6px 6px 14px #d5d1c7, -6px -6px 14px #ffffff;
+    --shadow-out-sm: 4px 4px 9px #d5d1c7, -4px -4px 9px #ffffff;
+    --shadow-in: inset 4px 4px 9px #d5d1c7, inset -4px -4px 9px #ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"Pretendard",system-ui,sans-serif;
+    line-height:1.8;-webkit-font-smoothing:antialiased;
+    padding-bottom:44px;word-break:keep-all;
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:0 18px;}
+
+  /* 헤더 */
+  header{padding:34px 0 8px;text-align:center;}
+  .brand{
+    font-size:44px;font-weight:800;letter-spacing:-1px;
+    background:linear-gradient(170deg,#7d8a80 0%,#3f4d43 40%,#2e3a32 70%,#586258 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .brand-sub{color:var(--ink-soft);font-size:16px;font-weight:600;margin-top:2px;letter-spacing:.3px;}
+  .brand-rule{width:44px;height:2px;background:var(--green-soft);margin:12px auto 0;border-radius:2px;opacity:.5;}
+
+  /* 탭바 */
+  .tabbar-outer{position:sticky;top:0;z-index:50;background:var(--bg);padding:12px 0;box-shadow:0 6px 12px -8px rgba(0,0,0,.08);}
+  .tabbar{display:flex;gap:9px;max-width:520px;margin:0 auto;padding:0 18px;justify-content:center;flex-wrap:wrap;}
+  .tab{
+    color:var(--green);background:var(--card);
+    padding:11px 17px;border-radius:16px;
+    font-size:15px;font-weight:700;cursor:pointer;
+    transition:all .18s ease;white-space:nowrap;text-decoration:none;
+    box-shadow:var(--shadow-out-sm);border:1px solid rgba(255,255,255,.5);
+  }
+  .tab:hover{transform:translateY(-2px);}
+  .tab:active{box-shadow:var(--shadow-in);transform:translateY(0);}
+  .tab.active{
+    background:var(--green);color:#fff;
+    box-shadow:4px 4px 10px #c9c5bb, -3px -3px 8px #ffffff, inset 0 1px 2px rgba(255,255,255,.15);
+    border-color:var(--green);
+  }
+
+  section{padding-top:30px;scroll-margin-top:80px;}
+  .sec-title{font-size:13px;font-weight:700;color:var(--green-soft);letter-spacing:2px;margin-bottom:14px;}
+
+  /* 소재 안심 배너 */
+  .safe{
+    background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-out);
+    padding:20px 22px;margin-bottom:16px;border-left:4px solid var(--gold2);
+  }
+  .safe h3{font-size:15px;color:var(--green);margin-bottom:8px;font-weight:800;}
+  .safe p{font-size:15px;color:var(--ink-soft);}
+  .safe b{color:var(--ink);font-weight:700;}
+
+  /* 아코디언 공통 */
+  .acc{
+    position:relative;background:var(--card);border-radius:16px;
+    box-shadow:var(--shadow-out);margin-bottom:12px;transition:box-shadow .25s;
+  }
+  .acc::before{
+    content:"";position:absolute;inset:0;border-radius:16px;padding:2px;
+    background:linear-gradient(135deg,var(--gold5) 0%,var(--gold2) 35%,var(--gold3) 60%,var(--gold5) 100%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    opacity:0;transition:opacity .3s;pointer-events:none;
+  }
+  .acc.open::before{opacity:.55;}
+  .acc.current::before{opacity:1;}
+  .acc.current{box-shadow:6px 6px 16px #d5d1c7, -6px -6px 16px #ffffff;}
+  .acc-head{display:flex;align-items:center;gap:14px;padding:15px 18px;cursor:pointer;user-select:none;position:relative;z-index:1;}
+  .acc-ico{
+    position:relative;flex:none;width:46px;height:46px;border-radius:13px;
+    background:var(--bg);box-shadow:var(--shadow-in);display:grid;place-items:center;
+    font-size:19px;font-weight:800;color:var(--green);transition:color .25s;
+  }
+  .acc-ico svg{width:26px;height:26px;stroke:var(--green);fill:none;stroke-width:1.7;transition:stroke .25s;}
+  .acc.open .acc-ico{color:var(--gold3);}
+  .acc.open .acc-ico svg{stroke:var(--gold3);}
+  .acc-title{flex:1;font-size:15.5px;font-weight:700;color:var(--ink);transition:color .25s;}
+  .acc.open .acc-title{color:var(--green);}
+  .acc-arrow{flex:none;width:18px;height:18px;transition:transform .25s,stroke .25s;stroke:var(--green-soft);fill:none;stroke-width:2;}
+  .acc.open .acc-arrow{transform:rotate(180deg);stroke:var(--gold3);}
+  .acc-body{max-height:0;overflow:hidden;transition:max-height .32s ease;position:relative;z-index:1;}
+  .acc-body-inner{padding:2px 20px 18px 78px;font-size:14.5px;color:var(--ink-soft);}
+  .acc-body-inner p{margin-bottom:11px;}
+  .acc-body-inner p:last-child{margin-bottom:0;}
+  .acc-body-inner b{color:var(--ink);font-weight:700;}
+  .acc-body-inner .warn{color:var(--gold3);font-weight:700;}
+  .acc-body-inner ul{margin:6px 0 0;padding-left:18px;}
+  .acc-body-inner li{margin-bottom:7px;}
+  .nowrap{white-space:nowrap;}
+  @media (max-width:420px){.acc-body-inner{padding-left:20px;}}
+
+  /* 정보 카드 (고객문의/제품정보) */
+  .info{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-out);padding:22px 22px;margin-bottom:14px;}
+  .info h3{font-size:16px;color:var(--green);font-weight:800;margin-bottom:12px;}
+  .info .blk{margin-bottom:16px;}
+  .info .blk:last-child{margin-bottom:0;}
+  .info .lbl{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+  .info p,.info li{font-size:14.5px;color:var(--ink-soft);}
+  .info ul{list-style:none;}
+  .info ul li{padding-left:14px;position:relative;margin-bottom:5px;}
+  .info ul li::before{content:"·";position:absolute;left:2px;color:var(--green-soft);font-weight:700;}
+  .info a{color:var(--green);text-decoration:none;border-bottom:1px solid var(--green-soft);}
+  .info b{color:var(--ink);font-weight:700;}
+
+  .hint{text-align:center;font-size:13px;color:var(--ink-soft);opacity:.7;margin:8px 0 2px;}
+
+  /* 푸터 */
+  footer{margin-top:48px;padding-top:28px;border-top:1px solid var(--line);}
+  .foot-in{display:flex;align-items:center;gap:14px;justify-content:center;}
+  .foot-in img{width:46px;height:46px;object-fit:contain;opacity:.95;flex:none;}
+  .foot-txt{text-align:left;line-height:1.65;}
+  .foot-txt .l1{
+    font-size:14.5px;font-weight:800;letter-spacing:.2px;
+    background:linear-gradient(120deg,#FCE49C 0%,#D8B46C 30%,#A88430 55%,#9C7818 72%,#E4C078 100%);
+    background-size:200% 200%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+    animation:gyeol-shimmer 7s ease-in-out infinite;
+  }
+  .foot-txt .l2{font-size:12.5px;color:#8A7A55;letter-spacing:.2px;}
+  @keyframes gyeol-shimmer{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+  @media (prefers-reduced-motion:reduce){.foot-txt .l1{animation:none;}.tab,.acc,.acc-body{transition:none;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">공간:결</div>
+  <div class="brand-sub">QR 태그 사용 가이드</div>
+  <div class="brand-rule"></div>
+</header>
+
+<div class="tabbar-outer">
+  <nav class="tabbar">
+    <a class="tab" href="#use" data-tab="use">사용방법</a>
+    <a class="tab" href="#buy" data-tab="buy">추가구매</a>
+    <a class="tab" href="#care" data-tab="care">주의사항</a>
+    <a class="tab" href="#help" data-tab="help">고객문의</a>
+  </nav>
+</div>
+
+<div class="wrap">
+
+  <!-- ===================== 사용방법 ===================== -->
+  <section id="use" data-mode="multi">
+    <div class="sec-title">사용방법</div>
+
+    <div class="acc open current">
+      <div class="acc-head">
+        <span class="acc-ico">1</span>
+        <span class="acc-title">QR 태그 부착 · 깨끗한 면에</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>붙일 곳의 먼지·물기·기름기를 깨끗이 제거한 후 완전히 마른 상태에서 부착해 주세요.</p>
+        <p>오염된 표면에서는 접착력이 약해질 수 있으므로, 위치를 충분히 확인한 후 부착해 주세요.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico">2</span>
+        <span class="acc-title">메인 QR 태그 부착</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>평소 자주 지나가는, 잘 보이는 곳에 부착해 주세요. 메인 태그는 집 안에 등록한 모든 수납장을 한 번에 찾아볼 수 있는 검색의 시작점입니다.</p>
+        <p>"그거 어디 뒀더라?" 싶을 때 태그 하나만 스캔하면 바로 검색 화면이 열려, 어느 수납장에 있는지 확인할 수 있습니다.</p>
+        <p>안방 서랍장, 주방이나 현관 입구처럼 평소 자주 지나가며 쉽게 스캔할 수 있는 곳에 부착해 주세요.</p>
+        <p>잘 보이지 않는 곳에 부착하면 찾고 싶을 때 태그부터 찾아야 하므로, 자주 지나가는 위치에 부착할수록 더욱 편리합니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico">3</span>
+        <span class="acc-title">수납 QR 태그 부착</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>수납 태그는 무엇이 들어있는지 자주 잊거나 확인을 위해 매번 열어봐야 하는 서랍, 수납박스 등 수납공간에 부착합니다.</p>
+        <p>이 태그의 가장 큰 장점은 물건을 넣는 순간입니다. 수납함 앞에서 QR을 스캔하면 별도로 수납 위치를 선택할 필요 없이 해당 수납공간의 등록 화면이 바로 보여집니다.</p>
+        <p>등록하고자 하는 물품을 촬영하면 물품 인식 후 등록이 완료되어, 어디에 보관했는지 따로 기억할 필요가 없습니다.</p>
+        <p>추후 내용을 확인할 때도 서랍을 열지 않아도 됩니다. QR만 스캔하면 해당 수납공간에 등록된 물품 목록을 즉시 확인할 수 있습니다.</p>
+        <p>수납장이 많아질수록 원하는 칸으로 바로 연결되는 편리함이 더욱 커집니다.</p>
+        <p>가족이나 사무실처럼 여러 사람이 함께 사용할 때는 활용도가 더욱 높아집니다. 한 사람이 정리해 두면 모두가 같은 정보를 확인할 수 있어, "그거 어디 있어?"를 서로 묻지 않아도 각자 쉽게 찾을 수 있습니다.</p>
+        <p>물건을 넣거나 꺼낸 뒤 등록 내용을 수정하면, 모두가 최신 수납 정보를 함께 확인할 수 있습니다. 또한 업로드된 사진과 영상에서 날짜와 시각까지 확인할 수 있어 변경 이력도 한눈에 파악할 수 있습니다.</p>
+        <p>※ 초대된 구성원은 물품 조회, 등록, 검색 기능을 함께 사용할 수 있으며, 구매·이용권 관리 및 구성원 초대는 계정 소유자만 가능합니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico">4</span>
+        <span class="acc-title">회원가입 · 계정 연결</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>QR을 스캔하면 앱 설치 없이 휴대폰 웹브라우저가 바로 열립니다. 회원가입 또는 로그인한 뒤, 태그에 적힌 시리얼 번호를 등록하면 해당 태그가 내 계정에 연결됩니다.</p>
+        <p><span class="warn">⚠ 시리얼 번호를 등록한 태그는 계정에 귀속되므로, 등록 후에는 환불이 불가능합니다.</span> 등록 전 반드시 시리얼 번호를 다시 한번 확인해 주세요.</p>
+        <p>메인 태그는 휴대폰 홈 화면에 추가해 두면 앱처럼 아이콘으로 바로 실행할 수 있어 더욱 편리합니다.</p>
+        <p>각 수납 태그는 해당 수납공간으로 바로 연결되는 전용 QR입니다. 수납함 앞에서 스캔하면 해당 공간이 즉시 열리며, 가족이나 동료와 함께 사용할 때도 같은 QR을 그대로 이용하면 됩니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="2"/><path d="M9 3l1.5 3h3L15 3M12 10.5l1 2.2 2.4.2-1.8 1.6.6 2.3-2.2-1.3-2.2 1.3.6-2.3-1.8-1.6 2.4-.2z"/></svg></span>
+        <span class="acc-title">촬영 · 자동 목록화</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>수납함 내부를 사진이나 영상으로 촬영하면 직접 하나하나 입력할 필요없이 보관된 물품을 AI가 자동으로 인식해 목록으로 정리합니다.</p>
+        <p>가입 시 <span class="nowrap">50결</span>이 제공됩니다. 사진 1장은 <span class="nowrap">1결</span>, 영상 1개는 <span class="nowrap">5결</span>이 차감되며, 사진 50장 또는 영상 10개까지 분석할 수 있습니다.</p>
+        <p>직접 입력, 검색, 목록 수정은 결 차감 없이 이용할 수 있습니다. 인식하지 못했거나 잘못 인식한 항목은 언제든 직접 수정하거나 추가할 수 있습니다.</p>
+        <p>※ AI가 이미지와 영상을 분석하여 내용을 인식하므로, 일부 정보는 실제와 다를 수 있습니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><rect x="5" y="7" width="14" height="11" rx="3"/><circle cx="9.5" cy="12.5" r="1.2"/><circle cx="14.5" cy="12.5" r="1.2"/><path d="M12 4v3M12 4l-1.2 0M12 4l1.2 0"/></svg></span>
+        <span class="acc-title">AI 수납 비서 '봄'</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>각 수납장 안에는 수납 비서 '봄'이 있습니다. 봄은 그 수납장에 무엇이 들어있는지 알고 있어서, 그 칸에 대해 편하게 대화하듯 물어볼 수 있습니다.</p>
+        <ul>
+          <li>"여기 건전지 있어요?" 처럼 물으면, 그 칸을 기준으로 바로 답해줍니다</li>
+          <li>"이 칸 어떻게 정리하면 좋을까요?" 하고 물으면 간단한 정리 방법을 제안해줍니다</li>
+          <li>봄과의 대화는 결 차감 없이 무료입니다</li>
+        </ul>
+        <p style="margin-top:11px">검색이 "집 전체에서 위치를 찾는" 기능이라면, 봄은 "그 수납장 하나를 같이 들여다보며 정리해주는" 도우미입니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico">7</span>
+        <span class="acc-title">간편 업데이트</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>수납 내용이 전체적으로 바뀌면 다시 촬영해 주세요.</p>
+        <p>일부만 변경된 경우에는 텍스트로 수정할 수 있으며, 이용권을 모두 사용한 후에도 텍스트 수정은 계속 이용할 수 있습니다.</p>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- ===================== 추가구매 ===================== -->
+  <section id="buy" data-mode="multi">
+    <div class="sec-title">추가구매</div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9.5 14.5c.5.8 1.4 1.2 2.5 1.2 1.4 0 2.3-.7 2.3-1.8 0-2.4-4.6-1.3-4.6-3.6 0-1 .9-1.7 2.1-1.7 1 0 1.9.4 2.4 1.1M12 7.3v1.5M12 15.7v1.5"/></svg></span>
+        <span class="acc-title">물품 인식 이용권 충전</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>물품 인식은 AI가 사진과 영상을 분석해 물품 목록을 생성하는 기능으로, '결'이라는 이용권을 사용합니다.</p>
+        <p>사진 1장은 <span class="nowrap">1결</span>, 영상 1개는 <span class="nowrap">5결</span>이 차감되며, 가입 시 <span class="nowrap">50결</span>이 기본 제공됩니다.(사진 50장 또는 영상 10편 분량)</p>
+        <p>결은 새로운 물품을 인식할 때만 차감되며, 등록된 물품의 조회, 검색, 수정, 수량 변경은 제한없이 이용할 수 있습니다.</p>
+        <p>또한 사진에서 얼굴이나 신분증 등 민감한 정보가 감지되면 물품 분석이 종료되며, 결은 차감되지 않습니다.</p>
+        <p>※ 민감한 정보가 연속 5회 감지될 경우, 당일에는 촬영을 이용할 수 없습니다.</p>
+        <p>기본 제공된 결을 모두 사용한 후에는 마이페이지에서 추가 충전하여 계속 이용할 수 있습니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M8 8V6a4 4 0 018 0v2M12 12v4M10 14h4"/></svg></span>
+        <span class="acc-title">태그 단품 추가</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>수납공간이 늘어나면 수납 QR 태그를 낱개로 추가해 사용할 수 있습니다.</p>
+        <p>※ 메인 태그는 단품으로 판매하지 않습니다.</p>
+        <p>기본 세트(메인 1개 + 수납 2개)에 더해, 새로 사용하는 서랍, 수납박스, 선반 등에 태그를 부착하여 관리 범위를 손쉽게 확장할 수 있습니다.</p>
+        <p>단품 태그는 수납 QR 태그 1개 단위로 판매되며, 기본 세트를 보유한 회원만 구매할 수 있습니다. 초대받은 구성원은 구매 대상이 아닙니다.</p>
+        <p>기존에 구매한 태그와 다른 색상을 선택해도 기능은 동일하며, 색상에 관계없이 함께 사용할 수 있습니다.</p>
+        <p>추가한 태그도 기존과 동일하게 시리얼 번호를 등록하면 본인 계정에 연결되어 바로 사용할 수 있습니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><circle cx="8" cy="9" r="2.4"/><circle cx="16" cy="9" r="2.4"/><path d="M3.5 18c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4M12.5 18c0-2.5 2-4 4.5-4s3.5 1 3.5 3.5"/></svg></span>
+        <span class="acc-title">멤버와 수납 공유</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>수납장을 가족이나 동료와 공유하면 초대받은 구성원도 물품 조회, 등록, 검색을 함께 사용할 수 있습니다.</p>
+        <p>집, 사무실, 매장뿐 아니라 돌봄이 필요한 가족의 수납을 함께 관리할 때도 유용합니다.</p>
+        <p>필요한 물건의 위치를 누구나 바로 확인할 수 있어, 여러 사람이 사용하는 공간도 더욱 체계적으로 관리할 수 있습니다.</p>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- ===================== 주의사항 ===================== -->
+  <section id="care" data-mode="single">
+    <div class="sec-title">주의사항</div>
+
+    <div class="safe">
+      <h3>소재 안심 안내</h3>
+      <p>본 제품은 PVC·포름알데히드·페놀이 들어 있지 않은 <b>유해물질 제한(RoHS) 기준을 충족하는</b> 소재로 제작되어, 생활 공간 어디에나 안심하고 사용하실 수 있습니다.</p>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7"/></svg></span>
+        <span class="acc-title">부착 전 · 표면 준비</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>태그를 붙이기 전에 부착할 면의 먼지·기름기·물기를 깨끗이 닦고 완전히 말려 주세요.</p>
+        <p>표면이 깨끗할수록 접착력이 오래갑니다. 매끄럽고 평평한 면에 가장 잘 붙으며, 울퉁불퉁하거나 곡면, 거친 표면, 천·실리콘 재질에는 접착력이 약할 수 있습니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><path d="M12 3v6M12 3L9 6M12 3l3 3M5 21h14a1 1 0 001-1v-8H4v8a1 1 0 001 1z"/></svg></span>
+        <span class="acc-title">부착 시 · 위치는 한 번에</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>점착 스티커 특성상 한 번 떼었다 다시 붙이면 접착력이 떨어집니다. 위치를 미리 정한 뒤 한 번에 붙여 주세요.</p>
+        <p>붙인 직후 약 24시간은 접착이 완전히 자리 잡는 시간이므로, 그 사이에는 떼거나 옮기지 않는 것을 권장합니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></span>
+        <span class="acc-title">사용 환경</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>본체는 무광 아크릴 소재로 제작되어 자외선에 강하며, 실내는 물론 일반적인 실외 환경에서도 사용할 수 있습니다.</p>
+        <p>다만 약 <b class="nowrap">79℃ 이상의 고온</b>에서는 변형될 수 있으므로, 한여름 밀폐된 차량 내부처럼 극심한 고온 환경은 피해주세요.</p>
+        <p>또한 기본 부착 스티커는 사용 환경에 따라 접착력이 달라질 수 있으므로, 평평하고 깨끗하며 건조한 면에 부착하는 것을 권장합니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><path d="M3 17l4-8 3 5 3-7 4 10M2 21h20"/></svg></span>
+        <span class="acc-title">야외·차량에 부착할 때</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>본체는 자외선과 일반적인 외부 환경에 강하지만, <b>기본 부착 스티커는 실내용입니다.</b> 비, 습기, 급격한 온도 변화가 잦은 야외나 차량에서는 시간이 지나면서 접착력이 약해질 수 있습니다.</p>
+        <p>이러한 환경에서는 강력 양면테이프를 추가로 사용하면 더욱 안정적으로 부착할 수 있습니다.</p>
+        <p><b>차량에 사용할 경우에는</b> 글로브박스, 트렁크 정리함, 선바이저 등 실내 공간에 부착하는 것을 권장하며, <b>차량 외부나 장시간 직사광선에 노출되는 위치는 접착력 저하 및 변형</b>의 원인이 될 수 있으므로 가급적 피해 주세요.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 5V3M16 5V3M4 10h16"/></svg></span>
+        <span class="acc-title">권장 양면테이프 (야외·차량·요철 면)</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <ul>
+          <li><b>종류</b>: <span class="nowrap">3M VHB</span> 폼 양면테이프 또는 동급의 아크릴 폼 강력 양면테이프를 권장합니다.</li>
+          <li><b>재단 크기</b>: 태그보다 약간 작은 <span class="nowrap">25~28mm</span> 정사각형으로 잘라 부착하면 가장자리 들뜸을 줄일 수 있습니다.</li>
+          <li><b>두께</b>: <span class="nowrap">0.8~1.1mm</span> 폼 타입을 사용하면 약간의 요철이나 곡면에도 안정적으로 밀착됩니다.</li>
+        </ul>
+        <p style="margin-top:11px">※ 참고: 실외·차량용은 <span class="nowrap">3M VHB 5952</span> 계열, 투명 부착이 필요한 경우에는 <span class="nowrap">3M VHB 4910</span> 계열을 권장합니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><path d="M8 3h8l-1 5a4 4 0 01-6 0zM7 21h10M12 13v8"/></svg></span>
+        <span class="acc-title">세척</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>이물질은 따뜻한 물과 순한 중성세제(주방세제)를 묻힌 부드러운 천으로 가볍게 닦아 주세요.</p>
+        <p>알코올·시너·아세톤 같은 용제나 강한 세제는 표면을 손상·변색시킬 수 있으니 사용하지 마세요. 마른 상태로 세게 문지르면 미세한 흠집이 생길 수 있습니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><path d="M14 14h2v2M18 14h2M20 18v2M16 20h-2M18 16h2"/></svg></span>
+        <span class="acc-title">QR 스캔 · 빛 반사·이물질 주의</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>무광 소재를 사용해 빛 반사가 적은 편이지만, <b>조명이 강하게 비치는 각도에서는 QR이 원활하게 인식되지 않을 수 있습니다.</b> 이 경우 태그나 휴대폰의 각도를 조절해 다시 스캔해 주세요.</p>
+        <p>QR 표면에 먼지나 이물질이 묻었거나, 스티커가 가려지거나 긁힌 경우에는 인식이 어려울 수 있습니다. 깨끗한 상태를 유지하면 더욱 안정적으로 사용할 수 있습니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><path d="M10.3 3.2L2.5 17a1.5 1.5 0 001.3 2.2h16.4a1.5 1.5 0 001.3-2.2L13.7 3.2a1.5 1.5 0 00-2.6 0zM12 9v4M12 16.5v.5"/></svg></span>
+        <span class="acc-title">파손 주의</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>충격에 비교적 강한 소재이지만 표면은 긁힘에 약할 수 있습니다.</p>
+        <p>날카로운 물건에 긁히거나 떨어뜨리지 않도록 주의해 주세요. QR이 손상되면 인식이 어려워질 수 있습니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3M12 14v2"/></svg></span>
+        <span class="acc-title">시리얼 번호 보안 (스크래치 라벨)</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>시리얼 번호는 태그를 본인 계정에 등록하기 위한 고유 인증 번호입니다. 분실되지 않도록 관리하세요.</p>
+        <p>사용 전에는 스크래치 라벨을 벗기지 않고, 등록 시에만 확인하세요.</p>
+        <p>시리얼 번호는 등록 전후 모두 사진이나 SNS 등에 노출되지 않도록 안전하게 보관하세요.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16 16l4 4"/></svg></span>
+        <span class="acc-title">분실·파손 안내</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>사용 중 태그를 분실하거나 파손하신 경우에는 동일 QR 태그를 다시 발급해 드리지 않으며, 계속 사용하시려면 재구매가 필요합니다.</p>
+        <p>(등록했던 데이터는 계정에 그대로 남아 있습니다.)</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.4-3 8-7 10-4-2-7-5.6-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+        <span class="acc-title">교환·환불</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>시리얼 번호를 등록한 뒤에는 단순 변심에 의한 환불이 어렵습니다. 다만 받으신 처음부터 인식이 되지 않거나 제품에 하자가 있는 경우에는 교환·환불해 드리며, 자세한 기준은 스토어 반품/교환 안내를 따릅니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.4-3 8-7 10-4-2-7-5.6-7-10V6z"/><path d="M12 8v4M12 15v.5"/></svg></span>
+        <span class="acc-title">안전 주의</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>작은 부품이 포함되어 있습니다. <b>영유아·반려동물이 삼키지 않도록</b> 손이 닿지 않는 곳에 보관해 주세요.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><path d="M5 12a7 7 0 0114 0M9 12a3 3 0 016 0M12 12v0M2 12h1M21 12h1"/></svg></span>
+        <span class="acc-title">인터넷 연결 필수</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>본 서비스는 웹 기반으로, 등록·촬영·검색 시 인터넷 연결이 필요합니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H4zM4 20h16M9 8l2 2-2 2M13 12h3"/></svg></span>
+        <span class="acc-title">AI 인식 안내</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>AI가 만든 목록은 참고용이며 100% 정확하지 않을 수 있습니다. 업로드된 물품은 직접 확인하시고, 인식 오류나 누락은 손쉽게 수정·추가할 수 있습니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><path d="M6 4h9l4 4v12H6zM14 4v5h5M9 13h6M9 16h6"/><path d="M4 8v13h11" opacity=".4"/></svg></span>
+        <span class="acc-title">재판매·전매 금지</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>상업적 목적의 재판매 및 전매를 엄격히 금합니다. 위반 시 관련 법령에 따라 법적 조치가 취해질 수 있습니다.</p>
+      </div></div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">
+        <span class="acc-ico"><svg viewBox="0 0 24 24"><path d="M16 7a4 4 0 10-8 0 4 4 0 008 0zM4 21c0-4 3.6-6 8-6M17 16l4 4M21 16l-4 4"/></svg></span>
+        <span class="acc-title">계정 탈퇴 안내</span>
+        <svg class="acc-arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>계정을 탈퇴하면 저장된 사진·영상·목록과 이용권이 즉시 삭제되며 복구되지 않습니다.</p>
+        <p>(탈퇴 후 14일 이내에는 동일 시리얼을 다시 연결할 수 있으나, 이전 데이터는 복구되지 않습니다.)</p>
+      </div></div>
+    </div>
+
+    <p class="hint">항목을 눌러 자세히 볼 수 있어요 (한 번에 하나씩 열립니다)</p>
+  </section>
+
+  <!-- ===================== 고객문의 ===================== -->
+  <section id="help">
+    <div class="sec-title">고객문의</div>
+
+    <div class="info">
+      <h3>고객문의</h3>
+      <div class="blk">
+        <p>공간:결은 소수의 인원이 운영하고 있어 전화 상담은 어렵습니다. 아래 채널로 문의해 주시면 확인 후 신속하게 안내해 드리겠습니다.</p>
+      </div>
+      <div class="blk">
+        <div class="lbl">문의 채널</div>
+        <ul>
+          <li>네이버 톡톡 '공간:결'</li>
+          <li>네이버 스마트스토어 '공간:결' 문의하기</li>
+          <li>이메일 <a href="mailto:on@elsehyun.com">on@elsehyun.com</a></li>
+        </ul>
+      </div>
+      <div class="blk">
+        <div class="lbl">상담 운영 시간</div>
+        <p>평일 10:00 ~ 17:00 (주말·공휴일 휴무)<br>※ 운영 시간 외에 주신 문의는 다음 영업일에 순차적으로 안내해 드립니다.</p>
+      </div>
+      <div class="blk">
+        <div class="lbl">문의 시 함께 알려주시면 빠릅니다</div>
+        <ul>
+          <li>주문번호, 증상 (이상 증상 화면 캡처 첨부)</li>
+          <li>사용 중인 기기</li>
+          <li>정보가 있을수록 정확하게 도와드릴 수 있습니다.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info">
+      <h3>제품 정보</h3>
+      <ul>
+        <li>제품명: 공간:결 QR 태그</li>
+        <li>구성: 메인 QR 1개 + 수납 QR 2개 (1세트)</li>
+        <li>본체 소재: 미국 Rowmark® 프리미엄 아크릴 (LaserMax®)</li>
+        <li>소재 특성: 할로겐 무함유(halogen-free) · 화재안전 등급 UL 94 HB 인증 소재</li>
+        <li>마감: 무광 메탈릭 (실버 / 샴페인골드)</li>
+        <li>부착 방식: 후면 점착 스티커</li>
+        <li>가공: 국내 정밀 레이저 각인</li>
+        <li>제조국: 대한민국 (국내 가공·각인)</li>
+        <li>판매원: (주)엘세현</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-in">
+      <img id="foot-logo" alt="ELSEHYUN">
+      <div class="foot-txt">
+        <div class="l1">공간:결 QR 태그</div>
+        <div class="l2">(주)엘세현 · Since 2026</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('foot-logo').src = "data:image/png;base64,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";
+
+  function setMax(acc, open){
+    var body = acc.querySelector('.acc-body');
+    body.style.maxHeight = open ? (body.querySelector('.acc-body-inner').scrollHeight + 6) + 'px' : '0';
+  }
+
+  document.querySelectorAll('section').forEach(function(sec){
+    var mode = sec.getAttribute('data-mode');
+    sec.querySelectorAll('.acc-head').forEach(function(h){
+      h.addEventListener('click', function(){
+        var acc = h.parentElement;
+        var isOpen = acc.classList.contains('open');
+        if(mode === 'single'){
+          sec.querySelectorAll('.acc').forEach(function(a){
+            if(a !== acc){ a.classList.remove('open','current'); setMax(a,false); }
+          });
+          if(isOpen){ acc.classList.remove('open','current'); setMax(acc,false); }
+          else{ acc.classList.add('open','current'); setMax(acc,true); }
+        } else {
+          if(isOpen){ acc.classList.remove('open','current'); setMax(acc,false); }
+          else{
+            sec.querySelectorAll('.acc.current').forEach(function(a){ a.classList.remove('current'); });
+            acc.classList.add('open','current'); setMax(acc,true);
+          }
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.acc.open').forEach(function(a){ setMax(a,true); });
+
+  // 스크롤 위치에 따라 상단 탭 자동 강조
+  var sections = Array.prototype.slice.call(document.querySelectorAll('section'));
+  var tabs = {};
+  document.querySelectorAll('.tab').forEach(function(t){ tabs[t.getAttribute('data-tab')] = t; });
+  function onScroll(){
+    var pos = window.scrollY + 120;
+    var cur = sections[0].id;
+    sections.forEach(function(s){ if(s.offsetTop <= pos) cur = s.id; });
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    if(tabs[cur]) tabs[cur].classList.add('active');
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // 열림/닫힘으로 높이 바뀔 때 열린 항목 maxHeight 재계산
+  window.addEventListener('resize', function(){
+    document.querySelectorAll('.acc.open').forEach(function(a){ setMax(a,true); });
+  });
+</script>
+</body>
+</html>
